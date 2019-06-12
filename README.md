@@ -11,6 +11,8 @@ The ShipGirl Project. Shoukaku. `(c) Kancolle for Shoukaku`.
 
 > Documentation is not yet available as of now, but I will soon:tm:
 
+> Look at the example usage for an idea on what to see in this library
+
 ### Installation
 ```
 npm i Deivu/Shoukaku
@@ -19,12 +21,15 @@ npm i Deivu/Shoukaku
 ### Example Usage
 ```js
 const { Client } = require('discord.js');
-const { Shoukaku, ShoukakuResolver } = require('../Shoukaku/index.js');
+const { Shoukaku, ShoukakuResolver } = require('shoukaku');
 
+// Your Discord.js Client
 const Kongou = new Client();
+//
+
+// Manager of the nodes and players
 const manager = new Shoukaku(
     Kongou, {
-        shardCount: 1,
         resumable: true,
         resumableTimeout: 15,
         resumekey: 'Kongou',
@@ -32,12 +37,18 @@ const manager = new Shoukaku(
         reconnectTries: 3
     }
 );
+//
+
+// Resolver for lavalink tracks
 const resolver = new ShoukakuResolver({
     host: 'localhost',
     port: 6969,
     auth: 'ur_a_qt_weeb'
 });
+//
 
+// Manager Events that you can use. 
+// YOU MUST HANDLE nodeError EVENT
 manager.on('nodeReady', (host) => console.log(`Node ${host} is now ready`));
 manager.on('nodeStats', (data, host) => console.log(`Node ${host} sent a stats update`));
 manager.on('nodeReconnecting', (host) => console.log(`Node ${host} is reconnecting`));
@@ -45,8 +56,10 @@ manager.on('nodeResumed', (host) => console.log(`Node ${host} is resumed`))
 manager.on('nodeNewSession', (host) => console.log(`Node ${host} re-established a new session`))
 manager.on('nodeError', (error, host) => console.log(`Node ${host} errored ${error}`))
 manager.on('nodeDisconnect', (host) => console.log(`Node ${host} is disconnected`))
+// 
 
 Kongou.on('ready', () => {
+    // Must be called in ready to initialize the manager
     manager.buildManager({
             id: Kongou.user.id,
             shardCount: 1
@@ -56,6 +69,7 @@ Kongou.on('ready', () => {
             auth: 'ur_a_qt_weeb'
         } 
     ])
+    //
     console.log('Bot is now ready');
 })
 
@@ -64,15 +78,28 @@ Kongou.on('message', async (msg) => {
         if (manager.players.has(msg.guild.id)) return;
         const args = msg.content.split(' ')
         if (!args[1]) return;
+
+        // Built in track resolver in this library
         const resolved = await resolver.resolve(args.slice(1).join(' '));
+        // 
+
         if (!resolved) return;
         console.log(resolved);
         const player = await manager.join('amanogawa.moe', msg.guild.id, msg.member.voice.channel.id);
+
+        // Lists of player events you can use
         player.on('playerEnd', () => {
+            // Makes the bot leave the voice channel
             manager.leave(player.id).catch(console.error);
         });
         player.on('playerUpdate', console.log);
-        await player.play(resolved.track);
+        player.on('playerError', console.log);
+        player.on('playerClosed', console.log);
+        player.on('playerNodeClosed', console.log);
+        player.on('playerWarn', console.log);
+        // 
+
+        await player.play(resolved.track)
         await msg.channel.send('Playing' + resolved.info.title);
     }
 })
