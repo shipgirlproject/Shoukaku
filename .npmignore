@@ -1,0 +1,11 @@
+node_modules
+scripts
+testing
+.eslintrc.js
+.gitattributes
+.gitignore
+.eslintrc.yml
+.travis.yml
+docs.js
+tslint.json
+example

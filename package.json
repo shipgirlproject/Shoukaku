@@ -1,0 +1,25 @@
+{
+  "name": "shoukaku",
+  "version": "0.0.1",
+  "description": "A lavalink client for Discord.js v12 only",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "bot",
+    "music",
+    "lavalink",
+    "api",
+    "discord",
+    "lavalink.js",
+    "discord.js"
+  ],
+  "author": "Saya",
+  "license": "MIT",
+  "dependencies": {
+    "abort-controller": "^3.0.0",
+    "node-fetch": "^2.6.0",
+    "ws": "^7.0.0"
+  }
+}
