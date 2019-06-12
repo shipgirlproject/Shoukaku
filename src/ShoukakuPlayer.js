@@ -8,11 +8,12 @@ class ShoukakuPlayer extends EventEmitter {
         Object.defineProperty(this, 'shoukaku', { value: origin.shoukaku });
         Object.defineProperty(this, 'shoukakuNode', { value: origin.shoukakuNode });
         Object.defineProperty(this, 'sessionID', { value: null, writable: true });
-
+        
         this.id = null;
         this.channel = null;
         this.selfDeaf = false;
         this.selfMute = false;
+
         this.playing = false;
         this.paused = false;
         this.should = true;

@@ -51,8 +51,7 @@ class ShoukakuNode extends EventEmitter {
 
     disconnect() {
         if (!this.ws) return;
-        this.ws.close(1000);
-        this.emit('disconnect', 'User Invoked Disconnection', this.host);
+        this.ws.close(1000, 'User Invoked Disconnection');
     }
 
     send(data) {
@@ -75,8 +74,10 @@ class ShoukakuNode extends EventEmitter {
             this.ws.removeAllListeners();
             this.ws = null;
         }
-        if (this.actualTries >= this.reconnectTries)
-            return this.emit('disconnect', `Retried ${this.actualTries} already but connection didn't connect.`, this.host);
+        if (this.actualTries >= this.reconnectTries) {
+            this.status = 4;
+            return this.emit('disconnect', `Retried ${this.actualTries} already but ws didn't connect.`, this.host);
+        }
         setTimeout(() => {
             this.status = 3;
             try {
@@ -110,7 +111,7 @@ class ShoukakuNode extends EventEmitter {
             this.emit('ready', this.host);
         } catch (error) {
             this.emit('error', error, this.host);
-            this.ws.close(1011);
+            if (this.ws && this.ws.readyState <= 2) this.ws.close(1011, 'Node onOpen errored, reconnecting the Websocket');
         }
     }
 
@@ -127,7 +128,7 @@ class ShoukakuNode extends EventEmitter {
 
     _error(error) {
         this.emit('error', error, this.host);
-        this.ws.destroy(1011);
+        this.ws.close(1011, 'Node Errored, Reconnecting the websocket');
     }
 
     _close(code, reason) {

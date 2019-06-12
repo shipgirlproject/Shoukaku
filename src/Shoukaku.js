@@ -1,6 +1,6 @@
 const EventEmitter = require('events');
 const ShoukakuNode = require('./ShoukakuNode.js');
-const ShoukakuPlauer = require('./ShoukakuPlayer.js');
+const ShoukakuPlayer = require('./ShoukakuPlayer.js');
 
 class Shoukaku extends EventEmitter {
     constructor(client, options) {
@@ -72,7 +72,7 @@ class Shoukaku extends EventEmitter {
             const node = this.nodes.get(host);
             if (!node) return reject(new Error(`The node ${node.host} is not a valid node.`));
             if (node.nodeStatus !== 'Ready') return reject(new Error(`The node ${node.host} is not yet ready`));
-            const player = new ShoukakuPlauer({ client: this.client, shoukaku: this, shoukakuNode: node });
+            const player = new ShoukakuPlayer({ client: this.client, shoukaku: this, shoukakuNode: node });
             this.pending.set(guildID, player);
             let timeout;
             let handle;
@@ -112,27 +112,25 @@ class Shoukaku extends EventEmitter {
                 player.off('serverUpdate', handle);
                 player.off('serverUpdateFailed', error);
                 this.pending.delete(guildID);
-                reject(new Error('GuildID provided is not in this shard.'));
+                reject(new Error('The GuildID provided is not in this shard.'));
             }
         });
     }
 
     async leave(guildID) {
         const player = this.players.get(guildID);
-        if (player) {
-            player.removeAllListeners();
-            await player.destroy().catch(() => null);
-            this._send({
-                op: 4,
-                d: {
-                    guild_id: guildID,
-                    channel_id: null,
-                    self_mute: false,
-                    self_deaf: false
-                }
-            });
-            return;
-        }
+        if (!player) return;
+        player.removeAllListeners();
+        await player.destroy().catch(() => null);
+        this._send({
+            op: 4,
+            d: {
+                guild_id: guildID,
+                channel_id: null,
+                self_mute: false,
+                self_deaf: false
+            }
+        });
     }
 
     _message(parsed) {
