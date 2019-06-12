@@ -11,7 +11,7 @@ The ShipGirl Project. Shoukaku. `(c) Kancolle for Shoukaku`.
 
 > Documentation is not yet available as of now, but I will soon:tm:
 
-> Look at the example usage for an idea on what to see in this library
+> Look at the Example Usage for an idea on what to see in this library
 
 ### Installation
 ```
@@ -29,7 +29,10 @@ const Kongou = new Client();
 
 // Manager of the nodes and players
 const manager = new Shoukaku(
-    Kongou, {
+    // Your Discord.js client
+    Kongou, 
+    // Options you can customize for Shoukaku Manager.
+    {
         resumable: true,
         resumableTimeout: 15,
         resumekey: 'Kongou',
@@ -40,9 +43,14 @@ const manager = new Shoukaku(
 //
 
 // Resolver for lavalink tracks
+// Node data here is same on manager.buildManager but instead it only holds one host.
+// Accepts an object for its properties, not an array.
 const resolver = new ShoukakuResolver({
+    // Host to use for shoukaku resolver
     host: 'localhost',
+    // Port to use for shoukaku resolver
     port: 6969,
+    // Rest password for shoukaku resolver
     auth: 'ur_a_qt_weeb'
 });
 //
@@ -61,14 +69,18 @@ manager.on('nodeDisconnect', (host) => console.log(`Node ${host} is disconnected
 Kongou.on('ready', () => {
     // Must be called in ready to initialize the manager
     manager.buildManager({
+            // Bot's user id
             id: Kongou.user.id,
+            // Bot's shard count
             shardCount: 1
-        }, [{
+        }, 
+        // Below is an array of object contains host, port and auth from your lavalink instance
+        [{ 
             host: 'localhost',
             port: 6969,
             auth: 'ur_a_qt_weeb'
-        } 
-    ])
+        }]
+    );
     //
     console.log('Bot is now ready');
 })
@@ -85,11 +97,15 @@ Kongou.on('message', async (msg) => {
 
         if (!resolved) return;
         console.log(resolved);
-        const player = await manager.join('amanogawa.moe', msg.guild.id, msg.member.voice.channel.id);
+
+        // Join Method. Makes the bot join the voice channel.
+        // params: lavalink host, guild id, voice channel id
+        const player = await manager.join('localhost', msg.guild.id, msg.member.voice.channel.id);
 
         // Lists of player events you can use
         player.on('playerEnd', () => {
-            // Makes the bot leave the voice channel
+            // Leave Method. Makes the bot leave the voice channel
+            // params: guild id
             manager.leave(player.id).catch(console.error);
         });
         player.on('playerUpdate', console.log);
@@ -100,6 +116,15 @@ Kongou.on('message', async (msg) => {
         // 
 
         await player.play(resolved.track)
+        /* 
+        Other Player Methods you can use
+        .setBands(Array of Bands)
+        .seek(time to skip to)
+        .pause() or .pause(false)
+        .stop()
+        .destroy()
+        */
+        
         await msg.channel.send('Playing' + resolved.info.title);
     }
 })
