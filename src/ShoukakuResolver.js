@@ -52,7 +52,7 @@ class ShoukakuResolver {
 
     _fetch(url) {
         const controller = new Abort();
-        const timeout = setTimeout(() => controller.abort(), 10000);
+        const timeout = setTimeout(() => controller.abort(), this.timeout);
         return Fetch(url, { headers: { Authorization: this.auth }, signal: controller.signal })
             .then((res) => {
                 if (res.status !== 200) 

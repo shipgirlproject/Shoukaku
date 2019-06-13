@@ -33,11 +33,12 @@ const manager = new Shoukaku(
     Kongou, 
     // Options you can customize for Shoukaku Manager.
     {
-        resumable: true,
-        resumableTimeout: 15,
-        resumekey: 'Kongou',
-        reconnectInterval: 5000,
-        reconnectTries: 3
+        resumable: true, // Defaults to false
+        resumableTimeout: 15, // Defaults to 30
+        resumekey: 'Kongou', // Defaults to resumable
+        reconnectInterval: 5000, // Defaults to 10000
+        reconnectTries: 3, // Defaults to 2
+        handleNodeDisconnects: true // Defaults to true
     }
 );
 //
@@ -115,12 +116,15 @@ Kongou.on('message', async (msg) => {
         player.on('playerWarn', console.log);
         // 
 
+        // Player Methods all returns a promise
         await player.play(resolved.track)
         /* 
         Other Player Methods you can use
         .setBands(Array of Bands)
         .seek(time to skip to)
         .pause() or .pause(false)
+        .volume(0-999)
+        .moveShoukakuNode(host, track, startTime in ms)
         .stop()
         .destroy()
         */

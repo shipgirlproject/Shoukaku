@@ -5,10 +5,11 @@ class ShoukakuPlayer extends EventEmitter {
         super();
 
         Object.defineProperty(this, 'client', { value: origin.client });
-        Object.defineProperty(this, 'shoukaku', { value: origin.shoukaku });
-        Object.defineProperty(this, 'shoukakuNode', { value: origin.shoukakuNode });
+        Object.defineProperty(this, 'Shoukaku', { value: origin.shoukaku });
+        Object.defineProperty(this, 'ShoukakuNode', { value: origin.shoukakuNode, writable: true });
+        this.handleNodeDisconnects = origin.shoukaku.options.handleNodeDisconnects || true;
         Object.defineProperty(this, 'sessionID', { value: null, writable: true });
-        
+        Object.defineProperty(this, 'serverUpdate', { value: null, writable: true });
         this.id = null;
         this.channel = null;
         this.selfDeaf = false;
@@ -17,10 +18,11 @@ class ShoukakuPlayer extends EventEmitter {
         this.playing = false;
         this.paused = false;
         this.should = true;
+        
     }
 
     async play(track) {
-        await this.shoukakuNode.send({
+        await this.ShoukakuNode.send({
             op: 'play',
             guildId: this.id,
             track
@@ -29,8 +31,17 @@ class ShoukakuPlayer extends EventEmitter {
         return this;
     }
 
+    async volume(volume) {
+        await this.ShoukakuNode.send({
+            op: 'volume',
+            guildId: this.id,
+            volume
+        });
+        return this;
+    }
+
     async setBands(bands) {
-        await this.shoukakuNode.send({
+        await this.ShoukakuNode.send({
             op: 'equalizer',
             guildId: this.id,
             bands
@@ -39,26 +50,17 @@ class ShoukakuPlayer extends EventEmitter {
     }
 
     async pause(pause = true) {
-        await this.shoukakuNode.send({
+        await this.ShoukakuNode.send({
             op: 'pause',
             guildId: this.id,
             pause
         });
         this.paused = pause;
         return this;
-    }
-
-    async stop() {
-        await this.shoukakuNode.send({
-            op: 'stop',
-            guildId: this.id
-        });
-        this.playing = false;
-        return this;
-    }
-
+    }    
+    
     async seek(time) {
-        await this.shoukakuNode.send({
+        await this.ShoukakuNode.send({
             op: 'seek',
             guildId: this.id,
             position: time
@@ -66,13 +68,47 @@ class ShoukakuPlayer extends EventEmitter {
         return this;
     }
 
+    async stop() {
+        await this.ShoukakuNode.send({
+            op: 'stop',
+            guildId: this.id
+        });
+        this.playing = false;
+        return this;
+    }
+
     async destroy() {
-        await this.shoukakuNode.send({
+        await this.ShoukakuNode.send({
             op: 'destroy',
             guildId: this.id
         });
         this.playing = false;
         return this;
+    }
+
+    moveShoukakuNode(host, track, startTime) {
+        return new Promise((resolve, reject) => {
+            if (!this.Shoukaku.nodes.has(host))
+                return reject(new Error(`Host ${host} is not one of my host(s)`));
+            const ShoukakuNode = this.Shoukaku.nodes.get(host);
+            ShoukakuNode.send({
+                op: 'voiceUpdate',
+                guildId: this.id,
+                sessionId: this.sessionID,
+                event: this.serverUpdate
+            }).then(() => {
+                this.ShoukakuNode = ShoukakuNode;
+                ShoukakuNode.send({
+                    op: 'play',
+                    guildId: this.id,
+                    track,
+                    startTime
+                }).then(() => {
+                    this.playing = true;
+                    resolve(this);
+                }, (error) => reject(error));
+            }, (error) => reject(error));
+        });
     }
 
     _message(parsed) {
@@ -98,6 +134,11 @@ class ShoukakuPlayer extends EventEmitter {
     }
 
     _removedNode() {
+        if (this.Shoukaku.options.handleNodeDisconnects) {
+            this.removeAllListeners();
+            this.Shoukaku.players.delete(this.id);
+            return this.emit('playerNodeClosed');
+        }
         this.emit('playerNodeClosed');
     }
 
@@ -105,12 +146,13 @@ class ShoukakuPlayer extends EventEmitter {
         try {
             if (!this.sessionID)
                 throw new Error('ShoukakuPlayer sessionID not found');
-            await this.shoukakuNode.send({
+            await this.ShoukakuNode.send({
                 op: 'voiceUpdate',
                 guildId: this.id,
                 sessionId: this.sessionID,
                 event
             });
+            this.serverUpdate = event;
             this.emit('serverUpdate');
         } catch (error) {
             if (this.listenerCount('serverUpdateFailed')) this.emit('serverUpdateFailed', error);

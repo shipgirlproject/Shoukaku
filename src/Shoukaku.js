@@ -5,10 +5,12 @@ const ShoukakuPlayer = require('./ShoukakuPlayer.js');
 class Shoukaku extends EventEmitter {
     constructor(client, options) {
         super();
+        if (!client) throw new Error('Discord.JS client not specified');
+        if (!options) throw new Error('Shoukaku Options is not specified');
 
         Object.defineProperty(this, 'client', { value: client });
-        Object.defineProperty(this, 'pending', { value: new Map() });
         Object.defineProperty(this, 'options', { value: options });
+        Object.defineProperty(this, 'pending', { value: new Map() });
 
         this.id = null;
         this.shardCount = null;
@@ -20,8 +22,11 @@ class Shoukaku extends EventEmitter {
     buildManager(data, nodes) {
         if (this.created)
             throw new Error('You cannot rebuild the Shoukaku Manager once its built');
+        if (!data || !data.id)
+            throw new Error('You did not provide the Data Object correctly.');
+
         this.id = data.id;
-        this.shardCount = data.shardCount;
+        this.shardCount = data.shardCount || 1;
         for (const node of nodes) this.createShoukakuNode(node, this.options);
         this.client.on('raw', (p) => {
             if (p.t !== 'VOICE_STATE_UPDATE' && p.t !== 'VOICE_SERVER_UPDATE') return;
@@ -30,7 +35,9 @@ class Shoukaku extends EventEmitter {
         this.created = true;
     }
 
-    createShoukakuNode(node, options) {
+    createShoukakuNode(node, options = this.options) {
+        if (!node)
+            throw new Error('Cannot create a node if the node data is missing');
         const connection = new ShoukakuNode(this, options, node);
         try {
             connection.on('ready', (host) => this.emit('nodeReady', host));
