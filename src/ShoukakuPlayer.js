@@ -7,7 +7,7 @@ class ShoukakuPlayer extends EventEmitter {
         Object.defineProperty(this, 'client', { value: origin.client });
         Object.defineProperty(this, 'Shoukaku', { value: origin.shoukaku });
         Object.defineProperty(this, 'ShoukakuNode', { value: origin.shoukakuNode, writable: true });
-        
+
         this.id = null;
         this.channel = null;
         this.selfDeaf = false;
@@ -100,7 +100,6 @@ class ShoukakuPlayer extends EventEmitter {
                 sessionId: this.sessionID,
                 event: this.serverUpdate
             }).then(() => {
-                this.ShoukakuNode = ShoukakuNode;
                 ShoukakuNode.send({
                     op: 'play',
                     guildId: this.id,
@@ -108,6 +107,7 @@ class ShoukakuPlayer extends EventEmitter {
                     startTime
                 }).then(() => {
                     this.playing = true;
+                    this.ShoukakuNode = ShoukakuNode;
                     resolve(this);
                 }, (error) => reject(error));
             }, (error) => reject(error));

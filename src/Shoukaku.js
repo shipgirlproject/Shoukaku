@@ -68,7 +68,7 @@ class Shoukaku extends EventEmitter {
     removeShoukakuNode(host) {
         if (!this.nodes.has(host)) return false;
         for (const player of this.players.values()) {
-            if (player.node.host === host) player._removedNode();
+            if (player.ShoukakuNode.host === host) player._removedNode();
         }
         this.nodes.get(host).removeAllListeners();
         return this.nodes.delete(host);
@@ -77,8 +77,8 @@ class Shoukaku extends EventEmitter {
     join(host, guildID, channelID, selfDeaf = false, selfMute = false) {
         return new Promise((resolve, reject) => {
             if (this.pending.has(guildID)) 
-                throw new Error('There is a pending join request in this guild');
-            const exists = this.players.get(guildID);
+                return reject(new Error('There is a pending join request in this guild'));
+            const exists = this.players.get(guildID);   
             if (exists) 
                 return resolve(exists);
             const node = this.nodes.get(host);
