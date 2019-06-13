@@ -7,7 +7,7 @@ class ShoukakuPlayer extends EventEmitter {
         Object.defineProperty(this, 'client', { value: origin.client });
         Object.defineProperty(this, 'Shoukaku', { value: origin.shoukaku });
         Object.defineProperty(this, 'ShoukakuNode', { value: origin.shoukakuNode, writable: true });
-        this.handleNodeDisconnects = origin.shoukaku.options.handleNodeDisconnects || true;
+        Object.defineProperty(this, 'handleNodeDisconnects', { value: origin.shoukaku.options.handleNodeDisconnects || true });
         Object.defineProperty(this, 'sessionID', { value: null, writable: true });
         Object.defineProperty(this, 'serverUpdate', { value: null, writable: true });
         this.id = null;
@@ -134,7 +134,7 @@ class ShoukakuPlayer extends EventEmitter {
     }
 
     _removedNode() {
-        if (this.Shoukaku.options.handleNodeDisconnects) {
+        if (this.handleNodeDisconnects) {
             this.removeAllListeners();
             this.Shoukaku.players.delete(this.id);
             return this.emit('playerNodeClosed');

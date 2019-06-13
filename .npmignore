@@ -6,6 +6,7 @@ testing
 .gitignore
 .eslintrc.yml
 .travis.yml
+.README.md
 docs.js
 tslint.json
 example
