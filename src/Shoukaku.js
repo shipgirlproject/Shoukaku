@@ -143,6 +143,7 @@ class Shoukaku extends EventEmitter {
                 self_deaf: false
             }
         });
+        this.players.delete(guildID);
     }
 
     // Based on https://github.com/discordjs/discord.js/blob/master/src/util/Util.js#L139
