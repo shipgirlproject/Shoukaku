@@ -16,13 +16,13 @@ class ShoukakuNode extends EventEmitter {
         Object.defineProperty(this, 'host', { value: node.host });
         Object.defineProperty(this, 'port', { value: node.port });
         Object.defineProperty(this, 'auth', { value: node.auth });
-        Object.defineProperty(this, 'resumable', { value: options.resumable || false });
-        Object.defineProperty(this, 'resumableTimeout', { value: options.resumableTimeout || 30 });
-        Object.defineProperty(this, 'resumekey', { value: options.resumekey || 'resumable'});
+        Object.defineProperty(this, 'resumable', { value: options.resumable });
+        Object.defineProperty(this, 'resumableTimeout', { value: options.resumableTimeout });
+        Object.defineProperty(this, 'resumekey', { value: options.resumekey });
 
         this.url = `ws://${node.host}:${node.port}`;
-        this.reconnectInterval = options.reconnectInterval || 10000;
-        this.reconnectTries = options.reconnectTries || 2;
+        this.reconnectInterval = options.reconnectInterval;
+        this.reconnectTries = options.reconnectTries;
 
         this.actualTries = 0;
         this.status = 4;

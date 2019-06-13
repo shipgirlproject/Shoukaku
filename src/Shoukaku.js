@@ -1,6 +1,7 @@
 const EventEmitter = require('events');
 const ShoukakuNode = require('./ShoukakuNode.js');
 const ShoukakuPlayer = require('./ShoukakuPlayer.js');
+const ShoukakuConstants = require('./ShoukakuConstants.js');
 
 class Shoukaku extends EventEmitter {
     constructor(client, options) {
@@ -9,7 +10,9 @@ class Shoukaku extends EventEmitter {
         if (!options) throw new Error('Shoukaku Options is not specified');
 
         Object.defineProperty(this, 'client', { value: client });
-        Object.defineProperty(this, 'options', { value: options });
+        Object.defineProperty(this, 'options', { 
+            value: this._mergeDefault(ShoukakuConstants.ShoukakuOptions, options) 
+        });
         Object.defineProperty(this, 'pending', { value: new Map() });
 
         this.id = null;
@@ -22,12 +25,13 @@ class Shoukaku extends EventEmitter {
     buildManager(data, nodes) {
         if (this.created)
             throw new Error('You cannot rebuild the Shoukaku Manager once its built');
-        if (!data || !data.id)
-            throw new Error('You did not provide the Data Object correctly.');
-
+        data = this._mergeDefault(ShoukakuConstants.ShoukakuBuildData, data);
         this.id = data.id;
         this.shardCount = data.shardCount || 1;
-        for (const node of nodes) this.createShoukakuNode(node, this.options);
+        for (let node of nodes) {
+            node = this._mergeDefault(ShoukakuConstants.ShoukakuNodeObject, node);
+            this.createShoukakuNode(node);
+        }
         this.client.on('raw', (p) => {
             if (p.t !== 'VOICE_STATE_UPDATE' && p.t !== 'VOICE_SERVER_UPDATE') return;
             this._update(p);
@@ -35,10 +39,11 @@ class Shoukaku extends EventEmitter {
         this.created = true;
     }
 
-    createShoukakuNode(node, options = this.options) {
+    createShoukakuNode(node) {
         if (!node)
             throw new Error('Cannot create a node if the node data is missing');
-        const connection = new ShoukakuNode(this, options, node);
+        node = this._mergeDefault(ShoukakuConstants.ShoukakuNodeObject, node);
+        const connection = new ShoukakuNode(this, this.options, node);
         try {
             connection.on('ready', (host) => this.emit('nodeReady', host));
             connection.on('message', this._message.bind(this));
@@ -138,6 +143,23 @@ class Shoukaku extends EventEmitter {
                 self_deaf: false
             }
         });
+    }
+
+    // Based on https://github.com/discordjs/discord.js/blob/master/src/util/Util.js#L139
+    _mergeDefault(def, given) {
+        if (!given) return def;
+        const defaultKeys = Object.keys(def);
+        for (const key of defaultKeys) {
+            if (def[key] === null) {
+                if (!given[key]) throw new Error(`${key} was not found and the given options.`);
+            }
+            if (!given[key]) given[key] = def[key];
+        }
+        for (const key in defaultKeys) {
+            if (defaultKeys.includes(key)) continue;
+            delete given[key];
+        }
+        return given;
     }
 
     _message(parsed) {

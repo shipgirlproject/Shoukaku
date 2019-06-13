@@ -7,18 +7,21 @@ class ShoukakuPlayer extends EventEmitter {
         Object.defineProperty(this, 'client', { value: origin.client });
         Object.defineProperty(this, 'Shoukaku', { value: origin.shoukaku });
         Object.defineProperty(this, 'ShoukakuNode', { value: origin.shoukakuNode, writable: true });
-        Object.defineProperty(this, 'handleNodeDisconnects', { value: origin.shoukaku.options.handleNodeDisconnects || true });
-        Object.defineProperty(this, 'sessionID', { value: null, writable: true });
-        Object.defineProperty(this, 'serverUpdate', { value: null, writable: true });
+        
         this.id = null;
         this.channel = null;
         this.selfDeaf = false;
         this.selfMute = false;
+        Object.defineProperty(this, 'sessionID', { value: null, writable: true });
+        Object.defineProperty(this, 'serverUpdate', { value: null, writable: true });
 
         this.playing = false;
         this.paused = false;
         this.should = true;
-        
+    }
+
+    get handleDisconnects() {
+        return this.Shoukaku.options.handleNodeDisconnects;
     }
 
     async play(track) {
@@ -134,7 +137,7 @@ class ShoukakuPlayer extends EventEmitter {
     }
 
     _removedNode() {
-        if (this.handleNodeDisconnects) {
+        if (this.handleDisconnects) {
             this.removeAllListeners();
             this.Shoukaku.players.delete(this.id);
             return this.emit('playerNodeClosed');
