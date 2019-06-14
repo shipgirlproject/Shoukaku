@@ -40,10 +40,21 @@ class Shoukaku extends EventEmitter {
         if (!this.nodes.size)
             throw new Error('No nodes available. What happened?');
         if (name) {
-            if (!this.nodes.has(name)) throw new Error('The node name you specified is not one of my nodes');
-            return this.nodes.get(name);
+            const node = this.nodes.get(name);
+            if (node) return node;
+            throw new Error('The node name you specified is not one of my nodes');
         }
-        return [...this.map.values()].sort((a, b) => a.penalties - b.penalties).shift();
+        return [...this.nodes.values()].sort((a, b) => a.penalties - b.penalties).shift();
+    }
+
+    getLink(guildID) {
+        if (!guildID) return null;
+        if (!this.nodes.size) 
+            throw new Error('No nodes available. What happened?');
+        for (const node of this.nodes.values()) {
+            const link = node.links.get(guildID);
+            if (link) return link;
+        }
     }
 
     send(payload) {

@@ -42,6 +42,13 @@ class ShoukakuConstants {
         };
     }
 
+    static get ShoukakuPlayOptions() {
+        return {
+            startTime: false,
+            endTime: false
+        };
+    }
+
     static get ShoukakuOptions() {
         return {
             resumable: false,

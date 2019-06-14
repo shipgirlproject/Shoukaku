@@ -90,7 +90,7 @@ class ShoukakuSocket extends EventEmitter {
                 this.links.delete(options.guild_id);
                 reject(new Error('The voice connection is not established in 15 seconds'));
             }, 15000);
-            newLink.join(options, (error, value) => {
+            newLink.connect(options, (error, value) => {
                 clearTimeout(timeout);
                 if (error) {
                     this.links.delete(options.guild_id);
@@ -105,13 +105,13 @@ class ShoukakuSocket extends EventEmitter {
         const link = this.links.get(packet.d.guild_id);
         if (!link) return;
         if (packet.t === 'VOICE_STATE_UPDATE') {
-            if (!packet.d.channelId) {
+            if (!packet.d.channel_id) {
                 if (link.state !== SHOUKAKU_STATUS.DISCONNECTED) link.voiceDisconnect();
                 return;
             }
-            link.build(packet.d);
+            link.build = packet.d;
         }
-        if (packet.t === 'VOICE_SERVER_UPDATE') link.serverUpdate(packet);
+        if (packet.t === 'VOICE_SERVER_UPDATE') link.serverUpdate = packet;
     }
 
     _configureResuming() {

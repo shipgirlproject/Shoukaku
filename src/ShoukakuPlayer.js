@@ -1,4 +1,5 @@
 const EventEmitter = require('events');
+const { ShoukakuPlayOptions } = require('./ShoukakuConstants.js');
 
 class ShoukakuPlayer extends EventEmitter {
     constructor(link) {
@@ -11,14 +12,15 @@ class ShoukakuPlayer extends EventEmitter {
         this.position = 0;
     }
 
-    async playTrack(track, { startTime, endTime }) {
+    async playTrack(track, options = ShoukakuPlayOptions) {
         if (!track) return false;
         const payload = {};
         Object.defineProperty(payload, 'op', { value: 'play', enumerable: true });
         Object.defineProperty(payload, 'guildId', { value: this.link.guildID, enumerable: true });
         Object.defineProperty(payload, 'track', { value: track, enumerable: true });
-        if (startTime) Object.defineProperty(payload, 'startTime', { value: startTime, enumerable: true });
-        if (endTime) Object.defineProperty(payload, 'endTime', { value: endTime, enumerable: true });
+        Object.defineProperty(payload, 'noReplace', { value: true, enumerable: true });
+        if (options.startTime) Object.defineProperty(payload, 'startTime', { value: options.startTime, enumerable: true });
+        if (options.endTime) Object.defineProperty(payload, 'endTime', { value: options.endTime, enumerable: true });
         await this.link.send(payload);
         this.track = track;
         return true;
