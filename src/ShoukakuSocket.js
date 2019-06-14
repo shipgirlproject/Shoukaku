@@ -103,7 +103,13 @@ class ShoukakuSocket extends EventEmitter {
     _handle_update(packet) {
         const link = this.links.get(packet.d.guild_id);
         if (!link) return;
-        if (packet.t === 'VOICE_STATE_UPDATE') link.build(packet.d);
+        if (packet.t === 'VOICE_STATE_UPDATE') {
+            if (!packet.d.channelId) {
+                if (link.state !== SHOUKAKU_STATUS.DISCONNECTED) link.voiceDisconnect();
+                return;
+            }
+            link.build(packet.d);
+        }
         if (packet.t === 'VOICE_SERVER_UPDATE') link.serverUpdate(packet);
     }
 

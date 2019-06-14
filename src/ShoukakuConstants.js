@@ -3,6 +3,7 @@ class ShoukakuConstants {
         return {
             CONNECTING: 'CONNECTING',
             CONNECTED: 'CONNECTED',
+            DISCONNECTING: 'DISCONNECTING',
             DISCONNECTED: 'DISCONNECTED'
         };
     }

@@ -30,9 +30,9 @@ class Shoukaku extends EventEmitter {
     addNode(nodeOptions) {
         const node = new ShoukakuSocket(this, nodeOptions);
         node.connect(this.id, this.shardCount);
-        node.on('error', (name, error) => this.emit('nodeError', name, error));
-        node.on('ready', (name, resumed) => this.emit('nodeResumed', name, resumed));
-        node.on('close', (name, code, reason) => this.emit('nodeClosed', name, code, reason));
+        node.on('error', (name, error) => this.emit('error', name, error));
+        node.on('ready', (name, resumed) => this.emit('ready', name, resumed));
+        node.on('close', (name, code, reason) => this.emit('close', name, code, reason));
         this.nodes.set(node.name, node);
     }
 

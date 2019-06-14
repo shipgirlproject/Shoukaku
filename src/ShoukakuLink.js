@@ -36,6 +36,30 @@ class ShoukakuLink {
         this.state = SHOUKAKU_STATUS.CONNECTING;
     }
 
+    disconnect() {
+        this.state = SHOUKAKU_STATUS.DISCONNECTING;
+        this.lastServerUpdate = null;
+        this.link.shoukaku.send({
+            op: 4,
+            d: {
+                guild_id: this.guildID,
+                channel_id: null,
+                self_mute: false,
+                self_deaf: false
+            }
+        });
+    }
+
+    voiceDisconnect() {
+        this.state = SHOUKAKU_STATUS.DISCONNECTED;
+        this.channel_id = null;
+        this.sessionID = null;
+        this.node.send({
+            op: 'destroy',
+            guildId: this.guildID
+        }).catch(() => null).finally(() => this.node.links.delete(this.guildID));
+    }
+    
     voiceUpdate(packet) {
         this.send({
             op: 'voiceUpdate',
