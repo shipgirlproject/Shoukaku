@@ -15,7 +15,7 @@ class ShoukakuLink {
         this.userID = data.userID;
         this.guildID = data.guild_id;
         this.voiceChannelID = data.channel_id;
-        this.sessionID = data.sessionID;
+        this.sessionID = data.session_id;
     }
 
     set serverUpdate(data) {
