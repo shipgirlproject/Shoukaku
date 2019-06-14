@@ -32,14 +32,21 @@ class ShoukakuConstants {
         };
     }
 
+    static get ShoukakuJoinOptions() {
+        return {
+            guild_id: null,
+            channel_id: null,
+            self_mute: false,
+            self_deaf: false
+        };
+    }
+
     static get ShoukakuOptions() {
         return {
             resumable: false,
             resumableTimeout: 30,
-            reconnectInterval: 10000,
             reconnectTries: 2,
-            restTimeout: 10000,
-            handleNodeDisconnects: true
+            restTimeout: 10000
         };
     }
 

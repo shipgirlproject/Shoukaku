@@ -23,11 +23,12 @@ class Shoukaku extends EventEmitter {
             node = this._mergeDefault(constants.ShoukakuNodeOptions, node);
             this.addNode(node);
         }
+        this.client.on('raw', this._handle_packet.bind(this));
         this._init = false;
     }
     
     addNode(nodeOptions) {
-        const node = new ShoukakuSocket(nodeOptions, this.options);
+        const node = new ShoukakuSocket(this, nodeOptions);
         node.connect(this.id, this.shardCount);
         node.on('error', (name, error) => this.emit('nodeError', name, error));
         node.on('ready', (name, resumed) => this.emit('nodeResumed', name, resumed));
@@ -45,6 +46,12 @@ class Shoukaku extends EventEmitter {
         return [...this.map.values()].sort((a, b) => a.penalties - b.penalties).shift();
     }
 
+    send(payload) {
+        const guild = this.client.guilds.get(payload.d.guild_id);
+        if (!guild) return;
+        guild.shard.send(payload);
+    }
+
     _mergeDefault(def, given) {
         if (!given) return def;
         const defaultKeys = Object.keys(def);
@@ -59,6 +66,14 @@ class Shoukaku extends EventEmitter {
             delete given[key];
         }
         return given;
+    }
+
+    _handle_packet(packet) {
+        if (packet.t === 'VOICE_STATE_UPDATE') {
+            if (packet.d.user_id !== this.id) return;
+            this.emit('packetUpdate', packet);
+        }
+        if (packet.t === 'VOICE_SERVER_UPDATE') this.emit('packetUpdate', packet);
     }
 }
 module.exports = Shoukaku;
