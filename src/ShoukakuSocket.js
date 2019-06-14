@@ -10,6 +10,7 @@ class ShoukakuSocket extends EventEmitter {
 
         this.shoukaku = shoukaku;
         this.name = node.name;
+        this.resumable = shoukaku.options.resumable;
         this.resumableTimeout = shoukaku.options.resumableTimeout;
         this.state = SHOUKAKU_STATUS.DISCONNECTED;
         this.stats = SHOUKAKU_NODE_STATS;
@@ -32,10 +33,10 @@ class ShoukakuSocket extends EventEmitter {
 
     connect(id, shardCount, resumable) {
         const headers = {};
-        Object.defineProperty(headers, 'Authorization', { value: this.auth });
-        Object.defineProperty(headers, 'Num-Shards', { value: id });
-        Object.defineProperty(headers, 'User-Id', { value: shardCount });
-        if (resumable) Object.defineProperty(headers, 'Resume-Key', { value: resumable });
+        Object.defineProperty(headers, 'Authorization', { value: this.auth, enumerable: true });
+        Object.defineProperty(headers, 'Num-Shards', { value: shardCount, enumerable: true });
+        Object.defineProperty(headers, 'User-Id', { value: id, enumerable: true });
+        if (resumable) Object.defineProperty(headers, 'Resume-Key', { value: resumable, enumerable: true });
         this.ws = new Websocket(this.url, { headers });
         this.ws.on('upgrade', this._upgrade.bind(this));
         this.ws.on('open', this._open.bind(this));
@@ -122,7 +123,7 @@ class ShoukakuSocket extends EventEmitter {
     }
 
     _upgrade(response) {
-        this._configureResuming()
+        if (this.resumable) this._configureResuming()
             .then(() =>{
                 this.resumed = response.headers['session-resumed'] === 'true';
             })            

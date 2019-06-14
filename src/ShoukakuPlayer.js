@@ -14,11 +14,11 @@ class ShoukakuPlayer extends EventEmitter {
     async playTrack(track, { startTime, endTime }) {
         if (!track) return false;
         const payload = {};
-        Object.defineProperty(payload, 'op', { value: 'play' });
-        Object.defineProperty(payload, 'guildId', { value: this.link.guildID });
-        Object.defineProperty(payload, 'track', { value: track });
-        if (startTime) Object.defineProperty(payload, 'startTime', { value: track });
-        if (endTime) Object.defineProperty(payload, 'endTime', { value: track });
+        Object.defineProperty(payload, 'op', { value: 'play', enumerable: true });
+        Object.defineProperty(payload, 'guildId', { value: this.link.guildID, enumerable: true });
+        Object.defineProperty(payload, 'track', { value: track, enumerable: true });
+        if (startTime) Object.defineProperty(payload, 'startTime', { value: startTime, enumerable: true });
+        if (endTime) Object.defineProperty(payload, 'endTime', { value: endTime, enumerable: true });
         await this.link.send(payload);
         this.track = track;
         return true;
