@@ -7,13 +7,10 @@ const Search = {
 const Success = ['TRACK_LOADED', 'PLAYLIST_LOADED', 'SEARCH_RESULT'];
 
 class ShoukakuResolver {
-    constructor(options) {
-
-        Object.defineProperty(this, 'auth', { value: options.auth });
-
-        this.host = options.host;
-        this.timeout = options.timeout || 10000;
-        this.url = `http://${options.host}:${options.port}/`;
+    constructor(host, port, auth, timeout) {
+        this.timeout = timeout || 10000;
+        Object.defineProperty(this, 'auth', { value: auth });
+        Object.defineProperty(this, 'url', { value: `http://${host}:${port}/` });
     }
 
     async resolve(identifier, search) {
