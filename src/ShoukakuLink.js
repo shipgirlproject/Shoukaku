@@ -12,7 +12,7 @@ class ShoukakuLink {
     }
     
     set link(data) {
-        this.userID = data.userID;
+        this.userID = data.user_id;
         this.guildID = data.guild_id;
         this.voiceChannelID = data.channel_id;
         this.sessionID = data.session_id;

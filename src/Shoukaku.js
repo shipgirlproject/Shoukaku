@@ -15,7 +15,7 @@ class Shoukaku extends EventEmitter {
     }
 
     build(nodes, options) {
-        if (this._init) throw new Error('You cannot build Shoukaku twice');
+        if (!this._init) throw new Error('You cannot build Shoukaku twice');
         options = this._mergeDefault(constants.ShoukakuBuildOptions, options);
         this.id = options.id;
         this.shardCount = options.shardCount;
@@ -23,6 +23,7 @@ class Shoukaku extends EventEmitter {
             node = this._mergeDefault(constants.ShoukakuNodeOptions, node);
             this.addNode(node);
         }
+        this._init = false;
     }
     
     addNode(nodeOptions) {

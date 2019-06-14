@@ -62,14 +62,14 @@ class ShoukakuSocket extends EventEmitter {
     }
 
     handleEvent(json) {
-        const link = this.link.get(json.guildId);
+        const link = this.links.get(json.guildId);
         if (!link) return false;
-        if (json.op  === 'playerUpdate') return this.link.player._playerUpdate(json.state);
+        if (json.op  === 'playerUpdate') return link.player._playerUpdate(json.state);
         if (json.op === 'event') {
-            if (json.type === 'TrackEndEvent') return this.link.player.emit('TrackEnd');
-            if (json.type === 'TrackExceptionEvent') return this.link.player.emit('TrackException');
-            if (json.type === 'TrackStuckEvent') return this.link.player.emit('TrackStuck');
-            if (json.type === 'WebSocketClosedEvent') return this.link.player.emit('WebSocketClosed');
+            if (json.type === 'TrackEndEvent') return link.player.emit('TrackEnd');
+            if (json.type === 'TrackExceptionEvent') return link.player.emit('TrackException');
+            if (json.type === 'TrackStuckEvent') return link.player.emit('TrackStuck');
+            if (json.type === 'WebSocketClosedEvent') return link.player.emit('WebSocketClosed');
         }
     }
 
