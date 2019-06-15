@@ -1,6 +1,7 @@
-const EventEmitter = require('events');
+const { RawRouter } = require('./ShoukakuRouter.js');
 const constants = require('./ShoukakuConstants.js');
 const ShoukakuSocket = require('./ShoukakuSocket.js');
+const EventEmitter = require('events');
 
 class Shoukaku extends EventEmitter {
     constructor(client, options) {
@@ -11,11 +12,12 @@ class Shoukaku extends EventEmitter {
         this.shardCount = null;
         this.nodes = new Map();
         Object.defineProperty(this, 'options', { value: true, writable: this._mergeDefault(constants.ShoukakuOptions, options) });
-        Object.defineProperty(this, '_init', { value: true, writable: true });
+        Object.defineProperty(this, 'init', { value: true, writable: true });
+        Object.defineProperty(this, 'rawRouter', { value: RawRouter.bind(this) });
     }
 
     build(nodes, options) {
-        if (!this._init) throw new Error('You cannot build Shoukaku twice');
+        if (!this.init) throw new Error('You cannot build Shoukaku twice');
         options = this._mergeDefault(constants.ShoukakuBuildOptions, options);
         this.id = options.id;
         this.shardCount = options.shardCount;
@@ -23,8 +25,8 @@ class Shoukaku extends EventEmitter {
             node = this._mergeDefault(constants.ShoukakuNodeOptions, node);
             this.addNode(node);
         }
-        this.client.on('raw', this._handle_packet.bind(this));
-        this._init = false;
+        this.client.on('raw', this.rawRouter);
+        this.init = false;
     }
     
     addNode(nodeOptions) {
@@ -77,14 +79,6 @@ class Shoukaku extends EventEmitter {
             delete given[key];
         }
         return given;
-    }
-
-    _handle_packet(packet) {
-        if (packet.t === 'VOICE_STATE_UPDATE') {
-            if (packet.d.user_id !== this.id) return;
-            this.emit('packetUpdate', packet);
-        }
-        if (packet.t === 'VOICE_SERVER_UPDATE') this.emit('packetUpdate', packet);
     }
 }
 module.exports = Shoukaku;

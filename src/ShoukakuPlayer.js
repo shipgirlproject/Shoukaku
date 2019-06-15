@@ -76,7 +76,7 @@ class ShoukakuPlayer extends EventEmitter {
 
     _playerUpdate(state) {
         this.position = state.position;
-        return this.emit('playerUpdate', state);
+        return this.emit('PlayerUpdate', state);
     }
 
     _onNodeChange() {

@@ -1,5 +1,13 @@
 const { SHOUKAKU_STATUS } = require('./ShoukakuConstants.js');
 class ShoukakuRouter {
+    static RawRouter(packet) {
+        if (packet.t === 'VOICE_STATE_UPDATE') {
+            if (packet.d.user_id !== this.id) return;
+            this.emit('packetUpdate', packet);
+        }
+        if (packet.t === 'VOICE_SERVER_UPDATE') this.emit('packetUpdate', packet);
+    }
+
     static PacketRouter(packet) {
         const link = this.links.get(packet.d.guild_id);
         if (!link) return;
@@ -18,10 +26,10 @@ class ShoukakuRouter {
         if (!link) return false;
         if (json.op  === 'playerUpdate') return link.player._playerUpdate(json.state);
         if (json.op === 'event') {
-            if (json.type === 'TrackEndEvent') return link.player.emit('TrackEnd');
-            if (json.type === 'TrackExceptionEvent') return link.player.emit('TrackException');
-            if (json.type === 'TrackStuckEvent') return link.player.emit('TrackStuck');
-            if (json.type === 'WebSocketClosedEvent') return link.player.emit('WebSocketClosed');
+            if (json.type === 'TrackEndEvent') return link.player.emit('TrackEnd', json);
+            if (json.type === 'TrackExceptionEvent') return link.player.emit('TrackException', json);
+            if (json.type === 'TrackStuckEvent') return link.player.emit('TrackStuck', json);
+            if (json.type === 'WebSocketClosedEvent') return link.player.emit('WebSocketClosed', json);
         }
     }
 }
