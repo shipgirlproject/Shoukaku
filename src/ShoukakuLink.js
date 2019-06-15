@@ -24,7 +24,7 @@ class ShoukakuLink {
 
     set serverUpdate(packet) {
         this.lastServerUpdate = packet.d;
-        this.voiceUpdate(packet.d);
+        this._voiceUpdate(packet.d);
     }
 
     connect(options, callback) {
@@ -39,6 +39,9 @@ class ShoukakuLink {
     disconnect() {
         this.state = SHOUKAKU_STATUS.DISCONNECTING;
         this.lastServerUpdate = null;
+        this.player._clearTrack();
+        this.player.removeAllListeners();
+        if (!this.node.shoukaku.client.has(this.guildID)) return this._voiceDisconnect();
         this.node.shoukaku.send({
             op: 4,
             d: {
@@ -49,8 +52,12 @@ class ShoukakuLink {
             }
         });
     }
+    
+    send(data) {
+        return this.node.send(data);
+    }
 
-    voiceDisconnect() {
+    _voiceDisconnect() {
         this.state = SHOUKAKU_STATUS.DISCONNECTED;
         this.channel_id = null;
         this.sessionID = null;
@@ -60,7 +67,7 @@ class ShoukakuLink {
         }).catch(() => null).finally(() => this.node.links.delete(this.guildID));
     }
     
-    voiceUpdate(data) {
+    _voiceUpdate(data) {
         this.send({
             op: 'voiceUpdate',
             guildId: this.guildID,
@@ -73,10 +80,6 @@ class ShoukakuLink {
             this.state = SHOUKAKU_STATUS.DISCONNECTED;
             this._callback(error);
         }).finally(() => delete this._callback);    
-    }
-
-    send(data) {
-        return this.node.send(data);
     }
 }
 module.exports = ShoukakuLink;

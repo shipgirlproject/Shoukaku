@@ -65,18 +65,6 @@ class ShoukakuSocket extends EventEmitter {
         });
     }
 
-    handleEvent(json) {
-        const link = this.links.get(json.guildId);
-        if (!link) return false;
-        if (json.op  === 'playerUpdate') return link.player._playerUpdate(json.state);
-        if (json.op === 'event') {
-            if (json.type === 'TrackEndEvent') return link.player.emit('TrackEnd');
-            if (json.type === 'TrackExceptionEvent') return link.player.emit('TrackException');
-            if (json.type === 'TrackStuckEvent') return link.player.emit('TrackStuck');
-            if (json.type === 'WebSocketClosedEvent') return link.player.emit('WebSocketClosed');
-        }
-    }
-
     joinVoiceChannel(options = ShoukakuJoinOptions) {
         return new Promise((resolve, reject) => {
             if (!options.guild_id || !options.channel_id)
@@ -101,12 +89,24 @@ class ShoukakuSocket extends EventEmitter {
         });
     }
 
+    _handleEvent(json) {
+        const link = this.links.get(json.guildId);
+        if (!link) return false;
+        if (json.op  === 'playerUpdate') return link.player._playerUpdate(json.state);
+        if (json.op === 'event') {
+            if (json.type === 'TrackEndEvent') return link.player.emit('TrackEnd');
+            if (json.type === 'TrackExceptionEvent') return link.player.emit('TrackException');
+            if (json.type === 'TrackStuckEvent') return link.player.emit('TrackStuck');
+            if (json.type === 'WebSocketClosedEvent') return link.player.emit('WebSocketClosed');
+        }
+    }
+
     _handle_update(packet) {
         const link = this.links.get(packet.d.guild_id);
         if (!link) return;
         if (packet.t === 'VOICE_STATE_UPDATE') {
             if (!packet.d.channel_id) {
-                if (link.state !== SHOUKAKU_STATUS.DISCONNECTED) link.voiceDisconnect();
+                if (link.state !== SHOUKAKU_STATUS.DISCONNECTED) link._voiceDisconnect();
                 return;
             }
             link.build = packet.d;
@@ -141,7 +141,7 @@ class ShoukakuSocket extends EventEmitter {
             const json = JSON.parse(message);
             if (json.op !== 'playerUpdate') this.emit('debug', json, this.name);
             if (json.op === 'stats') return this.stats = json;
-            this.handleEvent(json);
+            this._handleEvent(json);
         } catch (error) {
             this.emit('error', this.name, error);
         }
