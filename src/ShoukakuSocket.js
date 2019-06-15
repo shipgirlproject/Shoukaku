@@ -1,7 +1,7 @@
 const { SHOUKAKU_STATUS, SHOUKAKU_NODE_STATS, ShoukakuJoinOptions } = require('./ShoukakuConstants.js');
+const { PacketRouter, EventRouter } = require('./ShoukakuRouter.js');
 const ShoukakuResolver = require('./ShoukakuResolver.js');
 const ShoukakuLink = require('./ShoukakuLink.js');
-const ShoukakuRouter = require('./ShoukakuRouter.js');
 const Websocket = require('ws');
 const EventEmitter = require('events');
 
@@ -21,8 +21,8 @@ class ShoukakuSocket extends EventEmitter {
         Object.defineProperty(this, 'url', { value: `ws://${node.host}:${node.port}` });
         Object.defineProperty(this, 'auth', { value: node.auth });
         Object.defineProperty(this, 'resumed', { value: false, writable: true });
-        Object.defineProperty(this, 'packetRouter', { value: ShoukakuRouter.PacketRouter.bind(this) });
-        Object.defineProperty(this, 'eventRouter', { value: ShoukakuRouter.EventRouter.bind(this) });
+        Object.defineProperty(this, 'packetRouter', { value: PacketRouter.bind(this) });
+        Object.defineProperty(this, 'eventRouter', { value: EventRouter.bind(this) });
     }   
 
     get penalties() {
