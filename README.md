@@ -19,6 +19,15 @@ The ShipGirl Project. Shoukaku `(c) Kancolle for Shoukaku`
 ```
 npm i Deivu/Shoukaku
 ```
+### Task List
+- [x] Base Logic
+- [x] Playing Stopping Logic 
+- [x] Load Balancing Logic
+- [ ] Node Removal logic
+- [ ] Reconnect logic
+- [ ] Resuming Logic
+- [ ] Documentation
+- and probably some things I forgot to mention?
 
 ### Example Usage
 ```js
