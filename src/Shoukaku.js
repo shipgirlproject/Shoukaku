@@ -11,7 +11,7 @@ class Shoukaku extends EventEmitter {
         this.id = null;
         this.shardCount = null;
         this.nodes = new Map();
-        Object.defineProperty(this, 'options', { value: true, writable: this._mergeDefault(constants.ShoukakuOptions, options) });
+        Object.defineProperty(this, 'options', { value: this._mergeDefault(constants.ShoukakuOptions, options) });
         Object.defineProperty(this, 'init', { value: true, writable: true });
         Object.defineProperty(this, 'rawRouter', { value: RawRouter.bind(this) });
     }
@@ -32,8 +32,9 @@ class Shoukaku extends EventEmitter {
     addNode(nodeOptions) {
         const node = new ShoukakuSocket(this, nodeOptions);
         node.connect(this.id, this.shardCount);
-        node.on('error', (name, error) => this.emit('error', name, error));
+        node.on('debug', (name, data) => this.emit('debug', name, data));
         node.on('ready', (name, resumed) => this.emit('ready', name, resumed));
+        node.on('error', (name, error) => this.emit('error', name, error));
         node.on('close', (name, code, reason) => this.emit('close', name, code, reason));
         this.nodes.set(node.name, node);
     }

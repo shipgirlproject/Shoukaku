@@ -40,11 +40,17 @@ class ShoukakuSocket extends EventEmitter {
         Object.defineProperty(headers, 'Num-Shards', { value: shardCount, enumerable: true });
         Object.defineProperty(headers, 'User-Id', { value: id, enumerable: true });
         if (resumable) Object.defineProperty(headers, 'Resume-Key', { value: resumable, enumerable: true });
+        const upgrade = this._upgrade.bind(this);
+        const open = this._open.bind(this);
+        const message = this._message.bind(this);
+        const error = this._error.bind(this);
+        const close = this._close.bind(this);
         this.ws = new Websocket(this.url, { headers });
-        this.ws.on('upgrade', this._upgrade.bind(this));
-        this.ws.on('open', this._open.bind(this));
-        this.ws.on('message', this._message.bind(this));
-        this.ws.on('error', this._error.bind(this));
+        this.ws.on('upgrade', upgrade);
+        this.ws.on('open', open);
+        this.ws.on('message', message);
+        this.ws.on('error', error);
+        this.ws.on('close', close);
         this.shoukaku.on('packetUpdate', this.packetRouter);
     }
 
@@ -117,7 +123,7 @@ class ShoukakuSocket extends EventEmitter {
     _message(message) {
         try {
             const json = JSON.parse(message);
-            if (json.op !== 'playerUpdate') this.emit('debug', json, this.name);
+            if (json.op !== 'playerUpdate') this.emit('debug', this.name, json);
             if (json.op === 'stats') return this.stats = json;
             this.eventRouter(json);
         } catch (error) {
