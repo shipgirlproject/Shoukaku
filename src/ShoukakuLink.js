@@ -12,7 +12,8 @@ class ShoukakuLink {
         this.voiceChannelID = null;
         this.state = SHOUKAKU_STATUS.DISCONNECTED;
         this.player = new ShoukakuPlayer(this);
-        Object.defineProperty(this, '_callback', { value: null, writable: true, configurable: true });
+        Object.defineProperty(this, '_callback', { value: null, writable: true });
+        Object.defineProperty(this, '_timeout', { value: null, writable: true });
     }
     
     set build(data) {
@@ -51,6 +52,7 @@ class ShoukakuLink {
                 self_deaf: false
             }
         });
+        this._timeout = setTimeout(() => this._voiceDisconnect(), 15000);
     }
     
     send(data) {
@@ -59,12 +61,15 @@ class ShoukakuLink {
 
     _voiceDisconnect() {
         this.state = SHOUKAKU_STATUS.DISCONNECTED;
+        clearTimeout(this._timeout);
         this.channel_id = null;
         this.sessionID = null;
-        this.send({
-            op: 'destroy',
-            guildId: this.guildID
-        }).catch(() => null).finally(() => this.node.links.delete(this.guildID));
+        this.send({ op: 'destroy', guildId: this.guildID })
+            .catch(() => null)
+            .finally(() => {
+                this._timeout = null;
+                this.node.links.delete(this.guildID);
+            });
     }
     
     _voiceUpdate(data) {
@@ -79,7 +84,7 @@ class ShoukakuLink {
         }).catch((error) => {
             this.state = SHOUKAKU_STATUS.DISCONNECTED;
             this._callback(error);
-        }).finally(() => delete this._callback);    
+        }).finally(() => this._callback = null);    
     }
 }
 module.exports = ShoukakuLink;
