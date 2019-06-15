@@ -1,6 +1,7 @@
 const { SHOUKAKU_STATUS, SHOUKAKU_NODE_STATS, ShoukakuJoinOptions } = require('./ShoukakuConstants.js');
 const ShoukakuResolver = require('./ShoukakuResolver.js');
 const ShoukakuLink = require('./ShoukakuLink.js');
+const ShoukakuRouter = require('./ShoukakuRouter.js/index.js');
 const Websocket = require('ws');
 const EventEmitter = require('events');
 
@@ -20,7 +21,9 @@ class ShoukakuSocket extends EventEmitter {
         Object.defineProperty(this, 'url', { value: `ws://${node.host}:${node.port}` });
         Object.defineProperty(this, 'auth', { value: node.auth });
         Object.defineProperty(this, 'resumed', { value: false, writable: true });
-    }
+        Object.defineProperty(this, 'packetRouter', { value: ShoukakuRouter.PacketRouter.bind(this) });
+        Object.defineProperty(this, 'eventRouter', { value: ShoukakuRouter.EventRouter.bind(this) });
+    }   
 
     get penalties() {
         const penalties = 0;
@@ -42,7 +45,7 @@ class ShoukakuSocket extends EventEmitter {
         this.ws.on('open', this._open.bind(this));
         this.ws.on('message', this._message.bind(this));
         this.ws.on('error', this._error.bind(this));
-        this.shoukaku.on('packetUpdate', this._handle_update.bind(this));
+        this.shoukaku.on('packetUpdate', this.packetRouter);
     }
 
     reconnect() {
@@ -89,31 +92,6 @@ class ShoukakuSocket extends EventEmitter {
         });
     }
 
-    _handleEvent(json) {
-        const link = this.links.get(json.guildId);
-        if (!link) return false;
-        if (json.op  === 'playerUpdate') return link.player._playerUpdate(json.state);
-        if (json.op === 'event') {
-            if (json.type === 'TrackEndEvent') return link.player.emit('TrackEnd');
-            if (json.type === 'TrackExceptionEvent') return link.player.emit('TrackException');
-            if (json.type === 'TrackStuckEvent') return link.player.emit('TrackStuck');
-            if (json.type === 'WebSocketClosedEvent') return link.player.emit('WebSocketClosed');
-        }
-    }
-
-    _handle_update(packet) {
-        const link = this.links.get(packet.d.guild_id);
-        if (!link) return;
-        if (packet.t === 'VOICE_STATE_UPDATE') {
-            if (!packet.d.channel_id) {
-                if (link.state !== SHOUKAKU_STATUS.DISCONNECTED) link._voiceDisconnect();
-                return;
-            }
-            link.build = packet.d;
-        }
-        if (packet.t === 'VOICE_SERVER_UPDATE') link.serverUpdate = packet;
-    }
-
     _configureResuming() {
         return this.send({
             op: 'configureResuming',
@@ -141,7 +119,7 @@ class ShoukakuSocket extends EventEmitter {
             const json = JSON.parse(message);
             if (json.op !== 'playerUpdate') this.emit('debug', json, this.name);
             if (json.op === 'stats') return this.stats = json;
-            this._handleEvent(json);
+            this.eventRouter(json);
         } catch (error) {
             this.emit('error', this.name, error);
         }
@@ -154,7 +132,7 @@ class ShoukakuSocket extends EventEmitter {
 
     _close(code, reason) {
         this.ws.removeAllListeners();
-        this.shoukaku.removeListener('packetUpdate', this._handle_update.bind(this));
+        this.shoukaku.removeListener('packetUpdate', this.packetRouter);
         this.ws = null;
         this.emit('close', this.name, code, reason);
     }

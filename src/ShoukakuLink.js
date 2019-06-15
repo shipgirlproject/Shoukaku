@@ -41,7 +41,7 @@ class ShoukakuLink {
         this.lastServerUpdate = null;
         this.player._clearTrack();
         this.player.removeAllListeners();
-        if (!this.node.shoukaku.client.has(this.guildID)) return this._voiceDisconnect();
+        if (!this.node.shoukaku.client.guild.has(this.guildID)) return this._voiceDisconnect();
         this.node.shoukaku.send({
             op: 4,
             d: {
