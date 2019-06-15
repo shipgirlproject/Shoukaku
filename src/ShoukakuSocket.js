@@ -1,7 +1,7 @@
 const { SHOUKAKU_STATUS, SHOUKAKU_NODE_STATS, ShoukakuJoinOptions } = require('./ShoukakuConstants.js');
 const ShoukakuResolver = require('./ShoukakuResolver.js');
 const ShoukakuLink = require('./ShoukakuLink.js');
-const ShoukakuRouter = require('./ShoukakuRouter.js/index.js');
+const ShoukakuRouter = require('./ShoukakuRouter.js');
 const Websocket = require('ws');
 const EventEmitter = require('events');
 
