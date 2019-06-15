@@ -26,10 +26,10 @@ class ShoukakuRouter {
         if (!link) return false;
         if (json.op  === 'playerUpdate') return link.player._playerUpdate(json.state);
         if (json.op === 'event') {
-            if (json.type === 'TrackEndEvent') return link.player.emit('TrackEnd', json);
-            if (json.type === 'TrackExceptionEvent') return link.player.emit('TrackException', json);
-            if (json.type === 'TrackStuckEvent') return link.player.emit('TrackStuck', json);
-            if (json.type === 'WebSocketClosedEvent') return link.player.emit('WebSocketClosed', json);
+            if (json.type === 'TrackEndEvent') return link.player.emit('end', json);
+            if (json.type === 'TrackExceptionEvent') return link.player.emit('exception', json);
+            if (json.type === 'TrackStuckEvent') return link.player.emit('stuck', json);
+            if (json.type === 'WebSocketClosedEvent') return link.player.emit('voiceClose', json);
         }
     }
 }

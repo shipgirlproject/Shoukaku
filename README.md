@@ -85,18 +85,18 @@ client.on('message', async (msg) => {
       channel_id: msg.member.voice.channelID
     });
     // Attach the listeners. More would be added probably
-    link.player.on('TrackEnd', (reason) => {
+    link.player.on('end', (reason) => {
       console.log(reason);
       link.disconnect();
     })
-    link.player.on('TrackException', console.error);
-    link.player.on('TrackStuck', (reason) => {
-      console.warn(reason)
+    link.player.on('exception', console.error);
+    link.player.on('stuck', (reason) => {
+      console.warn(reason);
       link.player.stopTrack().catch(console.error);
     });
-    link.player.on('WebSocketClosed', (reason) => {
+    link.player.on('voiceClose', (reason) => {
       console.log(reason);
-      link.disconnect()
+      link.disconnect();
     });
     // Do the play thingy
     await link.player.playTrack(data.track);

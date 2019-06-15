@@ -13,7 +13,6 @@ class ShoukakuLink {
         this.state = SHOUKAKU_STATUS.DISCONNECTED;
         this.player = new ShoukakuPlayer(this);
         Object.defineProperty(this, '_callback', { value: null, writable: true });
-        Object.defineProperty(this, '_timeout', { value: null, writable: true });
     }
     
     set build(data) {
@@ -39,52 +38,55 @@ class ShoukakuLink {
 
     disconnect() {
         this.state = SHOUKAKU_STATUS.DISCONNECTING;
-        this.lastServerUpdate = null;
+        this._clearVoice();
         this.player._clearTrack();
         this.player.removeAllListeners();
-        if (!this.node.shoukaku.client.guilds.has(this.guildID)) return this._voiceDisconnect();
+        this.node.links.delete(this.guildID);
+        if (this.state !== SHOUKAKU_STATUS.DISCONNECTED) this._destroy();
+        if (!this.node.shoukaku.client.guilds.has(this.guildID)) return;
         this.node.shoukaku.send({
             op: 4,
             d: {
                 guild_id: this.guildID,
                 channel_id: null,
                 self_mute: false,
-                self_deaf: false
+                self_deaf: false    
             }
         });
-        this._timeout = setTimeout(() => this._voiceDisconnect(), 15000);
-    }
-    
-    send(data) {
-        return this.node.send(data);
+        this.state = SHOUKAKU_STATUS.DISCONNECTED;
     }
 
-    _voiceDisconnect() {
-        this.state = SHOUKAKU_STATUS.DISCONNECTED;
-        clearTimeout(this._timeout);
-        this.channel_id = null;
+    _clearVoice() {
+        this.lastServerUpdate = null;
         this.sessionID = null;
-        this.send({ op: 'destroy', guildId: this.guildID })
-            .catch(() => null)
-            .finally(() => {
-                this._timeout = null;
-                this.node.links.delete(this.guildID);
-            });
+        this.voiceChannelID = null;
     }
-    
+
     _voiceUpdate(data) {
-        this.send({
+        this.node.send({
             op: 'voiceUpdate',
             guildId: this.guildID,
             sessionId: this.sessionID,
             event: data
         }).then(() => {
             this.state = SHOUKAKU_STATUS.CONNECTED;
-            this._callback(null, this);
+            if (this._callback) this._callback(null, this);
         }).catch((error) => {
             this.state = SHOUKAKU_STATUS.DISCONNECTED;
-            this._callback(error);
+            if (this._callback) this._callback(error);
         }).finally(() => this._callback = null);    
+    }
+
+    _voiceDisconnect() {
+        this.state = SHOUKAKU_STATUS.DISCONNECTED;
+        this._destroy();
+    }
+
+    _destroy() {
+        this.node.send({ 
+            op: 'destroy', 
+            guildId: this.guildID 
+        }).catch(() => null);
     }
 }
 module.exports = ShoukakuLink;
