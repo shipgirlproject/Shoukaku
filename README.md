@@ -2,6 +2,7 @@
 <p align="center">
   <img src="https://vignette.wikia.nocookie.net/kancolle/images/9/97/Shoukaku_Christmas_Full.png/revision/latest/">
 </p>
+
 The ShipGirl Project. Shoukaku `(c) Kancolle for Shoukaku`
 
 ### A Full Blown Lavalink Wrapper designed around Discord.js v12
@@ -9,11 +10,11 @@ The ShipGirl Project. Shoukaku `(c) Kancolle for Shoukaku`
 ### Saya Note:
 > The wrapper has entered the `beta` stage. 
 
->If you want to help in development, you can use the wrapper and report the issues you experienced on using it, or Submit a PR if you think you can improve something.
+> If you want to help in development, you can use the wrapper and report the issues you experienced on using it, or Submit a PR if you think you can improve something.
 
 > Documentation is not yet available as of now, but I will soon:tm:
 
-> Look at the Example Usage for an idea on what to see in this library
+> There is a Discord.JS actual implementation and a simple implementation examples below.
 
 ### Installation
 ```
@@ -29,7 +30,10 @@ npm i Deivu/Shoukaku
 - [ ] Documentation
 - and probably some things I forgot to mention?
 
-### Example Usage
+### Discord.js actual implementation.
+[View Kongou's Source Code Here](https://github.com/Deivu/Kongou)
+
+### More simple implementation w/o queue.
 ```js
 const { Client } = require('discord.js');
 const { Shoukaku } = require('shoukaku');
