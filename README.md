@@ -7,19 +7,21 @@ The ShipGirl Project. Shoukaku `(c) Kancolle for Shoukaku`
 
 ### A Full Blown Lavalink Wrapper designed around Discord.js v12
 
-### Saya Note:
-> The wrapper has entered the `beta` stage. 
-
-> If you want to help in development, you can use the wrapper and report the issues you experienced on using it, or Submit a PR if you think you can improve something.
-
-> Documentation is not yet available as of now, but I will soon:tm:
-
-> There is a Discord.JS actual implementation and a simple implementation examples below.
+### Documentation
+https://deivu.github.io/Shoukaku/?api
 
 ### Installation
 ```
 npm i Deivu/Shoukaku
 ```
+
+### Saya Note:
+> The wrapper has entered the `beta` stage. 
+
+> If you want to help in development, you can use the wrapper and report the issues you experienced on using it, or Submit a PR if you think you can improve something.
+
+> There is a Discord.JS actual implementation and a simple implementation examples below.
+
 ### Task List
 - [x] Base Logic
 - [x] Playing Stopping Logic 
