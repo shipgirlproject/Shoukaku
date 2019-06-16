@@ -24,10 +24,10 @@ npm i Deivu/Shoukaku
 
 ### Task List
 - [x] Base Logic
-- [x] Playing Stopping Logic 
+- [x] Player & Voice Logic 
 - [x] Load Balancing Logic
-- [ ] Node Removal logic
-- [x] Reconnect logic
+- [ ] Node Removal Logic
+- [x] Reconnect Logic
 - [x] Resuming Logic
 - [x] Documentation
 - and probably some things I forgot to mention?
