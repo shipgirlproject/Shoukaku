@@ -52,7 +52,7 @@ class ShoukakuSocket extends EventEmitter {
         Object.defineProperty(this, 'url', { value: `ws://${node.host}:${node.port}` });
         Object.defineProperty(this, 'auth', { value: node.auth });
         Object.defineProperty(this, 'resumed', { value: false, writable: true });
-        Object.defineProperty(this, 'cleaner', { value: false, configurable: true });
+        Object.defineProperty(this, 'cleaner', { value: false, writable: true });
         Object.defineProperty(this, 'packetRouter', { value: PacketRouter.bind(this) });
         Object.defineProperty(this, 'eventRouter', { value: EventRouter.bind(this) });
     }
