@@ -1,0 +1,46 @@
+{
+    "src":[
+        "./src/*.js",
+        "./README.md"
+    ],
+    "dest":"./docs",
+    "jsdoc":{
+        "hierarchy":"true",
+        "plugins":[
+            "plugins/markdown"
+        ]
+    },
+    "markdown":{
+        "sanitize":false
+    },
+    "app":{
+        "title":"Shoukaku | A Lavalink Library for Discord.JS v12",
+        "routing":"query",
+        "entrance":"content:readme",
+        "base":"/Shoukaku"
+    },
+    "template":{
+        "options":{
+            "title":{
+                "label":"Shoukaku",
+                "href":"."
+            },
+            "navbar":{
+                "menu":[
+                    {
+                        "label":"Readme",
+                        "href":"."
+                    },
+                    {
+                        "label":"Documentation",
+                        "href":"?api"
+                    },
+                    {
+                        "label":"GitHub",
+                        "href":"https://github.com/Deivu/Shoukaku"
+                    }
+                ]
+            }
+        }
+    }
+}

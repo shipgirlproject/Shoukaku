@@ -5,14 +5,29 @@ const Search = {
     'youtube': 'ytsearch'
 };
 const Success = ['TRACK_LOADED', 'PLAYLIST_LOADED', 'SEARCH_RESULT'];
-
+/**
+ * ShoukakuResolver, the REST part of the wrapper
+ * @param {string} host Your node host / ip address of where the lavalink is hosted.
+ * @param {string} port The Port Number of your lavalink instance.
+ * @param {string} auth The authentication key you set on your lavalink config.
+ * @param {number} timeout Timeout before a request times out.
+ */
 class ShoukakuResolver {
     constructor(host, port, auth, timeout) {
+        /**
+         * This Resolver Timeout before it decides to cancel the request.
+         * @type {number}
+         */
         this.timeout = timeout || 10000;
         Object.defineProperty(this, 'auth', { value: auth });
         Object.defineProperty(this, 'url', { value: `http://${host}:${port}/` });
     }
-
+    /**
+    * Resolves a identifier into a lavalink track.
+    * @param {string} identifier Anything you want for lavalink to search for
+    * @param {string} search Either `youtube` or `soundcloud`. If specified, resolve will return search results.
+    * @returns {Promise<Object>} The Lavalink Track Object.
+    */
     async resolve(identifier, search) {
         if (!identifier)
             throw new Error('Query cannot be null');
@@ -37,7 +52,11 @@ class ShoukakuResolver {
             return data;
         }
     }
-    
+    /**
+     * Decodes the given base64 encoded track from lavalink.
+     * @param {base64} track Base64 Encoded Track you got from the Lavalink API.
+     * @returns {Promise<Object>} The Lavalink Track details.
+     */
     async decode(track) {
         if (!track)
             throw new Error('Track cannot be null');

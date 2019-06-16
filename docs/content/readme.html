@@ -1,0 +1,107 @@
+
+<html><head></head><body><h1 id="shoukaku">Shoukaku</h1>
+<hr />
+<p align="center">
+  <img src="https://vignette.wikia.nocookie.net/kancolle/images/9/97/Shoukaku_Christmas_Full.png/revision/latest/" style="max-width: 100%;">
+</p>
+
+<p>The ShipGirl Project. Shoukaku <code>(c) Kancolle for Shoukaku</code></p>
+<h3 id="a-full-blown-lavalink-wrapper-designed-around-discordjs-v12">A Full Blown Lavalink Wrapper designed around Discord.js v12</h3>
+<h3 id="saya-note-">Saya Note:</h3>
+<blockquote>
+<p>The wrapper has entered the <code>beta</code> stage. </p>
+</blockquote>
+<blockquote>
+<p>If you want to help in development, you can use the wrapper and report the issues you experienced on using it, or Submit a PR if you think you can improve something.</p>
+</blockquote>
+<blockquote>
+<p>Documentation is not yet available as of now, but I will soon<img class="docma emoji" src="https://twemoji.maxcdn.com/svg/2122.svg" /></p>
+</blockquote>
+<blockquote>
+<p>There is a Discord.JS actual implementation and a simple implementation examples below.</p>
+</blockquote>
+<h3 id="installation">Installation</h3>
+<pre><code>npm i Deivu/Shoukaku</code></pre><h3 id="task-list">Task List</h3>
+<ul>
+<li><input checked="" disabled="" type="checkbox"> Base Logic</li>
+<li><input checked="" disabled="" type="checkbox"> Playing Stopping Logic </li>
+<li><input checked="" disabled="" type="checkbox"> Load Balancing Logic</li>
+<li><input disabled="" type="checkbox"> Node Removal logic</li>
+<li><input checked="" disabled="" type="checkbox"> Reconnect logic</li>
+<li><input checked="" disabled="" type="checkbox"> Resuming Logic</li>
+<li><input disabled="" type="checkbox"> Documentation</li>
+<li>and probably some things I forgot to mention?</li>
+</ul>
+<h3 id="discordjs-actual-implementation">Discord.js actual implementation.</h3>
+<p><a href="https://github.com/Deivu/Kongou">View Kongou's Source Code Here</a></p>
+<h3 id="more-simple-implementation-w-o-queue">More simple implementation w/o queue.</h3>
+<pre><code class="js">const { Client } = require('discord.js');
+const { Shoukaku } = require('shoukaku');
+const client = new Client();
+
+// In this example, I will assign Shoukaku to a carrier variable. Options are the default options if nothing is specified
+const Carrier = new Shoukaku(client, {
+  resumable: false,
+  resumableTimeout: 30,
+  reconnectTries: 2,
+  restTimeout: 10000 
+});
+// Attach listeners, currently this are the only listeners available
+// on ERROR must be handled.
+Carrier.on('ready', (name) =&gt; console.log(`Lavalink Node: ${name} is now connected`));
+Carrier.on('error', (name, error) =&gt; console.log(`Lavalink Node: ${name} emitted an error.`, error));
+Carrier.on('close', (name, code, reason) =&gt; console.log(`Lavalink Node: ${name} closed with code ${code}. Reason: ${reason || 'No reason'}`));
+
+client.on('ready', () =&gt; {
+  // You need to build shoukaku on your client's ready event for her to work like how its done in this example.
+  Carrier.build([{
+    name: 'my_lavalink_server',
+    host: 'localhost',
+    port: 6969,
+    auth: 'I_Love_Anime_Weeb_69'
+  }], { 
+    id: client.user.id 
+  });
+  console.log('Bot Initialized');
+})
+
+// Now I will show you how to make a simple handler that plays a link on your chnanel. Async Await style
+client.on('message', async (msg) =&gt; {
+  if (msg.author.bot || !msg.guild) return
+  if (msg.content.startsWith('$play')) {
+    // Check if there is already a link on your guild.
+    if (Carrier.getLink(msg.guild.id)) return;
+    const args = msg.content.split(' ');
+    if (!args[1]) return;
+    // Getting the recommended node, the ez way.
+    const node = Carrier.getNode();
+    // Getting the track data 
+    let data = await node.rest.resolve(args[1]);
+    if (!data) return;
+    if (Array.isArray(data)) data = data[0];
+    // Joining the Voice Channel to obtain a link class for the guild.
+    const link = await node.joinVoiceChannel({
+      guild_id: msg.guild.id,
+      channel_id: msg.member.voice.channelID
+    });
+    // Attach the listeners. More would be added probably
+    link.player.on('end', (reason) =&gt; {
+      console.log(reason);
+      link.disconnect();
+    })
+    link.player.on('exception', console.error);
+    link.player.on('stuck', (reason) =&gt; {
+      console.warn(reason);
+      link.player.stopTrack().catch(console.error);
+    });
+    link.player.on('voiceClose', (reason) =&gt; {
+      console.log(reason);
+      link.disconnect();
+    });
+    // Do the play thingy
+    await link.player.playTrack(data.track);
+    await msg.channel.send("Now Playing: " + data.info.title);
+  }
+})
+client.login('token');</code></pre>
+</body></html>

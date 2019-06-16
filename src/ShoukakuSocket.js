@@ -1,30 +1,73 @@
-const { SHOUKAKU_STATUS, SHOUKAKU_NODE_STATS, ShoukakuJoinOptions } = require('./ShoukakuConstants.js');
+const { SHOUKAKU_STATUS, ShoukakuNodeStats, ShoukakuJoinOptions } = require('./ShoukakuConstants.js');
 const { PacketRouter, EventRouter } = require('./ShoukakuRouter.js');
 const ShoukakuResolver = require('./ShoukakuResolver.js');
 const ShoukakuLink = require('./ShoukakuLink.js');
 const Websocket = require('ws');
 const EventEmitter = require('events');
-
+/**
+ * ShoukakuSocket, governs the Lavalink Connection and Lavalink Voice Connections.
+ * @extends {external:EventEmitter}
+ * @param  {Shoukaku} shoukaku Your Shoukaku Instance
+ * @param {ShoukakuOptions} [node=ShoukakuNodeOptions] Options to initialize Shoukaku with
+ */
 class ShoukakuSocket extends EventEmitter {
     constructor(shoukaku, node) {
         super();
-
+        /**
+        * The Instance of Shoukaku where this node initialization is called.
+        * @type {Shoukaku}
+        */
         this.shoukaku = shoukaku;
-        this.name = node.name;
-        this.resumable = shoukaku.options.resumable;
-        this.resumableTimeout = shoukaku.options.resumableTimeout;
-        this.state = SHOUKAKU_STATUS.DISCONNECTED;
-        this.stats = SHOUKAKU_NODE_STATS;
-        this.reconnectAttempts = 0;
+        /**
+        * The mapped links that is being governed by this Socket.
+        * @type {external:Map}
+        */
         this.links = new Map();
+        /**
+        * The REST server of this Socket, mostly to load balance your REST requests instead of relying on a single node.
+        * @type {ShoukakuResolver}
+        */
         this.rest = new ShoukakuResolver(node.host, node.port, node.auth,shoukaku.options.restTimeout);
+        /**
+        * The state of this Socket.
+        * @type {ShoukakuConstants#SHOUKAKU_STATUS}
+        */
+        this.state = SHOUKAKU_STATUS.DISCONNECTED;
+        /**
+        * The current stats of this Socket.
+        * @type {ShoukakuConstants#ShoukakuNodeStats}
+        */
+        this.stats = ShoukakuNodeStats;
+        /**
+        * Attempted reconnects of this Socket. Resets to 0 when the socket opens properly.
+        * @type {number}
+        */
+        this.reconnectAttempts = 0;
+        /**
+        * Name of this Socket that you can use on .getNode() method of Shoukaku.
+        * @type {string}
+        */
+        this.name = node.name;
+
         Object.defineProperty(this, 'url', { value: `ws://${node.host}:${node.port}` });
         Object.defineProperty(this, 'auth', { value: node.auth });
         Object.defineProperty(this, 'resumed', { value: false, writable: true });
+        Object.defineProperty(this, 'cleaner', { value: false, configurable: true });
         Object.defineProperty(this, 'packetRouter', { value: PacketRouter.bind(this) });
         Object.defineProperty(this, 'eventRouter', { value: EventRouter.bind(this) });
     }   
 
+    get resumable() {
+        return this.shoukaku.options.resumable;
+    }
+
+    get resumableTimeout() {
+        return this.shoukaku.options.resumableTimeout;
+    }
+    /**
+    * Penalties of this Socket. The higher the return number, the more loaded the server is.
+    * @type {number}
+    */
     get penalties() {
         const penalties = 0;
         penalties.points += this.stats.players;
@@ -33,7 +76,13 @@ class ShoukakuSocket extends EventEmitter {
         penalties.points += this.stats.frameStats.nulled * 2;
         return penalties;
     }
-
+    /**
+    * Connects this Socket.
+    * @param {string} [id] Your Bot's / Client user id.
+    * @param {number} [shardCount] Your Bot's / Client shard count.
+    * @param {boolean|string} [resumable] Determines if we should try to resume the connection.
+    * @returns {void}
+    */
     connect(id, shardCount, resumable) {
         const headers = {};
         Object.defineProperty(headers, 'Authorization', { value: this.auth, enumerable: true });
@@ -53,10 +102,39 @@ class ShoukakuSocket extends EventEmitter {
         this.ws.on('close', close);
         this.shoukaku.on('packetUpdate', this.packetRouter);
     }
-
-    reconnect() {
-        this.reconnectAttempts++;
-        this.connect();
+    /**
+    * Joins then creates a ShoukakuLink Object for the guild & voice channel you specified.
+    * @param {ShoukakuConstants#ShoukakuJoinOptions} [options] Join data to send.
+    * @returns {Promise<ShoukakuLink>}
+    */
+    joinVoiceChannel(options = ShoukakuJoinOptions) {
+        return new Promise((resolve, reject) => {
+            if (!options.guildID|| !options.voiceChannelID)
+                return reject(new Error('Guild ID or Channel ID is not specified.'));
+            const link = this.links.get(options.guild_id);
+            if (link)
+                return reject(new Error('A voice connection is already established in this channel.'));
+            const newLink = new ShoukakuLink(this);
+            this.links.set(options.guild_id, newLink);
+            const timeout = setTimeout(() => {
+                this.links.delete(options.guild_id);
+                reject(new Error('The voice connection is not established in 15 seconds'));
+            }, 15000);
+            options = {
+                guild_id: options.guildID,
+                channel_id: options.voiceChannelID,
+                self_deaf: options.deaf,
+                self_mute: options.mute
+            };
+            newLink.connect(options, (error, value) => {
+                clearTimeout(timeout);
+                if (error) {
+                    this.links.delete(options.guild_id);
+                    return reject(error);
+                }
+                resolve(value);
+            });
+        });
     }
 
     send(data) {
@@ -74,30 +152,6 @@ class ShoukakuSocket extends EventEmitter {
         });
     }
 
-    joinVoiceChannel(options = ShoukakuJoinOptions) {
-        return new Promise((resolve, reject) => {
-            if (!options.guild_id || !options.channel_id)
-                return reject(new Error('Guild ID or Channel ID is not specified.'));
-            const link = this.links.get(options.guild_id);
-            if (link)
-                return reject(new Error('A voice connection is already established in this channel.'));
-            const newLink = new ShoukakuLink(this);
-            this.links.set(options.guild_id, newLink);
-            const timeout = setTimeout(() => {
-                this.links.delete(options.guild_id);
-                reject(new Error('The voice connection is not established in 15 seconds'));
-            }, 15000);
-            newLink.connect(options, (error, value) => {
-                clearTimeout(timeout);
-                if (error) {
-                    this.links.delete(options.guild_id);
-                    return reject(error);
-                }
-                resolve(value);
-            });
-        });
-    }
-
     _configureResuming() {
         return this.send({
             op: 'configureResuming',
@@ -106,15 +160,23 @@ class ShoukakuSocket extends EventEmitter {
         });
     }
 
+    _configureCleaner(state) {
+        this.cleaner = state;
+    }
+
+    _executeCleaner() {
+        if (!this.cleaner) return this._configureCleaner(true);  
+        for (const link of this.links.values()) link._failedReconnect();
+    }
+
     _upgrade(response) {
-        if (this.resumable) this._configureResuming()
-            .then(() =>{
-                this.resumed = response.headers['session-resumed'] === 'true';
-            })            
-            .catch((error) => this.emit('error', this.name, error));
+        this.resumed = response.headers['session-resumed'] === 'true';
     }
 
     _open() {
+        if (this.resumable) 
+            this._configureResuming()
+                .catch((error) => this.emit('error', this.name, error));
         this.reconnectAttempts = 0;
         this.state = SHOUKAKU_STATUS.CONNECTED;
         this.emit('ready', this.name, this.resumed);

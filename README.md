@@ -25,9 +25,9 @@ npm i Deivu/Shoukaku
 - [x] Playing Stopping Logic 
 - [x] Load Balancing Logic
 - [ ] Node Removal logic
-- [ ] Reconnect logic
-- [ ] Resuming Logic
-- [ ] Documentation
+- [x] Reconnect logic
+- [x] Resuming Logic
+- [x] Documentation
 - and probably some things I forgot to mention?
 
 ### Discord.js actual implementation.
@@ -81,8 +81,8 @@ client.on('message', async (msg) => {
     if (Array.isArray(data)) data = data[0];
     // Joining the Voice Channel to obtain a link class for the guild.
     const link = await node.joinVoiceChannel({
-      guild_id: msg.guild.id,
-      channel_id: msg.member.voice.channelID
+      guildID: msg.guild.id,
+      voiceChannelID: msg.member.voice.channelID
     });
     // Attach the listeners. More would be added probably
     link.player.on('end', (reason) => {
