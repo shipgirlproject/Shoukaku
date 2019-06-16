@@ -123,6 +123,20 @@ class Shoukaku extends EventEmitter {
         this.nodes.set(node.name, node);
     }
     /**
+     * Function to remove a Lavalink Node
+     * @param {string} name The Lavalink Node to remove
+     * @returns {boolean} true if the node was removed with no problems. Otherwise false.
+     */
+    removeNode(name, libraryInvoked = false) {
+        const node = this.nodes.get(name);
+        if (!node) return false;
+        node.removeAllListeners();
+        node._executeCleaner();
+        this.nodes.delete(name);
+        if (!libraryInvoked) this.emit('disconnected', name, 'User invoked disconnection');
+        return true;
+    }
+    /**
      * Shortcut to get the Ideal Node or a manually specified Node from the current nodes that Shoukaku governs.
      * @param {boolean|string} [name=false] If blank, Shoukaku will automatically return the Ideal Node for you to connect to. If name is specifed, she will try to return the node you specified.
      * @returns {ShoukakuSocket}
@@ -185,8 +199,7 @@ class Shoukaku extends EventEmitter {
                 return;
             }
         } else {
-            node.removeAllListeners();
-            this.nodes.delete(name);
+            this.removeNode(name, true);
             this.emit('disconnected', name, `Failed to reconnect in ${this.options.reconnectTries} attempts`);
             return;
         }

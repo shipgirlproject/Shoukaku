@@ -114,7 +114,7 @@ class ShoukakuSocket extends EventEmitter {
      */
     joinVoiceChannel(options = ShoukakuJoinOptions) {
         return new Promise((resolve, reject) => {
-            if (!options.guildID|| !options.voiceChannelID)
+            if (!options.guildID || !options.voiceChannelID)
                 return reject(new Error('Guild ID or Channel ID is not specified.'));
             const link = this.links.get(options.guildID);
             if (link)

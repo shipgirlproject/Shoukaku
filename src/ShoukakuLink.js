@@ -58,7 +58,7 @@ class ShoukakuLink {
         this._voiceUpdate(packet.d);
     }
     /**
-     * Generates a VoiceConnection to the Guild's specific Voice Channel.
+     * Generates a VoiceConnection to the Guild's specific Voice Channel. Warning: DO NOT USE THIS UNLESS YOU HAVE A GOOD REASON TO DO SO. Use <node>.joinVoiceChannel() instead.
      * @param {Object} options The Join Object Format from Discord API Documentation
      * @param {function(error, ShoukakuLink):void} callback The callback to run.
      * @returns {void}

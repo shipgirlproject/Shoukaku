@@ -69,38 +69,54 @@ client.on('ready', () => {
 
 // Now I will show you how to make a simple handler that plays a link on your chnanel. Async Await style
 client.on('message', async (msg) => {
-  if (msg.author.bot || !msg.guild) return
+  if (msg.author.bot || !msg.guild) return;
   if (msg.content.startsWith('$play')) {
+
     // Check if there is already a link on your guild.
     if (Carrier.getLink(msg.guild.id)) return;
+
     const args = msg.content.split(' ');
     if (!args[1]) return;
-    // Getting the recommended node, the ez way.
+
+    // Getting a node where we can peform our queries and connections.
     const node = Carrier.getNode();
-    // Getting the track data 
+
+    // Fetching the Lavalink Track Data from the node we got.
     let data = await node.rest.resolve(args[1]);
+
+    // If there is no data lets just return
     if (!data) return;
+
     if (Array.isArray(data)) data = data[0];
-    // Joining the Voice Channel to obtain a link class for the guild.
+
+    // Joining to a voice channel that returns the LINK property that we need.
     const link = await node.joinVoiceChannel({
       guildID: msg.guild.id,
       voiceChannelID: msg.member.voice.channelID
     });
-    // Attach the listeners. More would be added probably
+
+    // link.player is our player class for that link, thats what we can use to play music
     link.player.on('end', (reason) => {
       console.log(reason);
+
+      // Disconnect the link and clean everyting up
       link.disconnect();
-    })
+    });
     link.player.on('exception', console.error);
     link.player.on('stuck', (reason) => {
       console.warn(reason);
-      link.player.stopTrack().catch(console.error);
+
+      // In stuck event, end will not fire automatically, either we just disconnect or play another song
+      link.disconnect();
     });
     link.player.on('voiceClose', (reason) => {
       console.log(reason);
+
+      // There is no more reason for us to do anything so lets just clean up in voiceClose event
       link.disconnect();
     });
-    // Do the play thingy
+
+    // Play the lavalink track we got
     await link.player.playTrack(data.track);
     await msg.channel.send("Now Playing: " + data.info.title);
   }
