@@ -4,13 +4,13 @@ const ShoukakuResolver = require('./ShoukakuResolver.js');
 const ShoukakuLink = require('./ShoukakuLink.js');
 const Websocket = require('ws');
 const EventEmitter = require('events');
-/**
- * ShoukakuSocket, governs the Lavalink Connection and Lavalink Voice Connections.
- * @extends {external:EventEmitter}
- * @param  {Shoukaku} shoukaku Your Shoukaku Instance
- * @param {ShoukakuOptions} [node=ShoukakuNodeOptions] Options to initialize Shoukaku with
- */
 class ShoukakuSocket extends EventEmitter {
+    /**
+     * ShoukakuSocket, governs the Lavalink Connection and Lavalink Voice Connections.
+     * @extends {external:EventEmitter}
+     * @param  {Shoukaku} shoukaku Your Shoukaku Instance
+     * @param {ShoukakuOptions} [node=ShoukakuNodeOptions] Options to initialize Shoukaku with
+     */
     constructor(shoukaku, node) {
         super();
         /**
@@ -55,7 +55,7 @@ class ShoukakuSocket extends EventEmitter {
         Object.defineProperty(this, 'cleaner', { value: false, configurable: true });
         Object.defineProperty(this, 'packetRouter', { value: PacketRouter.bind(this) });
         Object.defineProperty(this, 'eventRouter', { value: EventRouter.bind(this) });
-    }   
+    }
 
     get resumable() {
         return this.shoukaku.options.resumable;
@@ -69,18 +69,18 @@ class ShoukakuSocket extends EventEmitter {
     * @type {number}
     */
     get penalties() {
-        const penalties = 0;
-        penalties.points += this.stats.players;
-        penalties.points += Math.round(Math.pow(1.05, 100 * this.stats.cpu.systemLoad) * 10 - 10);
-        penalties.points += this.stats.frameStats.deficit;
-        penalties.points += this.stats.frameStats.nulled * 2;
+        let penalties = 0;
+        penalties += this.stats.players;
+        penalties += Math.round(Math.pow(1.05, 100 * this.stats.cpu.systemLoad) * 10 - 10);
+        penalties += this.stats.frameStats.deficit;
+        penalties += this.stats.frameStats.nulled * 2;
         return penalties;
     }
     /**
     * Connects this Socket.
-    * @param {string} [id] Your Bot's / Client user id.
-    * @param {number} [shardCount] Your Bot's / Client shard count.
-    * @param {boolean|string} [resumable] Determines if we should try to resume the connection.
+    * @param {string} id Your Bot's / Client user id.
+    * @param {number} shardCount Your Bot's / Client shard count.
+    * @param {boolean|string} resumable Determines if we should try to resume the connection.
     * @returns {void}
     */
     connect(id, shardCount, resumable) {
@@ -103,10 +103,15 @@ class ShoukakuSocket extends EventEmitter {
         this.shoukaku.on('packetUpdate', this.packetRouter);
     }
     /**
-    * Joins then creates a ShoukakuLink Object for the guild & voice channel you specified.
-    * @param {ShoukakuConstants#ShoukakuJoinOptions} [options] Join data to send.
-    * @returns {Promise<ShoukakuLink>}
-    */
+     * Joins then creates a ShoukakuLink Object for the guild & voice channel you specified.
+     * @param {ShoukakuConstants#ShoukakuJoinOptions} options Join data to send.
+     * @returns {Promise<ShoukakuLink>}
+     * @example
+     * <ShoukakuSocket>.joinVoiceChannel({
+     *     guildID: 'guild_id',
+     *     voiceChannelID: 'voice_channel_id'
+     * }).then((link) => link.player.playTrack('lavalink_track'));
+     */
     joinVoiceChannel(options = ShoukakuJoinOptions) {
         return new Promise((resolve, reject) => {
             if (!options.guildID|| !options.voiceChannelID)
@@ -165,7 +170,7 @@ class ShoukakuSocket extends EventEmitter {
     }
 
     _executeCleaner() {
-        if (!this.cleaner) return this._configureCleaner(true);  
+        if (!this.cleaner) return this._configureCleaner(true);
         for (const link of this.links.values()) link._failedReconnect();
     }
 
@@ -174,7 +179,7 @@ class ShoukakuSocket extends EventEmitter {
     }
 
     _open() {
-        if (this.resumable) 
+        if (this.resumable)
             this._configureResuming()
                 .catch((error) => this.emit('error', this.name, error));
         this.reconnectAttempts = 0;

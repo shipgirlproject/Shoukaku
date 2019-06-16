@@ -6,6 +6,7 @@
     "dest":"./docs",
     "jsdoc":{
         "hierarchy":"true",
+        "sort": false,
         "plugins":[
             "plugins/markdown"
         ]

@@ -1,36 +1,11 @@
 const EventEmitter = require('events');
 const { ShoukakuPlayOptions } = require('./ShoukakuConstants.js');
-/**
- * Emitted when the Lavalink Player emits a TrackEnd event.
- * @event ShoukakuPlayer#end 
- * @param {Object} reason 
- */
-/**
- * Emitted when the Lavalink Player encounters an TrackException event. This is just a normal object that contains the error. Not an error object.
- * @event ShoukakuPlayer#exception
- * @param {Object} reason
- */
-/**
- * Emitted when the Lavalink Player encounters an TrackStuck event. When this fires, TrackEnd will not fire, so make sure you handle this as well.
- * @event ShoukakuPlayer#stuck
- * @param {Object} reason
- */
-/**
- * Emitted when the Client's Voice Connection got closed by Discord and not by you.
- * @event ShoukakuPlayer#voiceClose
- * @param {Object} reason
- */
-/**
- * Emitted when Lavalink gives a Player Update event.
- * @event ShoukakuPlayer#playerUpdate
- * @param {Object} data
- */
-/**
- * ShoukakuPlayer, Governs the playing stuff on your guild
- * @extends {external:EventEmitter}
- * @param  {ShoukakuLink} link The Link in which this player is connected to.
- */
 class ShoukakuPlayer extends EventEmitter {
+    /**
+     * ShoukakuPlayer, Governs the playing stuff on your guild
+     * @extends {external:EventEmitter}
+     * @param  {ShoukakuLink} link The Link in which this player is connected to.
+     */
     constructor(link) {
         super();
         /**
@@ -64,6 +39,35 @@ class ShoukakuPlayer extends EventEmitter {
         this.on('voiceClose', () => this._clearTrack());
         this.on('playerUpdate', (state) => this.position = state.position);
     }
+
+    // Events
+    /**
+     * Emitted when the Lavalink Player emits a TrackEnd event.
+     * @event ShoukakuPlayer#end
+     * @param {Object} reason
+     */
+    /**
+     * Emitted when the Lavalink Player encounters an TrackException event. This is just a normal object that contains the error. Not an error object.
+     * @event ShoukakuPlayer#exception
+     * @param {Object} reason
+     */
+    /**
+     * Emitted when the Lavalink Player encounters an TrackStuck event. When this fires, TrackEnd will not fire, so make sure you handle this as well.
+     * @event ShoukakuPlayer#stuck
+     * @param {Object} reason
+     */
+    /**
+     * Emitted when the Client's Voice Connection got closed by Discord and not by you.
+     * @event ShoukakuPlayer#voiceClose
+     * @param {Object} reason
+     */
+    /**
+     * Emitted when Lavalink gives a Player Update event.
+     * @event ShoukakuPlayer#playerUpdate
+     * @param {Object} data
+     */
+    // Events End
+
     /**
      * Plays the track you specifed. Warning: If the player is playing anything, calling this will just ignore your call. Call `ShoukakuPlayer.StopTrack()` first.
      * @param {base64} track The Base64 encoded track you got from lavalink API.
@@ -123,7 +127,7 @@ class ShoukakuPlayer extends EventEmitter {
             guildId: this.link.guildID,
             bands
         });
-        return true;    
+        return true;
     }
     /**
      * Sets the playback volume of your lavalink player
@@ -160,7 +164,7 @@ class ShoukakuPlayer extends EventEmitter {
         this.track = null;
         this.position = 0;
     }
-    
+
     _onNodeChange() {
         if (!this.track) return;
         this.playTrack(this.track, { startTime: this.position }).catch(() => null);

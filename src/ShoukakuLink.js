@@ -1,10 +1,10 @@
 const { SHOUKAKU_STATUS } = require('./ShoukakuConstants.js');
 const ShoukakuPlayer = require('./ShoukakuPlayer.js');
-/**
- * ShoukakuLink, the voice connection manager of a guild. Contains the Player Class that can be used to play tracks.
- * @param {ShoukakuSocket} node The node where this class initialization is called.
- */
 class ShoukakuLink {
+    /**
+     * ShoukakuLink, the voice connection manager of a guild. Contains the Player Class that can be used to play tracks.
+     * @param {ShoukakuSocket} node The node where this class initialization is called.
+     */
     constructor(node) {
         /**
          * The node that governs this Link
@@ -45,7 +45,7 @@ class ShoukakuLink {
         this.lastServerUpdate = null;
         Object.defineProperty(this, '_callback', { value: null, writable: true });
     }
-    
+
     set build(data) {
         this.userID = data.user_id;
         this.guildID = data.guild_id;
@@ -60,7 +60,7 @@ class ShoukakuLink {
     /**
      * Generates a VoiceConnection to the Guild's specific Voice Channel.
      * @param {Object} options The Join Object Format from Discord API Documentation
-     * @param {function(error, ShoukakuLink)} callback The callback to run.
+     * @param {function(error, ShoukakuLink):void} callback The callback to run.
      * @returns {void}
      */
     connect(options, callback) {
@@ -89,7 +89,7 @@ class ShoukakuLink {
                     guild_id: this.guildID,
                     channel_id: null,
                     self_mute: false,
-                    self_deaf: false    
+                    self_deaf: false
                 }
             });
         }
@@ -114,7 +114,7 @@ class ShoukakuLink {
         }).catch((error) => {
             this.state = SHOUKAKU_STATUS.DISCONNECTED;
             if (this._callback) this._callback(error);
-        }).finally(() => this._callback = null);    
+        }).finally(() => this._callback = null);
     }
 
     _voiceDisconnect() {
@@ -127,9 +127,9 @@ class ShoukakuLink {
     }
 
     _destroy() {
-        this.node.send({ 
-            op: 'destroy', 
-            guildId: this.guildID 
+        this.node.send({
+            op: 'destroy',
+            guildId: this.guildID
         }).catch(() => null);
     }
 }

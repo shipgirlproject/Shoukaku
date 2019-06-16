@@ -32,7 +32,7 @@ class ShoukakuRouter {
         }
         if (packet.t === 'VOICE_SERVER_UPDATE') link.serverUpdate = packet;
     }
-    
+
     static EventRouter(json) {
         const link = this.links.get(json.guildId);
         if (!link) return false;
