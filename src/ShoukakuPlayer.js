@@ -29,15 +29,15 @@ class ShoukakuPlayer extends EventEmitter {
          */
         this.volume = 100;
         /**
+         * The current equalizer bands set in this player.
+         * @type {Array}
+         */
+        this.bands = [];
+        /**
          * The current postion in ms of this player
          * @type {number}
          */
         this.position = 0;
-
-        this.on('end', () => this._clearTrack());
-        this.on('stuck', () => this._clearTrack());
-        this.on('voiceClose', () => this._clearTrack());
-        this.on('playerUpdate', (state) => this.position = state.position);
     }
 
     // Events
@@ -60,6 +60,11 @@ class ShoukakuPlayer extends EventEmitter {
      * Emitted when the Client's Voice Connection got closed by Discord and not by you.
      * @event ShoukakuPlayer#voiceClose
      * @param {Object} reason
+     */
+    /**
+     * Emitted when this player's node was disconnected. You must clean your link instance via .disconnect() tho.
+     * @event ShoukakuPlayer#nodeDisconnect
+     * @param {string} name The name of the node that disconnected.
      */
     /**
      * Emitted when Lavalink gives a Player Update event.
@@ -122,6 +127,7 @@ class ShoukakuPlayer extends EventEmitter {
      */
     async setEqualizer(bands) {
         if (!bands || !Array.isArray(bands)) return false;
+        this.bands = bands;
         await this.link.node.send({
             op: 'equalizer',
             guildId: this.link.guildID,
@@ -160,14 +166,28 @@ class ShoukakuPlayer extends EventEmitter {
         return true;
     }
 
+    _listen() {
+        this.on('end', () => this._clearTrack());
+        this.on('stuck', () => this._clearTrack());
+        this.on('voiceClose', () => this._clearTrack());
+        this.on('nodeDisconnect', () => this._clearTrack() && this._clearPlayer());
+        this.on('playerUpdate', (state) => this.position = state.position);
+    }
+
     _clearTrack() {
         this.track = null;
         this.position = 0;
     }
 
+    _clearPlayer() {
+        this.bands = null;
+    }
+    
+    /* soon:tm:
     _onNodeChange() {
         if (!this.track) return;
         this.playTrack(this.track, { startTime: this.position }).catch(() => null);
     }
+    */
 }
 module.exports = ShoukakuPlayer;

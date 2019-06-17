@@ -48,7 +48,7 @@ class ShoukakuSocket extends EventEmitter {
         * @type {string}
         */
         this.name = node.name;
-
+        
         Object.defineProperty(this, 'url', { value: `ws://${node.host}:${node.port}` });
         Object.defineProperty(this, 'auth', { value: node.auth });
         Object.defineProperty(this, 'resumed', { value: false, writable: true });
@@ -171,7 +171,7 @@ class ShoukakuSocket extends EventEmitter {
 
     _executeCleaner() {
         if (!this.cleaner) return this._configureCleaner(true);
-        for (const link of this.links.values()) link._failedReconnect();
+        for (const link of this.links.values()) link._nodeDisconnected();
     }
 
     _upgrade(response) {

@@ -32,6 +32,16 @@ class ShoukakuLink {
          */
         this.voiceChannelID = null;
         /**
+         * If the client user is self muted.
+         * @type {boolean}
+         */
+        this.selfMute = false;
+        /**
+         * TIf the client user is self defeaned.
+         * @type {boolean}
+         */
+        this.selfDeaf = false;
+        /**
          * The current state of this link.
          * @type {ShoukakuConstants#SHOUKAKU_STATUS}
          */
@@ -42,12 +52,14 @@ class ShoukakuLink {
          */
         this.player = new ShoukakuPlayer(this);
 
-        this.lastServerUpdate = null;
+        Object.defineProperty(this, 'lastServerUpdate', { value: null, writable: true });
         Object.defineProperty(this, '_callback', { value: null, writable: true });
     }
 
     set build(data) {
         this.userID = data.user_id;
+        this.selfDeaf = data.self_deaf;
+        this.selfMute = data.self_mute;
         this.guildID = data.guild_id;
         this.voiceChannelID = data.channel_id;
         this.sessionID = data.session_id;
@@ -58,17 +70,14 @@ class ShoukakuLink {
         this._voiceUpdate(packet.d);
     }
     /**
-     * Generates a VoiceConnection to the Guild's specific Voice Channel. Warning: DO NOT USE THIS UNLESS YOU HAVE A GOOD REASON TO DO SO. Use <node>.joinVoiceChannel() instead.
+     * Generates a VoiceConnection to the Guild's specific Voice Channel. Warning: DO NOT USE THIS UNLESS YOU HAVE A GOOD REASON TO DO SO. Use `node.joinVoiceChannel()` instead.
      * @param {Object} options The Join Object Format from Discord API Documentation
      * @param {function(error, ShoukakuLink):void} callback The callback to run.
      * @returns {void}
      */
     connect(options, callback) {
         this._callback = callback;
-        this.node.shoukaku.send({
-            op: 4,
-            d: options
-        });
+        this._queueConnection(options);
         this.state = SHOUKAKU_STATUS.CONNECTING;
     }
     /**
@@ -83,16 +92,27 @@ class ShoukakuLink {
         this.node.links.delete(this.guildID);
         if (this.state !== SHOUKAKU_STATUS.DISCONNECTED) {
             this._destroy();
-            this.node.shoukaku.send({
-                op: 4,
-                d: {
-                    guild_id: this.guildID,
-                    channel_id: null,
-                    self_mute: false,
-                    self_deaf: false
-                }
-            });
+            this._removeConnection(this.guildID);
         }
+    }
+
+    _queueConnection(d) {
+        this.node.shoukaku.send({
+            op: 4,
+            d
+        });
+    }
+
+    _removeConnection(guild_id) {
+        this.node.shoukaku.send({
+            op: 4,
+            d: {
+                guild_id,
+                channel_id: null,
+                self_mute: false,
+                self_deaf: false
+            }
+        });
         this.state = SHOUKAKU_STATUS.DISCONNECTED;
     }
 
@@ -100,6 +120,13 @@ class ShoukakuLink {
         this.lastServerUpdate = null;
         this.sessionID = null;
         this.voiceChannelID = null;
+    }
+
+    _destroy() {
+        this.node.send({
+            op: 'destroy',
+            guildId: this.guildID
+        }).catch(() => null);
     }
 
     _voiceUpdate(data) {
@@ -110,6 +137,7 @@ class ShoukakuLink {
             event: data
         }).then(() => {
             this.state = SHOUKAKU_STATUS.CONNECTED;
+            this.player._listen();  
             if (this._callback) this._callback(null, this);
         }).catch((error) => {
             this.state = SHOUKAKU_STATUS.DISCONNECTED;
@@ -122,15 +150,10 @@ class ShoukakuLink {
         this._destroy();
     }
 
-    _failedReconnect() {
-        // To be implemented
-    }
-
-    _destroy() {
-        this.node.send({
-            op: 'destroy',
-            guildId: this.guildID
-        }).catch(() => null);
+    _nodeDisconnected() {
+        this._clearVoice();
+        this._removeConnection(this.guildID);
+        this.player.emit('nodeDisconnect', this.name);
     }
 }
 module.exports = ShoukakuLink;

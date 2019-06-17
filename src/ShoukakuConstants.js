@@ -78,7 +78,7 @@ class ShoukakuConstants {
     /**
     * Options that Shoukaku accepts upon initialization.
     * @typedef {Object} ShoukakuOptions
-    * @property {boolean|string} [resumable=false] If you want your node to support resuming. Just replace the false with the resume-key you want to enxable resuming.
+    * @property {boolean|string} [resumable=false] If you want your node to support resuming. Just replace the false with the resume-key you want to enable resuming.
     * @property {number} [resumableTimeout=30] Timeout when Lavalink will decide a player isn't resumed and will destroy the connection to it.
     * @property {number} [reconnectTries=2] Amount of tries to connect to the lavalink Node before it decides that the node is unreconnectable.
     * @property {number} [restTimeout=10000] Timeout on rest requests to your lavalink node.
