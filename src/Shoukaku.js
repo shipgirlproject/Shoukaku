@@ -44,10 +44,20 @@ class Shoukaku extends EventEmitter {
         * @type {external:Map}
         */
         this.nodes = new Map();
+        
         Object.defineProperty(this, 'options', { value: this._mergeDefault(constants.ShoukakuOptions, options) });
         Object.defineProperty(this, 'init', { value: true, writable: true });
         Object.defineProperty(this, 'rawRouter', { value: RawRouter.bind(this) });
         Object.defineProperty(this, 'reconnectRouter', { value: ReconnectRouter.bind(this) });
+    }
+    /**
+     * The total Links / Voice Connections Shoukaku currently have
+     * @type {number}
+     */
+    get totalLinks() {
+        let links = 0;
+        for (const node of this.nodes) links += node.links.size;
+        return links;
     }
 
     // Events

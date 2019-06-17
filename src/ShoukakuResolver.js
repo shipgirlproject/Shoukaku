@@ -19,6 +19,7 @@ class ShoukakuResolver {
          * @type {number}
          */
         this.timeout = timeout || 10000;
+        
         Object.defineProperty(this, 'auth', { value: auth });
         Object.defineProperty(this, 'url', { value: `http://${host}:${port}/` });
     }
