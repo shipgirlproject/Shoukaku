@@ -56,7 +56,7 @@ class Shoukaku extends EventEmitter {
      */
     get totalLinks() {
         let links = 0;
-        for (const node of this.nodes) links += node.links.size;
+        for (const node of this.nodes.values()) links += node.links.size;
         return links;
     }
 
