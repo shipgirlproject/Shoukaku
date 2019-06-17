@@ -49,7 +49,7 @@ class ShoukakuConstants {
     * Required Object in Shoukaku's join method.
     * @typedef {Object} ShoukakuJoinOptions
     * @property {string} guildID Guild ID of the Voice Channel you want to join to.
-    * @property {string} channelID Voice Channel ID of the Voice Channel you want to join to.
+    * @property {string} voiceChannelID Voice Channel ID of the Voice Channel you want to join to.
     * @property {boolean} [mute=false] Whether to mute the client.
     * @property {boolean} [deaf=false] Whether to deafen the client.
     * @memberof ShoukakuConstants#
