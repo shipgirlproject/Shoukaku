@@ -26,11 +26,11 @@ npm i Deivu/Shoukaku
 - [x] Base Logic
 - [x] Player & Voice Logic 
 - [x] Load Balancing Logic
-- [ ] Node Removal Logic
+- [x] Node Removal Logic
 - [x] Reconnect Logic
 - [x] Resuming Logic
 - [x] Documentation
-- and probably some things I forgot to mention?
+- [ ] Automatic Node Switching (Minor Feature)
 
 ### Discord.js actual implementation.
 [View Kongou's Source Code Here](https://github.com/Deivu/Kongou)
