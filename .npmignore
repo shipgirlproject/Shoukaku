@@ -1,12 +1,8 @@
 node_modules
-scripts
-testing
-.eslintrc.js
-.gitattributes
 .gitignore
 .eslintrc.yml
-.travis.yml
 .README.md
-docs.js
-tslint.json
-example
+.idea
+docs
+.docma.json
+package-lock.json

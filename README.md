@@ -7,17 +7,28 @@ The ShipGirl Project. Shoukaku `(c) Kancolle for Shoukaku`
 
 ### A Full Blown Lavalink Wrapper designed around Discord.js v12
 
+Currently being used by [Kashima](https://discordbots.org/bot/kashima-is-a-good-girl)
+
 ### Documentation
 https://deivu.github.io/Shoukaku/?api
 
 ### Installation
+For Stable
+```
+npm i shoukaku
+```
+For Master
 ```
 npm i Deivu/Shoukaku
 ```
 
-### Saya Note:
-> The wrapper has entered the `beta` stage. 
+### Support Server
+If you need help on using this, Join Here [ShipGirls Community](https://discordapp.com/invite/FVqbtGu) and `ask at #support`. 
 
+### Issue / Bug Found?
+Feel free to open an issue in the [Issues](https://github.com/Deivu/Shoukaku/issues) section of this repository.
+
+### Notes 
 > If you want to help in development, you can use the wrapper and report the issues you experienced on using it, or Submit a PR if you think you can improve something.
 
 > There is a Discord.JS actual implementation and a simple implementation examples below.
@@ -30,9 +41,9 @@ npm i Deivu/Shoukaku
 - [x] Reconnect Logic
 - [x] Resuming Logic
 - [x] Documentation
-- [ ] Automatic Node Switching (Minor Feature)
+- and some more to come.
 
-### Discord.js actual implementation.
+### Discord.js actual implementation. 
 [View Kongou's Source Code Here](https://github.com/Deivu/Kongou)
 
 ### More simple implementation w/o queue.
@@ -60,7 +71,7 @@ client.on('ready', () => {
     name: 'my_lavalink_server',
     host: 'localhost',
     port: 6969,
-    auth: 'I_Love_Anime_Weeb_69'
+    auth: 'owo_your_password'
   }], { 
     id: client.user.id 
   });
@@ -115,6 +126,11 @@ client.on('message', async (msg) => {
       // There is no more reason for us to do anything so lets just clean up in voiceClose event
       link.disconnect();
     });
+    link.player.on('nodeDisconnect', () => {
+
+      // You still need to clean your link when player.on 'nodeDisconnect' fires. This means the node that governs this link disconnected.
+      link.disconnect();
+    })
 
     // Play the lavalink track we got
     await link.player.playTrack(data.track);
