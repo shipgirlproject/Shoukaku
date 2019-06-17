@@ -3,9 +3,6 @@
   "version": "0.0.6",
   "description": "A lavalink client for Discord.js v12 only",
   "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "keywords": [
     "bot",
     "music",
@@ -13,10 +10,16 @@
     "api",
     "discord",
     "lavalink.js",
-    "discord.js"
+    "discord.js",
+    "lavalink-api",
+    "weeb-library"
   ],
   "author": "Saya",
   "license": "MIT",
+  "repository": {
+		"type": "git",
+		"url": "https://github.com/Deivu/Shoukaku"
+	},
   "dependencies": {
     "abort-controller": "^3.0.0",
     "node-fetch": "^2.6.0",
