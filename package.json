@@ -1,6 +1,6 @@
 {
   "name": "shoukaku",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "A lavalink client for Discord.js v12 only",
   "main": "index.js",
   "keywords": [
@@ -18,8 +18,8 @@
   "license": "MIT",
   "repository": {
 		"type": "git",
-		"url": "https://github.com/Deivu/Shoukaku"
-	},
+    "url": "https://github.com/Deivu/Shoukaku"
+  },
   "dependencies": {
     "abort-controller": "^3.0.0",
     "node-fetch": "^2.6.0",
