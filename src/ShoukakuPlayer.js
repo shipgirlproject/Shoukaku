@@ -111,13 +111,13 @@ class ShoukakuPlayer extends EventEmitter {
      * @returns {Promise<boolean>} true if sucessful false if not.
      */
     async setPaused(pause = true) {
-        if (!pause || pause === this.paused) return false;
+        if (pause === this.paused) return false;
         await this.link.node.send({
             op: 'pause',
             guildId: this.link.guildID,
             pause
         });
-        this.pause = pause;
+        this.paused = pause;
         return true;
     }
     /**
