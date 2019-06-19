@@ -121,10 +121,6 @@ class ShoukakuSocket extends EventEmitter {
                 return reject(new Error('A voice connection is already established in this channel.'));
             const newLink = new ShoukakuLink(this);
             this.links.set(options.guildID, newLink);
-            const timeout = setTimeout(() => {
-                this.links.delete(options.guildID);
-                reject(new Error('The voice connection is not established in 15 seconds'));
-            }, 15000);
             options = {
                 guild_id: options.guildID,
                 channel_id: options.voiceChannelID,
@@ -132,11 +128,7 @@ class ShoukakuSocket extends EventEmitter {
                 self_mute: options.mute
             };
             newLink.connect(options, (error, value) => {
-                clearTimeout(timeout);
-                if (error) {
-                    this.links.delete(options.guild_id);
-                    return reject(error);
-                }
+                if (error) return reject(error);
                 resolve(value);
             });
         });

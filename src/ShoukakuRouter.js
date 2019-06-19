@@ -6,7 +6,11 @@ class ShoukakuRouter {
                 if (!link.voiceChannelID) continue;
                 link.connect({
                     guild_id: link.guildID,
-                    channel_id: link.voiceChannelID
+                    channel_id: link.voiceChannelID,
+                    self_deaf:  link.selfDeaf,
+                    self_mute: link.selfMute
+                }, (error) => {
+                    if (error) this.emit('error', 'Shoukaku', error);
                 });
             }
         }
