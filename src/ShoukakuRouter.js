@@ -4,6 +4,7 @@ class ShoukakuRouter {
         for (const node of this.nodes.values()) {
             for (const link of node.links.values()) {
                 if (!link.voiceChannelID) continue;
+                if (link.state === SHOUKAKU_STATUS.CONNECTING) continue;
                 link.connect({
                     guild_id: link.guildID,
                     channel_id: link.voiceChannelID,

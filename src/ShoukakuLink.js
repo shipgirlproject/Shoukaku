@@ -78,6 +78,8 @@ class ShoukakuLink {
      */
     connect(options, callback) {
         this._callback = callback;
+        if (this.state === SHOUKAKU_STATUS.CONNECTING) 
+            return this._callback(new Error('Can\'t connect a connecting link. Wait for it to resolve first'));
         this._timeout = setTimeout(() => {
             this.node.links.delete(this.guildID);
             this.state = SHOUKAKU_STATUS.DISCONNECTED;
