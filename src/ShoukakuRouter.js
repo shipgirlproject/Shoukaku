@@ -11,7 +11,7 @@ class ShoukakuRouter {
                     self_deaf:  link.selfDeaf,
                     self_mute: link.selfMute
                 }, (error) => {
-                    if (error) this.emit('error', 'Shoukaku', error);
+                    if (error) link.player.emit('voiceClose', error);
                 });
             }
         }
