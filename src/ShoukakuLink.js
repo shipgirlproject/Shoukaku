@@ -77,11 +77,13 @@ class ShoukakuLink {
      * @returns {void}
      */
     connect(options, callback) {
+        if (!options || !callback)
+            throw new Error('No Options or Callback supplied.');
         this._callback = callback;
         if (this.state === SHOUKAKU_STATUS.CONNECTING) 
             return this._callback(new Error('Can\'t connect a connecting link. Wait for it to resolve first'));
         this._timeout = setTimeout(() => {
-            this.node.links.delete(this.guildID);
+            this.node.links.delete(options.guild_id);
             this.state = SHOUKAKU_STATUS.DISCONNECTED;
             if (this._callback) this._callback(new Error('The voice connection is not established in 15 seconds'));
         }, 15000);
