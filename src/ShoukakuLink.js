@@ -85,7 +85,7 @@ class ShoukakuLink {
         this._timeout = setTimeout(() => {
             this.node.links.delete(options.guild_id);
             this.state = SHOUKAKU_STATUS.DISCONNECTED;
-            if (this._callback) this._callback(new Error('The voice connection is not established in 15 seconds'));
+            this._callback(new Error('The voice connection is not established in 15 seconds'));
         }, 15000);
         this._queueConnection(options);
         this.state = SHOUKAKU_STATUS.CONNECTING;
@@ -149,12 +149,12 @@ class ShoukakuLink {
             clearTimeout(this._timeout);
             this.player._listen();
             this.state = SHOUKAKU_STATUS.CONNECTED;
-            if (this._callback) this._callback(null, this);
+            this._callback(null, this);
         }).catch((error) => {
             clearTimeout(this._timeout);
             this.node.links.delete(this.guildID);
             this.state = SHOUKAKU_STATUS.DISCONNECTED;
-            if (this._callback) this._callback(error);
+            this._callback(error);
         }).finally(() => {
             this._callback = null;
             this._timeout = null;
