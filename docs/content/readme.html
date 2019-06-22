@@ -7,13 +7,17 @@
 
 <p>The ShipGirl Project. Shoukaku <code>(c) Kancolle for Shoukaku</code></p>
 <h3 id="a-full-blown-lavalink-wrapper-designed-around-discordjs-v12">A Full Blown Lavalink Wrapper designed around Discord.js v12</h3>
+<p>Currently being used by <a href="https://discordbots.org/bot/kashima-is-a-good-girl">Kashima</a></p>
 <h3 id="documentation">Documentation</h3>
 <p><a href="https://deivu.github.io/Shoukaku/?api">https://deivu.github.io/Shoukaku/?api</a></p>
 <h3 id="installation">Installation</h3>
-<pre><code>npm i Deivu/Shoukaku</code></pre><h3 id="saya-note-">Saya Note:</h3>
-<blockquote>
-<p>The wrapper has entered the <code>beta</code> stage. </p>
-</blockquote>
+<p>For Stable</p>
+<pre><code>npm i shoukaku</code></pre><p>For Master</p>
+<pre><code>npm i Deivu/Shoukaku</code></pre><h3 id="support-server">Support Server</h3>
+<p>If you need help on using this, Join Here <a href="https://discordapp.com/invite/FVqbtGu">ShipGirls Community</a> and <code>ask at #support</code>. </p>
+<h3 id="issue---bug-found-">Issue / Bug Found?</h3>
+<p>Feel free to open an issue in the <a href="https://github.com/Deivu/Shoukaku/issues">Issues</a> section of this repository.</p>
+<h3 id="notes">Notes</h3>
 <blockquote>
 <p>If you want to help in development, you can use the wrapper and report the issues you experienced on using it, or Submit a PR if you think you can improve something.</p>
 </blockquote>
@@ -29,7 +33,7 @@
 <li><input checked="" disabled="" type="checkbox"> Reconnect Logic</li>
 <li><input checked="" disabled="" type="checkbox"> Resuming Logic</li>
 <li><input checked="" disabled="" type="checkbox"> Documentation</li>
-<li><input disabled="" type="checkbox"> Automatic Node Switching (Minor Feature)</li>
+<li>and some more to come.</li>
 </ul>
 <h3 id="discordjs-actual-implementation">Discord.js actual implementation.</h3>
 <p><a href="https://github.com/Deivu/Kongou">View Kongou's Source Code Here</a></p>
@@ -57,7 +61,7 @@ client.on('ready', () =&gt; {
     name: 'my_lavalink_server',
     host: 'localhost',
     port: 6969,
-    auth: 'I_Love_Anime_Weeb_69'
+    auth: 'owo_your_password'
   }], { 
     id: client.user.id 
   });
@@ -112,6 +116,11 @@ client.on('message', async (msg) =&gt; {
       // There is no more reason for us to do anything so lets just clean up in voiceClose event
       link.disconnect();
     });
+    link.player.on('nodeDisconnect', () =&gt; {
+
+      // You still need to clean your link when player.on 'nodeDisconnect' fires. This means the node that governs this link disconnected.
+      link.disconnect();
+    })
 
     // Play the lavalink track we got
     await link.player.playTrack(data.track);

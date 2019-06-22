@@ -51,15 +51,24 @@ class Shoukaku extends EventEmitter {
         Object.defineProperty(this, 'reconnectRouter', { value: ReconnectRouter.bind(this) });
     }
     /**
-     * The total Links / Voice Connections Shoukaku currently have
+     * Gets all the links governed by the Nodes / Sockets in this instance.
+     * @type {external:Map}
+     */
+    get links() {
+        const links = new Map();
+        for (const [key, val] of this.nodes) links.set(key, val);
+        return links;
+    }
+    /**
+     * Gets the number of total links that is currently active on all nodes in this instance.
      * @type {number}
      */
     get totalLinks() {
-        let links = 0;
-        for (const node of this.nodes.values()) links += node.links.size;
-        return links;
+        let counter = 0;
+        for (const node of this.nodes.values()) counter += node.links.size;
+        return counter;
     }
-
+    
     // Events
     /**
      * Emitted when a Lavalink Node sends a debug event.
