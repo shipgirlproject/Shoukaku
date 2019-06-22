@@ -57,7 +57,7 @@ class ShoukakuPlayer extends EventEmitter {
      * @param {Object} reason
      */
     /**
-     * Emitted when the Client's Voice Connection got closed by Discord and not by you.
+     * Emitted when the Client's Voice Connection got closed by Discord. This can also throw errors so make sure you handle this.
      * @event ShoukakuPlayer#voiceClose
      * @param {Object} reason
      */
@@ -166,13 +166,15 @@ class ShoukakuPlayer extends EventEmitter {
         return true;
     }
 
-    _listen() {
-        this.on('end', () => this._clearTrack());
-        this.on('stuck', () => this._clearTrack());
-        this.on('voiceClose', () => this._clearTrack());
-        this.on('nodeDisconnect', () => this._clearTrack() && this._clearPlayer());
-        this.on('playerUpdate', (state) => this.position = state.position);
-    }
+    _listen(event, data) {
+        if (['end', 'stuck', 'voiceClose', 'nodeDisconnect'].includes(event)) {
+            event === 'nodeDisconnect' ? this._clearTrack() && this._clearPlayer() : this._clearTrack();
+            this.emit(event, data);
+            return;
+        }
+        this.position = data.position;
+        this.emit(event, data);
+    }   
 
     _clearTrack() {
         this.track = null;

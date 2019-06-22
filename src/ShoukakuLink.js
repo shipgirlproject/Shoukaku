@@ -85,6 +85,7 @@ class ShoukakuLink {
         this._timeout = setTimeout(() => {
             this.node.links.delete(options.guild_id);
             this.state = SHOUKAKU_STATUS.DISCONNECTED;
+            if (!this._callback) return;
             this._callback(new Error('The voice connection is not established in 15 seconds'));
         }, 15000);
         this._queueConnection(options);
@@ -139,26 +140,31 @@ class ShoukakuLink {
         }).catch(() => null);
     }
 
-    _voiceUpdate(data) {
-        this.node.send({
-            op: 'voiceUpdate',
-            guildId: this.guildID,
-            sessionId: this.sessionID,
-            event: data
-        }).then(() => {
+    async _voiceUpdate(data) {
+        try {
+            await this.node.send({
+                op: 'voiceUpdate',
+                guildId: this.guildID,
+                sessionId: this.sessionID,
+                event: data
+            });
             clearTimeout(this._timeout);
-            this.player._listen();
             this.state = SHOUKAKU_STATUS.CONNECTED;
+            if (!this._callback) return;
             this._callback(null, this);
-        }).catch((error) => {
+        } catch (error) {
             clearTimeout(this._timeout);
-            this.node.links.delete(this.guildID);
+            if (this.state !== SHOUKAKU_STATUS.CONNECTING) {
+                this.player.emit('voiceClose', error);
+                return;
+            }
             this.state = SHOUKAKU_STATUS.DISCONNECTED;
+            if (!this._callback) return;
             this._callback(error);
-        }).finally(() => {
+        } finally {
             this._callback = null;
             this._timeout = null;
-        });
+        }
     }
 
     _voiceDisconnect() {
@@ -169,7 +175,7 @@ class ShoukakuLink {
     _nodeDisconnected() {
         this._clearVoice();
         this._removeConnection(this.guildID);
-        this.player.emit('nodeDisconnect', this.name);
+        this.player._listen('nodeDisconnect', this.name);
     }
 }
 module.exports = ShoukakuLink;

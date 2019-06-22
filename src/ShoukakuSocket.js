@@ -128,7 +128,10 @@ class ShoukakuSocket extends EventEmitter {
                 self_mute: options.mute
             };
             newLink.connect(options, (error, value) => {
-                if (error) return reject(error);
+                if (error) {
+                    this.links.delete(options.guildID);
+                    return reject(error);
+                }
                 resolve(value);
             });
         });

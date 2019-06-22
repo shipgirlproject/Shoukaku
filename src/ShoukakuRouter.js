@@ -41,12 +41,12 @@ class ShoukakuRouter {
     static EventRouter(json) {
         const link = this.links.get(json.guildId);
         if (!link) return false;
-        if (json.op  === 'playerUpdate') return link.player.emit('playerUpdate', json.state);
+        if (json.op  === 'playerUpdate') return link.player._listen('playerUpdate', json.state);
         if (json.op === 'event') {
-            if (json.type === 'TrackEndEvent') return link.player.emit('end', json);
-            if (json.type === 'TrackExceptionEvent') return link.player.emit('exception', json);
-            if (json.type === 'TrackStuckEvent') return link.player.emit('stuck', json);
-            if (json.type === 'WebSocketClosedEvent') return link.player.emit('voiceClose', json);
+            if (json.type === 'TrackEndEvent') return link.player._listen('end', json);
+            if (json.type === 'TrackExceptionEvent') return link.player._listen('exception', json);
+            if (json.type === 'TrackStuckEvent') return link.player._listen('stuck', json);
+            if (json.type === 'WebSocketClosedEvent') return link.player._listen('voiceClose', json);
         }
     }
 }
