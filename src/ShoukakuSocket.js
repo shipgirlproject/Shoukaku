@@ -119,7 +119,10 @@ class ShoukakuSocket extends EventEmitter {
             const link = this.links.get(options.guildID);
             if (link)
                 return reject(new Error('A voice connection is already established in this channel.'));
-            const newLink = new ShoukakuLink(this);
+            const guild = this.shoukaku.client.guilds.get(options.guildID);
+            if (!guild)
+                return reject(new Error('Guild not found. Cannot continue creating the voice connection.'));
+            const newLink = new ShoukakuLink(this, guild.shardID);
             this.links.set(options.guildID, newLink);
             options = {
                 guild_id: options.guildID,
@@ -130,7 +133,8 @@ class ShoukakuSocket extends EventEmitter {
             newLink.connect(options, (error, value) => {
                 if (error) {
                     this.links.delete(options.guildID);
-                    return reject(error);
+                    reject(error);
+                    return;
                 }
                 resolve(value);
             });

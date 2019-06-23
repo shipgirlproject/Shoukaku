@@ -4,8 +4,9 @@ class ShoukakuLink {
     /**
      * ShoukakuLink, the voice connection manager of a guild. Contains the Player Class that can be used to play tracks.
      * @param {ShoukakuSocket} node The node where this class initialization is called.
+     * @param {number} shardID The shardID of the guild. 
      */
-    constructor(node) {
+    constructor(node, shardID) {
         /**
          * The node that governs this Link
          * @type {ShoukakuSocket}
@@ -26,6 +27,11 @@ class ShoukakuLink {
          * @type {string}
          */
         this.guildID = null;
+        /**
+         * The ID of the shard where this guild is in
+         * @type {number}
+         */
+        this.shardID = shardID;
         /**
          * The ID of the voice channel that is being governed by this link.
          * @type {string}
@@ -83,13 +89,11 @@ class ShoukakuLink {
         if (this.state === SHOUKAKU_STATUS.CONNECTING) 
             return this._callback(new Error('Can\'t connect a connecting link. Wait for it to resolve first'));
         this._timeout = setTimeout(() => {
-            this.node.links.delete(options.guild_id);
             this.state = SHOUKAKU_STATUS.DISCONNECTED;
-            if (!this._callback) return;
             this._callback(new Error('The voice connection is not established in 15 seconds'));
         }, 15000);
-        this._queueConnection(options);
         this.state = SHOUKAKU_STATUS.CONNECTING;
+        this._queueConnection(options);
     }
     /**
      * Eventually Disconnects the VoiceConnection from a Guild. Could be also used to clean up player remnants from unexpected events.
@@ -97,10 +101,9 @@ class ShoukakuLink {
      */
     disconnect() {
         this.state = SHOUKAKU_STATUS.DISCONNECTING;
-        this._clearVoice();
-        this.player._clearTrack();
-        this.player.removeAllListeners();
         this.node.links.delete(this.guildID);
+        this.player.removeAllListeners() && this._clearVoice();
+        this.player._clearTrack() && this.player._clearPlayer();
         if (this.state !== SHOUKAKU_STATUS.DISCONNECTED) {
             this._destroy();
             this._removeConnection(this.guildID);
@@ -140,31 +143,31 @@ class ShoukakuLink {
         }).catch(() => null);
     }
 
-    async _voiceUpdate(data) {
-        try {
-            await this.node.send({
-                op: 'voiceUpdate',
-                guildId: this.guildID,
-                sessionId: this.sessionID,
-                event: data
-            });
-            clearTimeout(this._timeout);
-            this.state = SHOUKAKU_STATUS.CONNECTED;
-            if (!this._callback) return;
-            this._callback(null, this);
-        } catch (error) {
-            clearTimeout(this._timeout);
-            if (this.state !== SHOUKAKU_STATUS.CONNECTING) {
+    _voiceUpdate(data) {
+        this.node.send({
+            op: 'voiceUpdate',
+            guildId: this.guildID,
+            sessionId: this.sessionID,
+            event: data
+        })
+            .then(() => {
+                if (this.state !== SHOUKAKU_STATUS.CONNECTING) return;
+                clearTimeout(this._timeout);
+                this.state = SHOUKAKU_STATUS.CONNECTED;
+                this._callback(null, this);
+            })
+            .catch((error) => {
+                if (this.state === SHOUKAKU_STATUS.CONNECTING) {
+                    clearTimeout(this._timeout);
+                    this.state = SHOUKAKU_STATUS.DISCONNECTED;
+                    return this._callback(error);
+                } 
                 this.player.emit('voiceClose', error);
-                return;
-            }
-            this.state = SHOUKAKU_STATUS.DISCONNECTED;
-            if (!this._callback) return;
-            this._callback(error);
-        } finally {
-            this._callback = null;
-            this._timeout = null;
-        }
+            })
+            .finally(() => {
+                this._callback = null;
+                this._timeout = null;
+            });
     }
 
     _voiceDisconnect() {

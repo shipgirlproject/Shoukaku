@@ -50,6 +50,14 @@ Feel free to open an issue in the [Issues](https://github.com/Deivu/Shoukaku/iss
 ```js
 const { Client } = require('discord.js');
 const { Shoukaku } = require('shoukaku');
+const MyLavalinkServer = [
+  {
+    name: 'my_lavalink_server',
+    host: 'localhost',
+    port: 6969,
+    auth: 'owo_your_password'
+  }
+];
 const client = new Client();
 
 // In this example, I will assign Shoukaku to a carrier variable. Options are the default options if nothing is specified
@@ -67,14 +75,7 @@ Carrier.on('close', (name, code, reason) => console.log(`Lavalink Node: ${name} 
 
 client.on('ready', () => {
   // You need to build shoukaku on your client's ready event for her to work like how its done in this example.
-  Carrier.build([{
-    name: 'my_lavalink_server',
-    host: 'localhost',
-    port: 6969,
-    auth: 'owo_your_password'
-  }], { 
-    id: client.user.id 
-  });
+  Carrier.build(MyLavalinkServer, { id: client.user.id  });
   console.log('Bot Initialized');
 })
 
@@ -121,6 +122,7 @@ client.on('message', async (msg) => {
       link.disconnect();
     });
     link.player.on('voiceClose', (reason) => {
+      // Make sure you log the reason because it may be an error.
       console.log(reason);
 
       // There is no more reason for us to do anything so lets just clean up in voiceClose event

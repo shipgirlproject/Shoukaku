@@ -1,5 +1,7 @@
 const EventEmitter = require('events');
 const { ShoukakuPlayOptions } = require('./ShoukakuConstants.js');
+const endEvents = ['end', 'stuck', 'voiceClose', 'nodeDisconnect'];
+
 class ShoukakuPlayer extends EventEmitter {
     /**
      * ShoukakuPlayer, Governs the playing stuff on your guild
@@ -60,11 +62,23 @@ class ShoukakuPlayer extends EventEmitter {
      * Emitted when the Client's Voice Connection got closed by Discord. This can also throw errors so make sure you handle this.
      * @event ShoukakuPlayer#voiceClose
      * @param {Object} reason
+     * @example
+     * // <Player> is your ShoukakuPlayer instance
+     * <Player>.on('voiceClose', (reason) => {
+     *   console.error(reason);
+     *   <Player>.link.disconnect();
+     * })
      */
     /**
      * Emitted when this player's node was disconnected. You must clean your link instance via .disconnect() tho.
      * @event ShoukakuPlayer#nodeDisconnect
      * @param {string} name The name of the node that disconnected.
+     * @example
+     * // <Player> is your ShoukakuPlayer instance
+     * <Player>.on('nodeDisconnect', (name) => {
+     *   console.log(`Node ${name} which governs this player disconnected.`);
+     *   <Player>.link.disconnect();
+     * })
      */
     /**
      * Emitted when Lavalink gives a Player Update event.
@@ -167,7 +181,7 @@ class ShoukakuPlayer extends EventEmitter {
     }
 
     _listen(event, data) {
-        if (['end', 'stuck', 'voiceClose', 'nodeDisconnect'].includes(event)) {
+        if (endEvents.includes(event)) {
             event === 'nodeDisconnect' ? this._clearTrack() && this._clearPlayer() : this._clearTrack();
             this.emit(event, data);
             return;

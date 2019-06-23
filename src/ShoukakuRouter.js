@@ -1,19 +1,20 @@
 const { SHOUKAKU_STATUS } = require('./ShoukakuConstants.js');
 class ShoukakuRouter {
-    static ReconnectRouter() {
+    static ReconnectRouter(id) {
         for (const node of this.nodes.values()) {
-            for (const link of node.links.values()) {
-                if (!link.voiceChannelID) continue;
-                if (link.state === SHOUKAKU_STATUS.CONNECTING) continue;
+            node.links.forEach((link) => {
+                if (!link.voiceChannelID) return;
+                if (link.state === SHOUKAKU_STATUS.CONNECTING) return;
+                if (link.shardID !== id) return;
                 link.connect({
                     guild_id: link.guildID,
                     channel_id: link.voiceChannelID,
                     self_deaf:  link.selfDeaf,
                     self_mute: link.selfMute
                 }, (error) => {
-                    if (error) link.player.emit('voiceClose', error);
+                    if (error) link.player._listen('voiceClose', error);
                 });
-            }
+            });
         }
     }
 
@@ -40,7 +41,7 @@ class ShoukakuRouter {
 
     static EventRouter(json) {
         const link = this.links.get(json.guildId);
-        if (!link) return false;
+        if (!link) return;
         if (json.op  === 'playerUpdate') return link.player._listen('playerUpdate', json.state);
         if (json.op === 'event') {
             if (json.type === 'TrackEndEvent') return link.player._listen('end', json);
