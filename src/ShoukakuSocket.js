@@ -1,4 +1,4 @@
-const { SHOUKAKU_STATUS, ShoukakuNodeStats, ShoukakuJoinOptions } = require('./ShoukakuConstants.js');
+const { ShoukakuStatus, ShoukakuNodeStats, ShoukakuJoinOptions } = require('./ShoukakuConstants.js');
 const { PacketRouter, EventRouter } = require('./ShoukakuRouter.js');
 const ShoukakuResolver = require('./ShoukakuResolver.js');
 const ShoukakuLink = require('./ShoukakuLink.js');
@@ -9,7 +9,7 @@ class ShoukakuSocket extends EventEmitter {
      * ShoukakuSocket, governs the Lavalink Connection and Lavalink Voice Connections.
      * @extends {external:EventEmitter}
      * @param  {Shoukaku} shoukaku Your Shoukaku Instance
-     * @param {ShoukakuOptions} [node=ShoukakuNodeOptions] Options to initialize Shoukaku with
+     * @param {ShoukakuOptions} node ShoukakuNodeOptions Options to initialize Shoukaku with
      */
     constructor(shoukaku, node) {
         super();
@@ -27,12 +27,12 @@ class ShoukakuSocket extends EventEmitter {
         * The REST server of this Socket, mostly to load balance your REST requests instead of relying on a single node.
         * @type {ShoukakuResolver}
         */
-        this.rest = new ShoukakuResolver(node.host, node.port, node.auth,shoukaku.options.restTimeout);
+        this.rest = new ShoukakuResolver(node.host, node.port, node.auth, shoukaku.options.restTimeout);
         /**
         * The state of this Socket.
-        * @type {ShoukakuConstants#SHOUKAKU_STATUS}
+        * @type {ShoukakuConstants#ShoukakuStatus}
         */
-        this.state = SHOUKAKU_STATUS.DISCONNECTED;
+        this.state = ShoukakuStatus.DISCONNECTED;
         /**
         * The current stats of this Socket.
         * @type {ShoukakuConstants#ShoukakuNodeStats}
@@ -48,7 +48,7 @@ class ShoukakuSocket extends EventEmitter {
         * @type {string}
         */
         this.name = node.name;
-        
+
         Object.defineProperty(this, 'url', { value: `ws://${node.host}:${node.port}` });
         Object.defineProperty(this, 'auth', { value: node.auth });
         Object.defineProperty(this, 'resumed', { value: false, writable: true });
@@ -124,13 +124,13 @@ class ShoukakuSocket extends EventEmitter {
                 return reject(new Error('Guild not found. Cannot continue creating the voice connection.'));
             const newLink = new ShoukakuLink(this, guild.shardID);
             this.links.set(options.guildID, newLink);
-            options = {
+            const _object = {
                 guild_id: options.guildID,
                 channel_id: options.voiceChannelID,
                 self_deaf: options.deaf,
                 self_mute: options.mute
             };
-            newLink.connect(options, (error, value) => {
+            newLink.connect(_object, (error, value) => {
                 if (error) {
                     this.links.delete(options.guildID);
                     reject(error);
@@ -182,7 +182,7 @@ class ShoukakuSocket extends EventEmitter {
             this._configureResuming()
                 .catch((error) => this.emit('error', this.name, error));
         this.reconnectAttempts = 0;
-        this.state = SHOUKAKU_STATUS.CONNECTED;
+        this.state = ShoukakuStatus.CONNECTED;
         this.emit('ready', this.name, this.resumed);
     }
 

@@ -1,46 +1,46 @@
-/** 
+/**
  * Documentation of constants for ease of usage.
  */
 class ShoukakuConstants {
     /**
     * Available Status for Node / Link managers.
-    * @typedef {string} SHOUKAKU_STATUS
-    * @enum {SHOUKAKU_STATUS}
+    * @typedef {string} ShoukakuStatus
+    * @enum {ShoukakuStatus}
     * @memberof ShoukakuConstants#
     */
-    static get SHOUKAKU_STATUS() {
+    static get ShoukakuStatus() {
         return {
             CONNECTING: 'CONNECTING',
             CONNECTED: 'CONNECTED',
             DISCONNECTING: 'DISCONNECTING',
             DISCONNECTED: 'DISCONNECTED'
         };
-    }   
+    }
     /**
     * Shoukaku's Node Stats Object.
     * @typedef {Object} ShoukakuNodeStats
     * @memberof ShoukakuConstants#
     */
     static get ShoukakuNodeStats() {
-        return { 
+        return {
             playingPlayers: 0,
             op: 'stats',
-            memory: { 
+            memory: {
                 reservable: 0,
                 used: 0,
                 free: 0,
                 allocated: 0
             },
-            frameStats: { 
-                sent: 0, 
-                deficit: 0, 
-                nulled: 0 
+            frameStats: {
+                sent: 0,
+                deficit: 0,
+                nulled: 0
             },
             players: 0,
-            cpu: { 
+            cpu: {
                 cores: 0,
                 systemLoad: 0,
-                lavalinkLoad: 0 
+                lavalinkLoad: 0
             },
             uptime: 0
         };
@@ -117,7 +117,7 @@ class ShoukakuConstants {
     * @memberof ShoukakuConstants#
     */
     static get ShoukakuBuildOptions() {
-        return {    
+        return {
             id: null,
             shardCount: 1
         };

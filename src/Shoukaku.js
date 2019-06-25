@@ -44,7 +44,7 @@ class Shoukaku extends EventEmitter {
         * @type {external:Map}
         */
         this.nodes = new Map();
-        
+
         Object.defineProperty(this, 'options', { value: this._mergeDefault(constants.ShoukakuOptions, options) });
         Object.defineProperty(this, 'init', { value: true, writable: true });
         Object.defineProperty(this, 'rawRouter', { value: RawRouter.bind(this) });
@@ -68,7 +68,7 @@ class Shoukaku extends EventEmitter {
         for (const node of this.nodes.values()) counter += node.links.size;
         return counter;
     }
-    
+
     // Events
     /**
      * Emitted when a Lavalink Node sends a debug event.
@@ -141,6 +141,7 @@ class Shoukaku extends EventEmitter {
         node.on('close', _close);
         this.nodes.set(node.name, node);
     }
+    // noinspection JSCommentMatchesSignature
     /**
      * Function to remove a Lavalink Node
      * @param {string} name The Lavalink Node to remove

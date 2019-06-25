@@ -1,10 +1,10 @@
-const { SHOUKAKU_STATUS } = require('./ShoukakuConstants.js');
+const { ShoukakuStatus } = require('./ShoukakuConstants.js');
 const ShoukakuPlayer = require('./ShoukakuPlayer.js');
 class ShoukakuLink {
     /**
      * ShoukakuLink, the voice connection manager of a guild. Contains the Player Class that can be used to play tracks.
      * @param {ShoukakuSocket} node The node where this class initialization is called.
-     * @param {number} shardID The shardID of the guild. 
+     * @param {number} shardID The shardID of the guild.
      */
     constructor(node, shardID) {
         /**
@@ -13,18 +13,8 @@ class ShoukakuLink {
          */
         this.node = node;
         /**
-         * The sessionID of this Link
-         * @type {string}
-         */
-        this.sessionID = null;
-        /**
-         * The ID of the user that is being governed by this Link
-         * @type {string}
-         */
-        this.userID = null;
-        /**
          * The ID of the guild that is being governed by this Link.
-         * @type {string}
+         * @type {?string}
          */
         this.guildID = null;
         /**
@@ -33,8 +23,18 @@ class ShoukakuLink {
          */
         this.shardID = shardID;
         /**
+         * The sessionID of this Link
+         * @type {?string}
+         */
+        this.sessionID = null;
+        /**
+         * The ID of the user that is being governed by this Link
+         * @type {?string}
+         */
+        this.userID = null;
+        /**
          * The ID of the voice channel that is being governed by this link.
-         * @type {string}
+         * @type {?string}
          */
         this.voiceChannelID = null;
         /**
@@ -49,9 +49,9 @@ class ShoukakuLink {
         this.selfDeaf = false;
         /**
          * The current state of this link.
-         * @type {ShoukakuConstants#SHOUKAKU_STATUS}
+         * @type {ShoukakuConstants#ShoukakuStatus}
          */
-        this.state = SHOUKAKU_STATUS.DISCONNECTED;
+        this.state = ShoukakuStatus.DISCONNECTED;
         /**
          * The player class of this link.
          * @type {ShoukakuPlayer}
@@ -86,13 +86,16 @@ class ShoukakuLink {
         if (!options || !callback)
             throw new Error('No Options or Callback supplied.');
         this._callback = callback;
-        if (this.state === SHOUKAKU_STATUS.CONNECTING) 
-            return this._callback(new Error('Can\'t connect a connecting link. Wait for it to resolve first'));
+        if (this.state === ShoukakuStatus.CONNECTING)  {
+            this._callback(new Error('Can\'t connect a connecting link. Wait for it to resolve first'));
+            return;
+        }
+
         this._timeout = setTimeout(() => {
-            this.state = SHOUKAKU_STATUS.DISCONNECTED;
+            this.state = ShoukakuStatus.DISCONNECTED;
             this._callback(new Error('The voice connection is not established in 15 seconds'));
         }, 15000);
-        this.state = SHOUKAKU_STATUS.CONNECTING;
+        this.state = ShoukakuStatus.CONNECTING;
         this._queueConnection(options);
     }
     /**
@@ -100,11 +103,11 @@ class ShoukakuLink {
      * @returns {void}
      */
     disconnect() {
-        this.state = SHOUKAKU_STATUS.DISCONNECTING;
+        this.state = ShoukakuStatus.DISCONNECTING;
         this.node.links.delete(this.guildID);
         this.player.removeAllListeners() && this._clearVoice();
         this.player._clearTrack() && this.player._clearPlayer();
-        if (this.state !== SHOUKAKU_STATUS.DISCONNECTED) {
+        if (this.state !== ShoukakuStatus.DISCONNECTED) {
             this._destroy();
             this._removeConnection(this.guildID);
         }
@@ -127,7 +130,7 @@ class ShoukakuLink {
                 self_deaf: false
             }
         });
-        this.state = SHOUKAKU_STATUS.DISCONNECTED;
+        this.state = ShoukakuStatus.DISCONNECTED;
     }
 
     _clearVoice() {
@@ -151,17 +154,17 @@ class ShoukakuLink {
             event: data
         })
             .then(() => {
-                if (this.state !== SHOUKAKU_STATUS.CONNECTING) return;
+                if (this.state !== ShoukakuStatus.CONNECTING) return;
                 clearTimeout(this._timeout);
-                this.state = SHOUKAKU_STATUS.CONNECTED;
+                this.state = ShoukakuStatus.CONNECTED;
                 this._callback(null, this);
             })
             .catch((error) => {
-                if (this.state === SHOUKAKU_STATUS.CONNECTING) {
+                if (this.state === ShoukakuStatus.CONNECTING) {
                     clearTimeout(this._timeout);
-                    this.state = SHOUKAKU_STATUS.DISCONNECTED;
+                    this.state = ShoukakuStatus.DISCONNECTED;
                     return this._callback(error);
-                } 
+                }
                 this.player.emit('voiceClose', error);
             })
             .finally(() => {
@@ -171,7 +174,7 @@ class ShoukakuLink {
     }
 
     _voiceDisconnect() {
-        this.state = SHOUKAKU_STATUS.DISCONNECTED;
+        this.state = ShoukakuStatus.DISCONNECTED;
         this._destroy();
     }
 

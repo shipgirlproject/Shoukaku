@@ -17,7 +17,7 @@ class ShoukakuPlayer extends EventEmitter {
         this.link = link;
         /**
          * The Track that is currently being played by this player.
-         * @type {base64}
+         * @type {?string}
          */
         this.track = null;
         /**
@@ -59,6 +59,10 @@ class ShoukakuPlayer extends EventEmitter {
      * @param {Object} reason
      */
     /**
+     * Emitted when the Shoukaku Player resumes the session by resending the playing data.
+     * @event ShoukakuPlayer#resumed
+     */
+    /**
      * Emitted when the Client's Voice Connection got closed by Discord. This can also throw errors so make sure you handle this.
      * @event ShoukakuPlayer#voiceClose
      * @param {Object} reason
@@ -89,7 +93,7 @@ class ShoukakuPlayer extends EventEmitter {
 
     /**
      * Plays the track you specifed. Warning: If the player is playing anything, calling this will just ignore your call. Call `ShoukakuPlayer.StopTrack()` first.
-     * @param {base64} track The Base64 encoded track you got from lavalink API.
+     * @param {string} track The Base64 encoded track you got from lavalink API.
      * @param {ShoukakuConstants#ShoukakuPlayOptions} [options=ShoukakuPlayOptions] Used if you want to put a custom track start or end time.
      * @returns {Promise<boolean>} true if sucessful false if not.
      */
@@ -186,9 +190,9 @@ class ShoukakuPlayer extends EventEmitter {
             this.emit(event, data);
             return;
         }
-        this.position = data.position;
+        if (data) this.position = data.position;
         this.emit(event, data);
-    }   
+    }
 
     _clearTrack() {
         this.track = null;
@@ -198,12 +202,23 @@ class ShoukakuPlayer extends EventEmitter {
     _clearPlayer() {
         this.bands = null;
     }
-    
-    /* soon:tm:
-    _onNodeChange() {
-        if (!this.track) return;
-        this.playTrack(this.track, { startTime: this.position }).catch(() => null);
+
+    async _resume() {
+        if (!this.track) {
+            this._listen('voiceClose', {
+                type: 'NoTrackFound',
+                reason: 'No track found, assuming a dead player.'
+            });
+            return;
+        }
+        try {
+            await this.playTrack(this.track.repeat(1), { startTime: this.position });
+            await this.setEqualizer(this.bands.slice(0));
+            await this.setVolume(Number(this.volume));
+            this._listen('resumed', null);
+        } catch (error) {
+            this._listen('voiceClose', error);
+        }
     }
-    */
 }
 module.exports = ShoukakuPlayer;
