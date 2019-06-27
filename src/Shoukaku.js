@@ -191,12 +191,12 @@ class Shoukaku extends EventEmitter {
     */
     getLink(guildID) {
         if (!guildID) return null;
-        if (!this.nodes.size)
-            throw new Error('No nodes available. What happened?');
+        if (!this.nodes.size) return null;
         for (const node of this.nodes.values()) {
             const link = node.links.get(guildID);
             if (link) return link;
         }
+        return null;
     }
 
     send(payload) {
