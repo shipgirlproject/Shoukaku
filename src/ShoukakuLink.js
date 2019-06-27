@@ -4,9 +4,9 @@ class ShoukakuLink {
     /**
      * ShoukakuLink, the voice connection manager of a guild. Contains the Player Class that can be used to play tracks.
      * @param {ShoukakuSocket} node The node where this class initialization is called.
-     * @param {number} shardID The shardID of the guild.
+     * @param {external:Guild} guild the Guild Object of this guild.
      */
-    constructor(node, shardID) {
+    constructor(node, guild) {
         /**
          * The node that governs this Link
          * @type {ShoukakuSocket}
@@ -14,24 +14,24 @@ class ShoukakuLink {
         this.node = node;
         /**
          * The ID of the guild that is being governed by this Link.
-         * @type {?string}
+         * @type {string}
          */
-        this.guildID = null;
+        this.guildID = guild.id;
         /**
          * The ID of the shard where this guild is in
          * @type {number}
          */
-        this.shardID = shardID;
+        this.shardID = guild.shardID;
+        /**
+         * The ID of the user that is being governed by this Link
+         * @type {string}
+         */
+        this.userID = node.shoukaku.id;
         /**
          * The sessionID of this Link
          * @type {?string}
          */
         this.sessionID = null;
-        /**
-         * The ID of the user that is being governed by this Link
-         * @type {?string}
-         */
-        this.userID = null;
         /**
          * The ID of the voice channel that is being governed by this link.
          * @type {?string}
@@ -64,17 +64,15 @@ class ShoukakuLink {
     }
 
     set build(data) {
-        this.userID = data.user_id;
         this.selfDeaf = data.self_deaf;
         this.selfMute = data.self_mute;
-        this.guildID = data.guild_id;
         this.voiceChannelID = data.channel_id;
         this.sessionID = data.session_id;
     }
 
-    set serverUpdate(packet) {
-        this.lastServerUpdate = packet.d;
-        this._voiceUpdate(packet.d);
+    set serverUpdate(data) {
+        this.lastServerUpdate = data;
+        this._voiceUpdate(data);
     }
     /**
      * Generates a VoiceConnection to the Guild's specific Voice Channel. Warning: DO NOT USE THIS UNLESS YOU HAVE A GOOD REASON TO DO SO. Use `node.joinVoiceChannel()` instead.
@@ -105,8 +103,10 @@ class ShoukakuLink {
     disconnect() {
         this.state = ShoukakuStatus.DISCONNECTING;
         this.node.links.delete(this.guildID);
-        this.player.removeAllListeners() && this._clearVoice();
-        this.player._clearTrack() && this.player._clearPlayer();
+        this.player.removeAllListeners();  
+        this._clearVoice();
+        this.player._clearTrack();
+        this.player._clearPlayer();
         if (this.state !== ShoukakuStatus.DISCONNECTED) {
             this._destroy();
             this._removeConnection(this.guildID);
@@ -146,12 +146,12 @@ class ShoukakuLink {
         }).catch(() => null);
     }
 
-    _voiceUpdate(data) {
+    _voiceUpdate(event) {
         this.node.send({
             op: 'voiceUpdate',
             guildId: this.guildID,
             sessionId: this.sessionID,
-            event: data
+            event
         })
             .then(() => {
                 if (this.state !== ShoukakuStatus.CONNECTING) return;
@@ -165,7 +165,7 @@ class ShoukakuLink {
                     this.state = ShoukakuStatus.DISCONNECTED;
                     return this._callback(error);
                 }
-                this.player.emit('voiceClose', error);
+                this.player._listen('voiceClose', error);
             })
             .finally(() => {
                 this._callback = null;

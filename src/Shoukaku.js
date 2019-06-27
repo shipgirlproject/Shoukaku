@@ -8,6 +8,10 @@ const EventEmitter = require('events');
  * @see {@link https://discord.js.org/#/docs/main/master/class/Client}
  */
 /**
+ * @external Guild
+ * @see {@link https://discord.js.org/#/docs/main/master/class/Guild}
+ */
+/**
  * @external EventEmitter
  * @see {@link https://nodejs.org/api/events.html}
  */

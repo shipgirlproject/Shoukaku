@@ -35,13 +35,10 @@ class ShoukakuRouter {
         const link = this.links.get(packet.d.guild_id);
         if (!link) return;
         if (packet.t === 'VOICE_STATE_UPDATE') {
-            if (!packet.d.channel_id) {
-                if (link.state !== ShoukakuStatus.DISCONNECTED) link._voiceDisconnect();
-                return;
-            }
+            if (!packet.d.channel_id) return link.disconnect();
             link.build = packet.d;
         }
-        if (packet.t === 'VOICE_SERVER_UPDATE') link.serverUpdate = packet;
+        if (packet.t === 'VOICE_SERVER_UPDATE') link.serverUpdate = packet.d;
     }
 
     static EventRouter(json) {
