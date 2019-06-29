@@ -3,6 +3,7 @@
   "version": "0.1.1",
   "description": "A lavalink client for Discord.js v12 only",
   "main": "index.js",
+  "types": "index.d.ts",
   "keywords": [
     "bot",
     "music",
@@ -17,12 +18,16 @@
   "author": "Saya",
   "license": "MIT",
   "repository": {
-		"type": "git",
+    "type": "git",
     "url": "https://github.com/Deivu/Shoukaku"
   },
   "dependencies": {
     "abort-controller": "^3.0.0",
     "node-fetch": "^2.6.0",
     "ws": "^7.0.0"
+  },
+  "devDependencies": {
+    "discord.js": "github:discordjs/discord.js",
+    "typescript": "^3.5.2"
   }
 }
