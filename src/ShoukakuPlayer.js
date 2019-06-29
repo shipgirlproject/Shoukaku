@@ -65,7 +65,7 @@ class ShoukakuPlayer extends EventEmitter {
     /**
      * Emitted when the Client's Voice Connection got closed by Discord. This can also throw errors so make sure you handle this.
      * @event ShoukakuPlayer#voiceClose
-     * @param {Object} reason
+     * @param {Object|Error} reason
      * @example
      * // <Player> is your ShoukakuPlayer instance
      * <Player>.on('voiceClose', (reason) => {

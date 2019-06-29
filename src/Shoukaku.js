@@ -86,7 +86,7 @@ class Shoukaku extends EventEmitter {
      * Emitted when a lavalink Node encouters an error. This event MUST BE HANDLED.
      * @event Shoukaku#error
      * @param {string} name The name of the Lavalink Node that sent an error event or 'Shoukaku' if the error is from Shoukaku.
-     * @param {error} error The error encountered.
+     * @param {Error} error The error encountered.
      * @example
      * // <Shoukaku> is your own instance of Shoukaku
      * <Shoukaku>.on('error', console.error);
