@@ -116,7 +116,7 @@ declare module 'shoukaku' {
     on(event: 'resumed', listener: () => void): this;
     on(event: 'nodeDisconnect', listener: (name: string) => void): this;
     on(event: 'playerUpdate', listener: (data: Reason) => void): this;
-    once(event: 'end' | 'exception' | 'stuck', listener: (reason: Reason) => void): this;nnnnn
+    once(event: 'end' | 'exception' | 'stuck', listener: (reason: Reason) => void): this;
     once(event: 'voiceClose', listener: (reason: Error | Reason) => void): this;
     once(event: 'resumed', listener: () => void): this;
     once(event: 'nodeDisconnect', listener: (name: string) => void): this;
