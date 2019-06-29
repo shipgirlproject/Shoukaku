@@ -180,8 +180,20 @@ declare module 'shoukaku' {
     getNode(name?: boolean | string): ShoukakuSocket;
     getLink(guildId: string): ShoukakuLink | null;
 
-    on(event: 'debug' | 'error' | 'read' | 'closed' | 'disconnected', listener: (name: string, data: any) => void): this;
-    once(event: 'debug' | 'error' | 'read' | 'closed' | 'disconnected', listener: (name: string, data: any) => void): this;
-    off(event: 'debug' | 'error' | 'read' | 'closed' | 'disconnected', listener: (name: string, data: any) => void): this;
+    on(event: 'debug', listener: (name: string, data: any) => void): this;
+    on(event: 'error', listener: (name: string, error: Error) => void): this;
+    on(event: 'ready', listener: (name: string, reconnect: boolean) => void): this;
+    on(event: 'close', listener: (name: string, code: number, reason: string) => void): this;
+    on(event: 'disconnected', listener: (name: string, reason: string) => void): this;
+    once(event: 'debug', listener: (name: string, data: any) => void): this;
+    once(event: 'error', listener: (name: string, error: Error) => void): this;
+    once(event: 'ready', listener: (name: string, reconnect: boolean) => void): this;
+    once(event: 'close', listener: (name: string, code: number, reason: string) => void): this;
+    once(event: 'disconnected', listener: (name: string, reason: string) => void): this;
+    off(event: 'debug', listener: (name: string, data: any) => void): this;
+    off(event: 'error', listener: (name: string, error: Error) => void): this;
+    off(event: 'ready', listener: (name: string, reconnect: boolean) => void): this;
+    off(event: 'close', listener: (name: string, code: number, reason: string) => void): this;
+    off(event: 'disconnected', listener: (name: string, reason: string) => void): this;
   }
 }
