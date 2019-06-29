@@ -157,9 +157,9 @@ declare module 'shoukaku' {
     client: DiscordClient;
     id: string | null;
     shardCount: number | null;
-    nodes: Map<string, ShoukakuNodeOptions>;
+    nodes: Map<string, ShoukakuSocket>;
 
-    links: Map<string, ShoukakuNodeOptions>;
+    links: Map<string, ShoukakuLink>;
     totalLinks: number;
 
     build(nodes: ShoukakuNodeOptions, options: ShoukakuBuildOptions): void;
