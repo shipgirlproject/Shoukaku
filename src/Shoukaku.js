@@ -60,7 +60,9 @@ class Shoukaku extends EventEmitter {
      */
     get links() {
         const links = new Map();
-        for (const [key, val] of this.nodes) links.set(key, val);
+        for (const node of this.nodes.values()) {
+            for (const [key, val] of node.links) links.set(key, val);
+        }
         return links;
     }
     /**
