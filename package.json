@@ -27,6 +27,7 @@
     "ws": "^7.0.0"
   },
   "devDependencies": {
-    "discord.js": "github:discordjs/discord.js"
+    "discord.js": "github:discordjs/discord.js",
+    "typescript": "^3.5.2"
   }
 }
