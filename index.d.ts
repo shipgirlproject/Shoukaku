@@ -77,6 +77,15 @@ declare module 'shoukaku' {
 
   export { ShoukakuConstants as Constants };
 
+  export interface Reason {
+    op: string;
+    reason: string;
+    code: number;
+    byRemote: boolean;
+    type: string;
+    guildId: string;
+  }
+
   interface ShoukakuResolver {
     constructor(host: string, port: string, auth: string, timeout: number): void;
     timeout: number;
@@ -102,18 +111,21 @@ declare module 'shoukaku' {
     setVolume(volume: number): Promise<boolean>;
     seekTo(position: number): Promise<boolean>;
 
-    on(event: 'end' | 'exception' | 'stuck' | 'voiceClose', listener: (reason: any) => void): this;
+    on(event: 'end' | 'exception' | 'stuck', listener: (reason: Reason) => void): this;
+    on(event: 'voiceClose', listener: (reason: Reason | Error) => void): this;
     on(event: 'resumed', listener: () => void): this;
     on(event: 'nodeDisconnect', listener: (name: string) => void): this;
-    on(event: 'playerUpdate', listener: (data: any) => void): this;
-    once(event: 'end' | 'exception' | 'stuck' | 'voiceClose', listener: (reason: any) => void): this;
+    on(event: 'playerUpdate', listener: (data: Reason) => void): this;
+    once(event: 'end' | 'exception' | 'stuck', listener: (reason: Reason) => void): this;nnnnn
+    once(event: 'voiceClose', listener: (reason: Error | Reason) => void): this;
     once(event: 'resumed', listener: () => void): this;
     once(event: 'nodeDisconnect', listener: (name: string) => void): this;
-    once(event: 'playerUpdate', listener: (data: any) => void): this;
-    off(event: 'end' | 'exception' | 'stuck' | 'voiceClose', listener: (reason: any) => void): this;
+    once(event: 'playerUpdate', listener: (data: Reason) => void): this;
+    off(event: 'end' | 'exception' | 'stuck', listener: (reason: Reason) => void): this;
+    off(event: 'voiceClose', listener: (reason: Error | Reason) => void): this;
     off(event: 'resumed', listener: () => void): this;
     off(event: 'nodeDisconnect', listener: (name: string) => void): this;
-    off(event: 'playerUpdate', listener: (data: any) => void): this;
+    off(event: 'playerUpdate', listener: (data: Reason) => void): this;
   }
 
   interface ShoukakuLink {
