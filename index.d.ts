@@ -62,7 +62,7 @@ declare module 'shoukaku' {
 
   export interface ShoukakuBuildOptions {
     id: string;
-    shardCount: number;
+    shardCount?: number;
   }
 
   class ShoukakuConstants {
