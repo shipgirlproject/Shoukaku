@@ -224,7 +224,7 @@ declare module 'shoukaku' {
     public options: ShoukakuOptions;
     public init: boolean;
 
-    public build(nodes: ShoukakuNodeOptions, options: ShoukakuBuildOptions): void;
+    public build(nodes: ShoukakuNodeOptions[], options: ShoukakuBuildOptions): void;
     public addNode(nodeOptions: ShoukakuNodeOptions): void;
     public removeNode(name: string, libraryInvoked?: boolean): void;
     public getNode(name?: boolean | string): ShoukakuSocket;
