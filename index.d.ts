@@ -86,7 +86,7 @@ declare module 'shoukaku' {
     guildId: string;
   }
 
-  class ShoukakuResolver {
+  export class ShoukakuResolver {
     constructor(host: string, port: string, auth: string, timeout: number);
     public timeout: number;
     public auth: string;
@@ -97,7 +97,7 @@ declare module 'shoukaku' {
     private _fetch(url: string): Promise<any>;
   }
 
-  interface ShoukakuPlayer {
+  export interface ShoukakuPlayer {
     on(event: 'end' | 'exception' | 'stuck', listener: (reason: Reason) => void): this;
     on(event: 'voiceClose', listener: (reason: Reason | Error) => void): this;
     on(event: 'resumed', listener: () => void): this;
@@ -115,7 +115,7 @@ declare module 'shoukaku' {
     off(event: 'playerUpdate', listener: (data: Reason) => void): this;
   }
 
-  class ShoukakuPlayer {
+  export class ShoukakuPlayer {
     constructor(link: ShoukakuLink);
     public link: ShoukakuLink;
     public track: string | null;
@@ -137,7 +137,7 @@ declare module 'shoukaku' {
     private _resume(): Promise<void>;
   }
 
-  class ShoukakuLink {
+  export class ShoukakuLink {
     constructor(node: ShoukakuSocket, guild: Guild);
     public node: ShoukakuSocket;
     public guildID: string;
@@ -162,7 +162,7 @@ declare module 'shoukaku' {
     private _nodeDisconnected(): void;
   }
 
-  class ShoukakuSocket {
+  export class ShoukakuSocket {
     constructor(shoukaku: Shoukaku, node: ShoukakuOptions);
     public shoukaku: Shoukaku;
     public links: Map<string, ShoukakuLink>;
@@ -193,7 +193,7 @@ declare module 'shoukaku' {
     private _close(code: number, reason: string): void;
   }
 
-  interface Shoukaku {
+  export interface Shoukaku {
     on(event: 'debug', listener: (name: string, data: any) => void): this;
     on(event: 'error', listener: (name: string, error: Error) => void): this;
     on(event: 'ready', listener: (name: string, reconnect: boolean) => void): this;
