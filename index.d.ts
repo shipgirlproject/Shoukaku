@@ -124,7 +124,7 @@ declare module 'shoukaku' {
     public bands: number[];
     public position: number;
 
-    public playTrack(track: string, options: ShoukakuPlayOptions): Promise<boolean>;
+    public playTrack(track: string, options?: ShoukakuPlayOptions): Promise<boolean>;
     public stopTrack(): Promise<boolean>;
     public setPaused(pause?: boolean): Promise<boolean>;
     public setEqualizer(bands: number[]): Promise<boolean>;
