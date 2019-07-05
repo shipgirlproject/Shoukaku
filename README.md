@@ -43,8 +43,11 @@ Feel free to open an issue in the [Issues](https://github.com/Deivu/Shoukaku/iss
 - [x] Documentation
 - and some more to come.
 
+### Starting a Lavalink Server.
+[View Lavalink README here](https://github.com/Frederikam/Lavalink/blob/master/README.md)
+
 ### Discord.js actual implementation. 
-[View Kongou's Source Code Here](https://github.com/Deivu/Kongou)
+[View Kongou's source code here](https://github.com/Deivu/Kongou)
 
 ### More simple implementation w/o queue.
 ```js
@@ -68,10 +71,13 @@ const Carrier = new Shoukaku(client, {
   restTimeout: 10000 
 });
 // Attach listeners, currently this are the only listeners available
-// on ERROR must be handled.
 Carrier.on('ready', (name) => console.log(`Lavalink Node: ${name} is now connected`));
+// Error must be hanndled
 Carrier.on('error', (name, error) => console.log(`Lavalink Node: ${name} emitted an error.`, error));
+// Close emits when a lavalink node disconnects.
 Carrier.on('close', (name, code, reason) => console.log(`Lavalink Node: ${name} closed with code ${code}. Reason: ${reason || 'No reason'}`));
+// Disconnected emits when a lavalink node disconnected and will not try to reconnect again.
+Carrier.on('disconnected', (name, reason) => console.log(`Lavalink Node: ${name} disconnected. Reason: ${reason || 'No reason'}`));
 
 client.on('ready', () => {
   // You need to build shoukaku on your client's ready event for her to work like how its done in this example.
@@ -108,31 +114,28 @@ client.on('message', async (msg) => {
     });
 
     // link.player is our player class for that link, thats what we can use to play music
+    // These are the events you can handle, exception can be ignored, while the other 4 should be handled.
     link.player.on('end', (reason) => {
       console.log(reason);
-
       // Disconnect the link and clean everyting up
       link.disconnect();
     });
     link.player.on('exception', console.error);
     link.player.on('stuck', (reason) => {
       console.warn(reason);
-
       // In stuck event, end will not fire automatically, either we just disconnect or play another song
       link.disconnect();
     });
     link.player.on('voiceClose', (reason) => {
       // Make sure you log the reason because it may be an error.
       console.log(reason);
-
       // There is no more reason for us to do anything so lets just clean up in voiceClose event
       link.disconnect();
     });
     link.player.on('nodeDisconnect', () => {
-
       // You still need to clean your link when player.on 'nodeDisconnect' fires. This means the node that governs this link disconnected.
       link.disconnect();
-    })
+    });
 
     // Play the lavalink track we got
     await link.player.playTrack(data.track);
