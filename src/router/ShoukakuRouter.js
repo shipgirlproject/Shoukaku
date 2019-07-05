@@ -1,4 +1,4 @@
-const { ShoukakuStatus } = require('./ShoukakuConstants.js');
+const { ShoukakuStatus } = require('../constants/ShoukakuConstants.js');
 class ShoukakuRouter {
     static ReconnectRouter(id) {
         for (const node of this.nodes.values()) {

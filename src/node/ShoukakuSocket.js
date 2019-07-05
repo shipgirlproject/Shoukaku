@@ -1,7 +1,7 @@
-const { ShoukakuStatus, ShoukakuNodeStats, ShoukakuJoinOptions } = require('./ShoukakuConstants.js');
-const { PacketRouter, EventRouter } = require('./ShoukakuRouter.js');
-const ShoukakuResolver = require('./ShoukakuResolver.js');
-const ShoukakuLink = require('./ShoukakuLink.js');
+const { ShoukakuStatus, ShoukakuNodeStats, ShoukakuJoinOptions } = require('../constants/ShoukakuConstants.js');
+const { PacketRouter, EventRouter } = require('../router/ShoukakuRouter.js');
+const ShoukakuResolver = require('../rest/ShoukakuResolver.js');
+const ShoukakuLink = require('../guild/ShoukakuLink.js');
 const Websocket = require('ws');
 const EventEmitter = require('events');
 class ShoukakuSocket extends EventEmitter {
@@ -120,7 +120,7 @@ class ShoukakuSocket extends EventEmitter {
             const link = this.links.get(options.guildID);
             if (link)
                 return reject(new Error('A voice connection is already established in this channel.'));
-                
+
             const guild = this.shoukaku.client.guilds.get(options.guildID);
             if (!guild)
                 return reject(new Error('Guild not found. Cannot continue creating the voice connection.'));

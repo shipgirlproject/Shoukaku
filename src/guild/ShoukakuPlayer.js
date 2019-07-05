@@ -1,5 +1,5 @@
 const EventEmitter = require('events');
-const { ShoukakuPlayOptions } = require('./ShoukakuConstants.js');
+const { ShoukakuPlayOptions } = require('../constants/ShoukakuConstants.js');
 const endEvents = ['end', 'stuck', 'voiceClose', 'nodeDisconnect'];
 
 class ShoukakuPlayer extends EventEmitter {

@@ -1,6 +1,6 @@
-const { RawRouter, ReconnectRouter } = require('./ShoukakuRouter.js');
-const constants = require('./ShoukakuConstants.js');
-const ShoukakuSocket = require('./ShoukakuSocket.js');
+const { RawRouter, ReconnectRouter } = require('./router/ShoukakuRouter.js');
+const constants = require('./constants/ShoukakuConstants.js');
+const ShoukakuSocket = require('./node/ShoukakuSocket.js');
 const EventEmitter = require('events');
 
 /**

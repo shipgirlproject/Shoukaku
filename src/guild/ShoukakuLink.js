@@ -1,4 +1,4 @@
-const { ShoukakuStatus } = require('./ShoukakuConstants.js');
+const { ShoukakuStatus } = require('../constants/ShoukakuConstants.js');
 const ShoukakuPlayer = require('./ShoukakuPlayer.js');
 class ShoukakuLink {
     /**
@@ -103,7 +103,7 @@ class ShoukakuLink {
     disconnect() {
         this.state = ShoukakuStatus.DISCONNECTING;
         this.node.links.delete(this.guildID);
-        this.player.removeAllListeners();  
+        this.player.removeAllListeners();
         this._clearVoice();
         this.player._clearTrack();
         this.player._clearPlayer();
