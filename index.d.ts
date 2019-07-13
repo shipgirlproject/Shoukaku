@@ -240,8 +240,8 @@ declare module 'shoukaku' {
     public name: string;
     private url: string;
     private auth: string;
-    public resumed: boolean;
-    public cleaner: boolean;
+    private resumed: boolean;
+    private cleaner: boolean;
     private packetRouter: unknown;
     private eventRouter: unknown;
 
