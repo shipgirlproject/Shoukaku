@@ -133,7 +133,7 @@ class Shoukaku extends EventEmitter {
     }
     /**
     * Function to register a Lavalink Node
-    * @param {ShoukakuConstants#ShoukakuNodeOptions} nodeOptions An array of lavalink nodes for Shoukaku to connect to.
+    * @param {ShoukakuConstants#ShoukakuNodeOptions} nodeOptions The Node Options to be used to connect to.
     * @returns {void}
     */
     addNode(nodeOptions) {
