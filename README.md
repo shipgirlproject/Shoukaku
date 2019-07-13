@@ -24,7 +24,7 @@ The ShipGirl Project. Shoukaku `(c) Kancolle for Shoukaku`
 
 ✅ And will make your library weeb 😂
 
-### Documentation <Documents the STABLE not MASTER>
+### Documentation "Documents the STABLE 0.1.1 not MASTER"
 https://deivu.github.io/Shoukaku/?api
 
 ### Installation
@@ -50,9 +50,9 @@ The events is as follows
 - closed
 - error
 - nodeDisconnect
-- trackException <optional>
-- resumed <optional>
-- playerUpdate <optional>
+- trackException "optional"
+- resumed "optional"
+- playerUpdate "optional"
 
 > Shoukaku class have renamed methods and properties
 - getLink() -> getPlayer()
