@@ -207,7 +207,7 @@ declare module 'shoukaku' {
     public state: ShoukakuStatus;
 
     private lastServerUpdate: unknown | null;
-    private _callback: (err: Err | null, player: ShoukakuPlayer) => void | null;
+    private _callback: (err: Error | null, player: ShoukakuPlayer) => void | null;
     private _timeout: number | null;
 
     public build: {
