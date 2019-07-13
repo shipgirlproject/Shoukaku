@@ -78,7 +78,7 @@ class ShoukakuLink {
     _connect(d, callback) {
         if (!d || !callback)
             throw new Error('No Options or Callback supplied.');
-
+            
         this._callback = callback;
         if (this.state === ShoukakuStatus.CONNECTING)  {
             this._callback(new Error('Can\'t connect while a connection is connecting. Wait for it to resolve first'));

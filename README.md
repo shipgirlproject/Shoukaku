@@ -59,8 +59,6 @@ The events is as follows
 - .links -> .players
 - .totalLinks -> .totalPlayers
 
-> Typings are also not updated to latest master.
-
 You can see the changes on updated example below.
 
 ### Support Server
