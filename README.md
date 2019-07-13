@@ -8,6 +8,7 @@ The ShipGirl Project. Shoukaku `(c) Kancolle for Shoukaku`
 ### A Full Blown Lavalink Wrapper designed around Discord.js v12
 
 ✅ Currently being used by: 
+
 [![DBL](https://discordbots.org/api/widget/424137718961012737.svg)](https://discordbots.org/bot/424137718961012737)
 
 ### Why Shoukaku?
