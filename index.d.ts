@@ -34,7 +34,10 @@ declare module 'shoukaku' {
 
   export interface LoadTrackResponse {
     loadType: LoadTrackType;
-    playlistInfo: any;
+    playlistInfo: {
+      name?: string;
+      selectedTrack?: number;
+    };
     tracks: Track[];
     exception?: LoadTrackException;
   }
@@ -140,7 +143,7 @@ declare module 'shoukaku' {
     public resolve(identifier: string, search: Source): Promise<LoadTrackResponse | Track | Track[] | null>;
     public decode(track: Base64String): Promise<unknown>;
 
-    private _fetch(url: string): Promise<any>;
+    private _fetch(url: string): Promise<unknown>;
   }
 
   export interface ShoukakuPlayer {
@@ -221,7 +224,7 @@ declare module 'shoukaku' {
     private _send(d: unknown): void;
     private _clearVoice(): void;
     private _destroy(): void;
-    private _voiceUpdate(event: any): void;
+    private _voiceUpdate(event: unknown): void;
     private _voiceDisconnect(): void;
     private _nodeDisconnected(): void;
   }
@@ -252,7 +255,7 @@ declare module 'shoukaku' {
     private _configureResuming(): Promise<boolean>;
     private _configureCleaner(state: boolean): void;
     private _executeCleaner(): void;
-    private _upgrade(response: any): void;
+    private _upgrade(response: unknown): void;
     private _open(): void;
     private _message(message: string): void;
     private _error(error: Error): void;
@@ -260,17 +263,17 @@ declare module 'shoukaku' {
   }
 
   export interface Shoukaku {
-    on(event: 'debug', listener: (name: string, data: any) => void): this;
+    on(event: 'debug', listener: (name: string, data: unknown) => void): this;
     on(event: 'error', listener: (name: string, error: Error) => void): this;
     on(event: 'ready', listener: (name: string, reconnect: boolean) => void): this;
     on(event: 'closed', listener: (name: string, code: number, reason: string) => void): this;
     on(event: 'disconnected', listener: (name: string, reason: string) => void): this;
-    once(event: 'debug', listener: (name: string, data: any) => void): this;
+    once(event: 'debug', listener: (name: string, data: unknown) => void): this;
     once(event: 'error', listener: (name: string, error: Error) => void): this;
     once(event: 'ready', listener: (name: string, reconnect: boolean) => void): this;
     once(event: 'closed', listener: (name: string, code: number, reason: string) => void): this;
     once(event: 'disconnected', listener: (name: string, reason: string) => void): this;
-    off(event: 'debug', listener: (name: string, data: any) => void): this;
+    off(event: 'debug', listener: (name: string, data: unknown) => void): this;
     off(event: 'error', listener: (name: string, error: Error) => void): this;
     off(event: 'ready', listener: (name: string, reconnect: boolean) => void): this;
     off(event: 'closed', listener: (name: string, code: number, reason: string) => void): this;
