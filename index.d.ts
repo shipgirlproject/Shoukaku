@@ -4,6 +4,43 @@ declare module 'shoukaku' {
 
   export const version: string;
 
+  export interface Track {
+    track: string;
+    info: {
+      identifier: string;
+      isSeekable: boolean;
+      author: string;
+      length: number;
+      isStream: boolean;
+      position: number;
+      title: string;
+      uri: string;
+    };
+  }
+
+  export interface EqualizerBand {
+    band: number;
+    gain: number;
+  }
+
+  export type LoadTrackType = 
+    'TRACK_LOADER' | 'PLAYLIST_LOADED' | 'SEARCH_RESULT' |
+    'NO_MATCHES' | 'LOAD_FAILED';
+
+  export interface LoadTrackException {
+    message: string;
+    severity: 'COMMON'
+  }
+
+  export interface LoadTrackResponse {
+    loadType: LoadTrackType;
+    playlistInfo: any;
+    tracks: Track[];
+    exception?: LoadTrackException;
+  }
+
+  export type Source = 'youtube' | 'soundcloud';
+
   export enum ShoukakuStatus {
     CONNECTING = 'CONNECTING',
     CONNECTED = 'CONNECTED',
@@ -37,20 +74,20 @@ declare module 'shoukaku' {
   export interface ShoukakuJoinOptions {
     guildID: string;
     voiceChannelID: string;
-    mute: boolean;
-    deaf: boolean;
+    mute?: boolean;
+    deaf?: boolean;
   }
 
   export interface ShoukakuPlayOptions {
-    startTime: boolean | number;
-    endTime: boolean | number;
+    startTime?: boolean | number;
+    endTime?: boolean | number;
   }
 
   export interface ShoukakuOptions {
-    resumable: boolean;
-    resumableTimeout: number;
-    reconnectTries: number;
-    restTimeout: number;
+    resumable?: boolean;
+    resumableTimeout?: number;
+    reconnectTries?: number;
+    restTimeout?: number;
   }
 
   export interface ShoukakuNodeOptions {
@@ -86,52 +123,67 @@ declare module 'shoukaku' {
     guildId: string;
   }
 
+  export interface PlayerUpdate {
+    op: "playerUpdate";
+    guildId: string;
+    state: {
+      time: number;
+      position: number;
+    }
+  }
+
   export class ShoukakuResolver {
     constructor(host: string, port: string, auth: string, timeout: number);
     public timeout: number;
     public auth: string;
     public url: string;
-    public resolve(identifier: string, search: string): Promise<any>;
-    public decode(track: Base64String): Promise<any>;
+    public resolve(identifier: string, search: Source): Promise<LoadTrackResponse | Track | Track[] | null>;
+    public decode(track: Base64String): Promise<unknown>;
 
     private _fetch(url: string): Promise<any>;
   }
 
   export interface ShoukakuPlayer {
-    on(event: 'end' | 'exception' | 'stuck', listener: (reason: Reason) => void): this;
-    on(event: 'voiceClose', listener: (reason: Reason | Error) => void): this;
-    on(event: 'resumed', listener: () => void): this;
+    on(event: 'end', listener: (reason: Reason) => void): this;
+    on(event: 'error', listener: (err: Error) => void): this;
     on(event: 'nodeDisconnect', listener: (name: string) => void): this;
-    on(event: 'playerUpdate', listener: (data: Reason) => void): this;
-    once(event: 'end' | 'exception' | 'stuck', listener: (reason: Reason) => void): this;
-    once(event: 'voiceClose', listener: (reason: Error | Reason) => void): this;
-    once(event: 'resumed', listener: () => void): this;
+    on(event: 'resumed', listener: () => void): this;
+    on(event: 'playerUpdate', listener: (data: PlayerUpdate) => void): this;
+    on(event: 'closed' | 'trackException', listener: (data: unknown) => void): this;
+    once(event: 'end', listener: (reason: Reason) => void): this;
+    once(event: 'error', listener: (err: Error) => void): this;
     once(event: 'nodeDisconnect', listener: (name: string) => void): this;
-    once(event: 'playerUpdate', listener: (data: Reason) => void): this;
-    off(event: 'end' | 'exception' | 'stuck', listener: (reason: Reason) => void): this;
-    off(event: 'voiceClose', listener: (reason: Error | Reason) => void): this;
-    off(event: 'resumed', listener: () => void): this;
+    once(event: 'resumed', listener: () => void): this;
+    once(event: 'playerUpdate', listener: (data: PlayerUpdate) => void): this;
+    once(event: 'closed' | 'trackException', listener: (data: unknown) => void): this;
+    off(event: 'end', listener: (reason: Reason) => void): this;
+    off(event: 'error', listener: (err: Error) => void): this;
     off(event: 'nodeDisconnect', listener: (name: string) => void): this;
-    off(event: 'playerUpdate', listener: (data: Reason) => void): this;
+    off(event: 'resumed', listener: () => void): this;
+    off(event: 'playerUpdate', listener: (data: PlayerUpdate) => void): this;
+    off(event: 'closed' | 'trackException', listener: (data: unknown) => void): this;
   }
 
   export class ShoukakuPlayer {
     constructor(link: ShoukakuLink);
-    public link: ShoukakuLink;
+    public voiceConnection: ShoukakuLink;
     public track: string | null;
     public paused: boolean;
     public volume: number;
-    public bands: number[];
+    public bands: EqualizerBand[];
     public position: number;
+
+    public connect(options: unknown, callback:(error: Error, link: ShoukakuLink) => void): void;
+    public disconnect(): void;
 
     public playTrack(track: string, options?: ShoukakuPlayOptions): Promise<boolean>;
     public stopTrack(): Promise<boolean>;
     public setPaused(pause?: boolean): Promise<boolean>;
-    public setEqualizer(bands: number[]): Promise<boolean>;
+    public setEqualizer(bands: EqualizerBand[]): Promise<boolean>;
     public setVolume(volume: number): Promise<boolean>;
     public seekTo(position: number): Promise<boolean>;
 
-    private _listen(event: string, data: any): void;
+    private _listen(event: string, data: unknown): void;
     private _clearTrack(): void;
     private _clearPlayer(): void;
     private _resume(): Promise<void>;
@@ -140,6 +192,8 @@ declare module 'shoukaku' {
   export class ShoukakuLink {
     constructor(node: ShoukakuSocket, guild: Guild);
     public node: ShoukakuSocket;
+    public player: ShoukakuPlayer;
+
     public guildID: string;
     public shardID: number;
     public userID: string;
@@ -148,13 +202,23 @@ declare module 'shoukaku' {
     public selfMute: boolean;
     public selfDeaf: boolean;
     public state: ShoukakuStatus;
-    public player: ShoukakuPlayer;
 
-    public connect(options: any, callback: (error: Error, link: ShoukakuLink) => void): void;
-    public disconnect(): void;
+    private lastServerUpdate: unknown | null;
+    private _callback: (err: Err | null, player: ShoukakuPlayer) => void | null;
+    private _timeout: number | null;
 
-    private _queueConnection(d: any): void;
-    private _removeConnect(guild_id: string): void;
+    public build: {
+      self_deaf: boolean;
+      self_mute: boolean;
+      channel_id: string;
+      session_id: string;
+    };
+
+    private serverUpdate: unknown;
+
+    private _connect(d: unknown, callback: (err: Error | null, player: ShoukakuPlayer) => void);
+    private _disconnect(): void;
+    private _send(d: unknown): void;
     private _clearVoice(): void;
     private _destroy(): void;
     private _voiceUpdate(event: any): void;
@@ -165,25 +229,27 @@ declare module 'shoukaku' {
   export class ShoukakuSocket {
     constructor(shoukaku: Shoukaku, node: ShoukakuOptions);
     public shoukaku: Shoukaku;
-    public links: Map<string, ShoukakuLink>;
+    public players: Map<string, ShoukakuPlayer>;
     public rest: ShoukakuResolver;
     public state: ShoukakuStatus;
     public stats: ShoukakuNodeStats;
     public reconnectAttempts: number;
     public name: string;
-    public url: string;
-    public auth: string;
+    private url: string;
+    private auth: string;
     public resumed: boolean;
     public cleaner: boolean;
+    private packetRouter: unknown;
+    private eventRouter: unknown;
 
     public resumable: boolean;
     public resumableTimeout: number;
     public penalties: number;
     public connect(id: string, shardCount: number, resumable: boolean | string): void;
-    public joinVoiceChannel(options: ShoukakuJoinOptions): Promise<ShoukakuLink>;
+    public joinVoiceChannel(options: ShoukakuJoinOptions): Promise<ShoukakuPlayer>;
 
-    private send(data: any): void;
-    private _configureResuming(): void;
+    private send(data: unknown): Promise<boolean>;
+    private _configureResuming(): Promise<boolean>;
     private _configureCleaner(state: boolean): void;
     private _executeCleaner(): void;
     private _upgrade(response: any): void;
@@ -197,17 +263,17 @@ declare module 'shoukaku' {
     on(event: 'debug', listener: (name: string, data: any) => void): this;
     on(event: 'error', listener: (name: string, error: Error) => void): this;
     on(event: 'ready', listener: (name: string, reconnect: boolean) => void): this;
-    on(event: 'close', listener: (name: string, code: number, reason: string) => void): this;
+    on(event: 'closed', listener: (name: string, code: number, reason: string) => void): this;
     on(event: 'disconnected', listener: (name: string, reason: string) => void): this;
     once(event: 'debug', listener: (name: string, data: any) => void): this;
     once(event: 'error', listener: (name: string, error: Error) => void): this;
     once(event: 'ready', listener: (name: string, reconnect: boolean) => void): this;
-    once(event: 'close', listener: (name: string, code: number, reason: string) => void): this;
+    once(event: 'closed', listener: (name: string, code: number, reason: string) => void): this;
     once(event: 'disconnected', listener: (name: string, reason: string) => void): this;
     off(event: 'debug', listener: (name: string, data: any) => void): this;
     off(event: 'error', listener: (name: string, error: Error) => void): this;
     off(event: 'ready', listener: (name: string, reconnect: boolean) => void): this;
-    off(event: 'close', listener: (name: string, code: number, reason: string) => void): this;
+    off(event: 'closed', listener: (name: string, code: number, reason: string) => void): this;
     off(event: 'disconnected', listener: (name: string, reason: string) => void): this;
   }
 
@@ -218,8 +284,8 @@ declare module 'shoukaku' {
     public shardCount: number | null;
     public nodes: Map<string, ShoukakuSocket>;
 
-    public links: Map<string, ShoukakuLink>;
-    public totalLinks: number;
+    public players: Map<string, ShoukakuPlayer>;
+    public totalPlayers: number;
 
     public options: ShoukakuOptions;
     public init: boolean;
@@ -230,7 +296,7 @@ declare module 'shoukaku' {
     public getNode(name?: boolean | string): ShoukakuSocket;
     public getLink(guildId: string): ShoukakuLink | null;
 
-    private send(payload: any): void;
+    private send(payload: unknown): void;
     private _ready(name: string, resumed: boolean): void;
     private _reconnect(name: string, code: number, reason: string): void;
     private _mergeDefault<T, J>(def: T, given: J): T & J;
