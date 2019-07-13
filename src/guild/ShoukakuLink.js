@@ -1,17 +1,22 @@
 const { ShoukakuStatus } = require('../constants/ShoukakuConstants.js');
-const ShoukakuPlayer = require('./ShoukakuPlayer.js');
 class ShoukakuLink {
     /**
      * ShoukakuLink, the voice connection manager of a guild. Contains the Player Class that can be used to play tracks.
-     * @param {ShoukakuSocket} node The node where this class initialization is called.
-     * @param {external:Guild} guild the Guild Object of this guild.
+     * @param {ShoukakuPlayer} player The player of this link.
+     * @param {ShoukakuSocket} node The node that governs this link.
+     * @param {external:Guild} guild A Discord.js Guild Object.
      */
-    constructor(node, guild) {
+    constructor(player, node, guild) {
         /**
          * The node that governs this Link
          * @type {ShoukakuSocket}
          */
         this.node = node;
+        /**
+         * The player class of this link.
+         * @type {ShoukakuPlayer}
+         */
+        this.player = player;
         /**
          * The ID of the guild that is being governed by this Link.
          * @type {string}
@@ -52,11 +57,6 @@ class ShoukakuLink {
          * @type {ShoukakuConstants#ShoukakuStatus}
          */
         this.state = ShoukakuStatus.DISCONNECTED;
-        /**
-         * The player class of this link.
-         * @type {ShoukakuPlayer}
-         */
-        this.player = new ShoukakuPlayer(this);
 
         Object.defineProperty(this, 'lastServerUpdate', { value: null, writable: true });
         Object.defineProperty(this, '_callback', { value: null, writable: true });
@@ -74,15 +74,11 @@ class ShoukakuLink {
         this.lastServerUpdate = data;
         this._voiceUpdate(data);
     }
-    /**
-     * Generates a VoiceConnection to the Guild's specific Voice Channel. Warning: DO NOT USE THIS UNLESS YOU HAVE A GOOD REASON TO DO SO. Use `node.joinVoiceChannel()` instead.
-     * @param {Object} options The Join Object Format from Discord API Documentation
-     * @param {function(error, ShoukakuLink):void} callback The callback to run.
-     * @returns {void}
-     */
-    connect(options, callback) {
-        if (!options || !callback)
+
+    _connect(d, callback) {
+        if (!d || !callback)
             throw new Error('No Options or Callback supplied.');
+
         this._callback = callback;
         if (this.state === ShoukakuStatus.CONNECTING)  {
             this._callback(new Error('Can\'t connect a connecting link. Wait for it to resolve first'));
@@ -93,44 +89,34 @@ class ShoukakuLink {
             this.state = ShoukakuStatus.DISCONNECTED;
             this._callback(new Error('The voice connection is not established in 15 seconds'));
         }, 15000);
+
         this.state = ShoukakuStatus.CONNECTING;
-        this._queueConnection(options);
+        this._send(d);
     }
-    /**
-     * Eventually Disconnects the VoiceConnection from a Guild. Could be also used to clean up player remnants from unexpected events.
-     * @returns {void}
-     */
-    disconnect() {
+
+    _disconnect() {
         this.state = ShoukakuStatus.DISCONNECTING;
-        this.node.links.delete(this.guildID);
+        this.node.players.delete(this.guildID);
         this.player.removeAllListeners();
         this._clearVoice();
         this.player._clearTrack();
         this.player._clearPlayer();
         if (this.state !== ShoukakuStatus.DISCONNECTED) {
             this._destroy();
-            this._removeConnection(this.guildID);
-        }
-    }
-
-    _queueConnection(d) {
-        this.node.shoukaku.send({
-            op: 4,
-            d
-        });
-    }
-
-    _removeConnection(guild_id) {
-        this.node.shoukaku.send({
-            op: 4,
-            d: {
-                guild_id,
+            this._send({
+                guild_id: this.guildID,
                 channel_id: null,
                 self_mute: false,
                 self_deaf: false
-            }
+            });
+        }
+    }
+
+    _send(d) {
+        this.node.shoukaku.send({
+            op:4,
+            d
         });
-        this.state = ShoukakuStatus.DISCONNECTED;
     }
 
     _clearVoice() {
@@ -163,9 +149,10 @@ class ShoukakuLink {
                 if (this.state === ShoukakuStatus.CONNECTING) {
                     clearTimeout(this._timeout);
                     this.state = ShoukakuStatus.DISCONNECTED;
-                    return this._callback(error);
+                    this._callback(error);
+                    return;
                 }
-                this.player._listen('voiceClose', error);
+                this.player._listen('error', error);
             })
             .finally(() => {
                 this._callback = null;
@@ -180,8 +167,13 @@ class ShoukakuLink {
 
     _nodeDisconnected() {
         this._clearVoice();
-        this._removeConnection(this.guildID);
-        this.player._listen('nodeDisconnect', this.name);
+        this._send({
+            guild_id: this.guildID,
+            channel_id: null,
+            self_mute: false,
+            self_deaf: false
+        });
+        this.player._listen('nodeDisconnect', this.node.name);
     }
 }
 module.exports = ShoukakuLink;

@@ -1,15 +1,29 @@
 # Shoukaku
 <p align="center">
-  <img src="https://vignette.wikia.nocookie.net/kancolle/images/9/97/Shoukaku_Christmas_Full.png/revision/latest/">
+  <img src="https://vignette.wikia.nocookie.net/kancolle/images/b/b3/Shoukaku_Christmas_Full_Damaged.png/revision/latest/">
 </p>
 
 The ShipGirl Project. Shoukaku `(c) Kancolle for Shoukaku`
 
 ### A Full Blown Lavalink Wrapper designed around Discord.js v12
 
-Currently being used by [Kashima](https://discordbots.org/bot/kashima-is-a-good-girl)
+✅ Currently being used by: 
+[![DBL](https://discordbots.org/api/widget/424137718961012737.svg)](https://discordbots.org/bot/424137718961012737)
 
-### Documentation
+### Why Shoukaku?
+✅ Straightforward 
+
+✅ Scalable
+
+✅ Reliable
+
+✅ Maintained
+
+✅ Very Cute and Charming Shipgirl ❤
+
+✅ And will make your library weeb 😂
+
+### Documentation <Documents the STABLE not MASTER>
 https://deivu.github.io/Shoukaku/?api
 
 ### Installation
@@ -21,6 +35,32 @@ For Master
 ```
 npm i Deivu/Shoukaku
 ```
+
+### 0.1.1 -> Master 0.2.0 Beta Migration
+> ShoukakuLink is now a property of ShoukakuPlayer, meaning all link related getters are changed to player getters.
+
+> You can access ShoukakuLink via .voiceConnection property of ShoukakuPlayer
+
+> ShoukakuPlayer makes the playing, and disconnecting more easier since now it has .connect() and .disconnect() methods.
+
+> ShoukakuPlayer events are "GREATLY CHANGED". Those marked as optional can be left out.
+The events is as follows
+- end
+- closed
+- error
+- nodeDisconnect
+- trackException <optional>
+- resumed <optional>
+- playerUpdate <optional>
+
+> Shoukaku class have renamed methods and properties
+- getLink() -> getPlayer()
+- .links -> .players
+- .totalLinks -> .totalPlayers
+
+> Typings are also not updated to latest master.
+
+You can see the changes on updated example below.
 
 ### Support Server
 If you need help on using this, Join Here [ShipGirls Community](https://discordapp.com/invite/FVqbtGu) and `ask at #support`. 
@@ -46,7 +86,7 @@ Feel free to open an issue in the [Issues](https://github.com/Deivu/Shoukaku/iss
 ### Starting a Lavalink Server.
 [View Lavalink README here](https://github.com/Frederikam/Lavalink/blob/master/README.md)
 
-### Discord.js actual implementation. 
+### Discord.js actual implementation. "Not yet updated to latest Master commit."
 [View Kongou's source code here](https://github.com/Deivu/Kongou)
 
 ### More simple implementation w/o queue.
@@ -90,8 +130,8 @@ client.on('message', async (msg) => {
   if (msg.author.bot || !msg.guild) return;
   if (msg.content.startsWith('$play')) {
 
-    // Check if there is already a link on your guild.
-    if (Carrier.getLink(msg.guild.id)) return;
+    // Check if there is already a link on your guild. Since this is a no queue implementation.
+    if (Carrier.getPlayer(msg.guild.id)) return;
 
     const args = msg.content.split(' ');
     if (!args[1]) return;
@@ -107,38 +147,24 @@ client.on('message', async (msg) => {
 
     if (Array.isArray(data)) data = data[0];
 
-    // Joining to a voice channel that returns the LINK property that we need.
-    const link = await node.joinVoiceChannel({
+    // Getting the ShoukakuPlayer where we can play tracks and disconnect once we dont need it anymore.
+    const player = await node.joinVoiceChannel({
       guildID: msg.guild.id,
       voiceChannelID: msg.member.voice.channelID
     });
-
-    // link.player is our player class for that link, thats what we can use to play music
-    // These are the events you can handle, exception can be ignored, while the other 4 should be handled.
-    link.player.on('end', (reason) => {
-      console.log(reason);
-      // Disconnect the link and clean everyting up
-      link.disconnect();
-    });
-    link.player.on('exception', console.error);
-    link.player.on('stuck', (reason) => {
-      console.warn(reason);
-      // In stuck event, end will not fire automatically, either we just disconnect or play another song
-      link.disconnect();
-    });
-    link.player.on('voiceClose', (reason) => {
-      // Make sure you log the reason because it may be an error.
-      console.log(reason);
-      // There is no more reason for us to do anything so lets just clean up in voiceClose event
-      link.disconnect();
-    });
-    link.player.on('nodeDisconnect', () => {
-      // You still need to clean your link when player.on 'nodeDisconnect' fires. This means the node that governs this link disconnected.
-      link.disconnect();
-    });
+    
+    // Example of handling the non optional events.
+    const endFunction = (param) => {
+        console.log(param);
+        player.disconnect();
+    }
+    player.on('end', endFunction);
+    player.on('closed', endFunction);
+    player.on('error', endFunction);
+    player.on('nodeDisconnect', endFunction);
 
     // Play the lavalink track we got
-    await link.player.playTrack(data.track);
+    await player.playTrack(data.track);
     await msg.channel.send("Now Playing: " + data.info.title);
   }
 })

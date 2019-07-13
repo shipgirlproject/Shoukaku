@@ -55,23 +55,23 @@ class Shoukaku extends EventEmitter {
         Object.defineProperty(this, 'reconnectRouter', { value: ReconnectRouter.bind(this) });
     }
     /**
-     * Gets all the links governed by the Nodes / Sockets in this instance.
+     * Gets all the Players governed by the Nodes / Sockets in this instance.
      * @type {external:Map}
      */
-    get links() {
-        const links = new Map();
+    get players() {
+        const players = new Map();
         for (const node of this.nodes.values()) {
-            for (const [key, val] of node.links) links.set(key, val);
+            for (const [id, player] of node.players) players.set(id, player);
         }
-        return links;
+        return players;
     }
     /**
-     * Gets the number of total links that is currently active on all nodes in this instance.
+     * Gets the number of total Players that is currently active on all nodes in this instance.
      * @type {number}
      */
-    get totalLinks() {
+    get totalPlayers() {
         let counter = 0;
-        for (const node of this.nodes.values()) counter += node.links.size;
+        for (const node of this.nodes.values()) counter += node.players.size;
         return counter;
     }
 
@@ -113,7 +113,7 @@ class Shoukaku extends EventEmitter {
     // Events End
 
     /**
-     * The starting point of Shoukaku, must be called in ready event in order for Shouaku to work.
+     * The starting point of Shoukaku, must be called in ready event in order for Shoukaku to work.
      * @param {ShoukakuConstants#ShoukakuNodeOptions} nodes An array of lavalink nodes for Shoukaku to connect to.
      * @param {ShoukakuConstants#ShoukakuBuildOptions} options Options that is need by Shoukaku to build herself.
      * @returns {void}
@@ -164,7 +164,7 @@ class Shoukaku extends EventEmitter {
     }
     /**
      * Shortcut to get the Ideal Node or a manually specified Node from the current nodes that Shoukaku governs.
-     * @param {boolean|string} [name=false] If blank, Shoukaku will automatically return the Ideal Node for you to connect to. If name is specifed, she will try to return the node you specified.
+     * @param {boolean|string} [name] If blank, Shoukaku will automatically return the Ideal Node for you to connect to. If name is specifed, she will try to return the node you specified.
      * @returns {ShoukakuSocket}
      * @example
      * const node = <Shoukaku>.getNode();
@@ -173,10 +173,10 @@ class Shoukaku extends EventEmitter {
      *         node.joinVoiceChannel({
      *             guildID: 'guild_id',
      *             voiceChannelID: 'voice_channel_id'
-     *         }).then(link => link.player.playTrack(data.track))
+     *         }).then(player => player.playTrack(data.track))
      *     })
      */
-    getNode(name = false) {
+    getNode(name) {
         if (!this.nodes.size)
             throw new Error('No nodes available. What happened?');
         if (name) {
@@ -187,18 +187,14 @@ class Shoukaku extends EventEmitter {
         return [...this.nodes.values()].sort((a, b) => a.penalties - b.penalties).shift();
     }
     /**
-    * Shortcut to get the Link of a guild, if there is any.
+    * Shortcut to get the Player of a guild, if there is any.
     * @param {string} guildID The guildID of the guild we are trying to get.
-    * @returns {?ShoukakuLink}
+    * @returns {?ShoukakuPlayer}
     */
-    getLink(guildID) {
+    getPlayer(guildID) {
         if (!guildID) return null;
         if (!this.nodes.size) return null;
-        for (const node of this.nodes.values()) {
-            const link = node.links.get(guildID);
-            if (link) return link;
-        }
-        return null;
+        return this.players.get(guildID);
     }
 
     send(payload) {

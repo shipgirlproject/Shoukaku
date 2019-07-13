@@ -1,7 +1,7 @@
 const { ShoukakuStatus, ShoukakuNodeStats, ShoukakuJoinOptions } = require('../constants/ShoukakuConstants.js');
 const { PacketRouter, EventRouter } = require('../router/ShoukakuRouter.js');
 const ShoukakuResolver = require('../rest/ShoukakuResolver.js');
-const ShoukakuLink = require('../guild/ShoukakuLink.js');
+const ShoukakuPlayer = require('../guild/ShoukakuPlayer.js');
 const Websocket = require('ws');
 const EventEmitter = require('events');
 class ShoukakuSocket extends EventEmitter {
@@ -19,10 +19,10 @@ class ShoukakuSocket extends EventEmitter {
         */
         this.shoukaku = shoukaku;
         /**
-        * The mapped links that is being governed by this Socket.
+        * The active players in this socket/node.
         * @type {external:Map}
         */
-        this.links = new Map();
+        this.players = new Map();
         /**
         * The REST server of this Socket, mostly to load balance your REST requests instead of relying on a single node.
         * @type {ShoukakuResolver}
@@ -72,8 +72,10 @@ class ShoukakuSocket extends EventEmitter {
         let penalties = 0;
         penalties += this.stats.players;
         penalties += Math.round(Math.pow(1.05, 100 * this.stats.cpu.systemLoad) * 10 - 10);
-        penalties += this.stats.frameStats.deficit;
-        penalties += this.stats.frameStats.nulled * 2;
+        if (this.stats.frameStats) {
+            penalties += this.stats.frameStats.deficit;
+            penalties += this.stats.frameStats.nulled * 2;
+        }
         return penalties;
     }
     /**
@@ -103,45 +105,41 @@ class ShoukakuSocket extends EventEmitter {
         this.shoukaku.on('packetUpdate', this.packetRouter);
     }
     /**
-     * Joins then creates a ShoukakuLink Object for the guild & voice channel you specified.
+     * Creates a player and connects your bot to the specified guild's voice channel
      * @param {ShoukakuConstants#ShoukakuJoinOptions} options Join data to send.
-     * @returns {Promise<ShoukakuLink>}
+     * @returns {Promise<ShoukakuPlayer>}
      * @example
      * <ShoukakuSocket>.joinVoiceChannel({
      *     guildID: 'guild_id',
      *     voiceChannelID: 'voice_channel_id'
-     * }).then((link) => link.player.playTrack('lavalink_track'));
+     * }).then((player) => player.playTrack('lavalink_track'));
      */
     joinVoiceChannel(options = ShoukakuJoinOptions) {
         return new Promise((resolve, reject) => {
             if (!options.guildID || !options.voiceChannelID)
                 return reject(new Error('Guild ID or Channel ID is not specified.'));
 
-            const link = this.links.get(options.guildID);
-            if (link)
-                return reject(new Error('A voice connection is already established in this channel.'));
+            if (this.players.has(options.guildID))
+                return reject(new Error('A Player is already established in this channel'));
 
             const guild = this.shoukaku.client.guilds.get(options.guildID);
             if (!guild)
                 return reject(new Error('Guild not found. Cannot continue creating the voice connection.'));
 
-            const newLink = new ShoukakuLink(this, guild);
-            this.links.set(guild.id, newLink);
+            const player = new ShoukakuPlayer(this, guild);
+            this.players.set(guild.id, player);
 
-            const _object = {
+            const joinOptions = {
                 guild_id: options.guildID,
                 channel_id: options.voiceChannelID,
                 self_deaf: options.deaf,
                 self_mute: options.mute
             };
 
-            newLink.connect(_object, (error, value) => {
-                if (error) {
-                    this.links.delete(guild.id);
-                    reject(error);
-                    return;
-                }
-                resolve(value);
+            player.connect(joinOptions, (error, value) => {
+                if (!error) return resolve(value);
+                this.players.delete(guild.id);
+                reject(error);
             });
         });
     }
@@ -175,7 +173,7 @@ class ShoukakuSocket extends EventEmitter {
 
     _executeCleaner() {
         if (!this.cleaner) return this._configureCleaner(true);
-        for (const link of this.links.values()) link._nodeDisconnected();
+        for (const player of this.players.values()) player.voiceConnection._nodeDisconnected();
     }
 
     _upgrade(response) {

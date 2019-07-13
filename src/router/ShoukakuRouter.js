@@ -2,22 +2,21 @@ const { ShoukakuStatus } = require('../constants/ShoukakuConstants.js');
 class ShoukakuRouter {
     static ReconnectRouter(id) {
         for (const node of this.nodes.values()) {
-            node.links.forEach((link) => {
-                if (!link.voiceChannelID) return;
-                if (link.state === ShoukakuStatus.CONNECTING) return;
-                if (link.shardID !== id) return;
-                link.connect({
-                    guild_id: link.guildID,
-                    channel_id: link.voiceChannelID,
-                    self_deaf:  link.selfDeaf,
-                    self_mute: link.selfMute
+            node.players.forEach((player) => {
+                const { voiceConnection } = player;
+                if (!voiceConnection.voiceChannelID) return;
+                if (voiceConnection.state === ShoukakuStatus.CONNECTING) return;
+                if (voiceConnection.shardID !== id) return;
+                player.connect({
+                    guild_id: voiceConnection.guildID,
+                    channel_id: voiceConnection.voiceChannelID,
+                    self_deaf:  voiceConnection.selfDeaf,
+                    self_mute: voiceConnection.selfMute
                 }, (error) => {
-                    if (error) {
-                        link.player._listen('voiceClose', error);
-                        return;
-                    }
-                    link.player._resume()
-                        .catch(() => null);
+                    if (!error)
+                        return player._resume()
+                            .catch(() => null);
+                    player._listen('error', error);
                 });
             });
         }
@@ -32,24 +31,34 @@ class ShoukakuRouter {
     }
 
     static PacketRouter(packet) {
-        const link = this.links.get(packet.d.guild_id);
-        if (!link) return;
+        const player = this.players.get(packet.d.guild_id);
+        if (!player) return;
         if (packet.t === 'VOICE_STATE_UPDATE') {
-            if (!packet.d.channel_id) return link.disconnect();
-            link.build = packet.d;
+            if (!packet.d.channel_id) return player.disconnect();
+            player.voiceConnection.build = packet.d;
         }
-        if (packet.t === 'VOICE_SERVER_UPDATE') link.serverUpdate = packet.d;
+        if (packet.t === 'VOICE_SERVER_UPDATE') player.voiceConnection.serverUpdate = packet.d;
     }
 
     static EventRouter(json) {
-        const link = this.links.get(json.guildId);
-        if (!link) return;
-        if (json.op  === 'playerUpdate') return link.player._listen('playerUpdate', json.state);
+        const player = this.players.get(json.guildId);
+        if (!player) return;
+        if (json.op === 'playerUpdate') return player._listen('playerUpdate', json.state);
         if (json.op === 'event') {
-            if (json.type === 'TrackEndEvent') return link.player._listen('end', json);
-            if (json.type === 'TrackExceptionEvent') return link.player._listen('exception', json);
-            if (json.type === 'TrackStuckEvent') return link.player._listen('stuck', json);
-            if (json.type === 'WebSocketClosedEvent') return link.player._listen('voiceClose', json);
+            switch (json.type) {
+                case 'TrackEndEvent':
+                    player._listen('end', json);
+                    break;
+                case 'TrackStuckEvent':
+                    player._listen('end', json);
+                    break;
+                case 'TrackExceptionEvent':
+                    player.listen('trackException', json);
+                    break;
+                case 'WebSocketClosedEvent':
+                    player.listen('closed', json);
+                    break;
+            }
         }
     }
 }

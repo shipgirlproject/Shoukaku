@@ -19,7 +19,7 @@ class ShoukakuResolver {
          * @type {number}
          */
         this.timeout = timeout || 10000;
-        
+
         Object.defineProperty(this, 'auth', { value: auth });
         Object.defineProperty(this, 'url', { value: `http://${host}:${port}/` });
     }
@@ -72,10 +72,10 @@ class ShoukakuResolver {
         return Fetch(url, { headers: { Authorization: this.auth }, signal: controller.signal })
             .then((res) => {
                 if (res.status !== 200)
-                    throw new Error(`Shouaku Resolver Failed. Error Code: ${res.status}`);
+                    throw new Error(`Shoukaku Resolver Failed. Error Code: ${res.status}`);
                 return res.json();
             }, (error) => {
-                if (error.name === 'AbortError') error = new Error(`Shouaku Resolver Failed. Failed to fetch this video in ${Math.round(this.timeout / 1000)}s`);
+                if (error.name === 'AbortError') error = new Error(`Shoukaku Resolver Failed. Failed to fetch this video in ${Math.round(this.timeout / 1000)}s`);
                 throw error;
             })
             .finally(() => clearTimeout(timeout));
