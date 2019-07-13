@@ -81,7 +81,7 @@ class ShoukakuLink {
 
         this._callback = callback;
         if (this.state === ShoukakuStatus.CONNECTING)  {
-            this._callback(new Error('Can\'t connect a connecting link. Wait for it to resolve first'));
+            this._callback(new Error('Can\'t connect while a connection is connecting. Wait for it to resolve first'));
             return;
         }
 
@@ -143,7 +143,7 @@ class ShoukakuLink {
                 if (this.state !== ShoukakuStatus.CONNECTING) return;
                 clearTimeout(this._timeout);
                 this.state = ShoukakuStatus.CONNECTED;
-                this._callback(null, this);
+                this._callback(null, this.player);
             })
             .catch((error) => {
                 if (this.state === ShoukakuStatus.CONNECTING) {
