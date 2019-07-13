@@ -167,7 +167,7 @@ declare module 'shoukaku' {
     off(event: 'closed' | 'trackException', listener: (data: unknown) => void): this;
   }
 
-  export class ShoukakuPlayer {
+  export class ShoukakuPlayer extends EventEmitter {
     constructor(link: ShoukakuLink);
     public voiceConnection: ShoukakuLink;
     public track: string | null;
@@ -280,7 +280,7 @@ declare module 'shoukaku' {
     off(event: 'disconnected', listener: (name: string, reason: string) => void): this;
   }
 
-  export class Shoukaku {
+  export class Shoukaku extends EventEmitter {
     constructor(client: DiscordClient, options: ShoukakuOptions);
     public client: DiscordClient;
     public id: string | null;
