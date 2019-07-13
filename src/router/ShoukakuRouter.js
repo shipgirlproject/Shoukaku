@@ -53,10 +53,10 @@ class ShoukakuRouter {
                     player._listen('end', json);
                     break;
                 case 'TrackExceptionEvent':
-                    player.listen('trackException', json);
+                    player._listen('trackException', json);
                     break;
                 case 'WebSocketClosedEvent':
-                    player.listen('closed', json);
+                    player._listen('closed', json);
                     break;
             }
         }
