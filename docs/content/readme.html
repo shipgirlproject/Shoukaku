@@ -2,18 +2,70 @@
 <html><head></head><body><h1 id="shoukaku">Shoukaku</h1>
 <hr />
 <p align="center">
-  <img src="https://vignette.wikia.nocookie.net/kancolle/images/9/97/Shoukaku_Christmas_Full.png/revision/latest/" style="max-width: 100%;">
+  <img src="https://vignette.wikia.nocookie.net/kancolle/images/b/b3/Shoukaku_Christmas_Full_Damaged.png/revision/latest/" style="max-width: 100%;">
 </p>
 
 <p>The ShipGirl Project. Shoukaku <code>(c) Kancolle for Shoukaku</code></p>
 <h3 id="a-full-blown-lavalink-wrapper-designed-around-discordjs-v12">A Full Blown Lavalink Wrapper designed around Discord.js v12</h3>
-<p>Currently being used by <a href="https://discordbots.org/bot/kashima-is-a-good-girl">Kashima</a></p>
+<p>✅ Currently being used by: </p>
+<p><a href="https://discordbots.org/bot/424137718961012737"><img src="https://discordbots.org/api/widget/424137718961012737.svg" alt="DBL" style="max-width: 100%;"></a></p>
+<h3 id="why-shoukaku-">Why Shoukaku?</h3>
+<p>✅ Straightforward </p>
+<p>✅ Scalable</p>
+<p>✅ Reliable</p>
+<p>✅ Maintained</p>
+<p>✅ Very Cute and Charming Shipgirl ❤</p>
+<p>✅ And will make your library weeb 😂</p>
 <h3 id="documentation">Documentation</h3>
 <p><a href="https://deivu.github.io/Shoukaku/?api">https://deivu.github.io/Shoukaku/?api</a></p>
 <h3 id="installation">Installation</h3>
 <p>For Stable</p>
 <pre><code>npm i shoukaku</code></pre><p>For Master</p>
-<pre><code>npm i Deivu/Shoukaku</code></pre><h3 id="support-server">Support Server</h3>
+<pre><code>npm i Deivu/Shoukaku</code></pre><h3 id="011----020-migration">0.1.1 -&gt; 0.2.0 Migration</h3>
+<blockquote>
+<p>ShoukakuLink is now a property of ShoukakuPlayer, meaning all link related getters are changed to player getters.</p>
+</blockquote>
+<blockquote>
+<p>You can access ShoukakuLink via .voiceConnection property of ShoukakuPlayer</p>
+</blockquote>
+<blockquote>
+<p>ShoukakuPlayer events are "GREATLY CHANGED". Those marked as optional can be left out.
+The events is as follows</p>
+<ul>
+<li>end</li>
+<li>closed</li>
+<li>error</li>
+<li>nodeDisconnect</li>
+<li>trackException "optional"</li>
+<li>resumed "optional"</li>
+<li>playerUpdate "optional"</li>
+</ul>
+</blockquote>
+<blockquote>
+<p>Shoukaku class have renamed methods and properties</p>
+<ul>
+<li>getLink() -&gt; getPlayer()</li>
+<li>.links -&gt; .players</li>
+<li>.totalLinks -&gt; .totalPlayers</li>
+</ul>
+</blockquote>
+<blockquote>
+<p>ShoukakuSocket also have a renamed property</p>
+<ul>
+<li>.links -&gt; .players</li>
+</ul>
+</blockquote>
+<blockquote>
+<p>You don't disconnect / clean the player on ShoukakuLink but on ShoukakuPlayer now making your code more clean and better</p>
+<pre><code class="js">// 0.1.1 and earlier versions
+ShoukakuLink.player.playTrack();
+ShoukakuLink.disconnect();
+// 0.2.0
+ShoukakuPlayer.playTrack();
+ShoukakuPlayer.disconnect();</code></pre>
+</blockquote>
+<p>You can see more of the changes on updated example below.</p>
+<h3 id="support-server">Support Server</h3>
 <p>If you need help on using this, Join Here <a href="https://discordapp.com/invite/FVqbtGu">ShipGirls Community</a> and <code>ask at #support</code>. </p>
 <h3 id="issue---bug-found-">Issue / Bug Found?</h3>
 <p>Feel free to open an issue in the <a href="https://github.com/Deivu/Shoukaku/issues">Issues</a> section of this repository.</p>
@@ -35,8 +87,10 @@
 <li><input checked="" disabled="" type="checkbox"> Documentation</li>
 <li>and some more to come.</li>
 </ul>
+<h3 id="starting-a-lavalink-server">Starting a Lavalink Server.</h3>
+<p><a href="https://github.com/Frederikam/Lavalink/blob/master/README.md">View Lavalink README here</a></p>
 <h3 id="discordjs-actual-implementation">Discord.js actual implementation.</h3>
-<p><a href="https://github.com/Deivu/Kongou">View Kongou's Source Code Here</a></p>
+<p><a href="https://github.com/Deivu/Kongou">View Kongou's source code here</a></p>
 <h3 id="more-simple-implementation-w-o-queue">More simple implementation w/o queue.</h3>
 <pre><code class="js">const { Client } = require('discord.js');
 const { Shoukaku } = require('shoukaku');
@@ -57,11 +111,15 @@ const Carrier = new Shoukaku(client, {
   reconnectTries: 2,
   restTimeout: 10000 
 });
-// Attach listeners, currently this are the only listeners available
-// on ERROR must be handled.
+
+// Listeners you can use for Shoukaku
 Carrier.on('ready', (name) =&gt; console.log(`Lavalink Node: ${name} is now connected`));
+// Error must be handled
 Carrier.on('error', (name, error) =&gt; console.log(`Lavalink Node: ${name} emitted an error.`, error));
+// Close emits when a lavalink node disconnects.
 Carrier.on('close', (name, code, reason) =&gt; console.log(`Lavalink Node: ${name} closed with code ${code}. Reason: ${reason || 'No reason'}`));
+// Disconnected emits when a lavalink node disconnected and will not try to reconnect again.
+Carrier.on('disconnected', (name, reason) =&gt; console.log(`Lavalink Node: ${name} disconnected. Reason: ${reason || 'No reason'}`));
 
 client.on('ready', () =&gt; {
   // You need to build shoukaku on your client's ready event for her to work like how its done in this example.
@@ -74,8 +132,8 @@ client.on('message', async (msg) =&gt; {
   if (msg.author.bot || !msg.guild) return;
   if (msg.content.startsWith('$play')) {
 
-    // Check if there is already a link on your guild.
-    if (Carrier.getLink(msg.guild.id)) return;
+    // Check if there is already a link on your guild. Since this is a no queue implementation.
+    if (Carrier.getPlayer(msg.guild.id)) return;
 
     const args = msg.content.split(' ');
     if (!args[1]) return;
@@ -91,41 +149,24 @@ client.on('message', async (msg) =&gt; {
 
     if (Array.isArray(data)) data = data[0];
 
-    // Joining to a voice channel that returns the LINK property that we need.
-    const link = await node.joinVoiceChannel({
+    // Getting the ShoukakuPlayer where we can play tracks and disconnect once we dont need it anymore.
+    const player = await node.joinVoiceChannel({
       guildID: msg.guild.id,
       voiceChannelID: msg.member.voice.channelID
     });
 
-    // link.player is our player class for that link, thats what we can use to play music
-    link.player.on('end', (reason) =&gt; {
-      console.log(reason);
-
-      // Disconnect the link and clean everyting up
-      link.disconnect();
-    });
-    link.player.on('exception', console.error);
-    link.player.on('stuck', (reason) =&gt; {
-      console.warn(reason);
-
-      // In stuck event, end will not fire automatically, either we just disconnect or play another song
-      link.disconnect();
-    });
-    link.player.on('voiceClose', (reason) =&gt; {
-      // Make sure you log the reason because it may be an error.
-      console.log(reason);
-
-      // There is no more reason for us to do anything so lets just clean up in voiceClose event
-      link.disconnect();
-    });
-    link.player.on('nodeDisconnect', () =&gt; {
-
-      // You still need to clean your link when player.on 'nodeDisconnect' fires. This means the node that governs this link disconnected.
-      link.disconnect();
-    })
+    // Example of handling the non optional events.
+    const endFunction = (param) =&gt; {
+        console.log(param);
+        player.disconnect();
+    }
+    player.on('end', endFunction);
+    player.on('closed', endFunction);
+    player.on('error', endFunction);
+    player.on('nodeDisconnect', endFunction);
 
     // Play the lavalink track we got
-    await link.player.playTrack(data.track);
+    await player.playTrack(data.track);
     await msg.channel.send("Now Playing: " + data.info.title);
   }
 })

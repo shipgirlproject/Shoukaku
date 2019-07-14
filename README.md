@@ -24,7 +24,7 @@ The ShipGirl Project. Shoukaku `(c) Kancolle for Shoukaku`
 
 ✅ And will make your library weeb 😂
 
-### Documentation "Documents the STABLE 0.1.1 not MASTER"
+### Documentation
 https://deivu.github.io/Shoukaku/?api
 
 ### Installation
@@ -37,12 +37,10 @@ For Master
 npm i Deivu/Shoukaku
 ```
 
-### 0.1.1 -> Master 0.2.0 Beta Migration
+### 0.1.1 -> 0.2.0 Migration
 > ShoukakuLink is now a property of ShoukakuPlayer, meaning all link related getters are changed to player getters.
 
 > You can access ShoukakuLink via .voiceConnection property of ShoukakuPlayer
-
-> ShoukakuPlayer makes the playing, and disconnecting more easier since now it has .connect() and .disconnect() methods.
 
 > ShoukakuPlayer events are "GREATLY CHANGED". Those marked as optional can be left out.
 The events is as follows
@@ -59,7 +57,20 @@ The events is as follows
 - .links -> .players
 - .totalLinks -> .totalPlayers
 
-You can see the changes on updated example below.
+> ShoukakuSocket also have a renamed property
+- .links -> .players
+
+> You don't disconnect / clean the player on ShoukakuLink but on ShoukakuPlayer now making your code more clean and better
+```js
+// 0.1.1 and earlier versions
+ShoukakuLink.player.playTrack();
+ShoukakuLink.disconnect();
+// 0.2.0
+ShoukakuPlayer.playTrack();
+ShoukakuPlayer.disconnect();
+```
+
+You can see more of the changes on updated example below.
 
 ### Support Server
 If you need help on using this, Join Here [ShipGirls Community](https://discordapp.com/invite/FVqbtGu) and `ask at #support`. 
@@ -85,7 +96,7 @@ Feel free to open an issue in the [Issues](https://github.com/Deivu/Shoukaku/iss
 ### Starting a Lavalink Server.
 [View Lavalink README here](https://github.com/Frederikam/Lavalink/blob/master/README.md)
 
-### Discord.js actual implementation. "Not yet updated to latest Master commit."
+### Discord.js actual implementation.
 [View Kongou's source code here](https://github.com/Deivu/Kongou)
 
 ### More simple implementation w/o queue.
@@ -109,9 +120,10 @@ const Carrier = new Shoukaku(client, {
   reconnectTries: 2,
   restTimeout: 10000 
 });
-// Attach listeners, currently this are the only listeners available
+
+// Listeners you can use for Shoukaku
 Carrier.on('ready', (name) => console.log(`Lavalink Node: ${name} is now connected`));
-// Error must be hanndled
+// Error must be handled
 Carrier.on('error', (name, error) => console.log(`Lavalink Node: ${name} emitted an error.`, error));
 // Close emits when a lavalink node disconnects.
 Carrier.on('close', (name, code, reason) => console.log(`Lavalink Node: ${name} closed with code ${code}. Reason: ${reason || 'No reason'}`));
