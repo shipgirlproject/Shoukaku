@@ -1,5 +1,6 @@
 /**
- * Documentation of constants for ease of usage.
+ * Constants for Shoukaku.
+ * @class ShoukakuConstants
  */
 class ShoukakuConstants {
     /**

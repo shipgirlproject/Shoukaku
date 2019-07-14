@@ -1,12 +1,13 @@
 {
     "src":[
         "./src/*.js",
+        "./src/*/*.js",
         "./README.md"
     ],
     "dest":"./docs",
     "jsdoc":{
-        "hierarchy":"true",
-        "sort": false,
+        "hierarchy": true,
+        "sort": "kind",
         "plugins":[
             "plugins/markdown"
         ]

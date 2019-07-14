@@ -3,10 +3,14 @@ const { ShoukakuPlayOptions } = require('../constants/ShoukakuConstants.js');
 const ShoukakuLink = require('./ShoukakuLink.js');
 const endEvents = ['end', 'closed', 'error', 'trackException', 'nodeDisconnect'];
 
+/**
+ * ShoukakuPlayer, Governs the playing stuff on your guild
+ * @class
+ * @extends {external:EventEmitter}
+ */
 class ShoukakuPlayer extends EventEmitter {
     /**
-     * ShoukakuPlayer, Governs the playing stuff on your guild
-     * @extends {external:EventEmitter}
+     * Constructs a player.
      * @param  {ShoukakuSocket} node The node that governs this player.
      * @param  {external:Guild} guild A Discord.JS Guild Object.
      */

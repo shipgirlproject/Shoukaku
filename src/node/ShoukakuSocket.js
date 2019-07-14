@@ -4,9 +4,14 @@ const ShoukakuResolver = require('../rest/ShoukakuResolver.js');
 const ShoukakuPlayer = require('../guild/ShoukakuPlayer.js');
 const Websocket = require('ws');
 const EventEmitter = require('events');
+
+/**
+ * ShoukakuSocket, governs the Lavalink Connection and Lavalink Voice Connections.
+ * @class
+ */
 class ShoukakuSocket extends EventEmitter {
     /**
-     * ShoukakuSocket, governs the Lavalink Connection and Lavalink Voice Connections.
+     * Constructs a socket.
      * @extends {external:EventEmitter}
      * @param  {Shoukaku} shoukaku Your Shoukaku Instance
      * @param {ShoukakuOptions} node ShoukakuNodeOptions Options to initialize Shoukaku with
