@@ -1,7 +1,12 @@
 const { ShoukakuStatus } = require('../constants/ShoukakuConstants.js');
+
+/**
+ * ShoukakuLink, the voice connection manager of a guild. Contains the Player Class that can be used to play tracks.
+ * @class
+ */
 class ShoukakuLink {
     /**
-     * ShoukakuLink, the voice connection manager of a guild. Contains the Player Class that can be used to play tracks.
+     * Constructor for ShoukakuLink
      * @param {ShoukakuPlayer} player The player of this link.
      * @param {ShoukakuSocket} node The node that governs this link.
      * @param {external:Guild} guild A Discord.js Guild Object.

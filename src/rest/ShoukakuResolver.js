@@ -5,9 +5,13 @@ const Search = {
     'youtube': 'ytsearch'
 };
 const Success = ['TRACK_LOADED', 'PLAYLIST_LOADED', 'SEARCH_RESULT'];
+/**
+ * ShoukakuResolver, the REST part of the wrapper
+ * @class
+ */
 class ShoukakuResolver {
     /**
-     * ShoukakuResolver, the REST part of the wrapper
+     * Constructs ShoukakuResolver
      * @param {string} host Your node host / ip address of where the lavalink is hosted.
      * @param {string} port The Port Number of your lavalink instance.
      * @param {string} auth The authentication key you set on your lavalink config.
