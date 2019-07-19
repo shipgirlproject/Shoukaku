@@ -3,6 +3,9 @@
   "version": "0.2.1",
   "description": "A lavalink client for Discord.js v12 only",
   "main": "index.js",
+  "scripts": {
+      "doc": "docma"
+  },
   "types": "index.d.ts",
   "keywords": [
     "bot",

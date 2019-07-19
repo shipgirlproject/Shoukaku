@@ -19,10 +19,16 @@ const EventEmitter = require('events');
  * @external Map
  * @see {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map}
  */
+
+
+/**
+  * Shoukaku, governs the client's node connections.
+  * @class
+  * @extends {external:EventEmitter}
+  */
 class Shoukaku extends EventEmitter {
     /**
-     * Shoukaku, governs the client's node connections.
-     * @extends {external:EventEmitter}
+     * Initialize the base class
      * @param  {external:Client} client Your Discord.js client
      * @param {ShoukakuConstants#ShoukakuOptions} [options=ShoukakuOptions] Options to initialize Shoukaku with
      */
