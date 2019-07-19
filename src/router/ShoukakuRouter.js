@@ -33,11 +33,14 @@ class ShoukakuRouter {
     static PacketRouter(packet) {
         const player = this.players.get(packet.d.guild_id);
         if (!player) return;
-        if (packet.t === 'VOICE_STATE_UPDATE') {
-            if (!packet.d.channel_id) return player.disconnect();
-            player.voiceConnection.build = packet.d;
+        switch (packet.t) {
+            case 'VOICE_STATE_UPDATE': 
+                player.voiceConnection.build = packet.d;
+                if (!packet.d.channel_id) player._listen('error', new Error('Voice connection is closed unexpectedly.'));
+                break;
+            case 'VOICE_SERVER_UPDATE':
+                player.voiceConnection.serverUpdate = packet.d;
         }
-        if (packet.t === 'VOICE_SERVER_UPDATE') player.voiceConnection.serverUpdate = packet.d;
     }
 
     static EventRouter(json) {
