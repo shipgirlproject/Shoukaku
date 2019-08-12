@@ -1,5 +1,6 @@
 const { ShoukakuStatus, ShoukakuNodeStats, ShoukakuJoinOptions } = require('../constants/ShoukakuConstants.js');
 const { PacketRouter, EventRouter } = require('../router/ShoukakuRouter.js');
+const ShoukakuError = require('../constants/ShoukakuError.js');
 const ShoukakuResolver = require('../rest/ShoukakuResolver.js');
 const ShoukakuPlayer = require('../guild/ShoukakuPlayer.js');
 const Websocket = require('ws');
@@ -122,14 +123,14 @@ class ShoukakuSocket extends EventEmitter {
     joinVoiceChannel(options = ShoukakuJoinOptions) {
         return new Promise((resolve, reject) => {
             if (!options.guildID || !options.voiceChannelID)
-                return reject(new Error('Guild ID or Channel ID is not specified.'));
+                return reject(new ShoukakuError('Guild ID or Channel ID is not specified.'));
 
             if (this.players.has(options.guildID))
-                return reject(new Error('A Player is already established in this channel'));
+                return reject(new ShoukakuError('A Player is already established in this channel'));
 
             const guild = this.shoukaku.client.guilds.get(options.guildID);
             if (!guild)
-                return reject(new Error('Guild not found. Cannot continue creating the voice connection.'));
+                return reject(new ShoukakuError('Guild not found. Cannot continue creating the voice connection.'));
 
             const player = new ShoukakuPlayer(this, guild);
             this.players.set(guild.id, player);

@@ -1,4 +1,5 @@
 const { ShoukakuStatus } = require('../constants/ShoukakuConstants.js');
+const ShoukakuError = require('../constants/ShoukakuError.js');
 
 /**
  * ShoukakuLink, the voice connection manager of a guild. Contains the Player Class that can be used to play tracks.
@@ -82,17 +83,17 @@ class ShoukakuLink {
 
     _connect(d, callback) {
         if (!d || !callback)
-            throw new Error('No Options or Callback supplied.');
+            throw new ShoukakuError('No Options or Callback supplied.');
             
         this._callback = callback;
         if (this.state === ShoukakuStatus.CONNECTING)  {
-            this._callback(new Error('Can\'t connect while a connection is connecting. Wait for it to resolve first'));
+            this._callback(new ShoukakuError('Can\'t connect while a connection is connecting. Wait for it to resolve first'));
             return;
         }
 
         this._timeout = setTimeout(() => {
             this.state = ShoukakuStatus.DISCONNECTED;
-            this._callback(new Error('The voice connection is not established in 15 seconds'));
+            this._callback(new ShoukakuError('The voice connection is not established in 15 seconds'));
         }, 15000);
 
         this.state = ShoukakuStatus.CONNECTING;

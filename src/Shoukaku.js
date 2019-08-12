@@ -1,5 +1,6 @@
 const { RawRouter, ReconnectRouter } = require('./router/ShoukakuRouter.js');
 const constants = require('./constants/ShoukakuConstants.js');
+const ShoukakuError = require('./constants/ShoukakuError.js');
 const ShoukakuSocket = require('./node/ShoukakuSocket.js');
 const EventEmitter = require('events');
 
@@ -125,7 +126,7 @@ class Shoukaku extends EventEmitter {
      * @returns {void}
      */
     build(nodes, options) {
-        if (!this.init) throw new Error('You cannot build Shoukaku twice');
+        if (!this.init) throw new ShoukakuError('You cannot build Shoukaku twice');
         options = this._mergeDefault(constants.ShoukakuBuildOptions, options);
         this.id = options.id;
         this.shardCount = options.shardCount;
@@ -184,11 +185,11 @@ class Shoukaku extends EventEmitter {
      */
     getNode(name) {
         if (!this.nodes.size)
-            throw new Error('No nodes available. What happened?');
+            throw new ShoukakuError('No nodes available. What happened?');
         if (name) {
             const node = this.nodes.get(name);
             if (node) return node;
-            throw new Error('The node name you specified is not one of my nodes');
+            throw new ShoukakuError('The node name you specified is not one of my nodes');
         }
         return [...this.nodes.values()].sort((a, b) => a.penalties - b.penalties).shift();
     }
@@ -240,7 +241,7 @@ class Shoukaku extends EventEmitter {
         const defaultKeys = Object.keys(def);
         for (const key of defaultKeys) {
             if (def[key] === null) {
-                if (!given[key]) throw new Error(`${key} was not found from the given options.`);
+                if (!given[key]) throw new ShoukakuError(`${key} was not found from the given options.`);
             }
             if (!given[key]) given[key] = def[key];
         }

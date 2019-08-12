@@ -1,6 +1,7 @@
 const EventEmitter = require('events');
 const { ShoukakuPlayOptions } = require('../constants/ShoukakuConstants.js');
 const ShoukakuLink = require('./ShoukakuLink.js');
+const ShoukakuError = require('../constants/ShoukakuError.js');
 const endEvents = ['end', 'closed', 'error', 'trackException', 'nodeDisconnect'];
 
 /**
@@ -227,7 +228,7 @@ class ShoukakuPlayer extends EventEmitter {
 
     async _resume() {
         if (!this.track) {
-            this._listen('error', new Error('No Track Found upon trying to resume.'));
+            this._listen('error', new ShoukakuError('No Track Found upon trying to resume.'));
             return;
         }
         try {

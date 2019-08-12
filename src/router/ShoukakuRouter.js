@@ -1,4 +1,5 @@
 const { ShoukakuStatus } = require('../constants/ShoukakuConstants.js');
+const ShoukakuError = require('../constants/ShoukakuError.js');
 class ShoukakuRouter {
     static ReconnectRouter(id) {
         for (const node of this.nodes.values()) {
@@ -36,7 +37,7 @@ class ShoukakuRouter {
         switch (packet.t) {
             case 'VOICE_STATE_UPDATE': 
                 player.voiceConnection.build = packet.d;
-                if (!packet.d.channel_id) player._listen('error', new Error('Voice connection is closed unexpectedly.'));
+                if (!packet.d.channel_id) player._listen('error', new ShoukakuError('Voice connection is closed unexpectedly.'));
                 break;
             case 'VOICE_SERVER_UPDATE':
                 player.voiceConnection.serverUpdate = packet.d;

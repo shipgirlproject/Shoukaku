@@ -1,5 +1,7 @@
 const Fetch = require('node-fetch');
 const Abort = require('abort-controller');
+const ShoukakuTimeout = require('../constants/ShoukakuTimeout.js');
+const ShoukakuError = require('../constants/ShoukakuError.js');
 const Search = {
     'soundcloud': 'scsearch',
     'youtube': 'ytsearch'
@@ -35,10 +37,10 @@ class ShoukakuResolver {
     */
     async resolve(identifier, search) {
         if (!identifier)
-            throw new Error('Query cannot be null');
+            throw new ShoukakuError('Query cannot be null');
         if (search) {
             search = Search[search];
-            if (!search) throw new Error('This search type is not supported');
+            if (!search) throw new ShoukakuError('This search type is not supported');
             identifier = `${search}:${identifier}`;
         }
         const url = new URL(`${this.url}/loadtracks`);
@@ -64,7 +66,7 @@ class ShoukakuResolver {
      */
     decode(track) {
         if (!track)
-            throw new Error('Track cannot be null');
+            throw new ShoukakuError('Track cannot be null');
         const url = new URL(`${this.url}/decodetrack`);
         url.search = new URLSearchParams({ track });
         return this._fetch(url.toString());
@@ -75,11 +77,12 @@ class ShoukakuResolver {
         const timeout = setTimeout(() => controller.abort(), this.timeout);
         return Fetch(url, { headers: { Authorization: this.auth }, signal: controller.signal })
             .then((res) => {
-                if (res.status !== 200)
-                    throw new Error(`Shoukaku Resolver Failed. Error Code: ${res.status}`);
+                if (!res.ok)
+                    throw new ShoukakuError(`Failed to fetch the video with response code: ${res.status}`);
                 return res.json();
-            }, (error) => {
-                if (error.name === 'AbortError') error = new Error(`Shoukaku Resolver Failed. Failed to fetch this video in ${Math.round(this.timeout / 1000)}s`);
+            })
+            .catch((error) => {
+                if (error.name === 'AbortError') error = new ShoukakuTimeout(`Failed to fetch the video in ${Math.round(this.timeout / 1000)}s`);
                 throw error;
             })
             .finally(() => clearTimeout(timeout));
