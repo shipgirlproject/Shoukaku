@@ -57,7 +57,6 @@ class Shoukaku extends EventEmitter {
         this.nodes = new Map();
 
         Object.defineProperty(this, 'options', { value: this._mergeDefault(constants.ShoukakuOptions, options) });
-        Object.defineProperty(this, 'init', { value: true, writable: true });
         Object.defineProperty(this, 'rawRouter', { value: RawRouter.bind(this) });
         Object.defineProperty(this, 'reconnectRouter', { value: ReconnectRouter.bind(this) });
     }
@@ -125,8 +124,9 @@ class Shoukaku extends EventEmitter {
      * @param {ShoukakuConstants#ShoukakuBuildOptions} options Options that is need by Shoukaku to build herself.
      * @returns {void}
      */
-    build(nodes, options) {
-        if (!this.init) throw new ShoukakuError('You cannot build Shoukaku twice');
+    start(nodes, options) {
+        if (this.id) 
+            throw new ShoukakuError('You already started Shoukaku, you don\'t need to start her again.');
         options = this._mergeDefault(constants.ShoukakuBuildOptions, options);
         this.id = options.id;
         this.shardCount = options.shardCount;
@@ -136,7 +136,6 @@ class Shoukaku extends EventEmitter {
         }
         this.client.on('raw', this.rawRouter);
         this.client.on('shardReady', this.reconnectRouter);
-        this.init = false;
     }
     /**
     * Function to register a Lavalink Node
@@ -144,6 +143,8 @@ class Shoukaku extends EventEmitter {
     * @returns {void}
     */
     addNode(nodeOptions) {
+        if (!this.id) 
+            throw new ShoukakuError('You didn\'t start Shoukaku once. Please call .start() method once before using this.');
         const node = new ShoukakuSocket(this, nodeOptions);
         node.connect(this.id, this.shardCount, false);
         const _close = this._reconnect.bind(this);
@@ -161,6 +162,8 @@ class Shoukaku extends EventEmitter {
      * @returns {boolean} true if the node was removed with no problems. Otherwise false.
      */
     removeNode(name, libraryInvoked = false) {
+        if (!this.id) 
+            throw new ShoukakuError('You didn\'t start Shoukaku once. Please call .start() method once before using this.');
         const node = this.nodes.get(name);
         if (!node) return false;
         node.removeAllListeners();
@@ -184,6 +187,8 @@ class Shoukaku extends EventEmitter {
      *     })
      */
     getNode(name) {
+        if (!this.id) 
+            throw new ShoukakuError('You didn\'t start Shoukaku once. Please call .start() method once before using this.');
         if (!this.nodes.size)
             throw new ShoukakuError('No nodes available. What happened?');
         if (name) {
@@ -199,6 +204,8 @@ class Shoukaku extends EventEmitter {
     * @returns {?ShoukakuPlayer}
     */
     getPlayer(guildID) {
+        if (!this.id) 
+            throw new ShoukakuError('You didn\'t start Shoukaku once. Please call .start() method once before using this.');
         if (!guildID) return null;
         if (!this.nodes.size) return null;
         return this.players.get(guildID);

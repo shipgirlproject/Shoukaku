@@ -1,6 +1,6 @@
 # Shoukaku
 <p align="center">
-  <img src="https://vignette.wikia.nocookie.net/kancolle/images/b/b3/Shoukaku_Christmas_Full_Damaged.png/revision/latest/">
+  <img src="https://vignette.wikia.nocookie.net/kancolle/images/c/c8/Shoukaku_Full.png/revision/latest">
 </p>
 
 The ShipGirl Project. Shoukaku `(c) Kancolle for Shoukaku`
@@ -37,7 +37,19 @@ For Master
 npm i Deivu/Shoukaku
 ```
 
-### 0.1.1 -> 0.2.0 Migration
+### 0.2.x -> 1.0.x Migration
+
+> 0.2.x and earlier
+```js
+<Shoukaku>.build({ /* buildOptions here */ });
+```
+
+> 1.0.0 and newer
+```js
+<Shoukaku>.start({ /* buildOptions here */ });
+```
+
+### 0.1.x -> 0.2.x Migration
 > ShoukakuLink is now a property of ShoukakuPlayer, meaning all link related getters are changed to player getters.
 
 > You can access ShoukakuLink via .voiceConnection property of ShoukakuPlayer
@@ -61,13 +73,17 @@ The events is as follows
 - .links -> .players
 
 > You don't disconnect / clean the player on ShoukakuLink but on ShoukakuPlayer now making your code more clean and better
+
+> 0.1.1 and earlier
 ```js
-// 0.1.1 and earlier versions
-ShoukakuLink.player.playTrack();
-ShoukakuLink.disconnect();
-// 0.2.0
-ShoukakuPlayer.playTrack();
-ShoukakuPlayer.disconnect();
+<ShoukakuLink>.player.playTrack();
+<ShoukakuLink>.disconnect();
+```
+
+> 0.2.x and newer
+```js
+<ShoukakuPlayer>.playTrack();
+<ShoukakuPlayer>.disconnect();
 ```
 
 You can see more of the changes on updated example below.
@@ -82,16 +98,6 @@ Feel free to open an issue in the [Issues](https://github.com/Deivu/Shoukaku/iss
 > If you want to help in development, you can use the wrapper and report the issues you experienced on using it, or Submit a PR if you think you can improve something.
 
 > There is a Discord.JS actual implementation and a simple implementation examples below.
-
-### Task List
-- [x] Base Logic
-- [x] Player & Voice Logic 
-- [x] Load Balancing Logic
-- [x] Node Removal Logic
-- [x] Reconnect Logic
-- [x] Resuming Logic
-- [x] Documentation
-- and some more to come.
 
 ### Starting a Lavalink Server.
 [View Lavalink README here](https://github.com/Frederikam/Lavalink/blob/master/README.md)
@@ -132,7 +138,7 @@ Carrier.on('disconnected', (name, reason) => console.log(`Lavalink Node: ${name}
 
 client.on('ready', () => {
   // You need to build shoukaku on your client's ready event for her to work like how its done in this example.
-  Carrier.build(MyLavalinkServer, { id: client.user.id  });
+  Carrier.start(MyLavalinkServer, { id: client.user.id  });
   console.log('Bot Initialized');
 })
 

@@ -138,8 +138,8 @@ declare module 'shoukaku' {
   export class ShoukakuResolver {
     constructor(host: string, port: string, auth: string, timeout: number);
     public timeout: number;
-    public auth: string;
     public url: string;
+    private auth: string;
     public resolve(identifier: string, search: Source): Promise<LoadTrackResponse | Track | Track[] | null>;
     public decode(track: Base64String): Promise<unknown>;
 
@@ -238,15 +238,15 @@ declare module 'shoukaku' {
     public stats: ShoukakuNodeStats;
     public reconnectAttempts: number;
     public name: string;
-    private url: string;
+    public url: string;
     private auth: string;
     private resumed: boolean;
     private cleaner: boolean;
     private packetRouter: unknown;
     private eventRouter: unknown;
 
-    public resumable: boolean;
-    public resumableTimeout: number;
+    private resumable: boolean;
+    private resumableTimeout: number;
     public penalties: number;
     public connect(id: string, shardCount: number, resumable: boolean | string): void;
     public joinVoiceChannel(options: ShoukakuJoinOptions): Promise<ShoukakuPlayer>;
@@ -290,10 +290,9 @@ declare module 'shoukaku' {
     public players: Map<string, ShoukakuPlayer>;
     public totalPlayers: number;
 
-    public options: ShoukakuOptions;
-    public init: boolean;
+    private options: ShoukakuOptions;
 
-    public build(nodes: ShoukakuNodeOptions[], options: ShoukakuBuildOptions): void;
+    public start(nodes: ShoukakuNodeOptions[], options: ShoukakuBuildOptions): void;
     public addNode(nodeOptions: ShoukakuNodeOptions): void;
     public removeNode(name: string, libraryInvoked?: boolean): void;
     public getNode(name?: boolean | string): ShoukakuSocket;

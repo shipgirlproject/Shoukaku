@@ -21,13 +21,17 @@ class ShoukakuResolver {
      */
     constructor(host, port, auth, timeout) {
         /**
+        * URL of the host used by this resolver instance.
+        * @type {string}
+        */
+        this.url = `http://${host}:${port}/`;
+        /**
          * This Resolver Timeout before it decides to cancel the request.
          * @type {number}
          */
         this.timeout = timeout || 10000;
 
         Object.defineProperty(this, 'auth', { value: auth });
-        Object.defineProperty(this, 'url', { value: `http://${host}:${port}/` });
     }
     /**
     * Resolves a identifier into a lavalink track.

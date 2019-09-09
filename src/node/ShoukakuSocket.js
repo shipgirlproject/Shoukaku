@@ -54,8 +54,12 @@ class ShoukakuSocket extends EventEmitter {
         * @type {string}
         */
         this.name = node.name;
+        /**
+        * URL of the websocket used in this node.
+        * @type {string}
+        */
+        this.url = `ws://${node.host}:${node.port}`;
 
-        Object.defineProperty(this, 'url', { value: `ws://${node.host}:${node.port}` });
         Object.defineProperty(this, 'auth', { value: node.auth });
         Object.defineProperty(this, 'resumed', { value: false, writable: true });
         Object.defineProperty(this, 'cleaner', { value: false, writable: true });

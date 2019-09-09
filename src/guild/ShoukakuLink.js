@@ -86,6 +86,7 @@ class ShoukakuLink {
             throw new ShoukakuError('No Options or Callback supplied.');
             
         this._callback = callback;
+
         if (this.state === ShoukakuStatus.CONNECTING)  {
             this._callback(new ShoukakuError('Can\'t connect while a connection is connecting. Wait for it to resolve first'));
             return;
@@ -119,10 +120,7 @@ class ShoukakuLink {
     }
 
     _send(d) {
-        this.node.shoukaku.send({
-            op:4,
-            d
-        });
+        this.node.shoukaku.send({ op: 4, d });
     }
 
     _clearVoice() {
@@ -132,33 +130,26 @@ class ShoukakuLink {
     }
 
     _destroy() {
-        this.node.send({
-            op: 'destroy',
-            guildId: this.guildID
-        }).catch(() => null);
+        this.node.send({ op: 'destroy', guildId: this.guildID })
+            .catch(() => null);
     }
 
     _voiceUpdate(event) {
-        this.node.send({
-            op: 'voiceUpdate',
-            guildId: this.guildID,
-            sessionId: this.sessionID,
-            event
-        })
+        this.node.send({ op: 'voiceUpdate', guildId: this.guildID, sessionId: this.sessionID, event })
             .then(() => {
+                if (this._timeout) clearTimeout(this._timeout);
                 if (this.state !== ShoukakuStatus.CONNECTING) return;
-                clearTimeout(this._timeout);
                 this.state = ShoukakuStatus.CONNECTED;
                 this._callback(null, this.player);
             })
             .catch((error) => {
-                if (this.state === ShoukakuStatus.CONNECTING) {
-                    clearTimeout(this._timeout);
-                    this.state = ShoukakuStatus.DISCONNECTED;
-                    this._callback(error);
+                if (this._timeout) clearTimeout(this._timeout);
+                if (this.state !== ShoukakuStatus.CONNECTING) {
+                    this.player._listen('error', error);
                     return;
                 }
-                this.player._listen('error', error);
+                this.state = ShoukakuStatus.DISCONNECTED;
+                this._callback(error); 
             })
             .finally(() => {
                 this._callback = null;

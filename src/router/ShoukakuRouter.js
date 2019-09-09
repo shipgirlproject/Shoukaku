@@ -47,7 +47,10 @@ class ShoukakuRouter {
     static EventRouter(json) {
         const player = this.players.get(json.guildId);
         if (!player) return;
-        if (json.op === 'playerUpdate') return player._listen('playerUpdate', json.state);
+        if (json.op === 'playerUpdate') {
+            player._listen('playerUpdate', json.state);
+            return;
+        }
         if (json.op === 'event') {
             switch (json.type) {
                 case 'TrackEndEvent':
