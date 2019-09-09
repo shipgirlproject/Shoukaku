@@ -1,7 +1,13 @@
-# Shoukaku
+## Shoukaku
 <p align="center">
   <img src="https://vignette.wikia.nocookie.net/kancolle/images/c/c8/Shoukaku_Full.png/revision/latest">
 </p>
+
+[![Discord](https://img.shields.io/discord/423116740810244097?style=for-the-badge)](https://discordapp.com/invite/FVqbtGu)
+[![npm](https://img.shields.io/npm/v/shoukaku?style=for-the-badge)](https://www.npmjs.com/package/shoukaku)
+![GitHub issues](https://img.shields.io/github/issues-raw/Deivu/Shoukaku?style=for-the-badge)
+![Snyk Vulnerabilities for npm package](https://img.shields.io/snyk/vulnerabilities/npm/shoukaku?style=for-the-badge) 
+![NPM](https://img.shields.io/npm/l/shoukaku?style=for-the-badge)
 
 The ShipGirl Project. Shoukaku `(c) Kancolle for Shoukaku`
 
