@@ -24,12 +24,11 @@ const EventEmitter = require('events');
 
 /**
   * Shoukaku, governs the client's node connections.
-  * @class
+  * @class Shoukaku
   * @extends {external:EventEmitter}
   */
 class Shoukaku extends EventEmitter {
     /**
-     * Initialize the base class
      * @param  {external:Client} client Your Discord.js client
      * @param {ShoukakuConstants#ShoukakuOptions} [options=ShoukakuOptions] Options to initialize Shoukaku with
      */
@@ -61,8 +60,9 @@ class Shoukaku extends EventEmitter {
         Object.defineProperty(this, 'reconnectRouter', { value: ReconnectRouter.bind(this) });
     }
     /**
-     * Gets all the Players governed by the Nodes / Sockets in this instance.
+     * Gets all the Players that is currently active on all nodes in this instance.
      * @type {external:Map}
+     * @memberof Shoukaku
      */
     get players() {
         const players = new Map();
@@ -74,6 +74,7 @@ class Shoukaku extends EventEmitter {
     /**
      * Gets the number of total Players that is currently active on all nodes in this instance.
      * @type {number}
+     * @memberof Shoukaku
      */
     get totalPlayers() {
         let counter = 0;
@@ -81,18 +82,19 @@ class Shoukaku extends EventEmitter {
         return counter;
     }
 
-    // Events
     /**
      * Emitted when a Lavalink Node sends a debug event.
      * @event Shoukaku#debug
      * @param {string} name The name of the Lavalink Node that sent a debug event.
      * @param {Object} data The actual debug data
+     * @memberof Shoukaku
      */
     /**
      * Emitted when a lavalink Node encouters an error. This event MUST BE HANDLED.
      * @event Shoukaku#error
      * @param {string} name The name of the Lavalink Node that sent an error event or 'Shoukaku' if the error is from Shoukaku.
      * @param {Error} error The error encountered.
+     * @memberof Shoukaku
      * @example
      * // <Shoukaku> is your own instance of Shoukaku
      * <Shoukaku>.on('error', console.error);
@@ -102,6 +104,7 @@ class Shoukaku extends EventEmitter {
      * @event Shoukaku#ready
      * @param {string} name The name of the Lavalink Node that sent a ready event.
      * @param {boolean} reconnect True if the session reconnected, otherwise false.
+     * @memberof Shoukaku
      */
     /**
      * Emitted when a Lavalink Node closed.
@@ -109,23 +112,25 @@ class Shoukaku extends EventEmitter {
      * @param {string} name The name of the Lavalink Node that sent a close event.
      * @param {number} code The WebSocket close code https://github.com/Luka967/websocket-close-codes
      * @param {reason} reason The reason for this close event.
+     * @memberof Shoukaku
      */
     /**
      * Emitted when a Lavalink Node will not try to reconnect again.
      * @event Shoukaku#disconnected
      * @param {string} name The name of the Lavalink Node that sent a close event.
      * @param {string} reason The reason for the disconnect.
+     * @memberof Shoukaku
      */
-    // Events End
 
     /**
      * The starting point of Shoukaku, must be called in ready event in order for Shoukaku to work.
      * @param {ShoukakuConstants#ShoukakuNodeOptions} nodes An array of lavalink nodes for Shoukaku to connect to.
      * @param {ShoukakuConstants#ShoukakuBuildOptions} options Options that is need by Shoukaku to build herself.
+     * @memberof Shoukaku
      * @returns {void}
      */
     start(nodes, options) {
-        if (this.id) 
+        if (this.id)
             throw new ShoukakuError('You already started Shoukaku, you don\'t need to start her again.');
         options = this._mergeDefault(constants.ShoukakuBuildOptions, options);
         this.id = options.id;
@@ -140,10 +145,11 @@ class Shoukaku extends EventEmitter {
     /**
     * Function to register a Lavalink Node
     * @param {ShoukakuConstants#ShoukakuNodeOptions} nodeOptions The Node Options to be used to connect to.
+    * @memberof Shoukaku
     * @returns {void}
     */
     addNode(nodeOptions) {
-        if (!this.id) 
+        if (!this.id)
             throw new ShoukakuError('You didn\'t start Shoukaku once. Please call .start() method once before using this.');
         const node = new ShoukakuSocket(this, nodeOptions);
         node.connect(this.id, this.shardCount, false);
@@ -155,14 +161,14 @@ class Shoukaku extends EventEmitter {
         node.on('close', _close);
         this.nodes.set(node.name, node);
     }
-    // noinspection JSCommentMatchesSignature
     /**
      * Function to remove a Lavalink Node
      * @param {string} name The Lavalink Node to remove
+     * @memberof Shoukaku
      * @returns {boolean} true if the node was removed with no problems. Otherwise false.
      */
     removeNode(name, libraryInvoked = false) {
-        if (!this.id) 
+        if (!this.id)
             throw new ShoukakuError('You didn\'t start Shoukaku once. Please call .start() method once before using this.');
         const node = this.nodes.get(name);
         if (!node) return false;
@@ -175,6 +181,7 @@ class Shoukaku extends EventEmitter {
     /**
      * Shortcut to get the Ideal Node or a manually specified Node from the current nodes that Shoukaku governs.
      * @param {boolean|string} [name] If blank, Shoukaku will automatically return the Ideal Node for you to connect to. If name is specifed, she will try to return the node you specified.
+     * @memberof Shoukaku
      * @returns {ShoukakuSocket}
      * @example
      * const node = <Shoukaku>.getNode();
@@ -187,7 +194,7 @@ class Shoukaku extends EventEmitter {
      *     })
      */
     getNode(name) {
-        if (!this.id) 
+        if (!this.id)
             throw new ShoukakuError('You didn\'t start Shoukaku once. Please call .start() method once before using this.');
         if (!this.nodes.size)
             throw new ShoukakuError('No nodes available. What happened?');
@@ -201,10 +208,11 @@ class Shoukaku extends EventEmitter {
     /**
     * Shortcut to get the Player of a guild, if there is any.
     * @param {string} guildID The guildID of the guild we are trying to get.
+    * @memberof Shoukaku
     * @returns {?ShoukakuPlayer}
     */
     getPlayer(guildID) {
-        if (!this.id) 
+        if (!this.id)
             throw new ShoukakuError('You didn\'t start Shoukaku once. Please call .start() method once before using this.');
         if (!guildID) return null;
         if (!this.nodes.size) return null;
@@ -242,7 +250,6 @@ class Shoukaku extends EventEmitter {
         this.emit('close', name, code, reason);
     }
 
-    // noinspection JSMethodCanBeStatic
     _mergeDefault(def, given) {
         if (!given) return def;
         const defaultKeys = Object.keys(def);

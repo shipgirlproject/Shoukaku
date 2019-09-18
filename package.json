@@ -27,7 +27,7 @@
   "dependencies": {
     "abort-controller": "^3.0.0",
     "node-fetch": "^2.6.0",
-    "ws": "^7.0.0"
+    "ws": "^7.1.2"
   },
   "devDependencies": {
     "discord.js": "github:discordjs/discord.js",

@@ -7,12 +7,11 @@ const Websocket = require('ws');
 const EventEmitter = require('events');
 
 /**
- * ShoukakuSocket, governs the Lavalink Connection and Lavalink Voice Connections.
- * @class
+ * ShoukakuSocket, manages a single Lavalink WS connection.
+ * @class ShoukakuSocket
  */
 class ShoukakuSocket extends EventEmitter {
     /**
-     * Constructs a socket.
      * @extends {external:EventEmitter}
      * @param  {Shoukaku} shoukaku Your Shoukaku Instance
      * @param {ShoukakuOptions} node ShoukakuNodeOptions Options to initialize Shoukaku with
@@ -30,7 +29,7 @@ class ShoukakuSocket extends EventEmitter {
         */
         this.players = new Map();
         /**
-        * The REST server of this Socket, mostly to load balance your REST requests instead of relying on a single node.
+        * The REST API of this Socket, mostly to load balance your REST requests instead of relying on a single node.
         * @type {ShoukakuResolver}
         */
         this.rest = new ShoukakuResolver(node.host, node.port, node.auth, shoukaku.options.restTimeout);
@@ -74,9 +73,11 @@ class ShoukakuSocket extends EventEmitter {
     get resumableTimeout() {
         return this.shoukaku.options.resumableTimeout;
     }
+
     /**
     * Penalties of this Socket. The higher the return number, the more loaded the server is.
     * @type {number}
+    * @memberof ShoukakuSocket
     */
     get penalties() {
         let penalties = 0;
@@ -93,6 +94,7 @@ class ShoukakuSocket extends EventEmitter {
     * @param {string} id Your Bot's / Client user id.
     * @param {number} shardCount Your Bot's / Client shard count.
     * @param {boolean|string} resumable Determines if we should try to resume the connection.
+    * @memberof ShoukakuSocket
     * @returns {void}
     */
     connect(id, shardCount, resumable) {
@@ -117,6 +119,7 @@ class ShoukakuSocket extends EventEmitter {
     /**
      * Creates a player and connects your bot to the specified guild's voice channel
      * @param {ShoukakuConstants#ShoukakuJoinOptions} options Join data to send.
+     * @memberof ShoukakuSocket
      * @returns {Promise<ShoukakuPlayer>}
      * @example
      * <ShoukakuSocket>.joinVoiceChannel({
@@ -169,23 +172,6 @@ class ShoukakuSocket extends EventEmitter {
         });
     }
 
-    _configureResuming() {
-        return this.send({
-            op: 'configureResuming',
-            key: this.resumable,
-            timeout: this.resumableTimeout
-        });
-    }
-
-    _configureCleaner(state) {
-        this.cleaner = state;
-    }
-
-    _executeCleaner() {
-        if (!this.cleaner) return this._configureCleaner(true);
-        for (const player of this.players.values()) player.voiceConnection._nodeDisconnected();
-    }
-
     _upgrade(response) {
         this.resumed = response.headers['session-resumed'] === 'true';
     }
@@ -220,6 +206,19 @@ class ShoukakuSocket extends EventEmitter {
         this.shoukaku.removeListener('packetUpdate', this.packetRouter);
         this.ws = null;
         this.emit('close', this.name, code, reason);
+    }
+
+    _configureResuming() {
+        return this.send({
+            op: 'configureResuming',
+            key: this.resumable,
+            timeout: this.resumableTimeout
+        });
+    }
+
+    _executeCleaner() {
+        if (!this.cleaner) return this.cleaner = true;
+        for (const player of this.players.values()) player.voiceConnection._nodeDisconnected();
     }
 }
 module.exports = ShoukakuSocket;

@@ -1,5 +1,6 @@
 const { ShoukakuStatus } = require('../constants/ShoukakuConstants.js');
 const ShoukakuError = require('../constants/ShoukakuError.js');
+
 class ShoukakuRouter {
     static ReconnectRouter(id) {
         for (const node of this.nodes.values()) {

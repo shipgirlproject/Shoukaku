@@ -2,12 +2,11 @@ const { ShoukakuStatus } = require('../constants/ShoukakuConstants.js');
 const ShoukakuError = require('../constants/ShoukakuError.js');
 
 /**
- * ShoukakuLink, the voice connection manager of a guild. Contains the Player Class that can be used to play tracks.
- * @class
+ * ShoukakuLink, contains data about the voice connection on the guild.
+ * @class ShoukakuLink
  */
 class ShoukakuLink {
     /**
-     * Constructor for ShoukakuLink
      * @param {ShoukakuPlayer} player The player of this link.
      * @param {ShoukakuSocket} node The node that governs this link.
      * @param {external:Guild} guild A Discord.js Guild Object.
@@ -84,7 +83,7 @@ class ShoukakuLink {
     _connect(d, callback) {
         if (!d || !callback)
             throw new ShoukakuError('No Options or Callback supplied.');
-            
+
         this._callback = callback;
 
         if (this.state === ShoukakuStatus.CONNECTING)  {
@@ -149,7 +148,7 @@ class ShoukakuLink {
                     return;
                 }
                 this.state = ShoukakuStatus.DISCONNECTED;
-                this._callback(error); 
+                this._callback(error);
             })
             .finally(() => {
                 this._callback = null;

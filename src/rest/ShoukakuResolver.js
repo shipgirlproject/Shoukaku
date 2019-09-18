@@ -8,12 +8,11 @@ const Search = {
 };
 const Success = ['TRACK_LOADED', 'PLAYLIST_LOADED', 'SEARCH_RESULT'];
 /**
- * ShoukakuResolver, the REST part of the wrapper
- * @class
+ * ShoukakuResolver, provides access to Lavalink REST API.
+ * @class ShoukakuResolver
  */
 class ShoukakuResolver {
     /**
-     * Constructs ShoukakuResolver
      * @param {string} host Your node host / ip address of where the lavalink is hosted.
      * @param {string} port The Port Number of your lavalink instance.
      * @param {string} auth The authentication key you set on your lavalink config.
@@ -37,6 +36,7 @@ class ShoukakuResolver {
     * Resolves a identifier into a lavalink track.
     * @param {string} identifier Anything you want for lavalink to search for
     * @param {string} search Either `youtube` or `soundcloud`. If specified, resolve will return search results.
+    * @memberof ShoukakuResolver
     * @returns {Promise<Object>} The Lavalink Track Object.
     */
     async resolve(identifier, search) {
@@ -66,6 +66,7 @@ class ShoukakuResolver {
     /**
      * Decodes the given base64 encoded track from lavalink.
      * @param {base64} track Base64 Encoded Track you got from the Lavalink API.
+     * @memberof ShoukakuResolver
      * @returns {Promise<Object>} The Lavalink Track details.
      */
     decode(track) {

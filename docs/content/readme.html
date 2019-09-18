@@ -1,10 +1,15 @@
 
-<html><head></head><body><h1 id="shoukaku">Shoukaku</h1>
+<html><head></head><body><h2 id="shoukaku">Shoukaku</h2>
 <hr />
 <p align="center">
   <img src="https://vignette.wikia.nocookie.net/kancolle/images/c/c8/Shoukaku_Full.png/revision/latest" style="max-width: 100%;">
 </p>
 
+<p><a href="https://discordapp.com/invite/FVqbtGu"><img src="https://img.shields.io/discord/423116740810244097?style=for-the-badge" alt="Discord" style="max-width: 100%;"></a>
+<a href="https://www.npmjs.com/package/shoukaku"><img src="https://img.shields.io/npm/v/shoukaku?style=for-the-badge" alt="npm" style="max-width: 100%;"></a>
+<img src="https://img.shields.io/github/issues-raw/Deivu/Shoukaku?style=for-the-badge" alt="GitHub issues" style="max-width: 100%;">
+<img src="https://img.shields.io/snyk/vulnerabilities/npm/shoukaku?style=for-the-badge" alt="Snyk Vulnerabilities for npm package" style="max-width: 100%;"> 
+<img src="https://img.shields.io/npm/l/shoukaku?style=for-the-badge" alt="NPM" style="max-width: 100%;"></p>
 <p>The ShipGirl Project. Shoukaku <code>(c) Kancolle for Shoukaku</code></p>
 <h3 id="a-full-blown-lavalink-wrapper-designed-around-discordjs-v12">A Full Blown Lavalink Wrapper designed around Discord.js v12</h3>
 <p>✅ Currently being used by: </p>
@@ -21,7 +26,16 @@
 <h3 id="installation">Installation</h3>
 <p>For Stable</p>
 <pre><code>npm i shoukaku</code></pre><p>For Master</p>
-<pre><code>npm i Deivu/Shoukaku</code></pre><h3 id="011----020-migration">0.1.1 -&gt; 0.2.0 Migration</h3>
+<pre><code>npm i Deivu/Shoukaku</code></pre><h3 id="02x----10x-migration">0.2.x -&gt; 1.0.x Migration</h3>
+<blockquote>
+<p>0.2.x and earlier</p>
+<pre><code class="js">&lt;Shoukaku&gt;.build({ /* buildOptions here */ });</code></pre>
+</blockquote>
+<blockquote>
+<p>1.0.0 and newer</p>
+<pre><code class="js">&lt;Shoukaku&gt;.start({ /* buildOptions here */ });</code></pre>
+</blockquote>
+<h3 id="01x----02x-migration">0.1.x -&gt; 0.2.x Migration</h3>
 <blockquote>
 <p>ShoukakuLink is now a property of ShoukakuPlayer, meaning all link related getters are changed to player getters.</p>
 </blockquote>
@@ -57,12 +71,16 @@ The events is as follows</p>
 </blockquote>
 <blockquote>
 <p>You don't disconnect / clean the player on ShoukakuLink but on ShoukakuPlayer now making your code more clean and better</p>
-<pre><code class="js">// 0.1.1 and earlier versions
-ShoukakuLink.player.playTrack();
-ShoukakuLink.disconnect();
-// 0.2.0
-ShoukakuPlayer.playTrack();
-ShoukakuPlayer.disconnect();</code></pre>
+</blockquote>
+<blockquote>
+<p>0.1.1 and earlier</p>
+<pre><code class="js">&lt;ShoukakuLink&gt;.player.playTrack();
+&lt;ShoukakuLink&gt;.disconnect();</code></pre>
+</blockquote>
+<blockquote>
+<p>0.2.x and newer</p>
+<pre><code class="js">&lt;ShoukakuPlayer&gt;.playTrack();
+&lt;ShoukakuPlayer&gt;.disconnect();</code></pre>
 </blockquote>
 <p>You can see more of the changes on updated example below.</p>
 <h3 id="support-server">Support Server</h3>
@@ -76,17 +94,6 @@ ShoukakuPlayer.disconnect();</code></pre>
 <blockquote>
 <p>There is a Discord.JS actual implementation and a simple implementation examples below.</p>
 </blockquote>
-<h3 id="task-list">Task List</h3>
-<ul>
-<li><input checked="" disabled="" type="checkbox"> Base Logic</li>
-<li><input checked="" disabled="" type="checkbox"> Player &amp; Voice Logic </li>
-<li><input checked="" disabled="" type="checkbox"> Load Balancing Logic</li>
-<li><input checked="" disabled="" type="checkbox"> Node Removal Logic</li>
-<li><input checked="" disabled="" type="checkbox"> Reconnect Logic</li>
-<li><input checked="" disabled="" type="checkbox"> Resuming Logic</li>
-<li><input checked="" disabled="" type="checkbox"> Documentation</li>
-<li>and some more to come.</li>
-</ul>
 <h3 id="starting-a-lavalink-server">Starting a Lavalink Server.</h3>
 <p><a href="https://github.com/Frederikam/Lavalink/blob/master/README.md">View Lavalink README here</a></p>
 <h3 id="discordjs-actual-implementation">Discord.js actual implementation.</h3>
@@ -123,7 +130,7 @@ Carrier.on('disconnected', (name, reason) =&gt; console.log(`Lavalink Node: ${na
 
 client.on('ready', () =&gt; {
   // You need to build shoukaku on your client's ready event for her to work like how its done in this example.
-  Carrier.build(MyLavalinkServer, { id: client.user.id  });
+  Carrier.start(MyLavalinkServer, { id: client.user.id  });
   console.log('Bot Initialized');
 })
 

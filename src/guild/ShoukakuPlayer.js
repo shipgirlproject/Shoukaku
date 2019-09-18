@@ -5,13 +5,12 @@ const ShoukakuError = require('../constants/ShoukakuError.js');
 const endEvents = ['end', 'closed', 'error', 'trackException', 'nodeDisconnect'];
 
 /**
- * ShoukakuPlayer, Governs the playing stuff on your guild
- * @class
+ * ShoukakuPlayer, used to control the player on the guildused to control the player on the guild.
+ * @class ShoukakuPlayer
  * @extends {external:EventEmitter}
  */
 class ShoukakuPlayer extends EventEmitter {
     /**
-     * Constructs a player.
      * @param  {ShoukakuSocket} node The node that governs this player.
      * @param  {external:Guild} guild A Discord.JS Guild Object.
      */
@@ -49,16 +48,17 @@ class ShoukakuPlayer extends EventEmitter {
         this.position = 0;
     }
 
-    // Events
     /**
      * Emitted when the Lavalink Player emits a TrackEnd or TrackStuck event.
      * @event ShoukakuPlayer#end
      * @param {Object} reason
+     * @memberOf ShoukakuPlayer
      */
     /**
      * Emitted when the voiceConnection got closed.
      * @event ShoukakuPlayer#closed
      * @param {Object} reason
+     * @memberOf ShoukakuPlayer
      * @example
      * // <Player> is your ShoukakuPlayer instance
      * <Player>.on('closed', (reason) => {
@@ -69,6 +69,7 @@ class ShoukakuPlayer extends EventEmitter {
      * Emitted when this library encounters an error in ShoukakuPlayer or ShoukakuLink class. MUST BE HANDLED.
      * @event ShoukakuPlayer#error
      * @param {Error} error The error encountered.
+     * @memberOf ShoukakuPlayer
      * @example
      * // <Player> is your ShoukakuPlayer instance
      * <Player>.on('error', (error) => {
@@ -80,6 +81,7 @@ class ShoukakuPlayer extends EventEmitter {
      * Emitted when this player's node was disconnected. MUST BE HANDLED.
      * @event ShoukakuPlayer#nodeDisconnect
      * @param {string} name The name of the node that disconnected.
+     * @memberOf ShoukakuPlayer
      * @example
      * // <Player> is your ShoukakuPlayer instance
      * <Player>.on('nodeDisconnect', (name) => {
@@ -91,23 +93,31 @@ class ShoukakuPlayer extends EventEmitter {
      * Emitted when Lavalink encounters an error on playing the song. Optional.
      * @event ShoukakuPlayer#trackException
      * @param {Object} reason
+     * @memberOf ShoukakuPlayer
      */
     /**
      * Emitted when the Shoukaku Player resumes the session by resending the playing data. Optional.
      * @event ShoukakuPlayer#resumed
+     * @memberOf ShoukakuPlayer
      */
     /**
      * Emitted when Lavalink gives a Player Update event. Optional.
      * @event ShoukakuPlayer#playerUpdate
      * @param {Object} data
+     * @memberOf ShoukakuPlayer
      */
-    // Events End
 
+    /**
+     * Eventually Connects the Bot to the voice channel in the guild. This is used internally and must not be used to connect players. Use `<ShoukakuSocket>.joinVoiceChannel()` instead.
+     * @memberOf ShoukakuPlayer
+     * @returns {void}
+     */
     connect(options, callback) {
         this.voiceConnection._connect(options, callback);
     }
     /**
      * Eventually Disconnects the VoiceConnection from a Guild. Could be also used to clean up player remnants from unexpected events.
+     * @memberOf ShoukakuPlayer
      * @returns {void}
      */
     disconnect() {
@@ -118,6 +128,7 @@ class ShoukakuPlayer extends EventEmitter {
      * Plays the track you specifed. Warning: If the player is playing anything, calling this will just ignore your call. Call `ShoukakuPlayer.StopTrack()` first.
      * @param {string} track The Base64 encoded track you got from lavalink API.
      * @param {ShoukakuConstants#ShoukakuPlayOptions} [options=ShoukakuPlayOptions] Used if you want to put a custom track start or end time.
+     * @memberOf ShoukakuPlayer
      * @returns {Promise<boolean>} true if successful false if not.
      */
     async playTrack(track, options = ShoukakuPlayOptions) {
@@ -135,6 +146,7 @@ class ShoukakuPlayer extends EventEmitter {
     }
     /**
      * Stops the player from playing.
+     * @memberOf ShoukakuPlayer
      * @returns {Promise<boolean>} true if successful false if not.
      */
     async stopTrack() {
@@ -149,6 +161,7 @@ class ShoukakuPlayer extends EventEmitter {
     /**
      * Pauses / Unpauses the player
      * @param {boolean} [pause=true] true to pause, false to unpause
+     * @memberOf ShoukakuPlayer
      * @returns {Promise<boolean>} true if successful false if not.
      */
     async setPaused(pause = true) {
@@ -164,6 +177,7 @@ class ShoukakuPlayer extends EventEmitter {
     /**
      * Sets the equalizer of your lavalink player
      * @param {Array} bands An array of Lavalink bands.
+     * @memberOf ShoukakuPlayer
      * @returns {Promise<boolean>} true if successful false if not.
      */
     async setEqualizer(bands) {
@@ -179,6 +193,7 @@ class ShoukakuPlayer extends EventEmitter {
     /**
      * Sets the playback volume of your lavalink player
      * @param {number} volume The new volume you want to set on the player.
+     * @memberOf ShoukakuPlayer
      * @returns {Promise<boolean>} true if successful false if not.
      */
     async setVolume(volume) {
@@ -195,6 +210,7 @@ class ShoukakuPlayer extends EventEmitter {
     /**
      * Seeks your player to the time you want
      * @param {number} position position in MS you want to seek to.
+     * @memberOf ShoukakuPlayer
      * @returns {Promise<boolean>} true if successful false if not.
      */
     async seekTo(position) {
@@ -209,7 +225,12 @@ class ShoukakuPlayer extends EventEmitter {
 
     _listen(event, data) {
         if (endEvents.includes(event)) {
-            event === 'nodeDisconnect' ? this._clearTrack() && this._clearPlayer() : this._clearTrack();
+            if (event === 'nodeDisconnect') {
+                this._clearTrack();
+                this._clearPlayer();
+            } else {
+                this._clearTrack();
+            }
             this.emit(event, data);
             return;
         }
@@ -227,10 +248,8 @@ class ShoukakuPlayer extends EventEmitter {
     }
 
     async _resume() {
-        if (!this.track) {
-            this._listen('error', new ShoukakuError('No Track Found upon trying to resume.'));
-            return;
-        }
+        if (!this.track)
+            return this._listen('error', new ShoukakuError('No Track Found upon trying to resume.'));
         try {
             await this.playTrack(this.track.repeat(1), { startTime: this.position });
             if (this.bands.length) await this.setEqualizer(this.bands.slice(0));
