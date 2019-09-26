@@ -23,7 +23,7 @@ declare module 'shoukaku' {
     gain: number;
   }
 
-  export type LoadTrackType = 
+  export type LoadTrackType =
     'TRACK_LOADER' | 'PLAYLIST_LOADED' | 'SEARCH_RESULT' |
     'NO_MATCHES' | 'LOAD_FAILED';
 
@@ -225,7 +225,6 @@ declare module 'shoukaku' {
     private _clearVoice(): void;
     private _destroy(): void;
     private _voiceUpdate(event: unknown): void;
-    private _voiceDisconnect(): void;
     private _nodeDisconnected(): void;
   }
 

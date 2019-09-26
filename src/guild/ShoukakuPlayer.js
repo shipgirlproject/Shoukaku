@@ -17,10 +17,15 @@ class ShoukakuPlayer extends EventEmitter {
     constructor(node, guild) {
         super();
         /**
-         * The Link where this connected to.
+         * The node where this is player connected to.
+         * @type {ShoukakuSocket}
+         */
+        this.node = node;
+        /**
+         * The Voice Connection of this Player.
          * @type {ShoukakuLink}
          */
-        this.voiceConnection = new ShoukakuLink(this, node, guild);
+        this.voiceConnection = new ShoukakuLink(this, guild);
         /**
          * The Track that is currently being played by this player.
          * @type {?string}

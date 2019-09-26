@@ -8,20 +8,19 @@ const ShoukakuError = require('../constants/ShoukakuError.js');
 class ShoukakuLink {
     /**
      * @param {ShoukakuPlayer} player The player of this link.
-     * @param {ShoukakuSocket} node The node that governs this link.
      * @param {external:Guild} guild A Discord.js Guild Object.
      */
-    constructor(player, node, guild) {
-        /**
-         * The node that governs this Link
-         * @type {ShoukakuSocket}
-         */
-        this.node = node;
+    constructor(player, guild) {
         /**
          * The player class of this link.
          * @type {ShoukakuPlayer}
          */
         this.player = player;
+        /**
+         * The node that governs this Link
+         * @type {ShoukakuSocket}
+         */
+        this.node = this.player.node;
         /**
          * The ID of the guild that is being governed by this Link.
          * @type {string}
@@ -36,7 +35,7 @@ class ShoukakuLink {
          * The ID of the user that is being governed by this Link
          * @type {string}
          */
-        this.userID = node.shoukaku.id;
+        this.userID = this.node.shoukaku.id;
         /**
          * The sessionID of this Link
          * @type {?string}
@@ -137,16 +136,13 @@ class ShoukakuLink {
         this.node.send({ op: 'voiceUpdate', guildId: this.guildID, sessionId: this.sessionID, event })
             .then(() => {
                 if (this._timeout) clearTimeout(this._timeout);
-                if (this.state !== ShoukakuStatus.CONNECTING) return;
-                this.state = ShoukakuStatus.CONNECTED;
+                if (this.state === ShoukakuStatus.CONNECTING) this.state = ShoukakuStatus.CONNECTED;
                 this._callback(null, this.player);
             })
             .catch((error) => {
                 if (this._timeout) clearTimeout(this._timeout);
-                if (this.state !== ShoukakuStatus.CONNECTING) {
-                    this.player._listen('error', error);
-                    return;
-                }
+                if (this.state !== ShoukakuStatus.CONNECTING)
+                    return this.player._listen('error', error);
                 this.state = ShoukakuStatus.DISCONNECTED;
                 this._callback(error);
             })
@@ -154,11 +150,6 @@ class ShoukakuLink {
                 this._callback = null;
                 this._timeout = null;
             });
-    }
-
-    _voiceDisconnect() {
-        this.state = ShoukakuStatus.DISCONNECTED;
-        this._destroy();
     }
 
     _nodeDisconnected() {

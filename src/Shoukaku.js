@@ -200,10 +200,17 @@ class Shoukaku extends EventEmitter {
             throw new ShoukakuError('No nodes available. What happened?');
         if (name) {
             const node = this.nodes.get(name);
-            if (node) return node;
+            if (node) {
+                if (node.state !== constants.ShoukakuStatus.CONNECTED)
+                    throw new ShoukakuError('This node is not yet ready');
+                return node;
+            }
             throw new ShoukakuError('The node name you specified is not one of my nodes');
         }
-        return [...this.nodes.values()].sort((a, b) => a.penalties - b.penalties).shift();
+        const nodes = [...this.nodes.values()].filter(node => node.state === constants.ShoukakuStatus.CONNECTED);
+        if (!nodes.length)
+            throw new ShoukakuError('No nodes are ready for communication.');
+        return nodes.sort((a, b) => a.penalties - b.penalties).shift();
     }
     /**
     * Shortcut to get the Player of a guild, if there is any.

@@ -4,7 +4,7 @@
   "description": "A lavalink client for Discord.js v12 only",
   "main": "index.js",
   "scripts": {
-      "doc": "docma"
+    "doc": "docma"
   },
   "types": "index.d.ts",
   "keywords": [

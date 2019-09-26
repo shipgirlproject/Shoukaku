@@ -98,6 +98,7 @@ class ShoukakuSocket extends EventEmitter {
     * @returns {void}
     */
     connect(id, shardCount, resumable) {
+        this.state = ShoukakuStatus.CONNECTING;
         const headers = {};
         Object.defineProperty(headers, 'Authorization', { value: this.auth, enumerable: true });
         Object.defineProperty(headers, 'Num-Shards', { value: shardCount, enumerable: true });
@@ -131,6 +132,9 @@ class ShoukakuSocket extends EventEmitter {
         return new Promise((resolve, reject) => {
             if (!options.guildID || !options.voiceChannelID)
                 return reject(new ShoukakuError('Guild ID or Channel ID is not specified.'));
+
+            if (this.state !== ShoukakuStatus.CONNECTED)
+                return reject(new ShoukakuError('This node is not yet ready.'));
 
             if (this.players.has(options.guildID))
                 return reject(new ShoukakuError('A Player is already established in this channel'));
@@ -179,7 +183,7 @@ class ShoukakuSocket extends EventEmitter {
     _open() {
         if (this.resumable)
             this._configureResuming()
-                .catch((error) => this.emit('error', this.name, error));
+                .catch(() => this.ws.close(4011, 'Failed to send resuming packet. Reconnecting.'));
         this.reconnectAttempts = 0;
         this.state = ShoukakuStatus.CONNECTED;
         this.emit('ready', this.name, this.resumed);
@@ -202,6 +206,7 @@ class ShoukakuSocket extends EventEmitter {
     }
 
     _close(code, reason) {
+        this.state = ShoukakuStatus.DISCONNECTED;
         this.ws.removeAllListeners();
         this.shoukaku.removeListener('packetUpdate', this.packetRouter);
         this.ws = null;

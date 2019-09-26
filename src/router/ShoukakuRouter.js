@@ -17,7 +17,7 @@ class ShoukakuRouter {
                 }, (error) => {
                     if (!error)
                         return player._resume()
-                            .catch(() => null);
+                            .catch((error) => player._listen('error', new ShoukakuError(error.message)));
                     player._listen('error', error);
                 });
             });
@@ -36,7 +36,7 @@ class ShoukakuRouter {
         const player = this.players.get(packet.d.guild_id);
         if (!player) return;
         switch (packet.t) {
-            case 'VOICE_STATE_UPDATE': 
+            case 'VOICE_STATE_UPDATE':
                 player.voiceConnection.build = packet.d;
                 if (!packet.d.channel_id) player._listen('error', new ShoukakuError('Voice connection is closed unexpectedly.'));
                 break;
