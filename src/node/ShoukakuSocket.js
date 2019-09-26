@@ -1,10 +1,10 @@
+const Websocket = require('ws');
+const EventEmitter = require('events');
 const { ShoukakuStatus, ShoukakuNodeStats, ShoukakuJoinOptions } = require('../constants/ShoukakuConstants.js');
 const { PacketRouter, EventRouter } = require('../router/ShoukakuRouter.js');
 const ShoukakuError = require('../constants/ShoukakuError.js');
 const ShoukakuResolver = require('../rest/ShoukakuResolver.js');
 const ShoukakuPlayer = require('../guild/ShoukakuPlayer.js');
-const Websocket = require('ws');
-const EventEmitter = require('events');
 
 /**
  * ShoukakuSocket, manages a single Lavalink WS connection.

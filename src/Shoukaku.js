@@ -249,12 +249,10 @@ class Shoukaku extends EventEmitter {
             } catch (error) {
                 this.emit('error', name, error);
                 setTimeout(() => this._reconnect(name, code, reason), 2500);
-                return;
             }
         } else {
             this.removeNode(name, `Failed to reconnect in ${this.options.reconnectTries} attempts`);
-            return;
-        }   
+        }
     }
 
     _mergeDefault(def, given) {
