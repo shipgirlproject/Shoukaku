@@ -17,15 +17,10 @@ class ShoukakuPlayer extends EventEmitter {
     constructor(node, guild) {
         super();
         /**
-         * The node where this is player connected to.
-         * @type {ShoukakuSocket}
-         */
-        this.node = node;
-        /**
          * The Voice Connection of this Player.
          * @type {ShoukakuLink}
          */
-        this.voiceConnection = new ShoukakuLink(this, guild);
+        this.voiceConnection = new ShoukakuLink(node, this, guild);
         /**
          * The Track that is currently being played by this player.
          * @type {?string}
@@ -121,7 +116,7 @@ class ShoukakuPlayer extends EventEmitter {
         this.voiceConnection._connect(options, callback);
     }
     /**
-     * Eventually Disconnects the VoiceConnection from a Guild. Could be also used to clean up player remnants from unexpected events.
+     * Eventually Disconnects the VoiceConnection & Removes the player from a Guild. Could be also used to clean up player remnants from unexpected events.
      * @memberOf ShoukakuPlayer
      * @returns {void}
      */
@@ -130,13 +125,13 @@ class ShoukakuPlayer extends EventEmitter {
     }
     /**
      * Moves this Player & VoiceConnection to another lavalink node you specified.
-     * @param {string} node Name of the Node you want to move to.
+     * @param {string} name Name of the Node you want to move to.
      * @memberOf ShoukakuPlayer
      * @returns {Promise<void>}
      */
-    async moveToNode(node) {
-        node = this.node.shoukaku.nodes.get(node);
-        if (!node || node.name === this.node.name) return;
+    async moveToNode(name) {
+        const node = this.voiceConnection.node.shoukaku.nodes.get(name);
+        if (!node || node.name === this.voiceConnection.node.name) return;
         if (node.state !== ShoukakuStatus.CONNECTED)
             throw new Error('The node you specified is not ready.');
         await this.voiceConnection._move(node);
@@ -242,12 +237,8 @@ class ShoukakuPlayer extends EventEmitter {
 
     _listen(event, data) {
         if (endEvents.includes(event)) {
-            if (event === 'nodeDisconnect') {
-                this._clearTrack();
-                this._clearPlayer();
-            } else {
-                this._clearTrack();
-            }
+            if (event === 'nodeDisconnect') this._clearTrack() && this._clearBands();
+            else this._clearTrack();
             this.emit(event, data);
             return;
         }
@@ -260,16 +251,16 @@ class ShoukakuPlayer extends EventEmitter {
         this.position = 0;
     }
 
-    _clearPlayer() {
-        this.bands = null;
+    _clearBands() {
+        this.bands.length = 0;
     }
-
+    
     async _resume() {
         try {
             if (!this.track) return this._listen('error', new ShoukakuError('No Track Found upon trying to resume.'));
-            await this.playTrack(this.track.repeat(1), { startTime: this.position });
-            if (this.bands.length) await this.setEqualizer(this.bands.slice(0));
-            if (this.volume !== 100) await this.setVolume(Number(this.volume));
+            await this.playTrack(this.track, { startTime: this.position });
+            if (this.bands.length) await this.setEqualizer(this.bands);
+            if (this.volume !== 100) await this.setVolume(this.volume);
             this._listen('resumed', null);
         } catch (error) {
             this._listen('error', error);

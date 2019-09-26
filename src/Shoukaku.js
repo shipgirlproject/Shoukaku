@@ -153,10 +153,10 @@ class Shoukaku extends EventEmitter {
             throw new ShoukakuError('You didn\'t start Shoukaku once. Please call .start() method once before using this.');
         const node = new ShoukakuSocket(this, nodeOptions);
         node.connect(this.id, this.shardCount, false);
-        const _close = this._reconnect.bind(this);
-        const _ready = this._ready.bind(this);
         node.on('debug', (name, data) => this.emit('debug', name, data));
         node.on('error', (name, error) => this.emit('error', name, error));
+        const _close = this._reconnect.bind(this);
+        const _ready = this._ready.bind(this);
         node.on('ready', _ready);
         node.on('close', _close);
         this.nodes.set(node.name, node);
@@ -164,10 +164,11 @@ class Shoukaku extends EventEmitter {
     /**
      * Function to remove a Lavalink Node
      * @param {string} name The Lavalink Node to remove
+     * @param {string} reason Optional reason for this disconnect.
      * @memberof Shoukaku
      * @returns {boolean} true if the node was removed with no problems. Otherwise false.
      */
-    removeNode(name, libraryInvoked = false) {
+    removeNode(name, reason) {
         if (!this.id)
             throw new ShoukakuError('You didn\'t start Shoukaku once. Please call .start() method once before using this.');
         const node = this.nodes.get(name);
@@ -175,7 +176,7 @@ class Shoukaku extends EventEmitter {
         node.removeAllListeners();
         node._executeCleaner();
         this.nodes.delete(name);
-        if (!libraryInvoked) this.emit('disconnected', name, 'User invoked disconnection');
+        this.emit('disconnected', name, reason);
         return true;
     }
     /**
@@ -239,22 +240,21 @@ class Shoukaku extends EventEmitter {
     }
 
     _reconnect(name, code, reason) {
+        this.emit('close', name, code, reason);
         const node = this.nodes.get(name);
         if (node.reconnectAttempts < this.options.reconnectTries) {
             node.reconnectAttempts++;
             try {
                 node.connect(this.id, this.shardCount, this.options.resumable);
             } catch (error) {
-                this.emit('error', 'Shoukaku', error);
+                this.emit('error', name, error);
                 setTimeout(() => this._reconnect(name, code, reason), 2500);
                 return;
             }
         } else {
-            this.removeNode(name, true);
-            this.emit('disconnected', name, `Failed to reconnect in ${this.options.reconnectTries} attempts`);
+            this.removeNode(name, `Failed to reconnect in ${this.options.reconnectTries} attempts`);
             return;
-        }
-        this.emit('close', name, code, reason);
+        }   
     }
 
     _mergeDefault(def, given) {

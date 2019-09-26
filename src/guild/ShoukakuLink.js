@@ -7,20 +7,21 @@ const ShoukakuError = require('../constants/ShoukakuError.js');
  */
 class ShoukakuLink {
     /**
+     * @param {ShoukakuSocket} node The node that governs this link.
      * @param {ShoukakuPlayer} player The player of this link.
      * @param {external:Guild} guild A Discord.js Guild Object.
      */
-    constructor(player, guild) {
+    constructor(node, player, guild) {
+        /**
+         * The node that governs this Link
+         * @type {ShoukakuSocket}
+         */
+        this.node = node;
         /**
          * The player class of this link.
          * @type {ShoukakuPlayer}
          */
         this.player = player;
-        /**
-         * The node that governs this Link
-         * @type {ShoukakuSocket}
-         */
-        this.node = this.player.node;
         /**
          * The ID of the guild that is being governed by this Link.
          * @type {string}
@@ -52,7 +53,7 @@ class ShoukakuLink {
          */
         this.selfMute = false;
         /**
-         * TIf the client user is self defeaned.
+         * If the client user is self defeaned.
          * @type {boolean}
          */
         this.selfDeaf = false;
@@ -80,14 +81,14 @@ class ShoukakuLink {
             .then(() => {
                 if (this._timeout) clearTimeout(this._timeout);
                 if (this.state === ShoukakuStatus.CONNECTING) this.state = ShoukakuStatus.CONNECTED;
-                this._callback(null, this.player);
+                if (this._callback) this._callback(null, this.player);
             })
             .catch((error) => {
                 if (this._timeout) clearTimeout(this._timeout);
                 if (this.state !== ShoukakuStatus.CONNECTING)
                     return this.player._listen('error', error);
                 this.state = ShoukakuStatus.DISCONNECTED;
-                this._callback(error);
+                if (this._callback) this._callback(error);
             })
             .finally(() => {
                 this._callback = null;
@@ -118,10 +119,10 @@ class ShoukakuLink {
     _disconnect() {
         this.state = ShoukakuStatus.DISCONNECTING;
         this.node.players.delete(this.guildID);
-        this.player.removeAllListeners();
         this._clearVoice();
+        this.player.removeAllListeners();
         this.player._clearTrack();
-        this.player._clearPlayer();
+        this.player._clearBands();
         if (this.state !== ShoukakuStatus.DISCONNECTED) {
             this._destroy()
                 .catch(() => null);
@@ -131,16 +132,25 @@ class ShoukakuLink {
                 self_mute: false,
                 self_deaf: false
             });
+            this.state = ShoukakuStatus.DISCONNECTED;
         }
     }
 
-    async _move(shoukakuSocket) {
+    async _move(node) {
         await this._destroy();
-        this.player.node.players.delete(this.guildID);
-        this.player.node = shoukakuSocket;
+        this.node.players.delete(this.guildID);
+        this.node = node;
         await this._voiceUpdate();
-        this.player.node.players.set(this.guildID, this.player);
+        this.node.players.set(this.guildID, this.player);
         await this.player._resume();
+    }
+
+    _destroy() {
+        return this.node.send({ op: 'destroy', guildId: this.guildID });
+    }
+
+    _voiceUpdate() {
+        return this.node.send({ op: 'voiceUpdate', guildId: this.guildID, sessionId: this.sessionID, event: this.lastServerUpdate });
     }
 
     _sendDiscordWS(d) {
@@ -153,22 +163,8 @@ class ShoukakuLink {
         this.voiceChannelID = null;
     }
 
-    _destroy() {
-        return this.node.send({ op: 'destroy', guildId: this.guildID });
-    }
-
-    _voiceUpdate() {
-        return this.node.send({ op: 'voiceUpdate', guildId: this.guildID, sessionId: this.sessionID, event: this.lastServerUpdate });
-    }
-
     _nodeDisconnected() {
-        this._clearVoice();
-        this._sendDiscordWS({
-            guild_id: this.guildID,
-            channel_id: null,
-            self_mute: false,
-            self_deaf: false
-        });
+        this._disconnect();
         this.player._listen('nodeDisconnect', this.node.name);
     }
 }

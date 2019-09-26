@@ -108,17 +108,13 @@ class ShoukakuSocket extends EventEmitter {
         Object.defineProperty(headers, 'Num-Shards', { value: shardCount, enumerable: true });
         Object.defineProperty(headers, 'User-Id', { value: id, enumerable: true });
         if (resumable) Object.defineProperty(headers, 'Resume-Key', { value: resumable, enumerable: true });
-        const upgrade = this._upgrade.bind(this);
-        const open = this._open.bind(this);
-        const message = this._message.bind(this);
-        const error = this._error.bind(this);
-        const close = this._close.bind(this);
         this.ws = new Websocket(this.url, { headers });
-        this.ws.on('upgrade', upgrade);
-        this.ws.on('open', open);
+        this.ws.once('upgrade', this._upgrade.bind(this));
+        this.ws.once('open', this._open.bind(this));
+        this.ws.once('error', this._error.bind(this));
+        this.ws.once('close', this._close.bind(this));
+        const message = this._message.bind(this);
         this.ws.on('message', message);
-        this.ws.on('error', error);
-        this.ws.on('close', close);
         this.shoukaku.on('packetUpdate', this.packetRouter);
     }
     /**
@@ -163,6 +159,17 @@ class ShoukakuSocket extends EventEmitter {
                 reject(error);
             });
         });
+    }
+    /**
+     * Eventually Disconnects the VoiceConnection & Removes the Player from a Guild.
+     * @param {string} guildID The guild id of the player you want to remove.
+     * @memberOf ShoukakuSocket
+     * @returns {void}
+     */
+    leaveVoiceChannel(guildID) {
+        const player = this.players.get(guildID);
+        if (!player) return;
+        player.disconnect();
     }
 
     send(data) {
@@ -228,7 +235,7 @@ class ShoukakuSocket extends EventEmitter {
     _executeCleaner() {
         if (!this.cleaner) return this.cleaner = true;
         const nodes = [...this.shoukaku.nodes.values()].filter(node => node.state === ShoukakuStatus.CONNECTED);
-        if (this.moveOnDisconnect && nodes.size) {
+        if (this.moveOnDisconnect && nodes.length > 0) {
             const ideal = nodes.sort((a, b) => a.penalties - b.penalties).shift();
             for (const player of this.players.values()) {
                 player.voiceConnection._move(ideal)

@@ -2,7 +2,18 @@ declare module 'shoukaku' {
   import { EventEmitter } from "events";
   import { Client as DiscordClient, Base64String, Guild } from 'discord.js';
 
-  export const version: string;
+  export const version: string; 
+
+  export class ShoukakuError extends Error {
+    constructor(message: string);
+    public name: string;
+  }
+
+  export class ShoukakuTimeout extends Error {
+    constructor(message: string);
+    public name: string;
+  }
+
 
   export interface Track {
     track: string;
@@ -90,6 +101,7 @@ declare module 'shoukaku' {
     resumable?: boolean;
     resumableTimeout?: number;
     reconnectTries?: number;
+    moveOnDisconnect?: boolean;
     restTimeout?: number;
   }
 
@@ -148,19 +160,19 @@ declare module 'shoukaku' {
 
   export interface ShoukakuPlayer {
     on(event: 'end', listener: (reason: Reason) => void): this;
-    on(event: 'error', listener: (err: Error) => void): this;
+    on(event: 'error', listener: (err: ShoukakuError | Error) => void): this;
     on(event: 'nodeDisconnect', listener: (name: string) => void): this;
     on(event: 'resumed', listener: () => void): this;
     on(event: 'playerUpdate', listener: (data: PlayerUpdate) => void): this;
     on(event: 'closed' | 'trackException', listener: (data: unknown) => void): this;
     once(event: 'end', listener: (reason: Reason) => void): this;
-    once(event: 'error', listener: (err: Error) => void): this;
+    once(event: 'error', listener: (err: ShoukakuError | Error) => void): this;
     once(event: 'nodeDisconnect', listener: (name: string) => void): this;
     once(event: 'resumed', listener: () => void): this;
     once(event: 'playerUpdate', listener: (data: PlayerUpdate) => void): this;
     once(event: 'closed' | 'trackException', listener: (data: unknown) => void): this;
     off(event: 'end', listener: (reason: Reason) => void): this;
-    off(event: 'error', listener: (err: Error) => void): this;
+    off(event: 'error', listener: (err: ShoukakuError | Error) => void): this;
     off(event: 'nodeDisconnect', listener: (name: string) => void): this;
     off(event: 'resumed', listener: () => void): this;
     off(event: 'playerUpdate', listener: (data: PlayerUpdate) => void): this;
@@ -168,7 +180,7 @@ declare module 'shoukaku' {
   }
 
   export class ShoukakuPlayer extends EventEmitter {
-    constructor(link: ShoukakuLink);
+    constructor(node: ShoukakuSocket, guild: Guild);
     public voiceConnection: ShoukakuLink;
     public track: string | null;
     public paused: boolean;
@@ -176,8 +188,10 @@ declare module 'shoukaku' {
     public bands: EqualizerBand[];
     public position: number;
 
-    public connect(options: unknown, callback:(error: Error, link: ShoukakuLink) => void): void;
+    private connect(options: unknown, callback:(error: ShoukakuError | Error | null, player: ShoukakuPlayer) => void): void;
+
     public disconnect(): void;
+    public moveToNode(name: string): Promise<void>;
 
     public playTrack(track: string, options?: ShoukakuPlayOptions): Promise<boolean>;
     public stopTrack(): Promise<boolean>;
@@ -188,12 +202,12 @@ declare module 'shoukaku' {
 
     private _listen(event: string, data: unknown): void;
     private _clearTrack(): void;
-    private _clearPlayer(): void;
+    private _clearBands(): void;
     private _resume(): Promise<void>;
   }
 
   export class ShoukakuLink {
-    constructor(node: ShoukakuSocket, guild: Guild);
+    constructor(node: ShoukakuSocket, player: ShoukakuPlayer, guild: Guild);
     public node: ShoukakuSocket;
     public player: ShoukakuPlayer;
 
@@ -207,22 +221,16 @@ declare module 'shoukaku' {
     public state: ShoukakuStatus;
 
     private lastServerUpdate: unknown | null;
-    private _callback: (err: Error | null, player: ShoukakuPlayer) => void | null;
+    private _callback: (err: ShoukakuError | Error | null, player: ShoukakuPlayer) => void | null;
     private _timeout: number | null;
-
-    public build: {
-      self_deaf: boolean;
-      self_mute: boolean;
-      channel_id: string;
-      session_id: string;
-    };
 
     private stateUpdate(data: unknown);
     private serverUpdate(data: unknown);
 
-    private _connect(d: unknown, callback: (err: Error | null, player: ShoukakuPlayer) => void);
+    private _connect(d: unknown, callback: (err: ShoukakuError | Error | null, player: ShoukakuPlayer) => void);
     private _disconnect(): void;
-    private  _sendDiscordWS(d: unknown): void;
+    private _move(): Promise<void>;
+    private _sendDiscordWS(d: unknown): void;
     private _clearVoice(): void;
     private _destroy(): Promise<boolean>;
     private _voiceUpdate(): Promise<boolean>;
@@ -250,10 +258,10 @@ declare module 'shoukaku' {
     public penalties: number;
     public connect(id: string, shardCount: number, resumable: boolean | string): void;
     public joinVoiceChannel(options: ShoukakuJoinOptions): Promise<ShoukakuPlayer>;
+    public leaveVoiceChannel(guildID: string): void;
 
     private send(data: unknown): Promise<boolean>;
     private _configureResuming(): Promise<boolean>;
-    private _configureCleaner(state: boolean): void;
     private _executeCleaner(): void;
     private _upgrade(response: unknown): void;
     private _open(): void;
@@ -264,20 +272,20 @@ declare module 'shoukaku' {
 
   export interface Shoukaku {
     on(event: 'debug', listener: (name: string, data: unknown) => void): this;
-    on(event: 'error', listener: (name: string, error: Error) => void): this;
+    on(event: 'error', listener: (name: string, error: ShoukakuError | Error) => void): this;
     on(event: 'ready', listener: (name: string, reconnect: boolean) => void): this;
-    on(event: 'closed', listener: (name: string, code: number, reason: string) => void): this;
-    on(event: 'disconnected', listener: (name: string, reason: string) => void): this;
+    on(event: 'closed', listener: (name: string, code: number, reason: string | null) => void): this;
+    on(event: 'disconnected', listener: (name: string, reason: string | null) => void): this;
     once(event: 'debug', listener: (name: string, data: unknown) => void): this;
-    once(event: 'error', listener: (name: string, error: Error) => void): this;
+    once(event: 'error', listener: (name: string, error: ShoukakuError | Error) => void): this;
     once(event: 'ready', listener: (name: string, reconnect: boolean) => void): this;
-    once(event: 'closed', listener: (name: string, code: number, reason: string) => void): this;
-    once(event: 'disconnected', listener: (name: string, reason: string) => void): this;
+    once(event: 'closed', listener: (name: string, code: number, reason: string | null) => void): this;
+    once(event: 'disconnected', listener: (name: string, reason: string | null) => void): this;
     off(event: 'debug', listener: (name: string, data: unknown) => void): this;
-    off(event: 'error', listener: (name: string, error: Error) => void): this;
+    off(event: 'error', listener: (name: string, error: ShoukakuError | Error) => void): this;
     off(event: 'ready', listener: (name: string, reconnect: boolean) => void): this;
-    off(event: 'closed', listener: (name: string, code: number, reason: string) => void): this;
-    off(event: 'disconnected', listener: (name: string, reason: string) => void): this;
+    off(event: 'closed', listener: (name: string, code: number, reason: string | null) => void): this;
+    off(event: 'disconnected', listener: (name: string, reason: string | null) => void): this;
   }
 
   export class Shoukaku extends EventEmitter {
