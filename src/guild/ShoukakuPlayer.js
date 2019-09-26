@@ -1,5 +1,5 @@
 const EventEmitter = require('events');
-const { ShoukakuPlayOptions } = require('../constants/ShoukakuConstants.js');
+const { ShoukakuPlayOptions, ShoukakuStatus } = require('../constants/ShoukakuConstants.js');
 const ShoukakuLink = require('./ShoukakuLink.js');
 const ShoukakuError = require('../constants/ShoukakuError.js');
 const endEvents = ['end', 'closed', 'error', 'trackException', 'nodeDisconnect'];
@@ -127,6 +127,19 @@ class ShoukakuPlayer extends EventEmitter {
      */
     disconnect() {
         this.voiceConnection._disconnect();
+    }
+    /**
+     * Moves this Player & VoiceConnection to another lavalink node you specified.
+     * @param {string} node Name of the Node you want to move to.
+     * @memberOf ShoukakuPlayer
+     * @returns {Promise<void>}
+     */
+    async moveToNode(node) {
+        node = this.node.shoukaku.nodes.get(node);
+        if (!node || node.name === this.node.name) return;
+        if (node.status !== ShoukakuStatus.CONNECTED)
+            throw new Error('The node you specified is not ready.');
+        await this.voiceConnection._move(node);
     }
 
     /**

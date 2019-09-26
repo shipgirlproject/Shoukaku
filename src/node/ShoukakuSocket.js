@@ -74,6 +74,10 @@ class ShoukakuSocket extends EventEmitter {
         return this.shoukaku.options.resumableTimeout;
     }
 
+    get moveOnDisconnect() {
+        return this.shoukaku.options.moveOnDisconnect;
+    }
+
     /**
     * Penalties of this Socket. The higher the return number, the more loaded the server is.
     * @type {number}
@@ -223,7 +227,16 @@ class ShoukakuSocket extends EventEmitter {
 
     _executeCleaner() {
         if (!this.cleaner) return this.cleaner = true;
-        for (const player of this.players.values()) player.voiceConnection._nodeDisconnected();
+        const nodes = [...this.shoukaku.nodes.values()].filter(node => node.state === ShoukakuStatus.CONNECTED);
+        if (this.moveOnDisconnect && nodes.size) {
+            const ideal = nodes.sort((a, b) => a.penalties - b.penalties).shift();
+            for (const player of this.players.values()) {
+                player.voiceConnection._move(ideal)
+                    .catch(() => player.voiceConnection._nodeDisconnected());
+            }
+        } else {
+            for (const player of this.players.values()) player.voiceConnection._nodeDisconnected();
+        }
     }
 }
 module.exports = ShoukakuSocket;

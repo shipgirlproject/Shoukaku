@@ -82,6 +82,7 @@ class ShoukakuConstants {
     * @property {boolean|string} [resumable=false] If you want your node to support resuming. Just replace the false with the resume-key you want to enable resuming.
     * @property {number} [resumableTimeout=30] Timeout when Lavalink will decide a player isn't resumed and will destroy the connection to it.
     * @property {number} [reconnectTries=2] Amount of tries to connect to the lavalink Node before it decides that the node is unreconnectable.
+    * @property {number} [moveOnDisconnect=2] Specifies if the library will attempt to reconnect players on a disconnected node to another node.
     * @property {number} [restTimeout=10000] Timeout on rest requests to your lavalink node.
     * @memberof ShoukakuConstants#
     */
@@ -90,6 +91,7 @@ class ShoukakuConstants {
             resumable: false,
             resumableTimeout: 30,
             reconnectTries: 2,
+            moveOnDisconnect: false,
             restTimeout: 10000
         };
     }

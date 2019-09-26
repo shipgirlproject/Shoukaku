@@ -117,6 +117,13 @@ class ShoukakuLink {
         }
     }
 
+    async _move(shoukakuSocket) {
+        this.player.node = shoukakuSocket;
+        this._destroy();
+        await this.node.send({ op: 'voiceUpdate', guildId: this.guildID, sessionId: this.sessionID, event: this.lastServerUpdate });
+        await this.player._resume();
+    }
+
     _send(d) {
         this.node.shoukaku.send({ op: 4, d });
     }
