@@ -37,11 +37,11 @@ class ShoukakuRouter {
         if (!player) return;
         switch (packet.t) {
             case 'VOICE_STATE_UPDATE':
-                player.voiceConnection.build = packet.d;
+                player.voiceConnection.stateUpdate(packet.d);
                 if (!packet.d.channel_id) player._listen('error', new ShoukakuError('Voice connection is closed unexpectedly.'));
                 break;
             case 'VOICE_SERVER_UPDATE':
-                player.voiceConnection.serverUpdate = packet.d;
+                player.voiceConnection.serverUpdate(packet.d);
         }
     }
 

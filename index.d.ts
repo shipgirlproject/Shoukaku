@@ -217,14 +217,15 @@ declare module 'shoukaku' {
       session_id: string;
     };
 
-    private serverUpdate: unknown;
+    private stateUpdate(data: unknown);
+    private serverUpdate(data: unknown);
 
     private _connect(d: unknown, callback: (err: Error | null, player: ShoukakuPlayer) => void);
     private _disconnect(): void;
-    private _send(d: unknown): void;
+    private  _sendDiscordWS(d: unknown): void;
     private _clearVoice(): void;
-    private _destroy(): void;
-    private _voiceUpdate(event: unknown): void;
+    private _destroy(): Promise<boolean>;
+    private _voiceUpdate(): Promise<boolean>;
     private _nodeDisconnected(): void;
   }
 

@@ -67,16 +67,32 @@ class ShoukakuLink {
         Object.defineProperty(this, '_timeout', { value: null, writable: true });
     }
 
-    set build(data) {
+    stateUpdate(data) {
         this.selfDeaf = data.self_deaf;
         this.selfMute = data.self_mute;
         this.voiceChannelID = data.channel_id;
         this.sessionID = data.session_id;
     }
 
-    set serverUpdate(data) {
+    serverUpdate(data) {
         this.lastServerUpdate = data;
-        this._voiceUpdate(data);
+        this._voiceUpdate()
+            .then(() => {
+                if (this._timeout) clearTimeout(this._timeout);
+                if (this.state === ShoukakuStatus.CONNECTING) this.state = ShoukakuStatus.CONNECTED;
+                this._callback(null, this.player);
+            })
+            .catch((error) => {
+                if (this._timeout) clearTimeout(this._timeout);
+                if (this.state !== ShoukakuStatus.CONNECTING)
+                    return this.player._listen('error', error);
+                this.state = ShoukakuStatus.DISCONNECTED;
+                this._callback(error);
+            })
+            .finally(() => {
+                this._callback = null;
+                this._timeout = null;
+            });
     }
 
     _connect(d, callback) {
@@ -96,7 +112,7 @@ class ShoukakuLink {
         }, 15000);
 
         this.state = ShoukakuStatus.CONNECTING;
-        this._send(d);
+        this._sendDiscordWS(d);
     }
 
     _disconnect() {
@@ -107,8 +123,9 @@ class ShoukakuLink {
         this.player._clearTrack();
         this.player._clearPlayer();
         if (this.state !== ShoukakuStatus.DISCONNECTED) {
-            this._destroy();
-            this._send({
+            this._destroy()
+                .catch(() => null);
+            this._sendDiscordWS({
                 guild_id: this.guildID,
                 channel_id: null,
                 self_mute: false,
@@ -118,52 +135,35 @@ class ShoukakuLink {
     }
 
     async _move(shoukakuSocket) {
-        await this.node.send({ op: 'destroy', guildId: this.guildID });
+        await this._destroy();
         this.player.node.players.delete(this.guildID);
-        await shoukakuSocket.send({ op: 'voiceUpdate', guildId: this.guildID, sessionId: this.sessionID, event: this.lastServerUpdate });
-        shoukakuSocket.players.set(this.guildID, this.player);
         this.player.node = shoukakuSocket;
+        await this._voiceUpdate();
+        this.player.node.players.set(this.guildID, this.player);
         await this.player._resume();
     }
 
-    _send(d) {
+    _sendDiscordWS(d) {
         this.node.shoukaku.send({ op: 4, d });
     }
 
-    _clearVoice() {
+    _clearVoice() { 
         this.lastServerUpdate = null;
         this.sessionID = null;
         this.voiceChannelID = null;
     }
 
     _destroy() {
-        this.node.send({ op: 'destroy', guildId: this.guildID })
-            .catch(() => null);
+        return this.node.send({ op: 'destroy', guildId: this.guildID });
     }
 
-    _voiceUpdate(event) {
-        this.node.send({ op: 'voiceUpdate', guildId: this.guildID, sessionId: this.sessionID, event })
-            .then(() => {
-                if (this._timeout) clearTimeout(this._timeout);
-                if (this.state === ShoukakuStatus.CONNECTING) this.state = ShoukakuStatus.CONNECTED;
-                this._callback(null, this.player);
-            })
-            .catch((error) => {
-                if (this._timeout) clearTimeout(this._timeout);
-                if (this.state !== ShoukakuStatus.CONNECTING)
-                    return this.player._listen('error', error);
-                this.state = ShoukakuStatus.DISCONNECTED;
-                this._callback(error);
-            })
-            .finally(() => {
-                this._callback = null;
-                this._timeout = null;
-            });
+    _voiceUpdate() {
+        return this.node.send({ op: 'voiceUpdate', guildId: this.guildID, sessionId: this.sessionID, event: this.lastServerUpdate });
     }
 
     _nodeDisconnected() {
         this._clearVoice();
-        this._send({
+        this._sendDiscordWS({
             guild_id: this.guildID,
             channel_id: null,
             self_mute: false,

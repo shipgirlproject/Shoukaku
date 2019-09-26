@@ -141,7 +141,6 @@ class ShoukakuPlayer extends EventEmitter {
             throw new Error('The node you specified is not ready.');
         await this.voiceConnection._move(node);
     }
-
     /**
      * Plays the track you specifed. Warning: If the player is playing anything, calling this will just ignore your call. Call `ShoukakuPlayer.StopTrack()` first.
      * @param {string} track The Base64 encoded track you got from lavalink API.
@@ -266,9 +265,8 @@ class ShoukakuPlayer extends EventEmitter {
     }
 
     async _resume() {
-        if (!this.track)
-            return this._listen('error', new ShoukakuError('No Track Found upon trying to resume.'));
         try {
+            if (!this.track) return this._listen('error', new ShoukakuError('No Track Found upon trying to resume.'));
             await this.playTrack(this.track.repeat(1), { startTime: this.position });
             if (this.bands.length) await this.setEqualizer(this.bands.slice(0));
             if (this.volume !== 100) await this.setVolume(Number(this.volume));
