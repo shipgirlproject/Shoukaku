@@ -118,7 +118,7 @@ class ShoukakuLink {
     }
 
     async _move(shoukakuSocket) {
-        this._destroy();
+        await this.node.send({ op: 'destroy', guildId: this.guildID });
         this.player.node.players.delete(this.guildID);
         await shoukakuSocket.send({ op: 'voiceUpdate', guildId: this.guildID, sessionId: this.sessionID, event: this.lastServerUpdate });
         shoukakuSocket.players.set(this.guildID, this.player);
