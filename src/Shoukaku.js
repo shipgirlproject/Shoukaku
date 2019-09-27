@@ -187,7 +187,7 @@ class Shoukaku extends EventEmitter {
     }
     /**
      * Shortcut to get the Ideal Node or a manually specified Node from the current nodes that Shoukaku governs.
-     * @param {boolean|string} [name] If blank, Shoukaku will automatically return the Ideal Node for you to connect to. If name is specifed, she will try to return the node you specified.
+     * @param {string} [name] If blank, Shoukaku will automatically return the Ideal Node for you to connect to. If name is specifed, she will try to return the node you specified.
      * @memberof Shoukaku
      * @returns {ShoukakuSocket}
      * @example

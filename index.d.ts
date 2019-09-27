@@ -262,7 +262,7 @@ declare module 'shoukaku' {
 
     private send(data: unknown): Promise<boolean>;
     private _configureResuming(): Promise<boolean>;
-    private _executeCleaner(): void;
+    private _executeCleaner(): Promise<void>;
     private _upgrade(response: unknown): void;
     private _open(): void;
     private _message(message: string): void;
@@ -302,8 +302,8 @@ declare module 'shoukaku' {
 
     public start(nodes: ShoukakuNodeOptions[], options: ShoukakuBuildOptions): void;
     public addNode(nodeOptions: ShoukakuNodeOptions): void;
-    public removeNode(name: string, libraryInvoked?: boolean): void;
-    public getNode(name?: boolean | string): ShoukakuSocket;
+    public removeNode(name: string, reason?: string): void;
+    public getNode(name?: string): ShoukakuSocket;
     public getLink(guildId: string): ShoukakuLink | null;
 
     private send(payload: unknown): void;
