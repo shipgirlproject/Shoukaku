@@ -232,13 +232,13 @@ class ShoukakuSocket extends EventEmitter {
         });
     }
 
-    _executeCleaner() {
+    async _executeCleaner() {
         if (!this.cleaner) return this.cleaner = true;
         const nodes = [...this.shoukaku.nodes.values()].filter(node => node.state === ShoukakuStatus.CONNECTED);
         if (this.moveOnDisconnect && nodes.length > 0) {
             const ideal = nodes.sort((a, b) => a.penalties - b.penalties).shift();
             for (const player of this.players.values()) {
-                player.voiceConnection._move(ideal)
+                await player.voiceConnection._move(ideal)
                     .catch(() => player.voiceConnection._nodeDisconnected());
             }
         } else {

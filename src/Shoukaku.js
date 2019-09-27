@@ -166,18 +166,24 @@ class Shoukaku extends EventEmitter {
      * @param {string} name The Lavalink Node to remove
      * @param {string} reason Optional reason for this disconnect.
      * @memberof Shoukaku
-     * @returns {boolean} true if the node was removed with no problems. Otherwise false.
+     * @returns {void}
      */
     removeNode(name, reason) {
         if (!this.id)
             throw new ShoukakuError('You didn\'t start Shoukaku once. Please call .start() method once before using this.');
         const node = this.nodes.get(name);
-        if (!node) return false;
-        node.removeAllListeners();
-        node._executeCleaner();
-        this.nodes.delete(name);
-        this.emit('disconnected', name, reason);
-        return true;
+        if (!node) return;
+        node.state = constants.ShoukakuStatus.DISCONNECTING;
+        node._executeCleaner()
+            .catch((error) => this.emit('error', name, error))
+            .finally(() => {
+                node.state = constants.ShoukakuStatus.DISCONNECTED;
+                this.nodes.delete(name);
+                this.removeListener('packetUpdate', node.packetRouter);
+                node.removeAllListeners();
+                node.ws.close(4011, 'Remove node executed.');
+                this.emit('disconnected', name, reason);
+            });
     }
     /**
      * Shortcut to get the Ideal Node or a manually specified Node from the current nodes that Shoukaku governs.

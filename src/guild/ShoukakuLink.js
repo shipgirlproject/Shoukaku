@@ -164,8 +164,8 @@ class ShoukakuLink {
     }
 
     _nodeDisconnected() {
-        this._disconnect();
         this.player._listen('nodeDisconnect', this.node.name);
+        this._disconnect();
     }
 }
 module.exports = ShoukakuLink;
