@@ -164,7 +164,7 @@ class ShoukakuLink {
     }
 
     _nodeDisconnected() {
-        this.player._listen('nodeDisconnect', this.node.name);
+        this.player._listen('nodeDisconnect', new ShoukakuError(`Node: ${this.node.name} disconnected. Either there is no more nodes available to migrate to, or moveOnDisconnect is disabled.`));
         this._disconnect();
     }
 }
