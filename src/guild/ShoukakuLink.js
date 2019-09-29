@@ -96,10 +96,10 @@ class ShoukakuLink {
             });
     }
 
-    _connect(d, callback) {
-        if (!d || !callback)
+    _connect(options, callback) {
+        if (!options || !callback)
             throw new ShoukakuError('No Options or Callback supplied.');
-
+        
         this._callback = callback;
 
         if (this.state === ShoukakuStatus.CONNECTING)  {
@@ -113,7 +113,9 @@ class ShoukakuLink {
         }, 15000);
 
         this.state = ShoukakuStatus.CONNECTING;
-        this._sendDiscordWS(d);
+        
+        const { guildID, voiceChannelID, deaf, mute } = options;
+        this._sendDiscordWS({ guild_id: guildID, channel_id: voiceChannelID, self_deaf: deaf, self_mute: mute });
     }
 
     _disconnect() {
@@ -126,12 +128,7 @@ class ShoukakuLink {
         if (this.state !== ShoukakuStatus.DISCONNECTED) {
             this._destroy()
                 .catch(() => null);
-            this._sendDiscordWS({
-                guild_id: this.guildID,
-                channel_id: null,
-                self_mute: false,
-                self_deaf: false
-            });
+            this._sendDiscordWS({ guild_id: this.guildID, channel_id: null, self_mute: false, self_deaf: false });
             this.state = ShoukakuStatus.DISCONNECTED;
         }
     }
@@ -154,7 +151,9 @@ class ShoukakuLink {
     }
 
     _sendDiscordWS(d) {
-        this.node.shoukaku.send({ op: 4, d });
+        const guild = this.node.shoukaku.client.guilds.get(this.guildID);
+        if (!guild) return;
+        guild.shard.send({ op: 4, d });
     }
 
     _clearVoice() { 

@@ -146,14 +146,7 @@ class ShoukakuSocket extends EventEmitter {
             const player = new ShoukakuPlayer(this, guild);
             this.players.set(guild.id, player);
 
-            const joinOptions = {
-                guild_id: options.guildID,
-                channel_id: options.voiceChannelID,
-                self_deaf: options.deaf,
-                self_mute: options.mute
-            };
-
-            player.connect(joinOptions, (error, value) => {
+            player.connect(options, (error, value) => {
                 if (!error) return resolve(value);
                 this.players.delete(guild.id);
                 reject(error);
@@ -172,6 +165,7 @@ class ShoukakuSocket extends EventEmitter {
         player.disconnect();
     }
 
+
     send(data) {
         return new Promise((resolve, reject) => {
             if (!this.ws || this.ws.readyState !== 1) return resolve(false);
@@ -186,6 +180,29 @@ class ShoukakuSocket extends EventEmitter {
             });
         });
     }
+    
+    _configureResuming() {
+        return this.send({
+            op: 'configureResuming',
+            key: this.resumable,
+            timeout: this.resumableTimeout
+        });
+    }
+
+    async _executeCleaner() {
+        if (!this.cleaner) return this.cleaner = true;
+        const nodes = [...this.shoukaku.nodes.values()].filter(node => node.state === ShoukakuStatus.CONNECTED);
+        if (this.moveOnDisconnect && nodes.length > 0) {
+            const ideal = nodes.sort((a, b) => a.penalties - b.penalties).shift();
+            for (const player of this.players.values()) {
+                await player.voiceConnection._move(ideal)
+                    .catch(() => player.voiceConnection._nodeDisconnected());
+            }
+        } else {
+            for (const player of this.players.values()) player.voiceConnection._nodeDisconnected();
+        }
+    }
+
 
     _upgrade(response) {
         this.resumed = response.headers['session-resumed'] === 'true';
@@ -222,28 +239,6 @@ class ShoukakuSocket extends EventEmitter {
         this.shoukaku.removeListener('packetUpdate', this.packetRouter);
         this.ws = null;
         this.emit('close', this.name, code, reason);
-    }
-
-    _configureResuming() {
-        return this.send({
-            op: 'configureResuming',
-            key: this.resumable,
-            timeout: this.resumableTimeout
-        });
-    }
-
-    async _executeCleaner() {
-        if (!this.cleaner) return this.cleaner = true;
-        const nodes = [...this.shoukaku.nodes.values()].filter(node => node.state === ShoukakuStatus.CONNECTED);
-        if (this.moveOnDisconnect && nodes.length > 0) {
-            const ideal = nodes.sort((a, b) => a.penalties - b.penalties).shift();
-            for (const player of this.players.values()) {
-                await player.voiceConnection._move(ideal)
-                    .catch(() => player.voiceConnection._nodeDisconnected());
-            }
-        } else {
-            for (const player of this.players.values()) player.voiceConnection._nodeDisconnected();
-        }
     }
 }
 module.exports = ShoukakuSocket;

@@ -235,16 +235,6 @@ class ShoukakuPlayer extends EventEmitter {
         return true;
     }
 
-    _listen(event, data) {
-        if (endEvents.includes(event)) {
-            if (event === 'nodeDisconnect') this._clearTrack() && this._clearBands();
-            else this._clearTrack();
-            this.emit(event, data);
-            return;
-        }
-        if (data) this.position = data.position;
-        this.emit(event, data);
-    }
 
     _clearTrack() {
         this.track = null;
@@ -265,6 +255,18 @@ class ShoukakuPlayer extends EventEmitter {
         } catch (error) {
             this._listen('error', error);
         }
+    }
+
+    
+    _listen(event, data) {
+        if (endEvents.includes(event)) {
+            if (event === 'nodeDisconnect') this._clearTrack() && this._clearBands();
+            else this._clearTrack();
+            this.emit(event, data);
+            return;
+        }
+        if (data) this.position = data.position;
+        this.emit(event, data);
     }
 }
 module.exports = ShoukakuPlayer;

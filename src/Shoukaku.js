@@ -155,7 +155,7 @@ class Shoukaku extends EventEmitter {
         node.connect(this.id, this.shardCount, false);
         node.on('debug', (name, data) => this.emit('debug', name, data));
         node.on('error', (name, error) => this.emit('error', name, error));
-        const _close = this._reconnect.bind(this);
+        const _close = this._close.bind(this);
         const _ready = this._ready.bind(this);
         node.on('ready', _ready);
         node.on('close', _close);
@@ -233,33 +233,6 @@ class Shoukaku extends EventEmitter {
         return this.players.get(guildID);
     }
 
-    send(payload) {
-        const guild = this.client.guilds.get(payload.d.guild_id);
-        if (!guild) return;
-        guild.shard.send(payload);
-    }
-
-    _ready(name, resumed) {
-        const node = this.nodes.get(name);
-        if (!resumed) node._executeCleaner();
-        this.emit('ready', name, resumed);
-    }
-
-    _reconnect(name, code, reason) {
-        this.emit('close', name, code, reason);
-        const node = this.nodes.get(name);
-        if (node.reconnectAttempts < this.options.reconnectTries) {
-            node.reconnectAttempts++;
-            try {
-                node.connect(this.id, this.shardCount, this.options.resumable);
-            } catch (error) {
-                this.emit('error', name, error);
-                setTimeout(() => this._reconnect(name, code, reason), 2500);
-            }
-        } else {
-            this.removeNode(name, `Failed to reconnect in ${this.options.reconnectTries} attempts`);
-        }
-    }
 
     _mergeDefault(def, given) {
         if (!given) return def;
@@ -275,6 +248,29 @@ class Shoukaku extends EventEmitter {
             delete given[key];
         }
         return given;
+    }
+
+
+    _ready(name, resumed) {
+        const node = this.nodes.get(name);
+        if (!resumed) node._executeCleaner();
+        this.emit('ready', name, resumed);
+    }
+
+    _close(name, code, reason) {
+        this.emit('close', name, code, reason);
+        const node = this.nodes.get(name);
+        if (node.reconnectAttempts < this.options.reconnectTries) {
+            node.reconnectAttempts++;
+            try {
+                node.connect(this.id, this.shardCount, this.options.resumable);
+            } catch (error) {
+                this.emit('error', name, error);
+                setTimeout(() => this._reconnect(name, code, reason), 2500);
+            }
+        } else {
+            this.removeNode(name, `Failed to reconnect in ${this.options.reconnectTries} attempts`);
+        }
     }
 }
 module.exports = Shoukaku;

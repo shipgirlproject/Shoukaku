@@ -306,7 +306,6 @@ declare module 'shoukaku' {
     public getNode(name?: string): ShoukakuSocket;
     public getLink(guildId: string): ShoukakuLink | null;
 
-    private send(payload: unknown): void;
     private _ready(name: string, resumed: boolean): void;
     private _reconnect(name: string, code: number, reason: string): void;
     private _mergeDefault<T, J>(def: T, given: J): T & J;
