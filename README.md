@@ -1,13 +1,13 @@
 ## Shoukaku
+[![Discord](https://img.shields.io/discord/423116740810244097?style=flat-square)](https://discordapp.com/invite/FVqbtGu)
+[![npm](https://img.shields.io/npm/v/shoukaku?style=flat-square)](https://www.npmjs.com/package/shoukaku)
+![Github Stars](https://img.shields.io/github/stars/Deivu/Shoukaku?style=flat-square)
+![GitHub issues](https://img.shields.io/github/issues-raw/Deivu/Shoukaku?style=flat-square)
+![Snyk Vulnerabilities for npm package](https://img.shields.io/snyk/vulnerabilities/npm/shoukaku?style=flat-square) 
+![NPM](https://img.shields.io/npm/l/shoukaku?style=flat-square)
 <p align="center">
   <img src="https://vignette.wikia.nocookie.net/kancolle/images/c/c8/Shoukaku_Full.png/revision/latest">
 </p>
-
-[![Discord](https://img.shields.io/discord/423116740810244097?style=for-the-badge)](https://discordapp.com/invite/FVqbtGu)
-[![npm](https://img.shields.io/npm/v/shoukaku?style=for-the-badge)](https://www.npmjs.com/package/shoukaku)
-![GitHub issues](https://img.shields.io/github/issues-raw/Deivu/Shoukaku?style=for-the-badge)
-![Snyk Vulnerabilities for npm package](https://img.shields.io/snyk/vulnerabilities/npm/shoukaku?style=for-the-badge) 
-![NPM](https://img.shields.io/npm/l/shoukaku?style=for-the-badge)
 
 The ShipGirl Project. Shoukaku `(c) Kancolle for Shoukaku`
 
@@ -18,17 +18,15 @@ The ShipGirl Project. Shoukaku `(c) Kancolle for Shoukaku`
 [![DBL](https://discordbots.org/api/widget/424137718961012737.svg)](https://discordbots.org/bot/424137718961012737)
 
 ### Why Shoukaku?
-✅ Straightforward 
+✅ Designed to used in Discord.JS v12
 
-✅ Scalable
+✅ Straightforward, Maintained, and Reliable.
 
-✅ Reliable
+✅ Stable for long term usage.
 
-✅ Maintained
+✅ Offers features that other libraries don't have.
 
-✅ Very Cute and Charming Shipgirl ❤
-
-✅ And will make your library weeb 😂
+✅ Very cute and reliable Shipgirl ❤ (Important)
 
 ### Documentation
 https://deivu.github.io/Shoukaku/?api
@@ -42,57 +40,6 @@ For Master
 ```
 npm i Deivu/Shoukaku
 ```
-
-### 0.2.x -> 1.0.x Migration
-
-> 0.2.x and earlier
-```js
-<Shoukaku>.build({ /* buildOptions here */ });
-```
-
-> 1.0.0 and newer
-```js
-<Shoukaku>.start({ /* buildOptions here */ });
-```
-
-### 0.1.x -> 0.2.x Migration
-> ShoukakuLink is now a property of ShoukakuPlayer, meaning all link related getters are changed to player getters.
-
-> You can access ShoukakuLink via .voiceConnection property of ShoukakuPlayer
-
-> ShoukakuPlayer events are "GREATLY CHANGED". Those marked as optional can be left out.
-The events is as follows
-- end
-- closed
-- error
-- nodeDisconnect
-- trackException "optional"
-- resumed "optional"
-- playerUpdate "optional"
-
-> Shoukaku class have renamed methods and properties
-- getLink() -> getPlayer()
-- .links -> .players
-- .totalLinks -> .totalPlayers
-
-> ShoukakuSocket also have a renamed property
-- .links -> .players
-
-> You don't disconnect / clean the player on ShoukakuLink but on ShoukakuPlayer now making your code more clean and better
-
-> 0.1.1 and earlier
-```js
-<ShoukakuLink>.player.playTrack();
-<ShoukakuLink>.disconnect();
-```
-
-> 0.2.x and newer
-```js
-<ShoukakuPlayer>.playTrack();
-<ShoukakuPlayer>.disconnect();
-```
-
-You can see more of the changes on updated example below.
 
 ### Support Server
 If you need help on using this, Join Here [ShipGirls Community](https://discordapp.com/invite/FVqbtGu) and `ask at #support`. 
@@ -111,22 +58,21 @@ Feel free to open an issue in the [Issues](https://github.com/Deivu/Shoukaku/iss
 ### Discord.js actual implementation.
 [View Kongou's source code here](https://github.com/Deivu/Kongou)
 
-### More simple implementation w/o queue.
+### Really simple example of using this.
 ```js
 const { Client } = require('discord.js');
 const { Shoukaku } = require('shoukaku');
-const MyLavalinkServer = [
-  {
-    name: 'my_lavalink_server',
+const MyLavalinkServer = [{
+    name: 'Lewd Server',
     host: 'localhost',
     port: 6969,
-    auth: 'owo_your_password'
-  }
-];
+    auth: 'do not guess my password'
+}];
 const client = new Client();
 
 // In this example, I will assign Shoukaku to a carrier variable. Options are the default options if nothing is specified
 const Carrier = new Shoukaku(client, {
+  moveOnDisconnect: false,
   resumable: false,
   resumableTimeout: 30,
   reconnectTries: 2,
@@ -143,7 +89,7 @@ Carrier.on('close', (name, code, reason) => console.log(`Lavalink Node: ${name} 
 Carrier.on('disconnected', (name, reason) => console.log(`Lavalink Node: ${name} disconnected. Reason: ${reason || 'No reason'}`));
 
 client.on('ready', () => {
-  // You need to build shoukaku on your client's ready event for her to work like how its done in this example.
+  // Connecting Shoukaku to Lavalink Nodes.
   Carrier.start(MyLavalinkServer, { id: client.user.id  });
   console.log('Bot Initialized');
 })

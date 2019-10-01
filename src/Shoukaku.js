@@ -46,9 +46,9 @@ class Shoukaku extends EventEmitter {
         this.id = null;
         /**
         * The shard count of the bot that is being governed by Shoukaku.
-        * @type {?number}
+        * @type {number}
         */
-        this.shardCount = null;
+        this.shardCount = 1;
         /**
         * The current nodes that is being handled by Shoukaku.
         * @type {external:Map}
@@ -134,7 +134,7 @@ class Shoukaku extends EventEmitter {
             throw new ShoukakuError('You already started Shoukaku, you don\'t need to start her again.');
         options = this._mergeDefault(constants.ShoukakuBuildOptions, options);
         this.id = options.id;
-        this.shardCount = options.shardCount;
+        if (options.shardCount) this.shardCount = options.shardCount;
         for (let node of nodes) {
             node = this._mergeDefault(constants.ShoukakuNodeOptions, node);
             this.addNode(node);
