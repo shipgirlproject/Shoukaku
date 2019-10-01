@@ -41,6 +41,9 @@ For Master
 npm i Deivu/Shoukaku
 ```
 
+### Changelogs
+You can view it on [CHANGELOGS.MD](https://github.com/Deivu/Shoukaku/blob/master/CHANGELOGS.MD) file in this repository.
+
 ### Support Server
 If you need help on using this, Join Here [ShipGirls Community](https://discordapp.com/invite/FVqbtGu) and `ask at #support`. 
 
