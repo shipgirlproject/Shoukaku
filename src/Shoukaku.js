@@ -181,7 +181,10 @@ class Shoukaku extends EventEmitter {
                 this.nodes.delete(name);
                 this.removeListener('packetUpdate', node.packetRouter);
                 node.removeAllListeners();
-                node.ws.close(4011, 'Remove node executed.');
+                if (node.ws) {
+                    node.ws.removeAllListeners();
+                    node.ws.close(4011, 'Remove node executed.');
+                }
                 this.emit('disconnected', name, reason);
             });
     }
