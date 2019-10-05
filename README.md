@@ -6,7 +6,7 @@
 ![Snyk Vulnerabilities for npm package](https://img.shields.io/snyk/vulnerabilities/npm/shoukaku?style=flat-square) 
 ![NPM](https://img.shields.io/npm/l/shoukaku?style=flat-square)
 <p align="center">
-  <img src="https://vignette.wikia.nocookie.net/kancolle/images/c/c8/Shoukaku_Full.png/revision/latest">
+  <img src="https://vignette.wikia.nocookie.net/kancolle/images/9/97/Shoukaku_Christmas_Full.png/revision/latest/">
 </p>
 
 The ShipGirl Project. Shoukaku `(c) Kancolle for Shoukaku`
@@ -47,7 +47,7 @@ You can view it on [CHANGELOGS.MD](https://github.com/Deivu/Shoukaku/blob/master
 ### Support Server
 If you need help on using this, Join Here [ShipGirls Community](https://discordapp.com/invite/FVqbtGu) and `ask at #support`. 
 
-### Issue / Bug Found?
+### Issues or Bugs
 Feel free to open an issue in the [Issues](https://github.com/Deivu/Shoukaku/issues) section of this repository.
 
 ### Notes 
@@ -55,13 +55,13 @@ Feel free to open an issue in the [Issues](https://github.com/Deivu/Shoukaku/iss
 
 > There is a Discord.JS actual implementation and a simple implementation examples below.
 
-### Starting a Lavalink Server.
+### Starting a Lavalink Server
 [View Lavalink README here](https://github.com/Frederikam/Lavalink/blob/master/README.md)
 
-### Discord.js actual implementation.
+### Discord.js example implementation
 [View Kongou's source code here](https://github.com/Deivu/Kongou)
 
-### Really simple example of using this.
+### Really simple example of using this
 ```js
 const { Client } = require('discord.js');
 const { Shoukaku } = require('shoukaku');
