@@ -256,7 +256,10 @@ class Shoukaku extends EventEmitter {
 
     _ready(name, resumed) {
         const node = this.nodes.get(name);
-        if (!resumed) node._executeCleaner();
+        if (!resumed) {
+            node._executeCleaner()
+                .catch((error) => this.emit('error', name, error));
+        }
         this.emit('ready', name, resumed);
     }
 
