@@ -1,4 +1,32 @@
-### 1.0.x -> 1.1.x Migration
+### 1.1.x -> 1.2.x
+> Master Compatibility change, Not compatible with commits older than `https://github.com/discordjs/discord.js/commit/5519d6fbaa61abccc27b742f97ad725bf4259265`
+
+> `<Shoukaku.start()>` is removed, hence no need to call `Shoukaku#start()` on ready event.
+
+> `ShoukakuConstants#ShoukakuBuildOptions` is removed.
+
+> Added `ShoukakuConstants#ShoukakuNodes`, which is an array of `ShoukakuConstants#ShoukakuNodeOptions`.
+
+> `<Shoukaku>` class gained a new parameter named `nodes` which is the `ShoukakuConstants#ShoukakuNodes`. Parameters order have been changed, the example below shows the change.
+
+Example:
+```js
+const servers = [{
+    name: 'Lewd Server',
+    host: 'localhost',
+    port: 6969,
+    auth: 'do not guess my password'
+}];
+new Shoukaku(client, servers, {
+  moveOnDisconnect: false,
+  resumable: 'resumableKongou',
+  resumableTimeout: 30,
+  reconnectTries: 2,
+  restTimeout: 10000
+})
+```
+
+### 1.0.x -> 1.1.x 
 > `<ShoukakuSocket>.leaveVoiceChannel('guild_id');` is added and can be used to remove players. Although I recommend `<ShoukakuPlayer>.disconnect();` if you have a reference of ShoukakuPlayer.
 
 > `<ShoukakuPlayer>.node` property is removed.

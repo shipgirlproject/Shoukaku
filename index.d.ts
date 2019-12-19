@@ -2,7 +2,7 @@ declare module 'shoukaku' {
   import { EventEmitter } from "events";
   import { Client as DiscordClient, Base64String, Guild } from 'discord.js';
 
-  export const version: string; 
+  export const version: string;
 
   export class ShoukakuError extends Error {
     constructor(message: string);
@@ -14,6 +14,9 @@ declare module 'shoukaku' {
     public name: string;
   }
 
+  export class ShoukakuUtil {
+    public static mergeDefault(def: Object, given: Object);
+  }
 
   export interface Track {
     track: string;
@@ -112,11 +115,6 @@ declare module 'shoukaku' {
     auth: string;
   }
 
-  export interface ShoukakuBuildOptions {
-    id: string;
-    shardCount?: number;
-  }
-
   class ShoukakuConstants {
     static ShoukakuStatus: ShoukakuStatus;
     static ShoukakuNodeStats: ShoukakuNodeStats;
@@ -124,7 +122,7 @@ declare module 'shoukaku' {
     static ShoukakuPlayOptions: ShoukakuPlayOptions;
     static ShoukakuOptions: ShoukakuOptions;
     static ShoukakuNodeOptions: ShoukakuNodeOptions;
-    static ShoukakuBuildOptions: ShoukakuBuildOptions;
+    static ShoukakuNodes: Array<ShoukakuNodeOptions>;
   }
 
   export { ShoukakuConstants as Constants };
@@ -300,7 +298,6 @@ declare module 'shoukaku' {
 
     private options: ShoukakuOptions;
 
-    public start(nodes: ShoukakuNodeOptions[], options: ShoukakuBuildOptions): void;
     public addNode(nodeOptions: ShoukakuNodeOptions): void;
     public removeNode(name: string, reason?: string): void;
     public getNode(name?: string): ShoukakuSocket;
@@ -308,6 +305,5 @@ declare module 'shoukaku' {
 
     private _ready(name: string, resumed: boolean): void;
     private _reconnect(name: string, code: number, reason: string): void;
-    private _mergeDefault<T, J>(def: T, given: J): T & J;
   }
 }

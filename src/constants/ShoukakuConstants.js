@@ -113,17 +113,12 @@ class ShoukakuConstants {
         };
     }
     /**
-    * Options that Shoukaku uses when you build the Shoukaku Instance. Init !== Build.
-    * @typedef {Object} ShoukakuBuildOptions
-    * @property {string} [id] Your Bot's / Client ID.
-    * @property {number} [shardCount=1] ShardCount of your Bot, leave this alone if your bot is unsharded.
-    * @memberof ShoukakuConstants#
-    */
-    static get ShoukakuBuildOptions() {
-        return {
-            id: null,
-            shardCount: 1
-        };
+     * An array of ShoukakuNodeOptions
+     * @typedef {Array<ShoukakuNodeOptions>} ShoukakuNodes
+     * @memberof ShoukakuConstants#
+     */
+    static get ShoukakuNodes() {
+        return [].push(ShoukakuConstants.ShoukakuNodeOptions);
     }
 }
 module.exports = ShoukakuConstants;

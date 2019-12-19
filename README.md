@@ -74,7 +74,7 @@ const MyLavalinkServer = [{
 const client = new Client();
 
 // In this example, I will assign Shoukaku to a carrier variable. Options are the default options if nothing is specified
-const Carrier = new Shoukaku(client, {
+const Carrier = new Shoukaku(client, MyLavalinkServer, {
   moveOnDisconnect: false,
   resumable: false,
   resumableTimeout: 30,
@@ -90,12 +90,6 @@ Carrier.on('error', (name, error) => console.log(`Lavalink Node: ${name} emitted
 Carrier.on('close', (name, code, reason) => console.log(`Lavalink Node: ${name} closed with code ${code}. Reason: ${reason || 'No reason'}`));
 // Disconnected emits when a lavalink node disconnected and will not try to reconnect again.
 Carrier.on('disconnected', (name, reason) => console.log(`Lavalink Node: ${name} disconnected. Reason: ${reason || 'No reason'}`));
-
-client.on('ready', () => {
-  // Connecting Shoukaku to Lavalink Nodes.
-  Carrier.start(MyLavalinkServer, { id: client.user.id  });
-  console.log('Bot Initialized');
-})
 
 // Now I will show you how to make a simple handler that plays a link on your chnanel. Async Await style
 client.on('message', async (msg) => {

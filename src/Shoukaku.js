@@ -1,4 +1,5 @@
 const { RawRouter, ReconnectRouter } = require('./router/ShoukakuRouter.js');
+const util  = require('./util/ShoukakuUtil.js');
 const constants = require('./constants/ShoukakuConstants.js');
 const ShoukakuError = require('./constants/ShoukakuError.js');
 const ShoukakuSocket = require('./node/ShoukakuSocket.js');
@@ -31,9 +32,10 @@ const { version } = require('discord.js');
 class Shoukaku extends EventEmitter {
     /**
      * @param  {external:Client} client Your Discord.js client
-     * @param {ShoukakuConstants#ShoukakuOptions} [options=ShoukakuOptions] Options to initialize Shoukaku with
+     * @param {ShoukakuConstants#ShoukakuNodes} [nodes] Lavalink Nodes where Shoukaku will try to connect to.
+     * @param {ShoukakuConstants#ShoukakuOptions} [options] Options to initialize Shoukaku with
      */
-    constructor(client, options) {
+    constructor(client, nodes, options) {
         super();
         if (!version.startsWith('12'))
             throw new ShoukakuError('Shoukaku will only work in Discord.JS v12 / Discord.JS Master Branch. Versions below Discord.JS v12 is not supported.');
@@ -58,9 +60,20 @@ class Shoukaku extends EventEmitter {
         */
         this.nodes = new Map();
 
-        Object.defineProperty(this, 'options', { value: this._mergeDefault(constants.ShoukakuOptions, options) });
+        Object.defineProperty(this, 'options', { value: util.mergeDefault(constants.ShoukakuOptions, options) });
         Object.defineProperty(this, 'rawRouter', { value: RawRouter.bind(this) });
         Object.defineProperty(this, 'reconnectRouter', { value: ReconnectRouter.bind(this) });
+
+        this.client.once('ready', () => {
+            this.id = this.client.user.id;
+            this.shardCount = this.client.shard ? this.client.shard.count : 1;
+            for (let node of nodes) {
+                node = util.mergeDefault(constants.ShoukakuNodeOptions, node);
+                this.addNode(node);
+            }
+            this.client.on('raw', this.rawRouter);
+            this.client.on('shardReady', this.reconnectRouter);
+        });
     }
     /**
      * Gets all the Players that is currently active on all nodes in this instance.
@@ -126,26 +139,6 @@ class Shoukaku extends EventEmitter {
      */
 
     /**
-     * The starting point of Shoukaku, must be called in ready event in order for Shoukaku to work.
-     * @param {ShoukakuConstants#ShoukakuNodeOptions} nodes An array of lavalink nodes for Shoukaku to connect to.
-     * @param {ShoukakuConstants#ShoukakuBuildOptions} options Options that is need by Shoukaku to build herself.
-     * @memberof Shoukaku
-     * @returns {void}
-     */
-    start(nodes, options) {
-        if (this.id)
-            throw new ShoukakuError('You already started Shoukaku, you don\'t need to start her again.');
-        options = this._mergeDefault(constants.ShoukakuBuildOptions, options);
-        this.id = options.id;
-        if (options.shardCount) this.shardCount = options.shardCount;
-        for (let node of nodes) {
-            node = this._mergeDefault(constants.ShoukakuNodeOptions, node);
-            this.addNode(node);
-        }
-        this.client.on('raw', this.rawRouter);
-        this.client.on('shardReady', this.reconnectRouter);
-    }
-    /**
     * Function to register a Lavalink Node
     * @param {ShoukakuConstants#ShoukakuNodeOptions} nodeOptions The Node Options to be used to connect to.
     * @memberof Shoukaku
@@ -153,7 +146,7 @@ class Shoukaku extends EventEmitter {
     */
     addNode(nodeOptions) {
         if (!this.id)
-            throw new ShoukakuError('You didn\'t start Shoukaku once. Please call .start() method once before using this.');
+            throw new ShoukakuError('Shoukaku is not yet ready to execute this method. Please wait and try again.');
         const node = new ShoukakuSocket(this, nodeOptions);
         node.connect(this.id, this.shardCount, false);
         node.on('debug', (name, data) => this.emit('debug', name, data));
@@ -173,7 +166,7 @@ class Shoukaku extends EventEmitter {
      */
     removeNode(name, reason) {
         if (!this.id)
-            throw new ShoukakuError('You didn\'t start Shoukaku once. Please call .start() method once before using this.');
+            throw new ShoukakuError('Shoukaku is not yet ready to execute this method. Please wait and try again.');
         const node = this.nodes.get(name);
         if (!node) return;
         node.state = constants.ShoukakuStatus.DISCONNECTING;
@@ -208,7 +201,7 @@ class Shoukaku extends EventEmitter {
      */
     getNode(name) {
         if (!this.id)
-            throw new ShoukakuError('You didn\'t start Shoukaku once. Please call .start() method once before using this.');
+            throw new ShoukakuError('Shoukaku is not yet ready to execute this method. Please wait and try again.');
         if (!this.nodes.size)
             throw new ShoukakuError('No nodes available. What happened?');
         if (name) {
@@ -233,29 +226,11 @@ class Shoukaku extends EventEmitter {
     */
     getPlayer(guildID) {
         if (!this.id)
-            throw new ShoukakuError('You didn\'t start Shoukaku once. Please call .start() method once before using this.');
+            throw new ShoukakuError('Shoukaku is not yet ready to execute this method. Please wait and try again.');
         if (!guildID) return null;
         if (!this.nodes.size) return null;
         return this.players.get(guildID);
     }
-
-
-    _mergeDefault(def, given) {
-        if (!given) return def;
-        const defaultKeys = Object.keys(def);
-        for (const key of defaultKeys) {
-            if (def[key] === null) {
-                if (!given[key]) throw new ShoukakuError(`${key} was not found from the given options.`);
-            }
-            if (!given[key]) given[key] = def[key];
-        }
-        for (const key in defaultKeys) {
-            if (defaultKeys.includes(key)) continue;
-            delete given[key];
-        }
-        return given;
-    }
-
 
     _ready(name, resumed) {
         const node = this.nodes.get(name);
