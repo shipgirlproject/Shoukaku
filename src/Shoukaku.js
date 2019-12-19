@@ -32,8 +32,8 @@ const { version } = require('discord.js');
 class Shoukaku extends EventEmitter {
     /**
      * @param  {external:Client} client Your Discord.js client
-     * @param {ShoukakuConstants#ShoukakuNodes} [nodes] Lavalink Nodes where Shoukaku will try to connect to.
-     * @param {ShoukakuConstants#ShoukakuOptions} [options] Options to initialize Shoukaku with
+     * @param {ShoukakuConstants#ShoukakuNodes} nodes Lavalink Nodes where Shoukaku will try to connect to.
+     * @param {ShoukakuConstants#ShoukakuOptions} options Options to initialize Shoukaku with
      */
     constructor(client, nodes, options) {
         super();
