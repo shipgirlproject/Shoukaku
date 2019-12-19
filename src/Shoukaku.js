@@ -66,7 +66,7 @@ class Shoukaku extends EventEmitter {
 
         this.client.once('ready', () => {
             this.id = this.client.user.id;
-            this.shardCount = this.client.shard ? this.client.shard.count : 1;
+            this.shardCount = this.client.shard ? this.client.shard.count || this.client.shard.shardCount : 1;
             for (let node of nodes) {
                 node = util.mergeDefault(constants.ShoukakuNodeOptions, node);
                 this.addNode(node);
