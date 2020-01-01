@@ -8,7 +8,7 @@
 <img src="https://img.shields.io/snyk/vulnerabilities/npm/shoukaku?style=flat-square" alt="Snyk Vulnerabilities for npm package" style="max-width: 100%;"> 
 <img src="https://img.shields.io/npm/l/shoukaku?style=flat-square" alt="NPM" style="max-width: 100%;"></p>
 <p align="center">
-  <img src="https://vignette.wikia.nocookie.net/kancolle/images/9/97/Shoukaku_Christmas_Full.png/revision/latest/" style="max-width: 100%;">
+  <img src="https://vignette.wikia.nocookie.net/kancolle/images/c/c8/Shoukaku_Full.png/revision/latest" style="max-width: 100%;">
 </p>
 
 <p>The ShipGirl Project. Shoukaku <code>(c) Kancolle for Shoukaku</code></p>
@@ -46,74 +46,61 @@
 <h3 id="really-simple-example-of-using-this">Really simple example of using this</h3>
 <pre><code class="js">const { Client } = require('discord.js');
 const { Shoukaku } = require('shoukaku');
-const MyLavalinkServer = [{
-    name: 'Lewd Server',
-    host: 'localhost',
-    port: 6969,
-    auth: 'do not guess my password'
-}];
-const client = new Client();
 
-// In this example, I will assign Shoukaku to a carrier variable. Options are the default options if nothing is specified
-const Carrier = new Shoukaku(client, MyLavalinkServer, {
-  moveOnDisconnect: false,
-  resumable: false,
-  resumableTimeout: 30,
-  reconnectTries: 2,
-  restTimeout: 10000 
-});
+const LavalinkServer = [{ name: 'Localhost', host: 'localhost', port: 6969, auth: 'big_weeb' }];
+const ShoukakuOptions = { moveOnDisconnect: false, resumable: false, resumableTimeout: 30, reconnectTries: 2, restTimeout: 10000 };
 
-// Listeners you can use for Shoukaku
-Carrier.on('ready', (name) =&gt; console.log(`Lavalink Node: ${name} is now connected`));
-// Error must be handled
-Carrier.on('error', (name, error) =&gt; console.log(`Lavalink Node: ${name} emitted an error.`, error));
-// Close emits when a lavalink node disconnects.
-Carrier.on('close', (name, code, reason) =&gt; console.log(`Lavalink Node: ${name} closed with code ${code}. Reason: ${reason || 'No reason'}`));
-// Disconnected emits when a lavalink node disconnected and will not try to reconnect again.
-Carrier.on('disconnected', (name, reason) =&gt; console.log(`Lavalink Node: ${name} disconnected. Reason: ${reason || 'No reason'}`));
-
-// Now I will show you how to make a simple handler that plays a link on your chnanel. Async Await style
-client.on('message', async (msg) =&gt; {
-  if (msg.author.bot || !msg.guild) return;
-  if (msg.content.startsWith('$play')) {
-
-    // Check if there is already a link on your guild. Since this is a no queue implementation.
-    if (Carrier.getPlayer(msg.guild.id)) return;
-
-    const args = msg.content.split(' ');
-    if (!args[1]) return;
-
-    // Getting a node where we can peform our queries and connections.
-    const node = Carrier.getNode();
-
-    // Fetching the Lavalink Track Data from the node we got.
-    let data = await node.rest.resolve(args[1]);
-
-    // If there is no data lets just return
-    if (!data) return;
-
-    if (Array.isArray(data)) data = data[0];
-
-    // Getting the ShoukakuPlayer where we can play tracks and disconnect once we dont need it anymore.
-    const player = await node.joinVoiceChannel({
-      guildID: msg.guild.id,
-      voiceChannelID: msg.member.voice.channelID
-    });
-
-    // Example of handling the non optional events.
-    const endFunction = (param) =&gt; {
-        console.log(param);
-        player.disconnect();
+class ExampleBot extends Client {
+    constructor(opts) {
+        super(opts);
+        this.shoukaku = new Shoukaku(this, LavalinkServer, ShoukakuOptions);
     }
-    player.on('end', endFunction);
-    player.on('closed', endFunction);
-    player.on('error', endFunction);
-    player.on('nodeDisconnect', endFunction);
 
-    // Play the lavalink track we got
-    await player.playTrack(data.track);
-    await msg.channel.send("Now Playing: " + data.info.title);
-  }
-})
-client.login('token');</code></pre>
+    login() {
+        this._setupShoukakuEvents();
+        this._setupClientEvents();
+        return super.login();
+    }
+
+    _setupShoukakuEvents() {
+        this.shoukaku.on('ready', (name) =&gt; console.log(`Lavalink Node: ${name} is now connected`));
+        // You must handle error event
+        this.shoukaku.on('error', (name, error) =&gt; console.log(`Lavalink Node: ${name} emitted an error.`, error));
+        this.shoukaku.on('close', (name, code, reason) =&gt; console.log(`Lavalink Node: ${name} closed with code ${code}. Reason: ${reason || 'No reason'}`));
+        this.shoukaku.on('disconnected', (name, reason) =&gt; console.log(`Lavalink Node: ${name} disconnected. Reason: ${reason || 'No reason'}`));
+    }
+
+    _setupClientEvents() {
+        this.on('message', async (msg) =&gt; {
+            if (msg.author.bot || !msg.guild) return;
+            if (!msg.content.startsWith('$play')) return;
+            if (this.shoukaku.getPlayer(msg.guild.id)) return;
+            const args = msg.content.split(' ');
+            if (!args[1]) return;
+            const node = this.shoukaku.getNode();
+            let data = await node.rest.resolve(args[1]);
+            if (!data) return;
+            if (Array.isArray(data)) data = data[0];
+            const player = await node.joinVoiceChannel({
+                guildID: msg.guild.id,
+                voiceChannelID: msg.member.voice.channelID
+            });
+            const cleanFunction = (param) =&gt; {
+                console.log(param);
+                player.disconnect();
+            }
+            player.on('end', cleanFunction);
+            player.on('closed', cleanFunction);
+            player.on('error', cleanFunction);
+            player.on('nodeDisconnect', cleanFunction);
+            await player.playTrack(data.track);
+            await msg.channel.send("Now Playing: " + data.info.title);
+        });
+        this.on('ready', () =&gt; console.log('Bot is now ready'));
+    }
+}
+
+new ExampleBot()
+    .login('token')
+    .catch(console.error);</code></pre>
 </body></html>
