@@ -145,15 +145,20 @@ declare module 'shoukaku' {
     }
   }
 
-  export class ShoukakuResolver {
+  export class ShoukakuRest {
     constructor(host: string, port: string, auth: string, timeout: number);
+    private auth: string;
     public timeout: number;
     public url: string;
-    private auth: string;
-    public resolve(identifier: string, search: Source): Promise<LoadTrackResponse | Track | Track[] | null>;
-    public decode(track: Base64String): Promise<unknown>;
 
-    private _fetch(url: string): Promise<unknown>;
+    public resolve(identifier: string, search: Source): Promise<LoadTrackResponse | Track | Track[] | null>;
+    public decode(track: Base64String): Promise<JSON>;
+    public getRoutePlannerStatus(): Promise<JSON>;
+    public unmarkFailedAddress(address: string): Promise<number>;
+    public unmarkAllFailedAddress(): Promise<number>;
+
+    private _getFetch(url: string): Promise<JSON>;
+    private _postFetch(url: string, body: Object): Promise<number>;
   }
 
   export interface ShoukakuPlayer {
@@ -239,7 +244,7 @@ declare module 'shoukaku' {
     constructor(shoukaku: Shoukaku, node: ShoukakuOptions);
     public shoukaku: Shoukaku;
     public players: Map<string, ShoukakuPlayer>;
-    public rest: ShoukakuResolver;
+    public rest: ShoukakuRest;
     public state: ShoukakuStatus;
     public stats: ShoukakuNodeStats;
     public reconnectAttempts: number;

@@ -3,7 +3,7 @@ const EventEmitter = require('events');
 const { ShoukakuStatus, ShoukakuNodeStats, ShoukakuJoinOptions } = require('../constants/ShoukakuConstants.js');
 const { PacketRouter, EventRouter } = require('../router/ShoukakuRouter.js');
 const ShoukakuError = require('../constants/ShoukakuError.js');
-const ShoukakuResolver = require('../rest/ShoukakuResolver.js');
+const ShoukakuRest= require('../rest/ShoukakuRest.js');
 const ShoukakuPlayer = require('../guild/ShoukakuPlayer.js');
 
 /**
@@ -30,9 +30,9 @@ class ShoukakuSocket extends EventEmitter {
         this.players = new Map();
         /**
         * The REST API of this Socket, mostly to load balance your REST requests instead of relying on a single node.
-        * @type {ShoukakuResolver}
+        * @type {ShoukakuRest}
         */
-        this.rest = new ShoukakuResolver(node.host, node.port, node.auth, shoukaku.options.restTimeout);
+        this.rest = new ShoukakuRest(node.host, node.port, node.auth, shoukaku.options.restTimeout);
         /**
         * The state of this Socket.
         * @type {ShoukakuConstants#ShoukakuStatus}
@@ -180,7 +180,7 @@ class ShoukakuSocket extends EventEmitter {
             });
         });
     }
-    
+
     _configureResuming() {
         return this.send({
             op: 'configureResuming',
