@@ -206,6 +206,7 @@ class ShoukakuPlayer extends EventEmitter {
             bands
         });
         this.bands = JSON.parse(JSON.stringify(bands));
+        this.bassboost = false;
         return true;
     }
     /**
@@ -263,13 +264,14 @@ class ShoukakuPlayer extends EventEmitter {
         return true;
     }
 
-    async setBassboost(enabled = false) {
+    async setBassBoost(enabled = false) {
         await this.voiceConnection.node.send({
             op: 'bassboost',
             guildId: this.voiceConnection.guildID,
             enabled
         });
         if (enabled !== this.bassboost) this.bassboost = enabled;
+        this.bands.length = 0;
         return true;
     }
 
@@ -313,7 +315,7 @@ class ShoukakuPlayer extends EventEmitter {
             if (this.bands.length) await this.setEqualizer(this.bands);
             if (this.volume !== 100) await this.setVolume(this.volume);
             if (this.vaporwave) await this.setVaporwave(this.vaporwave);
-            if (this.bassboost) await this.setBassboost(this.bassboost);
+            if (this.bassboost) await this.setBassBoost(this.bassboost);
             if (this.karaoke) await this.setKaraoke(this.karaoke);
             if (this.nightcore !== 1.0) await this.setNightcore(this.nightcore);
             this._listen('resumed', null);
