@@ -235,6 +235,45 @@ class ShoukakuPlayer extends EventEmitter {
         return true;
     }
 
+    async nightcore(speed) {
+        if (!speed) return false;
+        await this.voiceConnection.node.send({
+            op: 'equalizer',
+            guildId: this.voiceConnection.guildID,
+            speed
+        });
+        return true;
+    }
+
+    async karaoke(enabled) {
+        if (!enabled) return false;
+        await this.voiceConnection.node.send({
+            op: 'karaoke',
+            guildId: this.voiceConnection.guildID,
+            enabled
+        });
+        return true;
+    }
+
+    async vaporwave(enabled) {
+        if (!enabled) return false;
+        await this.voiceConnection.node.send({
+            op: 'vaporwave',
+            guildId: this.voiceConnection.guildID,
+            enabled
+        });
+        return true;
+    }
+
+    async resetFilters(reset) {
+        if (!reset) return false;
+        await this.voiceConnection.node.send({
+            op: 'reset',
+            guildId: this.voiceConnection.guildID,
+            reset
+        });
+        return true;
+    }
 
     _clearTrack() {
         this.track = null;
@@ -244,7 +283,7 @@ class ShoukakuPlayer extends EventEmitter {
     _clearBands() {
         this.bands.length = 0;
     }
-    
+
     async _resume() {
         try {
             if (!this.track) return this._listen('error', new ShoukakuError('No Track Found upon trying to resume.'));
@@ -257,7 +296,7 @@ class ShoukakuPlayer extends EventEmitter {
         }
     }
 
-    
+
     _listen(event, data) {
         if (endEvents.includes(event)) {
             if (event === 'nodeDisconnect') this._clearTrack() && this._clearBands();
