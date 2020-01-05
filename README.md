@@ -75,10 +75,10 @@ class ExampleBot extends Client {
         this.shoukaku = new Shoukaku(this, LavalinkServer, ShoukakuOptions);
     }
 
-    login() {
+    login(token) {
         this._setupShoukakuEvents();
         this._setupClientEvents();
-        return super.login();
+        return super.login(token);
     }
 
     _setupShoukakuEvents() {
