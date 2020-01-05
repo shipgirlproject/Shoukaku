@@ -275,7 +275,7 @@ class ShoukakuPlayer extends EventEmitter {
         return true;
     }
 
-    async setVaporwave(enabled = false) {
+    async setVaporWave(enabled = false) {
         await this.voiceConnection.node.send({
             op: 'vaporwave',
             guildId: this.voiceConnection.guildID,
@@ -314,7 +314,7 @@ class ShoukakuPlayer extends EventEmitter {
             await this.playTrack(this.track, { startTime: this.position });
             if (this.bands.length) await this.setEqualizer(this.bands);
             if (this.volume !== 100) await this.setVolume(this.volume);
-            if (this.vaporwave) await this.setVaporwave(this.vaporwave);
+            if (this.vaporwave) await this.setVaporWave(this.vaporwave);
             if (this.bassboost) await this.setBassBoost(this.bassboost);
             if (this.karaoke) await this.setKaraoke(this.karaoke);
             if (this.nightcore !== 1.0) await this.setNightcore(this.nightcore);
