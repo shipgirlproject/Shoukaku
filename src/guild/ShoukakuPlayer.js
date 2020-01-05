@@ -235,12 +235,13 @@ class ShoukakuPlayer extends EventEmitter {
         return true;
     }
 
-    async nightcore(speed) {
+    async nightcore(speed, hq = false) {
         if (!speed) return false;
         await this.voiceConnection.node.send({
-            op: 'equalizer',
+            op: 'nightcore',
             guildId: this.voiceConnection.guildID,
-            speed
+            speed,
+            hq
         });
         return true;
     }
