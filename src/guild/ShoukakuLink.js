@@ -99,7 +99,7 @@ class ShoukakuLink {
     _connect(options, callback) {
         if (!options || !callback)
             throw new ShoukakuError('No Options or Callback supplied.');
-        
+
         this._callback = callback;
 
         if (this.state === ShoukakuStatus.CONNECTING)  {
@@ -113,7 +113,7 @@ class ShoukakuLink {
         }, 15000);
 
         this.state = ShoukakuStatus.CONNECTING;
-        
+
         const { guildID, voiceChannelID, deaf, mute } = options;
         this._sendDiscordWS({ guild_id: guildID, channel_id: voiceChannelID, self_deaf: deaf, self_mute: mute });
     }
@@ -123,8 +123,7 @@ class ShoukakuLink {
         this.node.players.delete(this.guildID);
         this._clearVoice();
         this.player.removeAllListeners();
-        this.player._clearTrack();
-        this.player._clearBands();
+        this.player._resetPlayer();
         if (this.state !== ShoukakuStatus.DISCONNECTED) {
             this._destroy()
                 .catch(() => null);
@@ -156,7 +155,7 @@ class ShoukakuLink {
         guild.shard.send({ op: 4, d });
     }
 
-    _clearVoice() { 
+    _clearVoice() {
         this.lastServerUpdate = null;
         this.sessionID = null;
         this.voiceChannelID = null;
