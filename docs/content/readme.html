@@ -12,8 +12,95 @@
 </p>
 
 <p>The ShipGirl Project. Shoukaku <code>(c) Kancolle for Shoukaku</code></p>
-<h3 id="shoukakus-module-for-kashima">Shoukaku's module for Kashima</h3>
+<h3 id="a-full-blown-lavalink-wrapper-designed-around-discordjs-v12">A Full Blown Lavalink Wrapper designed around Discord.js v12</h3>
+<p>✅ Currently being used by: </p>
+<p><a href="https://discordbots.org/bot/424137718961012737"><img src="https://discordbots.org/api/widget/424137718961012737.svg" alt="DBL" style="max-width: 100%;"></a></p>
+<h3 id="why-shoukaku-">Why Shoukaku?</h3>
+<p>✅ Designed to used in Discord.JS v12</p>
+<p>✅ Straightforward, Maintained, and Reliable.</p>
+<p>✅ Stable for long term usage.</p>
+<p>✅ Offers features that other libraries don't have.</p>
+<p>✅ Very cute and reliable Shipgirl ❤ (Important)</p>
+<h3 id="documentation">Documentation</h3>
+<p><a href="https://deivu.github.io/Shoukaku/?api">https://deivu.github.io/Shoukaku/?api</a></p>
+<h3 id="installation">Installation</h3>
+<p>For Stable</p>
+<pre><code>npm i shoukaku</code></pre><p>For Master</p>
+<pre><code>npm i Deivu/Shoukaku</code></pre><h3 id="changelogs">Changelogs</h3>
+<p>You can view it on <a href="https://github.com/Deivu/Shoukaku/blob/master/CHANGELOGS.MD">CHANGELOGS.MD</a> file in this repository.</p>
+<h3 id="support-server">Support Server</h3>
+<p>If you need help on using this, Join Here <a href="https://discordapp.com/invite/FVqbtGu">ShipGirls Community</a> and <code>ask at #support</code>. </p>
+<h3 id="issues-or-bugs">Issues or Bugs</h3>
+<p>Feel free to open an issue in the <a href="https://github.com/Deivu/Shoukaku/issues">Issues</a> section of this repository.</p>
+<h3 id="notes">Notes</h3>
 <blockquote>
-<p>Not intended for public usage.</p>
+<p>If you want to help in development, you can use the wrapper and report the issues you experienced on using it, or Submit a PR if you think you can improve something.</p>
 </blockquote>
+<blockquote>
+<p>There is a Discord.JS actual implementation and a simple implementation examples below.</p>
+</blockquote>
+<h3 id="starting-a-lavalink-server">Starting a Lavalink Server</h3>
+<p><a href="https://github.com/Frederikam/Lavalink/blob/master/README.md">View Lavalink README here</a></p>
+<h3 id="discordjs-example-implementation">Discord.js example implementation</h3>
+<p><a href="https://github.com/Deivu/Kongou">View Kongou's source code here</a></p>
+<h3 id="really-simple-example-of-using-this">Really simple example of using this</h3>
+<pre><code class="js">const { Client } = require('discord.js');
+const { Shoukaku } = require('shoukaku');
+
+const LavalinkServer = [{ name: 'Localhost', host: 'localhost', port: 6969, auth: 'big_weeb' }];
+const ShoukakuOptions = { moveOnDisconnect: false, resumable: false, resumableTimeout: 30, reconnectTries: 2, restTimeout: 10000 };
+
+class ExampleBot extends Client {
+    constructor(opts) {
+        super(opts);
+        this.shoukaku = new Shoukaku(this, LavalinkServer, ShoukakuOptions);
+    }
+
+    login(token) {
+        this._setupShoukakuEvents();
+        this._setupClientEvents();
+        return super.login(token);
+    }
+
+    _setupShoukakuEvents() {
+        this.shoukaku.on('ready', (name) =&gt; console.log(`Lavalink Node: ${name} is now connected`));
+        // You must handle error event
+        this.shoukaku.on('error', (name, error) =&gt; console.log(`Lavalink Node: ${name} emitted an error.`, error));
+        this.shoukaku.on('close', (name, code, reason) =&gt; console.log(`Lavalink Node: ${name} closed with code ${code}. Reason: ${reason || 'No reason'}`));
+        this.shoukaku.on('disconnected', (name, reason) =&gt; console.log(`Lavalink Node: ${name} disconnected. Reason: ${reason || 'No reason'}`));
+    }
+
+    _setupClientEvents() {
+        this.on('message', async (msg) =&gt; {
+            if (msg.author.bot || !msg.guild) return;
+            if (!msg.content.startsWith('$play')) return;
+            if (this.shoukaku.getPlayer(msg.guild.id)) return;
+            const args = msg.content.split(' ');
+            if (!args[1]) return;
+            const node = this.shoukaku.getNode();
+            let data = await node.rest.resolve(args[1]);
+            if (!data) return;
+            if (Array.isArray(data)) data = data[0];
+            const player = await node.joinVoiceChannel({
+                guildID: msg.guild.id,
+                voiceChannelID: msg.member.voice.channelID
+            });
+            const cleanFunction = (param) =&gt; {
+                console.log(param);
+                player.disconnect();
+            }
+            player.on('end', cleanFunction);
+            player.on('closed', cleanFunction);
+            player.on('error', cleanFunction);
+            player.on('nodeDisconnect', cleanFunction);
+            await player.playTrack(data.track);
+            await msg.channel.send("Now Playing: " + data.info.title);
+        });
+        this.on('ready', () =&gt; console.log('Bot is now ready'));
+    }
+}
+
+new ExampleBot()
+    .login('token')
+    .catch(console.error);</code></pre>
 </body></html>
