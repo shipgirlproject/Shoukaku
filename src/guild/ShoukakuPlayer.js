@@ -1,5 +1,6 @@
 const EventEmitter = require('events');
 const { ShoukakuPlayOptions, ShoukakuStatus } = require('../constants/ShoukakuConstants.js');
+const util  = require('./util/ShoukakuUtil.js');
 const ShoukakuLink = require('./ShoukakuLink.js');
 const ShoukakuError = require('../constants/ShoukakuError.js');
 const endEvents = ['end', 'closed', 'error', 'trackException', 'nodeDisconnect'];
@@ -150,11 +151,12 @@ class ShoukakuPlayer extends EventEmitter {
      */
     async playTrack(track, options = ShoukakuPlayOptions) {
         if (!track) return false;
+        options = util.mergeDefault(ShoukakuPlayOptions, options);
         const payload = {};
         Object.defineProperty(payload, 'op', { value: 'play', enumerable: true });
         Object.defineProperty(payload, 'guildId', { value: this.voiceConnection.guildID, enumerable: true });
         Object.defineProperty(payload, 'track', { value: track, enumerable: true });
-        Object.defineProperty(payload, 'noReplace', { value: true, enumerable: true });
+        Object.defineProperty(payload, 'noReplace', { value: options.noReplace, enumerable: true });
         if (options.startTime) Object.defineProperty(payload, 'startTime', { value: options.startTime, enumerable: true });
         if (options.endTime) Object.defineProperty(payload, 'endTime', { value: options.endTime, enumerable: true });
         await this.voiceConnection.node.send(payload);

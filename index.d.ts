@@ -96,6 +96,7 @@ declare module 'shoukaku' {
   }
 
   export interface ShoukakuPlayOptions {
+    noReplace?: boolean,
     startTime?: boolean | number;
     endTime?: boolean | number;
   }

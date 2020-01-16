@@ -66,12 +66,14 @@ class ShoukakuConstants {
     /**
     * Required Object in Shoukaku's join method.
     * @typedef {Object} ShoukakuPlayOptions
+    * @property {boolean} [noReplace=true] Specifies if the player will not replace the current track when executing this action.
     * @property {boolean|number} [startTime=false] In milliseconds on when to start.
     * @property {boolean|number} [endTime=false] In milliseconds on when to end.
     * @memberof ShoukakuConstants#
     */
     static get ShoukakuPlayOptions() {
         return {
+            noReplace: true,
             startTime: false,
             endTime: false
         };
