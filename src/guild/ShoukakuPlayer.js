@@ -47,11 +47,6 @@ class ShoukakuPlayer extends EventEmitter {
          * @type {number}
          */
         this.position = 0;
-
-        this.bassboost = false;
-        this.vaporwave  = false;
-        this.nightcore = 1.0;
-        this.karaoke = false;
     }
 
     /**
@@ -244,70 +239,10 @@ class ShoukakuPlayer extends EventEmitter {
         return true;
     }
 
-    async setNightcore(speed, hq = false) {
-        if (!speed) return false;
-        await this.voiceConnection.node.send({
-            op: 'nightcore',
-            guildId: this.voiceConnection.guildID,
-            speed,
-            hq
-        });
-        if (speed !== this.nightcore) this.nightcore = speed;
-        return true;
-    }
-
-    async setKaraoke(enabled = false) {
-        await this.voiceConnection.node.send({
-            op: 'karaoke',
-            guildId: this.voiceConnection.guildID,
-            enabled
-        });
-        if (enabled !== this.karaoke) this.karaoke = enabled;
-        return true;
-    }
-
-    async setBassBoost(enabled = false) {
-        await this.voiceConnection.node.send({
-            op: 'bassboost',
-            guildId: this.voiceConnection.guildID,
-            enabled
-        });
-        if (enabled !== this.bassboost) this.bassboost = enabled;
-        this.bands.length = 0;
-        return true;
-    }
-
-    async setVaporWave(enabled = false) {
-        await this.voiceConnection.node.send({
-            op: 'vaporwave',
-            guildId: this.voiceConnection.guildID,
-            enabled
-        });
-        if (enabled !== this.vaporwave) this.vaporwave = enabled;
-        return true;
-    }
-
-    async resetFilters(reset) {
-        if (!reset) return false;
-        await this.voiceConnection.node.send({
-            op: 'reset',
-            guildId: this.voiceConnection.guildID,
-            reset
-        });
-        let oldpos = Number(this.position);
-        this._resetPlayer();
-        this.position = oldpos;
-        return true;
-    }
-
     _resetPlayer() {
         this.track = null;
         this.position = 0;
         this.bands.length = 0;
-        this.vaporwave = false;
-        this.bassboost = false;
-        this.nightcore = 1.0;
-        this.karaoke = false;
     }
 
     async _resume() {
@@ -316,10 +251,6 @@ class ShoukakuPlayer extends EventEmitter {
             await this.playTrack(this.track, { startTime: this.position });
             if (this.bands.length) await this.setEqualizer(this.bands);
             if (this.volume !== 100) await this.setVolume(this.volume);
-            if (this.vaporwave) await this.setVaporWave(this.vaporwave);
-            if (this.bassboost) await this.setBassBoost(this.bassboost);
-            if (this.karaoke) await this.setKaraoke(this.karaoke);
-            if (this.nightcore !== 1.0) await this.setNightcore(this.nightcore);
             this._listen('resumed', null);
         } catch (error) {
             this._listen('error', error);
