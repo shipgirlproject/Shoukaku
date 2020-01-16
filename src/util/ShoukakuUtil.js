@@ -8,7 +8,7 @@ class ShoukakuUtil {
             if (def[key] === null) {
                 if (!given[key]) throw new ShoukakuError(`${key} was not found from the given options.`);
             }
-            if (!given[key]) given[key] = def[key];
+            if (given[key] === null) given[key] = def[key];
         }
         for (const key in defaultKeys) {
             if (defaultKeys.includes(key)) continue;
