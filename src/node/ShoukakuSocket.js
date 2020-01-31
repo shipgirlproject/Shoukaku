@@ -53,12 +53,8 @@ class ShoukakuSocket extends EventEmitter {
         * @type {string}
         */
         this.name = node.name;
-        /**
-        * URL of the websocket used in this node.
-        * @type {string}
-        */
-        this.url = `ws://${node.host}:${node.port}`;
-
+        
+        Object.defineProperty(this, 'url', { value: `ws://${node.host}:${node.port}` });
         Object.defineProperty(this, 'auth', { value: node.auth });
         Object.defineProperty(this, 'resumed', { value: false, writable: true });
         Object.defineProperty(this, 'cleaner', { value: false, writable: true });
@@ -136,14 +132,18 @@ class ShoukakuSocket extends EventEmitter {
             if (this.state !== ShoukakuStatus.CONNECTED)
                 return reject(new ShoukakuError('This node is not yet ready.'));
 
-            if (this.players.has(options.guildID))
-                return reject(new ShoukakuError('A Player is already established in this channel'));
+            let player = this.players.get(options.guildID);
+            if (player) {
+                if (player.voiceConnection.state !== ShoukakuStatus.CONNECTED)
+                    return reject(new ShoukakuError('A Player is currently connecting to this channel'));
+                return player;
+            }
 
             const guild = this.shoukaku.client.guilds.get(options.guildID);
             if (!guild)
                 return reject(new ShoukakuError('Guild not found. Cannot continue creating the voice connection.'));
 
-            const player = new ShoukakuPlayer(this, guild);
+            player = new ShoukakuPlayer(this, guild);
             this.players.set(guild.id, player);
 
             player.connect(options, (error, value) => {

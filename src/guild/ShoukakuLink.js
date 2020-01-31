@@ -85,8 +85,7 @@ class ShoukakuLink {
             })
             .catch((error) => {
                 if (this._timeout) clearTimeout(this._timeout);
-                if (this.state !== ShoukakuStatus.CONNECTING)
-                    return this.player._listen('error', error);
+                if (this.state !== ShoukakuStatus.CONNECTING) return this.player._listen('error', error);
                 this.state = ShoukakuStatus.DISCONNECTED;
                 if (this._callback) this._callback(error);
             })
@@ -126,9 +125,11 @@ class ShoukakuLink {
         this.player._resetPlayer();
         if (this.state !== ShoukakuStatus.DISCONNECTED) {
             this._destroy()
-                .catch(() => null);
-            this._sendDiscordWS({ guild_id: this.guildID, channel_id: null, self_mute: false, self_deaf: false });
-            this.state = ShoukakuStatus.DISCONNECTED;
+                .catch((error) => this.node.shoukaku.emit('error', this.node.name, error))
+                .finally(() => {
+                    this._sendDiscordWS({ guild_id: this.guildID, channel_id: null, self_mute: false, self_deaf: false });
+                    this.state = ShoukakuStatus.DISCONNECTED;
+                });
         }
     }
 
