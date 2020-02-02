@@ -4,7 +4,13 @@ const constants = require('./constants/ShoukakuConstants.js');
 const ShoukakuError = require('./constants/ShoukakuError.js');
 const ShoukakuSocket = require('./node/ShoukakuSocket.js');
 const EventEmitter = require('events');
-const { version } = require('discord.js');
+
+let version;
+try { 
+    version = require('discord.js').version;
+} catch (_) {
+    version = null;
+}
 
 /**
  * @external Client
@@ -37,7 +43,7 @@ class Shoukaku extends EventEmitter {
      */
     constructor(client, nodes, options) {
         super();
-        if (!version.startsWith('12'))
+        if (version && !version.startsWith('12'))
             throw new ShoukakuError('Shoukaku will only work in Discord.JS v12 / Discord.JS Master Branch. Versions below Discord.JS v12 is not supported.');
         /**
         * The instance of Discord.js client used with Shoukaku.
