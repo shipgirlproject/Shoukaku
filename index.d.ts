@@ -255,7 +255,6 @@ declare module 'shoukaku' {
     private cleaner: boolean;
     private packetRouter: unknown;
     private eventRouter: unknown;
-    private processingReconnect: Set<string>;
 
     private resumable: boolean;
     private resumableTimeout: number;
@@ -303,6 +302,9 @@ declare module 'shoukaku' {
     public totalPlayers: number;
 
     private options: ShoukakuOptions;
+    private rawRouter: unknown;
+    private reconnectRouter: unknown;
+    private processingReconnect: Set<string>;
 
     public addNode(nodeOptions: ShoukakuNodeOptions): void;
     public removeNode(name: string, reason?: string): void;
