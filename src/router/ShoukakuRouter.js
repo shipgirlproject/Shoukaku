@@ -11,19 +11,21 @@ class ShoukakuRouter {
                 if (!voiceConnection.voiceChannelID) continue;
                 if (voiceConnection.state === ShoukakuStatus.CONNECTING) continue;
                 if (voiceConnection.shardID !== id) continue;
-                const connectPromise = new Promise((resolve, reject) => {
-                    player.connect({
-                        guild_id: voiceConnection.guildID,
-                        channel_id: voiceConnection.voiceChannelID,
-                        self_deaf:  voiceConnection.selfDeaf,
-                        self_mute: voiceConnection.selfMute
-                    }, (error) => {
-                        if (error) return reject(error);
-                        player._resume()
-                            .then(() => resolve())
-                            .catch((error) => reject(error));
+                const connectPromise = () => {
+                    return new Promise((resolve, reject) => {
+                        player.connect({
+                            guild_id: voiceConnection.guildID,
+                            channel_id: voiceConnection.voiceChannelID,
+                            self_deaf:  voiceConnection.selfDeaf,
+                            self_mute: voiceConnection.selfMute
+                        }, (error) => {
+                            if (error) return reject(error);
+                            player._resume()
+                                .then(() => resolve())
+                                .catch((error) => reject(error));
+                        });
                     });
-                });
+                };
                 try {
                     await connectPromise();
                 } catch (error) {
