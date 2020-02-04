@@ -15,7 +15,7 @@ declare module 'shoukaku' {
   }
 
   export class ShoukakuUtil {
-    public static mergeDefault(def: Object, given: Object);
+    public static mergeDefault(def: Object, given: Object): Object;
   }
 
   export interface Track {
