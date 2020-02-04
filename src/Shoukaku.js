@@ -66,10 +66,12 @@ class Shoukaku extends EventEmitter {
         */
         this.nodes = new Map();
 
+        
         Object.defineProperty(this, 'options', { value: util.mergeDefault(constants.ShoukakuOptions, options) });
         Object.defineProperty(this, 'rawRouter', { value: RawRouter.bind(this) });
         Object.defineProperty(this, 'reconnectRouter', { value: ReconnectRouter.bind(this) });
-
+        Object.defineProperty(this, 'processingReconnect', { value: new Set() });
+        
         this.client.once('ready', () => {
             this.id = this.client.user.id;
             this.shardCount = this.client.shard ? this.client.shard.count || this.client.shard.shardCount : 1;
