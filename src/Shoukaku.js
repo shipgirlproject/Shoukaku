@@ -132,7 +132,7 @@ class Shoukaku extends EventEmitter {
      */
     /**
      * Emitted when a Lavalink Node closed.
-     * @event Shoukaku#closed
+     * @event Shoukaku#close
      * @param {string} name The name of the Lavalink Node that sent a close event.
      * @param {number} code The WebSocket close code https://github.com/Luka967/websocket-close-codes
      * @param {reason} reason The reason for this close event.
