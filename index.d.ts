@@ -303,9 +303,7 @@ declare module 'shoukaku' {
 
     private options: ShoukakuOptions;
     private rawRouter: unknown;
-    private reconnectRouter: unknown;
-    private processingReconnect: Set<string>;
-
+    
     public addNode(nodeOptions: ShoukakuNodeOptions): void;
     public removeNode(name: string, reason?: string): void;
     public getNode(name?: string): ShoukakuSocket;
