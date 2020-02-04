@@ -1,4 +1,4 @@
-const { RawRouter, ReconnectRouter } = require('./router/ShoukakuRouter.js');
+const { RawRouter } = require('./router/ShoukakuRouter.js');
 const util  = require('./util/ShoukakuUtil.js');
 const constants = require('./constants/ShoukakuConstants.js');
 const ShoukakuError = require('./constants/ShoukakuError.js');
@@ -69,8 +69,6 @@ class Shoukaku extends EventEmitter {
         
         Object.defineProperty(this, 'options', { value: util.mergeDefault(constants.ShoukakuOptions, options) });
         Object.defineProperty(this, 'rawRouter', { value: RawRouter.bind(this) });
-        Object.defineProperty(this, 'reconnectRouter', { value: ReconnectRouter.bind(this) });
-        Object.defineProperty(this, 'processingReconnect', { value: new Set() });
         
         this.client.once('ready', () => {
             this.id = this.client.user.id;
@@ -80,7 +78,6 @@ class Shoukaku extends EventEmitter {
                 this.addNode(node);
             }
             this.client.on('raw', this.rawRouter);
-            this.client.on('shardReady', this.reconnectRouter);
         });
     }
     /**

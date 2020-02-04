@@ -1,41 +1,6 @@
-const { ShoukakuStatus } = require('../constants/ShoukakuConstants.js');
 const ShoukakuError = require('../constants/ShoukakuError.js');
 
 class ShoukakuRouter {
-    static async ReconnectRouter(id) {
-        if (this.processingReconnect.has(id)) return;
-        this.processingReconnect.add(id);
-        for (const node of this.nodes.values()) {
-            for (const player of node.players.values()) {
-                const { voiceConnection } = player;
-                if (!voiceConnection.voiceChannelID) continue;
-                if (voiceConnection.state === ShoukakuStatus.CONNECTING) continue;
-                if (voiceConnection.shardID !== id) continue;
-                const connectPromise = () => {
-                    return new Promise((resolve, reject) => {
-                        player.connect({
-                            guild_id: voiceConnection.guildID,
-                            channel_id: voiceConnection.voiceChannelID,
-                            self_deaf:  voiceConnection.selfDeaf,
-                            self_mute: voiceConnection.selfMute
-                        }, (error) => {
-                            if (error) return reject(error);
-                            player._resume()
-                                .then(() => resolve())
-                                .catch((error) => reject(error));
-                        });
-                    });
-                };
-                try {
-                    await connectPromise();
-                } catch (error) {
-                    player._listen('error', error);
-                }
-            }
-        }
-        this.processingReconnect.delete(id);
-    }
-
     static RawRouter(packet) {
         if (packet.t === 'VOICE_STATE_UPDATE') {
             if (packet.d.user_id !== this.id) return;
