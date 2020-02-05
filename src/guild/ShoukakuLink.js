@@ -118,7 +118,7 @@ class ShoukakuLink {
     }
 
     _disconnect() {
-        this.state = ShoukakuStatus.DISCONNECTING;
+        if (this.state !== ShoukakuStatus.DISCONNECTED) this.state = ShoukakuStatus.DISCONNECTING;
         this.node.players.delete(this.guildID);
         this._clearVoice();
         this.player.removeAllListeners();
