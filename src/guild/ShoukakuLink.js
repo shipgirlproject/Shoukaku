@@ -98,16 +98,18 @@ class ShoukakuLink {
     attemptReconnect() {
         return new Promise((resolve, reject) => {
             if (!this.voiceChannelID) return reject(new ShoukakuError('No voice channel to reconnect to'));
-            if (!this.state !== ShoukakuStatus.DISCONNECTED) return reject(new ShoukakuError('Cannot reconnect if the connection isn\'t disconnected'));
-            this._connect({
-                guildID: this.guildID,
-                voiceChannelID: this.voiceChannelID,
-                mute: this.selfMute,
-                deaf: this.selfDeaf
-            }, (error) => {
-                if (error) return reject(error);
-                resolve(this.player);
-            });
+            setTimeout(() => {
+                if (this.state !== ShoukakuStatus.DISCONNECTED) return reject(new ShoukakuError('Cannot reconnect if the connection isn\'t disconnected'));
+                this._connect({
+                    guildID: this.guildID,
+                    voiceChannelID: this.voiceChannelID,
+                    mute: this.selfMute,
+                    deaf: this.selfDeaf
+                }, (error) => {
+                    if (error) return reject(error);
+                    resolve(this.player);
+                });
+            }, 1000);
         });
     }
 
