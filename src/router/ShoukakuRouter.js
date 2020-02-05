@@ -15,7 +15,7 @@ class ShoukakuRouter {
         switch (packet.t) {
             case 'VOICE_STATE_UPDATE':
                 player.voiceConnection.stateUpdate(packet.d);
-                if (!packet.d.channel_id) player.voiceConnection.state = ShoukakuStatus.DISCONNECTED;
+                if (!packet.d.channel_id && ShoukakuStatus.CONNECTING !== player.voiceConnection.state) player.voiceConnection.state = ShoukakuStatus.DISCONNECTED;
                 break;
             case 'VOICE_SERVER_UPDATE':
                 player.voiceConnection.serverUpdate(packet.d);
