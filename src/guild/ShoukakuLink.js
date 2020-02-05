@@ -123,14 +123,14 @@ class ShoukakuLink {
         this._clearVoice();
         this.player.removeAllListeners();
         this.player._resetPlayer();
-        if (this.state !== ShoukakuStatus.DISCONNECTED) {
-            this._destroy()
-                .catch((error) => this.node.shoukaku.emit('error', this.node.name, error))
-                .finally(() => {
+        this._destroy()
+            .catch((error) => this.node.shoukaku.emit('error', this.node.name, error))
+            .finally(() => {
+                if (this.state !== ShoukakuStatus.DISCONNECTED) {
                     this._sendDiscordWS({ guild_id: this.guildID, channel_id: null, self_mute: false, self_deaf: false });
                     this.state = ShoukakuStatus.DISCONNECTED;
-                });
-        }
+                }
+            });
     }
 
     async _move(node) {
