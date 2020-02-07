@@ -230,6 +230,8 @@ declare module 'shoukaku' {
     private stateUpdate(data: unknown);
     private serverUpdate(data: unknown);
 
+    public attemptReconnect(): Promise<ShoukakuPlayer>;
+
     private _connect(d: unknown, callback: (err: ShoukakuError | Error | null, player: ShoukakuPlayer) => void);
     private _disconnect(): void;
     private _move(): Promise<void>;

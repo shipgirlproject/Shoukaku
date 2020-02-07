@@ -237,11 +237,14 @@ class Shoukaku extends EventEmitter {
         return this.players.get(guildID);
     }
 
-    _ready(name, resumed) {
+    async _ready(name, resumed) {
         const node = this.nodes.get(name);
         if (!resumed) {
-            node._executeCleaner()
-                .catch((error) => this.emit('error', name, error));
+            try {
+                await node._executeCleaner();
+            } catch (error) {
+                this.emit('error', name, error);
+            }
         }
         this.emit('ready', name, resumed);
     }
