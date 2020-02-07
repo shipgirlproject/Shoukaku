@@ -51,6 +51,12 @@ class ShoukakuPlayer extends EventEmitter {
 
     /**
      * Emitted when the Lavalink Player emits a TrackEnd or TrackStuck event.
+     * @event ShoukakuPlayer#start
+     * @param {Object} data
+     * @memberOf ShoukakuPlayer
+     */
+    /**
+     * Emitted when the Lavalink Player emits a TrackEnd or TrackStuck event.
      * @event ShoukakuPlayer#end
      * @param {Object} reason
      * @memberOf ShoukakuPlayer
@@ -269,7 +275,7 @@ class ShoukakuPlayer extends EventEmitter {
             this.emit(event, data);
             return;
         }
-        if (data) this.position = data.position;
+        if (data && data.position) this.position = data.position;
         this.emit(event, data);
     }
 }

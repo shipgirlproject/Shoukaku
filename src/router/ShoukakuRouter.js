@@ -37,6 +37,9 @@ class ShoukakuRouter {
                 case 'TrackStuckEvent':
                     player._listen('end', json);
                     break;
+                case 'TrackStartEvent': 
+                    player._listen('start', json);
+                    break;
                 case 'TrackExceptionEvent':
                     player._listen('trackException', json);
                     break;
