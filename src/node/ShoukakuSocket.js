@@ -139,7 +139,7 @@ class ShoukakuSocket extends EventEmitter {
                 return player;
             }
 
-            const guild = this.shoukaku.client.guilds.get(options.guildID);
+            const guild = this.shoukaku.client.guilds.cache.get(options.guildID);
             if (!guild)
                 return reject(new ShoukakuError('Guild not found. Cannot continue creating the voice connection.'));
 

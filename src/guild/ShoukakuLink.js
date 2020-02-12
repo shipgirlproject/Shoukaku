@@ -174,7 +174,7 @@ class ShoukakuLink {
     }
 
     _sendDiscordWS(d) {
-        const guild = this.node.shoukaku.client.guilds.get(this.guildID);
+        const guild = this.node.shoukaku.client.guilds.cache.get(this.guildID);
         if (!guild) return;
         guild.shard.send({ op: 4, d });
     }
