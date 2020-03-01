@@ -31,6 +31,6 @@
   },
   "devDependencies": {
     "discord.js": "github:discordjs/discord.js",
-    "typescript": "^3.7.5"
+    "typescript": "^3.8.3"
   }
 }
