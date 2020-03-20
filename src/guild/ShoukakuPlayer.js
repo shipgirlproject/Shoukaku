@@ -209,7 +209,6 @@ class ShoukakuPlayer extends EventEmitter {
             bands
         });
         this.bands = JSON.parse(JSON.stringify(bands));
-        this.bassboost = false;
         return true;
     }
     /**
