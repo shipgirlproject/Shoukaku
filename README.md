@@ -9,7 +9,7 @@
   <img src="https://upload.wikimedia.org/wikipedia/commons/0/00/Japanese_aircraft_carrier_shokaku_1941.jpg">
 </p>
 
-The ShipGirl Project. Shoukaku `(c) Kancolle for Shoukaku`
+Japanese Navy Aircraft Carrier Shokaku type "Shokaku" immediately after completion photo `public domain`
 
 ### A Full Blown Lavalink Wrapper designed around Discord.js v12
 
