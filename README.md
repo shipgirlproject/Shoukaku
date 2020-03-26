@@ -6,7 +6,7 @@
 ![Snyk Vulnerabilities for npm package](https://img.shields.io/snyk/vulnerabilities/npm/shoukaku?style=flat-square) 
 ![NPM](https://img.shields.io/npm/l/shoukaku?style=flat-square)
 <p align="center">
-  <img src="https://vignette.wikia.nocookie.net/kancolle/images/c/c8/Shoukaku_Full.png/revision/latest">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/0/00/Japanese_aircraft_carrier_shokaku_1941.jpg">
 </p>
 
 The ShipGirl Project. Shoukaku `(c) Kancolle for Shoukaku`
