@@ -51,12 +51,6 @@ class ShoukakuPlayer extends EventEmitter {
 
     /**
      * Emitted when the Lavalink Player emits a TrackEnd or TrackStuck event.
-     * @event ShoukakuPlayer#start
-     * @param {Object} data
-     * @memberOf ShoukakuPlayer
-     */
-    /**
-     * Emitted when the Lavalink Player emits a TrackEnd or TrackStuck event.
      * @event ShoukakuPlayer#end
      * @param {Object} reason
      * @memberOf ShoukakuPlayer
@@ -95,6 +89,12 @@ class ShoukakuPlayer extends EventEmitter {
      *   console.log(`Node ${name} which governs this player disconnected.`);
      *   <Player>.disconnect();
      * })
+     */
+    /**
+     * Emitted when the Lavalink Player emits a TrackStartEvent event. Optional.
+     * @event ShoukakuPlayer#start
+     * @param {Object} data
+     * @memberOf ShoukakuPlayer
      */
     /**
      * Emitted when Lavalink encounters an error on playing the song. Optional.
