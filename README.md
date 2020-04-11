@@ -26,7 +26,7 @@ Japanese Navy Aircraft Carrier Shokaku type "Shokaku" immediately after completi
 
 ✅ Offers features that other libraries don't have.
 
-✅ Very cute and reliable aircraft ❤ (Important)
+✅ Very cute and reliable aircraft carrier ❤ (Important)
 
 ### Documentation
 https://deivu.github.io/Shoukaku/?api
