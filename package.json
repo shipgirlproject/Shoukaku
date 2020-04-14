@@ -27,10 +27,10 @@
   "dependencies": {
     "abort-controller": "^3.0.0",
     "node-fetch": "^2.6.0",
-    "ws": "^7.1.2"
+    "ws": "^7.2.3"
   },
   "devDependencies": {
-    "discord.js": "github:discordjs/discord.js",
+    "discord.js": ">=12.0.0 <13.0.0",
     "typescript": "^3.8.3"
   }
 }
