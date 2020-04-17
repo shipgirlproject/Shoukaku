@@ -16,7 +16,7 @@ declare module 'shoukaku' {
 
   export class ShoukakuUtil {
     public static mergeDefault(def: Object, given: Object): Object;
-    public static searchType(string: string): Object;
+    public static searchType(string: string): string;
   }
 
   export class ShoukakuTrackList {
