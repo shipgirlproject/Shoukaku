@@ -210,17 +210,17 @@ class ShoukakuSocket extends EventEmitter {
         this.resumed = response.headers['session-resumed'] === 'true';
     }
 
-   async  _open() {
-       this._configureResuming()
-           .then(() => {
-               this.reconnectAttempts = 0;
-               this.state = ShoukakuStatus.CONNECTED;
-               this.emit('ready', this.name, this.resumed);
-           })
-           .catch((error) => {
-               this.emit('error', this.name, error);
-               this.ws.close(4011, 'Failed to send the resume packet');
-           });
+    async  _open() {
+        this._configureResuming()
+            .then(() => {
+                this.reconnectAttempts = 0;
+                this.state = ShoukakuStatus.CONNECTED;
+                this.emit('ready', this.name, this.resumed);
+            })
+            .catch((error) => {
+                this.emit('error', this.name, error);
+                this.ws.close(4011, 'Failed to send the resume packet');
+            });
     }
 
     _message(message) {
