@@ -12,7 +12,7 @@ const ShoukakuPlayer = require('../guild/ShoukakuPlayer.js');
  */
 class ShoukakuSocket extends EventEmitter {
     /**
-     * @extends {external:EventEmitter}
+     * @extends {EventEmitter}
      * @param  {Shoukaku} shoukaku Your Shoukaku Instance
      * @param {ShoukakuOptions} node ShoukakuNodeOptions Options to initialize Shoukaku with
      */
@@ -25,7 +25,7 @@ class ShoukakuSocket extends EventEmitter {
         this.shoukaku = shoukaku;
         /**
         * The active players in this socket/node.
-        * @type {external:Map}
+        * @type {Map<string, ShoukakuPlayer>}
         */
         this.players = new Map();
         /**
@@ -53,7 +53,7 @@ class ShoukakuSocket extends EventEmitter {
         * @type {string}
         */
         this.name = node.name;
-        
+
         Object.defineProperty(this, 'url', { value: `ws://${node.host}:${node.port}` });
         Object.defineProperty(this, 'auth', { value: node.auth });
         Object.defineProperty(this, 'resumed', { value: false, writable: true });

@@ -16,44 +16,32 @@ declare module 'shoukaku' {
 
   export class ShoukakuUtil {
     public static mergeDefault(def: Object, given: Object): Object;
+    public static searchType(string: string): Object;
   }
 
-  export interface Track {
+  export class ShoukakuTrackList {
+    type: string;
+    playlistName?: string;
+    tracks: Array<ShoukakuTrack>;
+  }
+
+  export class ShoukakuTrack {
     track: string;
     info: {
-      identifier: string;
-      isSeekable: boolean;
-      author: string;
-      length: number;
-      isStream: boolean;
-      position: number;
-      title: string;
-      uri: string;
+      identifier?: string;
+      isSeekable?: boolean;
+      author?: string;
+      length?: number;
+      isStream?: boolean;
+      position?: number;
+      title?: string;
+      uri?: string;
     };
   }
 
   export interface EqualizerBand {
     band: number;
     gain: number;
-  }
-
-  export type LoadTrackType =
-    'TRACK_LOADER' | 'PLAYLIST_LOADED' | 'SEARCH_RESULT' |
-    'NO_MATCHES' | 'LOAD_FAILED';
-
-  export interface LoadTrackException {
-    message: string;
-    severity: 'COMMON'
-  }
-
-  export interface LoadTrackResponse {
-    loadType: LoadTrackType;
-    playlistInfo: {
-      name?: string;
-      selectedTrack?: number;
-    };
-    tracks: Track[];
-    exception?: LoadTrackException;
   }
 
   export type Source = 'youtube' | 'soundcloud';
@@ -152,9 +140,9 @@ declare module 'shoukaku' {
     public timeout: number;
     public url: string;
 
-    public resolve(identifier: string, search: Source): Promise<LoadTrackResponse | Track | Track[] | null>;
-    public decode(track: Base64String): Promise<JSON>;
-    public getRoutePlannerStatus(): Promise<JSON>;
+    public resolve(identifier: string, search: Source): Promise<ShoukakuTrackList | null>;
+    public decode(track: Base64String): Promise<Object>;
+    public getRoutePlannerStatus(): Promise<Object>;
     public unmarkFailedAddress(address: string): Promise<number>;
     public unmarkAllFailedAddress(): Promise<number>;
 
@@ -197,7 +185,7 @@ declare module 'shoukaku' {
     public disconnect(): void;
     public moveToNode(name: string): Promise<void>;
 
-    public playTrack(track: string, options?: ShoukakuPlayOptions): Promise<boolean>;
+    public playTrack(track: string | ShoukakuTrack, options?: ShoukakuPlayOptions): Promise<boolean>;
     public stopTrack(): Promise<boolean>;
     public setPaused(pause?: boolean): Promise<boolean>;
     public setEqualizer(bands: EqualizerBand[]): Promise<boolean>;
@@ -305,7 +293,7 @@ declare module 'shoukaku' {
 
     private options: ShoukakuOptions;
     private rawRouter: unknown;
-    
+
     public addNode(nodeOptions: ShoukakuNodeOptions): void;
     public removeNode(name: string, reason?: string): void;
     public getNode(name?: string): ShoukakuSocket;

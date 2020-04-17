@@ -2,10 +2,8 @@ const Fetch = require('node-fetch');
 const Abort = require('abort-controller');
 const ShoukakuTimeout = require('../constants/ShoukakuTimeout.js');
 const ShoukakuError = require('../constants/ShoukakuError.js');
-const Search = {
-    'soundcloud': 'scsearch',
-    'youtube': 'ytsearch'
-};
+const ShoukakuUtil = require('../util/ShoukakuUtil.js');
+const ShoukakuTrackList = require('../constants/ShoukakuTrackList.js');
 const Success = ['TRACK_LOADED', 'PLAYLIST_LOADED', 'SEARCH_RESULT'];
 /**
  * ShoukakuRest, provides access to Lavalink REST API.
@@ -37,32 +35,25 @@ class ShoukakuRest {
     * @param {string} identifier Anything you want for lavalink to search for
     * @param {string} search Either `youtube` or `soundcloud`. If specified, resolve will return search results.
     * @memberof ShoukakuRest
-    * @returns {Promise<Object>} The Lavalink Track Object.
+    * @returns {Promise<null|ShoukakuTrackList>} The parsed data from Lavalink rest
     */
     async resolve(identifier, search) {
         if (!identifier)
             throw new ShoukakuError('Query cannot be null');
-        if (search) {
-            search = Search[search];
-            if (!search) throw new ShoukakuError('This search type is not supported');
-            identifier = `${search}:${identifier}`;
-        }
+
+        if (search)
+            identifier = `${ShoukakuUtil.searchType(search)}:${identifier}`;
+
         const data = await this._getFetch(`/loadtracks?${new URLSearchParams({ identifier }).toString()}`);
-        if (!Success.includes(data.loadType)) return null;
-        if (data.loadType === 'PLAYLIST_LOADED') {
-            data.tracks.name = data.playlistInfo.name;
-            return data.tracks;
-        }
-        if (data.loadType === 'TRACK_LOADED') {
-            return data.tracks[0];
-        }
-        if (data.loadType === 'SEARCH_RESULT') {
-            return data;
-        }
+
+        if (Success.includes(data.loadType))
+            return new ShoukakuTrackList(data);
+        else
+            return null;
     }
     /**
      * Decodes the given base64 encoded track from lavalink.
-     * @param {base64} track Base64 Encoded Track you got from the Lavalink API.
+     * @param {string} track Base64 Encoded Track you got from the Lavalink API.
      * @memberof ShoukakuRest
      * @returns {Promise<Object>} The Lavalink Track details.
      */
@@ -74,7 +65,7 @@ class ShoukakuRest {
     /**
      * Gets the status of the "RoutePlanner API" for this Lavalink node.
      * @memberof ShoukakuRest
-     * @returns {Promise<JSON>} Refer to `https://github.com/Frederikam/Lavalink/blob/master/IMPLEMENTATION.md#routeplanner-api`
+     * @returns {Promise<Object>} Refer to `https://github.com/Frederikam/Lavalink/blob/master/IMPLEMENTATION.md#routeplanner-api`
      */
     getRoutePlannerStatus() {
         return this._getFetch('/routeplanner/status');

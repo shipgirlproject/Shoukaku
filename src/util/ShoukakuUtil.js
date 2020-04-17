@@ -1,5 +1,9 @@
 const ShoukakuError = require('../constants/ShoukakuError.js');
-
+const SearchTypes = { 'soundcloud': 'scsearch', 'youtube': 'ytsearch' };
+/**
+ * Misc utilities used by Shoukaku
+ * @class ShoukakuUtil
+ */
 class ShoukakuUtil {
     static mergeDefault(def, given) {
         if (!given) return def;
@@ -15,6 +19,12 @@ class ShoukakuUtil {
             delete given[key];
         }
         return given;
+    }
+
+    static searchType(string) {
+        const result = SearchTypes[string];
+        if (!result) throw new ShoukakuError('This search type is not supported');
+        return result;
     }
 }
 module.exports = ShoukakuUtil;

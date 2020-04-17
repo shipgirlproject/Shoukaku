@@ -3,17 +3,18 @@ const { ShoukakuPlayOptions, ShoukakuStatus } = require('../constants/ShoukakuCo
 const util  = require('../util/ShoukakuUtil.js');
 const ShoukakuLink = require('./ShoukakuLink.js');
 const ShoukakuError = require('../constants/ShoukakuError.js');
+const ShoukakuTrack = require('../constants/ShoukakuTrack.js');
 const endEvents = ['end', 'closed', 'error', 'trackException', 'nodeDisconnect'];
 
 /**
  * ShoukakuPlayer, used to control the player on the guildused to control the player on the guild.
  * @class ShoukakuPlayer
- * @extends {external:EventEmitter}
+ * @extends {EventEmitter}
  */
 class ShoukakuPlayer extends EventEmitter {
     /**
      * @param  {ShoukakuSocket} node The node that governs this player.
-     * @param  {external:Guild} guild A Discord.JS Guild Object.
+     * @param  {Guild} guild A Discord.JS Guild Object.
      */
     constructor(node, guild) {
         super();
@@ -144,8 +145,8 @@ class ShoukakuPlayer extends EventEmitter {
         await this.voiceConnection._move(node);
     }
     /**
-     * Plays the track you specifed. Warning: If the player is playing anything, calling this will just ignore your call. Call `ShoukakuPlayer.StopTrack()` first.
-     * @param {string} track The Base64 encoded track you got from lavalink API.
+     * Plays a track.
+     * @param {string|ShoukakuTrack} track The Base64 track from the Lavalink Rest API or a ShoukakuTrack.
      * @param {ShoukakuConstants#ShoukakuPlayOptions} [options=ShoukakuPlayOptions] Used if you want to put a custom track start or end time.
      * @memberOf ShoukakuPlayer
      * @returns {Promise<boolean>} true if successful false if not.
@@ -153,6 +154,7 @@ class ShoukakuPlayer extends EventEmitter {
     async playTrack(track, options = ShoukakuPlayOptions) {
         if (!track) return false;
         options = util.mergeDefault(ShoukakuPlayOptions, options);
+        if (track instanceof ShoukakuTrack) track = track.track;
         const payload = {};
         Object.defineProperty(payload, 'op', { value: 'play', enumerable: true });
         Object.defineProperty(payload, 'guildId', { value: this.voiceConnection.guildID, enumerable: true });
@@ -196,7 +198,7 @@ class ShoukakuPlayer extends EventEmitter {
     }
     /**
      * Sets the equalizer of your lavalink player
-     * @param {Array} bands An array of Lavalink bands.
+     * @param {Array<ShoukakuConstants#EqualizerBand>} bands An array of Lavalink bands.
      * @memberOf ShoukakuPlayer
      * @returns {Promise<boolean>} true if successful false if not.
      */

@@ -9,7 +9,7 @@ class ShoukakuLink {
     /**
      * @param {ShoukakuSocket} node The node that governs this link.
      * @param {ShoukakuPlayer} player The player of this link.
-     * @param {external:Guild} guild A Discord.js Guild Object.
+     * @param {Guild} guild A Discord.js Guild Object.
      */
     constructor(node, player, guild) {
         /**
