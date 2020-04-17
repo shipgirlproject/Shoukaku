@@ -182,8 +182,9 @@ class ShoukakuSocket extends EventEmitter {
         });
     }
 
-    _configureResuming() {
-        return this.send({
+    async _configureResuming() {
+        if (!this.resumable) return;
+        await this.send({
             op: 'configureResuming',
             key: this.resumable,
             timeout: this.resumableTimeout
@@ -209,13 +210,17 @@ class ShoukakuSocket extends EventEmitter {
         this.resumed = response.headers['session-resumed'] === 'true';
     }
 
-    _open() {
-        if (this.resumable)
-            this._configureResuming()
-                .catch(() => this.ws.close(4011, 'Failed to send resuming packet. Reconnecting.'));
-        this.reconnectAttempts = 0;
-        this.state = ShoukakuStatus.CONNECTED;
-        this.emit('ready', this.name, this.resumed);
+   async  _open() {
+       this._configureResuming()
+           .then(() => {
+               this.reconnectAttempts = 0;
+               this.state = ShoukakuStatus.CONNECTED;
+               this.emit('ready', this.name, this.resumed);
+           })
+           .catch((error) => {
+               this.emit('error', this.name, error);
+               this.ws.close(4011, 'Failed to send the resume packet');
+           });
     }
 
     _message(message) {
@@ -231,7 +236,7 @@ class ShoukakuSocket extends EventEmitter {
 
     _error(error) {
         this.emit('error', this.name, error);
-        this.ws.close(4011, 'Reconnecting the Websocket');
+        this.ws.close(4011, 'Reconnecting the Websocket due to an error');
     }
 
     _close(code, reason) {
