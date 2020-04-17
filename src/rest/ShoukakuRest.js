@@ -106,14 +106,17 @@ class ShoukakuRest {
 
     _postFetch(endpoint, body) {
         const controller = new Abort();
-        const headerOptions = {};
-        Object.defineProperty(headerOptions, 'Authorization', { value: this.auth, enumerable: true });
-        if (body) Object.defineProperty(headerOptions, 'Content-Type', { value: 'application/json', enumerable: true });
-        const options = {};
-        Object.defineProperty(options, 'method', { value: 'POST', enumerable: true });
-        Object.defineProperty(options, 'headers', { value: headerOptions, enumerable: true });
-        Object.defineProperty(options, 'signal', { value: controller.signal, enumerable: true });
-        if (body) Object.defineProperty(options, 'body', { value: JSON.stringify(body), enumerable: true });
+        const options = {
+            method: 'POST',
+            controller: controller.signal,
+            headers: {
+                Authorization: this.auth
+            }
+        };
+        if (body) {
+            options.headers['Content-Type'] = 'application/json';
+            options.body = JSON.stringify(body);
+        }
         const timeout = setTimeout(() => controller.abort(), this.timeout);
         return Fetch(this.url + endpoint, options)
             .then((res) => {

@@ -40,9 +40,9 @@ class ShoukakuPlayer extends EventEmitter {
         this.volume = 100;
         /**
          * The current equalizer bands set in this player.
-         * @type {Array}
+         * @type {Array<EqualizerBand>}
          */
-        this.bands = [];
+        this.bands = [EqualizerBand];
         /**
          * The current postion in ms of this player
          * @type {number}
@@ -147,22 +147,27 @@ class ShoukakuPlayer extends EventEmitter {
     /**
      * Plays a track.
      * @param {string|ShoukakuTrack} track The Base64 track from the Lavalink Rest API or a ShoukakuTrack.
-     * @param {ShoukakuConstants#ShoukakuPlayOptions} [options=ShoukakuPlayOptions] Used if you want to put a custom track start or end time.
+     * @param {ShoukakuPlayOptions} [options=ShoukakuPlayOptions] Used if you want to put a custom track start or end time.
      * @memberOf ShoukakuPlayer
      * @returns {Promise<boolean>} true if successful false if not.
      */
-    async playTrack(track, options = ShoukakuPlayOptions) {
+    async playTrack(track, options) {
         if (!track) return false;
-        options = util.mergeDefault(ShoukakuPlayOptions, options);
         if (track instanceof ShoukakuTrack) track = track.track;
-        const payload = {};
-        Object.defineProperty(payload, 'op', { value: 'play', enumerable: true });
-        Object.defineProperty(payload, 'guildId', { value: this.voiceConnection.guildID, enumerable: true });
-        Object.defineProperty(payload, 'track', { value: track, enumerable: true });
-        Object.defineProperty(payload, 'noReplace', { value: options.noReplace, enumerable: true });
-        if (options.startTime) Object.defineProperty(payload, 'startTime', { value: options.startTime, enumerable: true });
-        if (options.endTime) Object.defineProperty(payload, 'endTime', { value: options.endTime, enumerable: true });
+        options = util.mergeDefault(ShoukakuPlayOptions, options);
+
+        const { noReplace, startTime, endTime } = options;
+        const payload = {
+            op: 'play',
+            guildId: this.voiceConnection.guildID,
+            track,
+            noReplace
+        };
+        if (startTime) payload.startTime = startTime;
+        if (endTime) payload.endTime = endTime;
+
         await this.voiceConnection.node.send(payload);
+
         if (track !== this.track) this.track = track;
         return true;
     }
@@ -202,7 +207,7 @@ class ShoukakuPlayer extends EventEmitter {
      * @memberOf ShoukakuPlayer
      * @returns {Promise<boolean>} true if successful false if not.
      */
-    async setEqualizer(bands = [].push(EqualizerBand)) {
+    async setEqualizer(bands) {
         if (!bands || !Array.isArray(bands)) return false;
         this.bands = bands;
         await this.voiceConnection.node.send({

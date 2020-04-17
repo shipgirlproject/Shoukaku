@@ -99,11 +99,12 @@ class ShoukakuSocket extends EventEmitter {
     */
     connect(id, shardCount, resumable) {
         this.state = ShoukakuStatus.CONNECTING;
-        const headers = {};
-        Object.defineProperty(headers, 'Authorization', { value: this.auth, enumerable: true });
-        Object.defineProperty(headers, 'Num-Shards', { value: shardCount, enumerable: true });
-        Object.defineProperty(headers, 'User-Id', { value: id, enumerable: true });
-        if (resumable) Object.defineProperty(headers, 'Resume-Key', { value: resumable, enumerable: true });
+        const headers = {
+            'Authorization': this.auth,
+            'Num-Shards': shardCount,
+            'User-Id': id
+        };
+        if (resumable) headers['Resume-Key'] = resumable;
         this.ws = new Websocket(this.url, { headers });
         this.ws.once('upgrade', this._upgrade.bind(this));
         this.ws.once('open', this._open.bind(this));
