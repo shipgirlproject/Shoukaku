@@ -1,5 +1,5 @@
 const EventEmitter = require('events');
-const { ShoukakuPlayOptions, ShoukakuStatus } = require('../constants/ShoukakuConstants.js');
+const { ShoukakuPlayOptions, EqualizerBand, ShoukakuStatus } = require('../constants/ShoukakuConstants.js');
 const util  = require('../util/ShoukakuUtil.js');
 const ShoukakuLink = require('./ShoukakuLink.js');
 const ShoukakuError = require('../constants/ShoukakuError.js');
@@ -202,7 +202,7 @@ class ShoukakuPlayer extends EventEmitter {
      * @memberOf ShoukakuPlayer
      * @returns {Promise<boolean>} true if successful false if not.
      */
-    async setEqualizer(bands) {
+    async setEqualizer(bands = [].push(EqualizerBand)) {
         if (!bands || !Array.isArray(bands)) return false;
         this.bands = bands;
         await this.voiceConnection.node.send({

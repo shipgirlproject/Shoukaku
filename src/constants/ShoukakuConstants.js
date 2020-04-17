@@ -134,7 +134,7 @@ class ShoukakuConstants {
         return {
             band: 0,
             gain: 0
-        }
+        };
     }
 }
 module.exports = ShoukakuConstants;
