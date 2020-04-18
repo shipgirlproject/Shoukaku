@@ -210,7 +210,7 @@ class ShoukakuSocket extends EventEmitter {
         this.resumed = response.headers['session-resumed'] === 'true';
     }
 
-    async  _open() {
+    async _open() {
         this._configureResuming()
             .then(() => {
                 this.reconnectAttempts = 0;
