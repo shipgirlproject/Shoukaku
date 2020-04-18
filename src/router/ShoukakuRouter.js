@@ -1,5 +1,8 @@
 const { ShoukakuStatus } = require('../constants/ShoukakuConstants.js');
-
+/**
+ * Router for certain events used & sent by Shoukaku
+ * @class ShoukakuRouter
+ */
 class ShoukakuRouter {
     static RawRouter(packet) {
         if (packet.t === 'VOICE_STATE_UPDATE') {
@@ -37,7 +40,7 @@ class ShoukakuRouter {
                 case 'TrackStuckEvent':
                     player._listen('end', json);
                     break;
-                case 'TrackStartEvent': 
+                case 'TrackStartEvent':
                     player._listen('start', json);
                     break;
                 case 'TrackExceptionEvent':

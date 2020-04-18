@@ -5,28 +5,32 @@
 ![GitHub issues](https://img.shields.io/github/issues-raw/Deivu/Shoukaku?style=flat-square)
 ![Snyk Vulnerabilities for npm package](https://img.shields.io/snyk/vulnerabilities/npm/shoukaku?style=flat-square) 
 ![NPM](https://img.shields.io/npm/l/shoukaku?style=flat-square)
+
 <p align="center">
   <img src="https://upload.wikimedia.org/wikipedia/commons/0/00/Japanese_aircraft_carrier_shokaku_1941.jpg">
 </p>
 
 Japanese Navy Aircraft Carrier Shokaku type "Shokaku" immediately after completion photo `public domain`
 
-### A Full Blown Lavalink Wrapper designed around Discord.js v12
+### A Lavalink wrapper for Discord.js v12.x.x
 
 ✅ Currently being used by: 
 
 [![DBL](https://discordbots.org/api/widget/424137718961012737.svg)](https://discordbots.org/bot/424137718961012737)
 
 ### Why Shoukaku?
-✅ Designed to used in Discord.JS v12
 
-✅ Straightforward, Maintained, and Reliable.
+✅ Straightforward.
 
-✅ Stable for long term usage.
+✅ Maintained.
 
-✅ Offers features that other libraries don't have.
+✅ Reliable.
 
-✅ Very cute and reliable aircraft carrier ❤ (Important)
+✅ Stable.
+
+✅ Feature-rich.
+
+✅ Very cute and reliable aircraft carrier ❤ (Very Very Important)
 
 ### Documentation
 https://deivu.github.io/Shoukaku/?api
@@ -45,20 +49,17 @@ npm i Deivu/Shoukaku
 You can view it on [CHANGELOGS.MD](https://github.com/Deivu/Shoukaku/blob/master/CHANGELOGS.MD) file in this repository.
 
 ### Support Server
-If you need help on using this, Join Here [ShipGirls Community](https://discordapp.com/invite/FVqbtGu) and `ask at #support`. 
+Join in [ShipGirls Community](https://discordapp.com/invite/FVqbtGu) and ask at `#support` channel. 
 
 ### Issues or Bugs
 Feel free to open an issue in the [Issues](https://github.com/Deivu/Shoukaku/issues) section of this repository.
 
-### Notes 
-> If you want to help in development, you can use the wrapper and report the issues you experienced on using it, or Submit a PR if you think you can improve something.
-
-> There is a Discord.JS actual implementation and a simple implementation examples below.
-
 ### Starting a Lavalink Server
 [View Lavalink README here](https://github.com/Frederikam/Lavalink/blob/master/README.md)
 
-### Discord.js example implementation
+### Example on a fully functional Discord Bot
+> Serves as your guide on how I implement my own library
+
 [View Kongou's source code here](https://github.com/Deivu/Kongou)
 
 ### Really simple example of using this
@@ -99,7 +100,6 @@ class ExampleBot extends Client {
             const node = this.shoukaku.getNode();
             let data = await node.rest.resolve(args[1]);
             if (!data) return;
-            if (Array.isArray(data)) data = data[0];
             const player = await node.joinVoiceChannel({
                 guildID: msg.guild.id,
                 voiceChannelID: msg.member.voice.channelID
@@ -112,7 +112,7 @@ class ExampleBot extends Client {
             player.on('closed', cleanFunction);
             player.on('error', cleanFunction);
             player.on('nodeDisconnect', cleanFunction);
-            await player.playTrack(data.track);
+            await player.playTrack(data.tracks.shift()); // can also be "data.tracks.shift().track but that looks meme here since playTrack also accepts an instance of ShoukakuTrack
             await msg.channel.send("Now Playing: " + data.info.title);
         });
         this.on('ready', () => console.log('Bot is now ready'));

@@ -1,3 +1,22 @@
+### 1.3.x -> 1.4.x
+> New Classes: ShoukakuTrack & ShoukakuTrackList
+
+>ShoukakuRest's resolve method now returns ShoukakuTrackList instead of a random object. This should make things easier for developers. Example below
+```js
+Shoukaku.getNode().resolve('https://www.youtube.com/watch?v=K7RdzkDX1vY')
+    .then(TrackList => { 
+        if (!TrackList) return;
+        const ShoukakuTrack = TrackList.tracks.shift();
+        ShoukakuPlayer.play(ShoukakuTrack.track) ;
+        console.log('Now Playing: ' + ShoukakuTrack.info.title);
+     });
+// Plox read documentation as I fully documented this thing there
+```
+
+> Documentation Fixes
+
+> Typescript typings fixes and new additions
+
 ### 1.2.x -> 1.3.x
 > ShoukakuResolver class is now renamed to ShoukakuRest
 
