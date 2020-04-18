@@ -6,38 +6,20 @@ const ShoukakuSocket = require('./node/ShoukakuSocket.js');
 const EventEmitter = require('events');
 
 let version;
-try { 
+try {
     version = require('discord.js').version;
 } catch (_) {
     version = null;
 }
 
 /**
- * @external Client
- * @see {@link https://discord.js.org/#/docs/main/master/class/Client}
- */
-/**
- * @external Guild
- * @see {@link https://discord.js.org/#/docs/main/master/class/Guild}
- */
-/**
- * @external EventEmitter
- * @see {@link https://nodejs.org/api/events.html}
- */
-/**
- * @external Map
- * @see {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map}
- */
-
-
-/**
   * Shoukaku, governs the client's node connections.
   * @class Shoukaku
-  * @extends {external:EventEmitter}
+  * @extends {EventEmitter}
   */
 class Shoukaku extends EventEmitter {
     /**
-     * @param  {external:Client} client Your Discord.js client
+     * @param  {Client} client Your Discord.js client
      * @param {ShoukakuConstants#ShoukakuNodes} nodes Lavalink Nodes where Shoukaku will try to connect to.
      * @param {ShoukakuConstants#ShoukakuOptions} options Options to initialize Shoukaku with
      */
@@ -47,7 +29,7 @@ class Shoukaku extends EventEmitter {
             throw new ShoukakuError('Shoukaku will only work in Discord.JS v12 / Discord.JS Master Branch. Versions below Discord.JS v12 is not supported.');
         /**
         * The instance of Discord.js client used with Shoukaku.
-        * @type {external:Client}
+        * @type {external.Client}
         */
         this.client = client;
         /**
@@ -62,14 +44,14 @@ class Shoukaku extends EventEmitter {
         this.shardCount = 1;
         /**
         * The current nodes that is being handled by Shoukaku.
-        * @type {external:Map}
+        * @type {Map<string, ShoukakuSocket>}
         */
         this.nodes = new Map();
 
-        
+
         Object.defineProperty(this, 'options', { value: util.mergeDefault(constants.ShoukakuOptions, options) });
         Object.defineProperty(this, 'rawRouter', { value: RawRouter.bind(this) });
-        
+
         this.client.once('ready', () => {
             this.id = this.client.user.id;
             this.shardCount = this.client.shard ? this.client.shard.count || this.client.shard.shardCount : 1;
@@ -82,7 +64,7 @@ class Shoukaku extends EventEmitter {
     }
     /**
      * Gets all the Players that is currently active on all nodes in this instance.
-     * @type {external:Map}
+     * @type {Map<string, ShoukakuPlayer>}
      * @memberof Shoukaku
      */
     get players() {

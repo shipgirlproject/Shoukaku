@@ -12,7 +12,7 @@ const ShoukakuPlayer = require('../guild/ShoukakuPlayer.js');
  */
 class ShoukakuSocket extends EventEmitter {
     /**
-     * @extends {external:EventEmitter}
+     * @extends {EventEmitter}
      * @param  {Shoukaku} shoukaku Your Shoukaku Instance
      * @param {ShoukakuOptions} node ShoukakuNodeOptions Options to initialize Shoukaku with
      */
@@ -25,7 +25,7 @@ class ShoukakuSocket extends EventEmitter {
         this.shoukaku = shoukaku;
         /**
         * The active players in this socket/node.
-        * @type {external:Map}
+        * @type {Map<string, ShoukakuPlayer>}
         */
         this.players = new Map();
         /**
@@ -53,7 +53,7 @@ class ShoukakuSocket extends EventEmitter {
         * @type {string}
         */
         this.name = node.name;
-        
+
         Object.defineProperty(this, 'url', { value: `ws://${node.host}:${node.port}` });
         Object.defineProperty(this, 'auth', { value: node.auth });
         Object.defineProperty(this, 'resumed', { value: false, writable: true });
@@ -99,11 +99,12 @@ class ShoukakuSocket extends EventEmitter {
     */
     connect(id, shardCount, resumable) {
         this.state = ShoukakuStatus.CONNECTING;
-        const headers = {};
-        Object.defineProperty(headers, 'Authorization', { value: this.auth, enumerable: true });
-        Object.defineProperty(headers, 'Num-Shards', { value: shardCount, enumerable: true });
-        Object.defineProperty(headers, 'User-Id', { value: id, enumerable: true });
-        if (resumable) Object.defineProperty(headers, 'Resume-Key', { value: resumable, enumerable: true });
+        const headers = {
+            'Authorization': this.auth,
+            'Num-Shards': shardCount,
+            'User-Id': id
+        };
+        if (resumable) headers['Resume-Key'] = resumable;
         this.ws = new Websocket(this.url, { headers });
         this.ws.once('upgrade', this._upgrade.bind(this));
         this.ws.once('open', this._open.bind(this));
@@ -181,8 +182,9 @@ class ShoukakuSocket extends EventEmitter {
         });
     }
 
-    _configureResuming() {
-        return this.send({
+    async _configureResuming() {
+        if (!this.resumable) return;
+        await this.send({
             op: 'configureResuming',
             key: this.resumable,
             timeout: this.resumableTimeout
@@ -208,13 +210,17 @@ class ShoukakuSocket extends EventEmitter {
         this.resumed = response.headers['session-resumed'] === 'true';
     }
 
-    _open() {
-        if (this.resumable)
-            this._configureResuming()
-                .catch(() => this.ws.close(4011, 'Failed to send resuming packet. Reconnecting.'));
-        this.reconnectAttempts = 0;
-        this.state = ShoukakuStatus.CONNECTED;
-        this.emit('ready', this.name, this.resumed);
+    async _open() {
+        this._configureResuming()
+            .then(() => {
+                this.reconnectAttempts = 0;
+                this.state = ShoukakuStatus.CONNECTED;
+                this.emit('ready', this.name, this.resumed);
+            })
+            .catch((error) => {
+                this.emit('error', this.name, error);
+                this.ws.close(4011, 'Failed to send the resume packet');
+            });
     }
 
     _message(message) {
@@ -230,7 +236,7 @@ class ShoukakuSocket extends EventEmitter {
 
     _error(error) {
         this.emit('error', this.name, error);
-        this.ws.close(4011, 'Reconnecting the Websocket');
+        this.ws.close(4011, 'Reconnecting the Websocket due to an error');
     }
 
     _close(code, reason) {

@@ -1,19 +1,20 @@
 const EventEmitter = require('events');
-const { ShoukakuPlayOptions, ShoukakuStatus } = require('../constants/ShoukakuConstants.js');
+const { ShoukakuPlayOptions, EqualizerBand, ShoukakuStatus } = require('../constants/ShoukakuConstants.js');
 const util  = require('../util/ShoukakuUtil.js');
 const ShoukakuLink = require('./ShoukakuLink.js');
 const ShoukakuError = require('../constants/ShoukakuError.js');
+const ShoukakuTrack = require('../constants/ShoukakuTrack.js');
 const endEvents = ['end', 'closed', 'error', 'trackException', 'nodeDisconnect'];
 
 /**
  * ShoukakuPlayer, used to control the player on the guildused to control the player on the guild.
  * @class ShoukakuPlayer
- * @extends {external:EventEmitter}
+ * @extends {EventEmitter}
  */
 class ShoukakuPlayer extends EventEmitter {
     /**
      * @param  {ShoukakuSocket} node The node that governs this player.
-     * @param  {external:Guild} guild A Discord.JS Guild Object.
+     * @param  {Guild} guild A Discord.JS Guild Object.
      */
     constructor(node, guild) {
         super();
@@ -39,9 +40,9 @@ class ShoukakuPlayer extends EventEmitter {
         this.volume = 100;
         /**
          * The current equalizer bands set in this player.
-         * @type {Array}
+         * @type {Array<EqualizerBand>}
          */
-        this.bands = [];
+        this.bands = [EqualizerBand];
         /**
          * The current postion in ms of this player
          * @type {number}
@@ -144,23 +145,29 @@ class ShoukakuPlayer extends EventEmitter {
         await this.voiceConnection._move(node);
     }
     /**
-     * Plays the track you specifed. Warning: If the player is playing anything, calling this will just ignore your call. Call `ShoukakuPlayer.StopTrack()` first.
-     * @param {string} track The Base64 encoded track you got from lavalink API.
-     * @param {ShoukakuConstants#ShoukakuPlayOptions} [options=ShoukakuPlayOptions] Used if you want to put a custom track start or end time.
+     * Plays a track.
+     * @param {string|ShoukakuTrack} track The Base64 track from the Lavalink Rest API or a ShoukakuTrack.
+     * @param {ShoukakuPlayOptions} [options=ShoukakuPlayOptions] Used if you want to put a custom track start or end time.
      * @memberOf ShoukakuPlayer
      * @returns {Promise<boolean>} true if successful false if not.
      */
-    async playTrack(track, options = ShoukakuPlayOptions) {
+    async playTrack(track, options) {
         if (!track) return false;
+        if (track instanceof ShoukakuTrack) track = track.track;
         options = util.mergeDefault(ShoukakuPlayOptions, options);
-        const payload = {};
-        Object.defineProperty(payload, 'op', { value: 'play', enumerable: true });
-        Object.defineProperty(payload, 'guildId', { value: this.voiceConnection.guildID, enumerable: true });
-        Object.defineProperty(payload, 'track', { value: track, enumerable: true });
-        Object.defineProperty(payload, 'noReplace', { value: options.noReplace, enumerable: true });
-        if (options.startTime) Object.defineProperty(payload, 'startTime', { value: options.startTime, enumerable: true });
-        if (options.endTime) Object.defineProperty(payload, 'endTime', { value: options.endTime, enumerable: true });
+
+        const { noReplace, startTime, endTime } = options;
+        const payload = {
+            op: 'play',
+            guildId: this.voiceConnection.guildID,
+            track,
+            noReplace
+        };
+        if (startTime) payload.startTime = startTime;
+        if (endTime) payload.endTime = endTime;
+
         await this.voiceConnection.node.send(payload);
+
         if (track !== this.track) this.track = track;
         return true;
     }
@@ -196,7 +203,7 @@ class ShoukakuPlayer extends EventEmitter {
     }
     /**
      * Sets the equalizer of your lavalink player
-     * @param {Array} bands An array of Lavalink bands.
+     * @param {Array<ShoukakuConstants#EqualizerBand>} bands An array of Lavalink bands.
      * @memberOf ShoukakuPlayer
      * @returns {Promise<boolean>} true if successful false if not.
      */
