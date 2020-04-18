@@ -122,5 +122,19 @@ class ShoukakuConstants {
     static get ShoukakuNodes() {
         return [].push(ShoukakuConstants.ShoukakuNodeOptions);
     }
+
+    /**
+     * Equalizer Band Object for Shoukaku's setEqualizer() object.
+     * @typedef {EqualizerBand} EqualizerBand
+     * @property {number} [band] There are 15 bands (0-14) from lowest to highest frequency
+     * @property {number} [gain] Gain for this band, range can be -0.25 to 1.0 with -0.25 mutes the band, 0.25 doubles the band gain
+     * @memberof ShoukakuConstants#
+     */
+    static get EqualizerBand() {
+        return {
+            band: 0,
+            gain: 0
+        };
+    }
 }
 module.exports = ShoukakuConstants;
