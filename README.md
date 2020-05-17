@@ -30,7 +30,7 @@ Japanese Navy Aircraft Carrier Shokaku type "Shokaku" immediately after completi
 
 ✅ Feature-rich.
 
-✅ Very cute and reliable aircraft carrier ❤ (Very Very Important)
+✅ Very cute and reliable aircraft carrier ❤ (Very, very Important)
 
 ### Documentation
 https://deivu.github.io/Shoukaku/?api
