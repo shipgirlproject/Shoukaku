@@ -157,18 +157,21 @@ declare module 'shoukaku' {
     on(event: 'resumed', listener: () => void): this;
     on(event: 'playerUpdate', listener: (data: PlayerUpdate) => void): this;
     on(event: 'closed' | 'trackException', listener: (data: unknown) => void): this;
+    on(event: 'start', listener: (data: unknown) => void): this;
     once(event: 'end', listener: (reason: Reason) => void): this;
     once(event: 'error', listener: (err: ShoukakuError | Error) => void): this;
     once(event: 'nodeDisconnect', listener: (name: string) => void): this;
     once(event: 'resumed', listener: () => void): this;
     once(event: 'playerUpdate', listener: (data: PlayerUpdate) => void): this;
     once(event: 'closed' | 'trackException', listener: (data: unknown) => void): this;
+    once(event: 'start', listener: (data: unknown) => void): this;
     off(event: 'end', listener: (reason: Reason) => void): this;
     off(event: 'error', listener: (err: ShoukakuError | Error) => void): this;
     off(event: 'nodeDisconnect', listener: (name: string) => void): this;
     off(event: 'resumed', listener: () => void): this;
     off(event: 'playerUpdate', listener: (data: PlayerUpdate) => void): this;
     off(event: 'closed' | 'trackException', listener: (data: unknown) => void): this;
+    off(event: 'start', listener: (data: unknown) => void): this;
   }
 
   export class ShoukakuPlayer extends EventEmitter {
