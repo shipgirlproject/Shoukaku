@@ -1,6 +1,6 @@
 const EventEmitter = require('events');
 const { ShoukakuPlayOptions, EqualizerBand, ShoukakuStatus } = require('../constants/ShoukakuConstants.js');
-const util  = require('../util/ShoukakuUtil.js');
+const util = require('../util/ShoukakuUtil.js');
 const ShoukakuLink = require('./ShoukakuLink.js');
 const ShoukakuError = require('../constants/ShoukakuError.js');
 const ShoukakuTrack = require('../constants/ShoukakuTrack.js');

@@ -176,7 +176,7 @@ class ShoukakuSocket extends EventEmitter {
             } catch (error) {
                 return reject(error);
             }
-            this.ws.send(payload, (error) => {
+            this.ws.send(payload, error => {
                 error ? reject(error) : resolve(true);
             });
         });
@@ -217,7 +217,7 @@ class ShoukakuSocket extends EventEmitter {
                 this.state = ShoukakuStatus.CONNECTED;
                 this.emit('ready', this.name, this.resumed);
             })
-            .catch((error) => {
+            .catch(error => {
                 this.emit('error', this.name, error);
                 this.ws.close(4011, 'Failed to send the resume packet');
             });

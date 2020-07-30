@@ -83,7 +83,7 @@ class ShoukakuLink {
                 if (this.state === ShoukakuStatus.CONNECTING) this.state = ShoukakuStatus.CONNECTED;
                 if (this._callback) this._callback(null, this.player);
             })
-            .catch((error) => {
+            .catch(error => {
                 if (this._timeout) clearTimeout(this._timeout);
                 if (this.state !== ShoukakuStatus.CONNECTING) return this.player._listen('error', error);
                 this.state = ShoukakuStatus.DISCONNECTED;
@@ -110,7 +110,7 @@ class ShoukakuLink {
                     voiceChannelID: this.voiceChannelID,
                     mute: this.selfMute,
                     deaf: this.selfDeaf
-                }, (error) => {
+                }, error => {
                     if (error) return reject(error);
                     resolve(this.player);
                 });
@@ -124,7 +124,7 @@ class ShoukakuLink {
 
         this._callback = callback;
 
-        if (this.state === ShoukakuStatus.CONNECTING)  {
+        if (this.state === ShoukakuStatus.CONNECTING) {
             this._callback(new ShoukakuError('Can\'t connect while a connection is connecting. Wait for it to resolve first'));
             return;
         }
@@ -147,7 +147,7 @@ class ShoukakuLink {
         this.player._resetPlayer();
         this._clearVoice();
         this._destroy()
-            .catch((error) => this.node.shoukaku.emit('error', this.node.name, error))
+            .catch(error => this.node.shoukaku.emit('error', this.node.name, error))
             .finally(() => {
                 if (this.state !== ShoukakuStatus.DISCONNECTED) {
                     this._sendDiscordWS({ guild_id: this.guildID, channel_id: null, self_mute: false, self_deaf: false });

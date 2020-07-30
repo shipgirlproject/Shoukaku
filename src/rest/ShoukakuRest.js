@@ -92,12 +92,12 @@ class ShoukakuRest {
         const controller = new Abort();
         const timeout = setTimeout(() => controller.abort(), this.timeout);
         return Fetch(this.url + endpoint, { headers: { Authorization: this.auth }, signal: controller.signal })
-            .then((res) => {
+            .then(res => {
                 if (!res.ok)
                     throw new ShoukakuError(`Rest request failed with response code: ${res.status}`);
                 return res.json();
             })
-            .catch((error) => {
+            .catch(error => {
                 if (error.name === 'AbortError') error = new ShoukakuTimeout(`Rest request timed out. Took more than ${Math.round(this.timeout / 1000)}s to resolve`);
                 throw error;
             })
@@ -119,12 +119,12 @@ class ShoukakuRest {
         }
         const timeout = setTimeout(() => controller.abort(), this.timeout);
         return Fetch(this.url + endpoint, options)
-            .then((res) => {
+            .then(res => {
                 if (!res.ok)
                     throw new ShoukakuError(`Rest request failed with response code: ${res.status}`);
                 return res.status;
             })
-            .catch((error) => {
+            .catch(error => {
                 if (error.name === 'AbortError') error = new ShoukakuTimeout(`Rest request timed out. Took more than ${Math.round(this.timeout / 1000)}s to resolve`);
                 throw error;
             })
