@@ -112,7 +112,8 @@ class ExampleBot extends Client {
             player.on('closed', cleanFunction);
             player.on('error', cleanFunction);
             player.on('nodeDisconnect', cleanFunction);
-            await player.playTrack(data.tracks.shift()); // can also be "data.tracks.shift().track but that looks meme here since playTrack also accepts an instance of ShoukakuTrack
+            data = data.tracks.shift();
+            await player.playTrack(data); 
             await msg.channel.send("Now Playing: " + data.info.title);
         });
         this.on('ready', () => console.log('Bot is now ready'));
