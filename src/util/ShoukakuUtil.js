@@ -26,5 +26,9 @@ class ShoukakuUtil {
         if (!result) throw new ShoukakuError('This search type is not supported');
         return result;
     }
+
+    static websocketSend(ws, payload) {
+        return new Promise(resolve => ws.send(payload, () => resolve()));
+    }
 }
 module.exports = ShoukakuUtil;

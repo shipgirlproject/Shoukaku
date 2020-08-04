@@ -3,6 +3,7 @@ const EventEmitter = require('events');
 const Util = require('util');
 const { ShoukakuStatus, ShoukakuNodeStats, ShoukakuJoinOptions } = require('../constants/ShoukakuConstants.js');
 const { PacketRouter, EventRouter } = require('../router/ShoukakuRouter.js');
+const ShoukakuUtil = require('../util/ShoukakuUtil.js');
 const ShoukakuError = require('../constants/ShoukakuError.js');
 const ShoukakuRest= require('../rest/ShoukakuRest.js');
 const ShoukakuPlayer = require('../guild/ShoukakuPlayer.js');
@@ -168,8 +169,7 @@ class ShoukakuSocket extends EventEmitter {
 
     async send(data) {
         if (!this.ws || this.ws.readyState !== 1) return;
-        const payload = JSON.stringify(data);
-        await Util.promisify((cb, payload) => this.ws.send(payload, cb))(payload);
+        await ShoukakuUtil.websocketSend(this.ws, JSON.stringify(data));
     }
 
     async configureResuming() {
