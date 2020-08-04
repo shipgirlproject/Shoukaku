@@ -17,6 +17,7 @@ declare module 'shoukaku' {
   export class ShoukakuUtil {
     public static mergeDefault(def: Object, given: Object): Object;
     public static searchType(string: string): string;
+    public static websocketSend(ws: WebSocket, payload: Object): Promise<void>;
   }
 
   export class ShoukakuTrackList {
