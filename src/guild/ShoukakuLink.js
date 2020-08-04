@@ -85,7 +85,7 @@ class ShoukakuLink {
             mute: this.selfMute,
             deaf: this.selfDeaf
         };
-        await Util.promisify(this.connect)(options);
+        await Util.promisify(this.connect.bind(this))(options);
         return this.player;
     }
 
@@ -133,7 +133,7 @@ class ShoukakuLink {
     
     connect(options, callback) {
         if (!options || !callback)
-            throw new ShoukakuError('No Options or Callback supplied.');
+            throw new ShoukakuError('No callback or options supplied.');
 
         this._callback = callback;
 

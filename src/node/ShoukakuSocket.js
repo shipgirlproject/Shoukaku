@@ -148,7 +148,7 @@ class ShoukakuSocket extends EventEmitter {
         player = new ShoukakuPlayer(this, guild);
         this.players.set(guild.id, player);
         try {
-            await Util.promisify(player.connect)(options);
+            await Util.promisify(player.connect.bind(player))(options);
             return player;
         } catch (error) {
             this.players.delete(guild.id);
