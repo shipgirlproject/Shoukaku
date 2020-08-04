@@ -5,11 +5,14 @@ const { ShoukakuStatus } = require('../constants/ShoukakuConstants.js');
  */
 class ShoukakuRouter {
     static RawRouter(packet) {
-        if (packet.t === 'VOICE_STATE_UPDATE') {
-            if (packet.d.user_id !== this.id) return;
-            this.emit('packetUpdate', packet);
+        switch (packet.t) {
+            case 'VOICE_STATE_UPDATE': 
+                if (packet.d.user_id !== this.id) return;
+                this.emit('packetUpdate', packet);
+                break;
+            case 'VOICE_SERVER_UPDATE':
+                this.emit('packetUpdate', packet);
         }
-        if (packet.t === 'VOICE_SERVER_UPDATE') this.emit('packetUpdate', packet);
     }
 
     static PacketRouter(packet) {
@@ -28,28 +31,28 @@ class ShoukakuRouter {
     static EventRouter(json) {
         const player = this.players.get(json.guildId);
         if (!player) return;
-        if (json.op === 'playerUpdate') {
-            player._listen('playerUpdate', json.state);
-            return;
-        }
-        if (json.op === 'event') {
-            switch (json.type) {
-                case 'TrackEndEvent':
-                    player._listen('end', json);
-                    break;
-                case 'TrackStuckEvent':
-                    player._listen('end', json);
-                    break;
-                case 'TrackStartEvent':
-                    player._listen('start', json);
-                    break;
-                case 'TrackExceptionEvent':
-                    player._listen('trackException', json);
-                    break;
-                case 'WebSocketClosedEvent':
-                    player._listen('closed', json);
-                    break;
-            }
+        switch (json.op) {
+            case 'playerUpdate':
+                player.emit('playerUpdate', json.state);
+                break;
+            case 'event': 
+                switch (json.type) {
+                    case 'TrackEndEvent':
+                        player.emit('end', json);
+                        break;
+                    case 'TrackStuckEvent':
+                        player.emit('end', json);
+                        break;
+                    case 'TrackStartEvent':
+                        player.emit('start', json);
+                        break;
+                    case 'TrackExceptionEvent':
+                        player.emit('trackException', json);
+                        break;
+                    case 'WebSocketClosedEvent':
+                        player.emit('closed', json);
+                        break;
+                }
         }
     }
 }

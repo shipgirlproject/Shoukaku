@@ -195,9 +195,8 @@ declare module 'shoukaku' {
     public setVolume(volume: number): Promise<boolean>;
     public seekTo(position: number): Promise<boolean>;
 
-    private _listen(event: string, data: unknown): void;
-    private _resetPlayer(): void;
-    private _resume(): Promise<void>;
+    private reset(cleanBand: boolean): void;
+    private resume(): Promise<void>;
   }
 
   export class ShoukakuLink {
@@ -223,14 +222,10 @@ declare module 'shoukaku' {
 
     public attemptReconnect(): Promise<ShoukakuPlayer>;
 
-    private _connect(d: unknown, callback: (err: ShoukakuError | Error | null, player: ShoukakuPlayer) => void);
-    private _disconnect(): void;
-    private _move(): Promise<void>;
-    private _sendDiscordWS(d: unknown): void;
-    private _clearVoice(): void;
-    private _destroy(): Promise<boolean>;
-    private _voiceUpdate(): Promise<boolean>;
-    private _nodeDisconnected(): void;
+    private connect(d: unknown, callback: (err: ShoukakuError | Error | null, player: ShoukakuPlayer) => void);
+    private disconnect(): void;
+    private move(): Promise<void>;
+    private send(d: unknown): void;
   }
 
   export class ShoukakuSocket {
@@ -257,8 +252,9 @@ declare module 'shoukaku' {
     public leaveVoiceChannel(guildID: string): void;
 
     private send(data: unknown): Promise<boolean>;
-    private _configureResuming(): Promise<boolean>;
-    private _executeCleaner(): Promise<void>;
+    private configureResuming(): Promise<boolean>;
+    private executeCleaner(): Promise<void>;
+    
     private _upgrade(response: unknown): void;
     private _open(): void;
     private _message(message: string): void;

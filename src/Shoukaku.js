@@ -157,7 +157,7 @@ class Shoukaku extends EventEmitter {
         const node = this.nodes.get(name);
         if (!node) return;
         node.state = constants.ShoukakuStatus.DISCONNECTING;
-        node._executeCleaner()
+        node.executeCleaner()
             .catch(error => this.emit('error', name, error))
             .finally(() => {
                 node.state = constants.ShoukakuStatus.DISCONNECTED;
@@ -223,7 +223,7 @@ class Shoukaku extends EventEmitter {
         const node = this.nodes.get(name);
         if (!resumed) {
             try {
-                await node._executeCleaner();
+                await node.executeCleaner();
             } catch (error) {
                 this.emit('error', name, error);
             }

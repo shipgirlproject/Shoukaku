@@ -1,3 +1,4 @@
+const Util = require('util');
 const { ShoukakuStatus } = require('../constants/ShoukakuConstants.js');
 const ShoukakuError = require('../constants/ShoukakuError.js');
 
@@ -68,6 +69,41 @@ class ShoukakuLink {
         Object.defineProperty(this, '_timeout', { value: null, writable: true });
     }
 
+    /**
+     * Attempts to reconnect this connection.
+     * @memberOf ShoukakuLink
+     * @returns {Promise<ShoukakuPlayer>}
+     */
+    async attemptReconnect() {
+        if (!this.voiceChannelID) 
+            throw new ShoukakuError('No voice channel to reconnect to');
+        if (this.state !== ShoukakuStatus.DISCONNECTED) 
+            throw new ShoukakuError('You can only reconnect connections that are on disconnected state');
+        const options = {
+            guildID: this.guildID,
+            voiceChannelID: this.voiceChannelID,
+            mute: this.selfMute,
+            deaf: this.selfDeaf
+        };
+        await Util.promisify(this.connect)(options);
+        return this.player;
+    }
+
+    async move(node) {
+        await this.node.send({ op: 'destroy', guildId: this.guildID });
+        this.node.players.delete(this.guildID);
+        this.node = node;
+        await this.node.send({ op: 'voiceUpdate', guildId: this.guildID, sessionId: this.sessionID, event: this.lastServerUpdate });
+        this.node.players.set(this.guildID, this.player);
+        await this.player.resume();
+    }
+
+    send(d) {
+        const guild = this.node.shoukaku.client.guilds.cache.get(this.guildID);
+        if (!guild) return;
+        guild.shard.send({ op: 4, d });
+    }
+
     stateUpdate(data) {
         this.selfDeaf = data.self_deaf;
         this.selfMute = data.self_mute;
@@ -77,7 +113,7 @@ class ShoukakuLink {
 
     serverUpdate(data) {
         this.lastServerUpdate = data;
-        this._voiceUpdate()
+        this.node.send({ op: 'voiceUpdate', guildId: this.guildID, sessionId: this.sessionID, event: this.lastServerUpdate })
             .then(() => {
                 if (this._timeout) clearTimeout(this._timeout);
                 if (this.state === ShoukakuStatus.CONNECTING) this.state = ShoukakuStatus.CONNECTED;
@@ -85,7 +121,7 @@ class ShoukakuLink {
             })
             .catch(error => {
                 if (this._timeout) clearTimeout(this._timeout);
-                if (this.state !== ShoukakuStatus.CONNECTING) return this.player._listen('error', error);
+                if (this.state !== ShoukakuStatus.CONNECTING) return this.player.emit('error', error);
                 this.state = ShoukakuStatus.DISCONNECTED;
                 if (this._callback) this._callback(error);
             })
@@ -94,31 +130,8 @@ class ShoukakuLink {
                 this._timeout = null;
             });
     }
-
-    /**
-     * Attempts to reconnect this connection.
-     * @memberOf ShoukakuLink
-     * @returns {Promise<ShoukakuPlayer>}
-     */
-    attemptReconnect() {
-        return new Promise((resolve, reject) => {
-            if (!this.voiceChannelID) return reject(new ShoukakuError('No voice channel to reconnect to'));
-            setTimeout(() => {
-                if (this.state !== ShoukakuStatus.DISCONNECTED) return reject(new ShoukakuError('You can only reconnect connections that are on Disconnected State'));
-                this._connect({
-                    guildID: this.guildID,
-                    voiceChannelID: this.voiceChannelID,
-                    mute: this.selfMute,
-                    deaf: this.selfDeaf
-                }, error => {
-                    if (error) return reject(error);
-                    resolve(this.player);
-                });
-            }, 1000);
-        });
-    }
-
-    _connect(options, callback) {
+    
+    connect(options, callback) {
         if (!options || !callback)
             throw new ShoukakuError('No Options or Callback supplied.');
 
@@ -137,57 +150,25 @@ class ShoukakuLink {
         this.state = ShoukakuStatus.CONNECTING;
 
         const { guildID, voiceChannelID, deaf, mute } = options;
-        this._sendDiscordWS({ guild_id: guildID, channel_id: voiceChannelID, self_deaf: deaf, self_mute: mute });
+        this.send({ guild_id: guildID, channel_id: voiceChannelID, self_deaf: deaf, self_mute: mute });
     }
 
-    _disconnect() {
+    disconnect() {
         if (this.state !== ShoukakuStatus.DISCONNECTED) this.state = ShoukakuStatus.DISCONNECTING;
         this.node.players.delete(this.guildID);
         this.player.removeAllListeners();
-        this.player._resetPlayer();
-        this._clearVoice();
-        this._destroy()
-            .catch(error => this.node.shoukaku.emit('error', this.node.name, error))
-            .finally(() => {
-                if (this.state !== ShoukakuStatus.DISCONNECTED) {
-                    this._sendDiscordWS({ guild_id: this.guildID, channel_id: null, self_mute: false, self_deaf: false });
-                    this.state = ShoukakuStatus.DISCONNECTED;
-                }
-            });
-    }
-
-    async _move(node) {
-        await this._destroy();
-        this.node.players.delete(this.guildID);
-        this.node = node;
-        await this._voiceUpdate();
-        this.node.players.set(this.guildID, this.player);
-        await this.player._resume();
-    }
-
-    _destroy() {
-        return this.node.send({ op: 'destroy', guildId: this.guildID });
-    }
-
-    _voiceUpdate() {
-        return this.node.send({ op: 'voiceUpdate', guildId: this.guildID, sessionId: this.sessionID, event: this.lastServerUpdate });
-    }
-
-    _sendDiscordWS(d) {
-        const guild = this.node.shoukaku.client.guilds.cache.get(this.guildID);
-        if (!guild) return;
-        guild.shard.send({ op: 4, d });
-    }
-
-    _clearVoice() {
+        this.player.reset(true);
         this.lastServerUpdate = null;
         this.sessionID = null;
         this.voiceChannelID = null;
-    }
-
-    _nodeDisconnected() {
-        this.player._listen('nodeDisconnect', new ShoukakuError(`Node: ${this.node.name} disconnected. Either there is no more nodes available to migrate to, or moveOnDisconnect is disabled.`));
-        this._disconnect();
+        this.node.send({ op: 'destroy', guildId: this.guildID })
+            .catch(error => this.node.shoukaku.emit('error', this.node.name, error))
+            .finally(() => {
+                if (this.state !== ShoukakuStatus.DISCONNECTED) {
+                    this.send({ guild_id: this.guildID, channel_id: null, self_mute: false, self_deaf: false });
+                    this.state = ShoukakuStatus.DISCONNECTED;
+                }
+            });
     }
 }
 module.exports = ShoukakuLink;

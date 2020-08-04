@@ -121,7 +121,7 @@ class ShoukakuPlayer extends EventEmitter {
      * @returns {void}
      */
     connect(options, callback) {
-        this.voiceConnection._connect(options, callback);
+        this.voiceConnection.connect(options, callback);
     }
     /**
      * Eventually Disconnects the VoiceConnection & Removes the player from a Guild. Could be also used to clean up player remnants from unexpected events.
@@ -129,33 +129,34 @@ class ShoukakuPlayer extends EventEmitter {
      * @returns {void}
      */
     disconnect() {
-        this.voiceConnection._disconnect();
+        this.voiceConnection.disconnect();
     }
     /**
      * Moves this Player & VoiceConnection to another lavalink node you specified.
      * @param {string} name Name of the Node you want to move to.
      * @memberOf ShoukakuPlayer
-     * @returns {Promise<void>}
+     * @returns {Promise<ShoukakuPlayer>}
      */
     async moveToNode(name) {
         const node = this.voiceConnection.node.shoukaku.nodes.get(name);
         if (!node || node.name === this.voiceConnection.node.name) return;
         if (node.state !== ShoukakuStatus.CONNECTED)
             throw new Error('The node you specified is not ready.');
-        await this.voiceConnection._move(node);
+        await this.voiceConnection.move(node);
+        return this;
     }
     /**
      * Plays a track.
      * @param {string|ShoukakuTrack} track The Base64 track from the Lavalink Rest API or a ShoukakuTrack.
      * @param {ShoukakuPlayOptions} [options=ShoukakuPlayOptions] Used if you want to put a custom track start or end time.
      * @memberOf ShoukakuPlayer
-     * @returns {Promise<boolean>} true if successful false if not.
+     * @returns {Promise<ShoukakuPlayer>}
      */
     async playTrack(track, options) {
-        if (!track) return false;
+        if (!track) 
+            throw new ShoukakuError('No track specified to play');
         if (track instanceof ShoukakuTrack) track = track.track;
         options = util.mergeDefault(ShoukakuPlayOptions, options);
-
         const { noReplace, startTime, endTime } = options;
         const payload = {
             op: 'play',
@@ -165,16 +166,14 @@ class ShoukakuPlayer extends EventEmitter {
         };
         if (startTime) payload.startTime = startTime;
         if (endTime) payload.endTime = endTime;
-
         await this.voiceConnection.node.send(payload);
-
         if (track !== this.track) this.track = track;
-        return true;
+        return this;
     }
     /**
      * Stops the player from playing.
      * @memberOf ShoukakuPlayer
-     * @returns {Promise<boolean>} true if successful false if not.
+     * @returns {Promise<ShoukakuPlayer>}
      */
     async stopTrack() {
         this.track = null;
@@ -183,32 +182,33 @@ class ShoukakuPlayer extends EventEmitter {
             op: 'stop',
             guildId: this.voiceConnection.guildID
         });
-        return true;
+        return this;
     }
     /**
      * Pauses / Unpauses the player
      * @param {boolean} [pause=true] true to pause, false to unpause
      * @memberOf ShoukakuPlayer
-     * @returns {Promise<boolean>} true if successful false if not.
+     * @returns {Promise<ShoukakuPlayer>}
      */
     async setPaused(pause = true) {
-        if (pause === this.paused) return false;
+        if (pause === this.paused) return this;
         await this.voiceConnection.node.send({
             op: 'pause',
             guildId: this.voiceConnection.guildID,
             pause
         });
-        if (pause !== this.paused) this.paused = pause;
-        return true;
+        this.paused = pause;
+        return this;
     }
     /**
      * Sets the equalizer of your lavalink player
      * @param {Array<ShoukakuConstants#EqualizerBand>} bands An array of Lavalink bands.
      * @memberOf ShoukakuPlayer
-     * @returns {Promise<boolean>} true if successful false if not.
+     * @returns {Promise<ShoukakuPlayer>}
      */
     async setEqualizer(bands) {
-        if (!bands || !Array.isArray(bands)) return false;
+        if (!bands || !Array.isArray(bands)) 
+            throw new Error('No bands, or the band you gave isn\'t an array');
         this.bands = bands;
         await this.voiceConnection.node.send({
             op: 'equalizer',
@@ -216,16 +216,17 @@ class ShoukakuPlayer extends EventEmitter {
             bands
         });
         this.bands = JSON.parse(JSON.stringify(bands));
-        return true;
+        return this;
     }
     /**
      * Sets the playback volume of your lavalink player
      * @param {number} volume The new volume you want to set on the player.
      * @memberOf ShoukakuPlayer
-     * @returns {Promise<boolean>} true if successful false if not.
+     * @returns {Promise<ShoukakuPlayer>}
      */
     async setVolume(volume) {
-        if (!volume) return false;
+        if (!volume) 
+            throw new Error('No volume specfied, please input the new volume');
         volume = Math.min(1000, Math.max(0, volume));
         await this.voiceConnection.node.send({
             op: 'volume',
@@ -233,56 +234,49 @@ class ShoukakuPlayer extends EventEmitter {
             volume
         });
         if (volume !== this.volume) this.volume = volume;
-        return true;
+        return this;
     }
     /**
      * Seeks your player to the time you want
      * @param {number} position position in MS you want to seek to.
      * @memberOf ShoukakuPlayer
-     * @returns {Promise<boolean>} true if successful false if not.
+     * @returns {Promise<ShoukakuPlayer>}
      */
     async seekTo(position) {
-        if (!position) return false;
+        if (!position) 
+            throw new Error('No position specified, please input the new position');
         await this.voiceConnection.node.send({
             op: 'seek',
             guildId: this.voiceConnection.guildID,
             position
         });
-        return true;
+        return this;
     }
 
-    _resetPlayer() {
-        this.track = null;
-        this.position = 0;
-        this.bands.length = 0;
-    }
-
-    async _resume() {
+    async resume() {
         try {
-            if (!this.track) return this._listen('error', new ShoukakuError('No Track Found upon trying to resume.'));
             await this.playTrack(this.track, { startTime: this.position });
             if (this.bands.length) await this.setEqualizer(this.bands);
             if (this.volume !== 100) await this.setVolume(this.volume);
-            this._listen('resumed', null);
+            this.emit('resumed', null);
         } catch (error) {
-            this._listen('error', error);
+            this.emit('error', error);
         }
     }
 
-
-    _listen(event, data) {
+    reset(cleanBand = false) {
+        this.track = null;
+        this.position = 0;
+        if (cleanBand) this.bands.length = 0;
+    }
+    
+    emit(event, data) {
         if (endEvents.includes(event)) {
-            if (event === 'nodeDisconnect') {
-                this._resetPlayer();
-            } else {
-                this.track = null;
-                this.position = 0;
-            }
-            this.emit(event, data);
-            return;
+            event === 'nodeDisconnect' ? this.reset(true) : this.reset();
+            return super.emit(event, data);
         }
         if (data && data.position) this.position = data.position;
-        this.emit(event, data);
+        return super.emit(event, data);
     }
 }
 module.exports = ShoukakuPlayer;
