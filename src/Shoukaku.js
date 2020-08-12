@@ -192,12 +192,11 @@ class Shoukaku extends EventEmitter {
             throw new ShoukakuError('No nodes available. What happened?');
         if (name) {
             const node = this.nodes.get(name);
-            if (node) {
-                if (node.state !== constants.ShoukakuStatus.CONNECTED)
-                    throw new ShoukakuError('This node is not yet ready');
-                return node;
-            }
-            throw new ShoukakuError('The node name you specified is not one of my nodes');
+            if (!node)
+                throw new ShoukakuError('The node name you specified is not one of my nodes');
+            if (node.state !== constants.ShoukakuStatus.CONNECTED)
+                throw new ShoukakuError('This node is not yet ready');
+            return node;
         }
         const nodes = [...this.nodes.values()].filter(node => node.state === constants.ShoukakuStatus.CONNECTED);
         if (!nodes.length)
