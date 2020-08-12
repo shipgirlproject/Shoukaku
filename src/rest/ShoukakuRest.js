@@ -4,6 +4,7 @@ const ShoukakuTimeout = require('../constants/ShoukakuTimeout.js');
 const ShoukakuError = require('../constants/ShoukakuError.js');
 const ShoukakuUtil = require('../util/ShoukakuUtil.js');
 const ShoukakuTrackList = require('../constants/ShoukakuTrackList.js');
+
 const Success = ['TRACK_LOADED', 'PLAYLIST_LOADED', 'SEARCH_RESULT'];
 /**
  * ShoukakuRest, provides access to Lavalink REST API.
@@ -46,10 +47,7 @@ class ShoukakuRest {
 
         const data = await this._getFetch(`/loadtracks?${new URLSearchParams({ identifier }).toString()}`);
 
-        if (Success.includes(data.loadType))
-            return new ShoukakuTrackList(data);
-        else
-            return null;
+        return Success.includes(data.loadType) ? new ShoukakuTrackList(data) : null;
     }
     /**
      * Decodes the given base64 encoded track from lavalink.

@@ -48,7 +48,6 @@ class Shoukaku extends EventEmitter {
         */
         this.nodes = new Map();
 
-
         Object.defineProperty(this, 'options', { value: util.mergeDefault(constants.ShoukakuOptions, options) });
         Object.defineProperty(this, 'rawRouter', { value: RawRouter.bind(this) });
 
@@ -173,7 +172,7 @@ class Shoukaku extends EventEmitter {
     }
     /**
      * Shortcut to get the Ideal Node or a manually specified Node from the current nodes that Shoukaku governs.
-     * @param {string} [name] If blank, Shoukaku will automatically return the Ideal Node for you to connect to. If name is specifed, she will try to return the node you specified.
+     * @param {?string} [name] If blank, Shoukaku will automatically return the Ideal Node for you to connect to. If name is specifed, she will try to return the node you specified.
      * @memberof Shoukaku
      * @returns {ShoukakuSocket}
      * @example
@@ -214,19 +213,15 @@ class Shoukaku extends EventEmitter {
     getPlayer(guildID) {
         if (!this.id)
             throw new ShoukakuError('Shoukaku is not yet ready to execute this method. Please wait and try again.');
-        if (!guildID) return null;
-        if (!this.nodes.size) return null;
+        if (!guildID || !this.nodes.size) return null;
         return this.players.get(guildID);
     }
 
     async _ready(name, resumed) {
         const node = this.nodes.get(name);
         if (!resumed) {
-            try {
-                await node.executeCleaner();
-            } catch (error) {
-                this.emit('error', name, error);
-            }
+            await node.executeCleaner()
+                .catch(error => this.emit('error', name, error));
         }
         this.emit('ready', name, resumed);
     }
@@ -234,16 +229,14 @@ class Shoukaku extends EventEmitter {
     _close(name, code, reason) {
         this.emit('close', name, code, reason);
         const node = this.nodes.get(name);
-        if (node.reconnectAttempts < this.options.reconnectTries) {
+        if (node.reconnectAttempts > this.options.reconnectTries)
+            return this.removeNode(name, `Failed to reconnect in ${this.options.reconnectTries} attempts`);
+        try {
             node.reconnectAttempts++;
-            try {
-                node.connect(this.id, this.shardCount, this.options.resumable);
-            } catch (error) {
-                this.emit('error', name, error);
-                setTimeout(() => this._reconnect(name, code, reason), 2500);
-            }
-        } else {
-            this.removeNode(name, `Failed to reconnect in ${this.options.reconnectTries} attempts`);
+            node.connect(this.id, this.shardCount, this.options.resumable);
+        } catch (error) {
+            this.emit('error', name, error);
+            setTimeout(() => this._reconnect(name, code, reason), 2500);
         }
     }
 }

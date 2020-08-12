@@ -65,8 +65,8 @@ class ShoukakuLink {
         this.state = ShoukakuStatus.DISCONNECTED;
 
         Object.defineProperty(this, 'lastServerUpdate', { value: null, writable: true });
-        Object.defineProperty(this, '_callback', { value: null, writable: true });
-        Object.defineProperty(this, '_timeout', { value: null, writable: true });
+        Object.defineProperty(this, 'callback', { value: null, writable: true });
+        Object.defineProperty(this, 'timeout', { value: null, writable: true });
     }
 
     /**
@@ -115,40 +115,46 @@ class ShoukakuLink {
         this.lastServerUpdate = data;
         this.node.send({ op: 'voiceUpdate', guildId: this.guildID, sessionId: this.sessionID, event: this.lastServerUpdate })
             .then(() => {
-                if (this._timeout) clearTimeout(this._timeout);
+                clearTimeout(this.timeout);
                 if (this.state === ShoukakuStatus.CONNECTING) this.state = ShoukakuStatus.CONNECTED;
-                if (this._callback) this._callback(null, this.player);
+                if (this.callback) this.callback(null, this.player);
             })
             .catch(error => {
-                if (this._timeout) clearTimeout(this._timeout);
+                clearTimeout(this.timeout);
                 if (this.state !== ShoukakuStatus.CONNECTING) return this.player.emit('error', error);
                 this.state = ShoukakuStatus.DISCONNECTED;
-                if (this._callback) this._callback(error);
+                if (this.callback) this.callback(error);
             })
             .finally(() => {
-                this._callback = null;
-                this._timeout = null;
+                this.callback = null;
+                this.timeout = null;
             });
     }
     
     connect(options, callback) {
-        if (!options || !callback)
-            throw new ShoukakuError('No callback or options supplied.');
+        if (!callback)
+            throw new ShoukakuError('No callback supplied.');
 
-        this._callback = callback;
-
-        if (this.state === ShoukakuStatus.CONNECTING) {
-            this._callback(new ShoukakuError('Can\'t connect while a connection is connecting. Wait for it to resolve first'));
+        if (!options) {
+            callback(new ShoukakuError('No options supplied'));
             return;
         }
 
-        this._timeout = setTimeout(() => {
-            this.state = ShoukakuStatus.DISCONNECTED;
-            this._callback(new ShoukakuError('The voice connection is not established in 15 seconds'));
-        }, 15000);
+        if (this.state === ShoukakuStatus.CONNECTING) {
+            callback(new ShoukakuError('Can\'t connect while a connection is connecting. Wait for it to resolve first'));
+            return;
+        }
 
         this.state = ShoukakuStatus.CONNECTING;
-
+        this.callback = callback;
+        this.timeout = setTimeout(() => {
+            this.state = ShoukakuStatus.DISCONNECTED;
+            this.callback(new ShoukakuError('The voice connection is not established in 20 seconds'));
+            this.callback = null;
+            clearTimeout(this.timeout);
+            this.timeout = null;
+        }, 20000);
+        
         const { guildID, voiceChannelID, deaf, mute } = options;
         this.send({ guild_id: guildID, channel_id: voiceChannelID, self_deaf: deaf, self_mute: mute });
     }

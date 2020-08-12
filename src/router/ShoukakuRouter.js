@@ -51,7 +51,6 @@ class ShoukakuRouter {
                         break;
                     case 'WebSocketClosedEvent':
                         player.emit('closed', json);
-                        break;
                 }
         }
     }

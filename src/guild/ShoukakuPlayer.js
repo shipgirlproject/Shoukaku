@@ -1,9 +1,10 @@
 const EventEmitter = require('events');
-const { ShoukakuPlayOptions, EqualizerBand, ShoukakuStatus } = require('../constants/ShoukakuConstants.js');
+const { ShoukakuPlayOptions, ShoukakuStatus } = require('../constants/ShoukakuConstants.js');
 const util = require('../util/ShoukakuUtil.js');
 const ShoukakuLink = require('./ShoukakuLink.js');
 const ShoukakuError = require('../constants/ShoukakuError.js');
 const ShoukakuTrack = require('../constants/ShoukakuTrack.js');
+
 const endEvents = ['end', 'closed', 'error', 'trackException', 'nodeDisconnect'];
 
 /**
@@ -42,7 +43,7 @@ class ShoukakuPlayer extends EventEmitter {
          * The current equalizer bands set in this player.
          * @type {Array<EqualizerBand>}
          */
-        this.bands = [EqualizerBand];
+        this.bands = [];
         /**
          * The current postion in ms of this player
          * @type {number}
@@ -141,7 +142,7 @@ class ShoukakuPlayer extends EventEmitter {
         const node = this.voiceConnection.node.shoukaku.nodes.get(name);
         if (!node || node.name === this.voiceConnection.node.name) return;
         if (node.state !== ShoukakuStatus.CONNECTED)
-            throw new Error('The node you specified is not ready.');
+            throw new ShoukakuError('The node you specified is not ready.');
         await this.voiceConnection.move(node);
         return this;
     }
@@ -208,7 +209,7 @@ class ShoukakuPlayer extends EventEmitter {
      */
     async setEqualizer(bands) {
         if (!bands || !Array.isArray(bands)) 
-            throw new Error('No bands, or the band you gave isn\'t an array');
+            throw new ShoukakuError('No bands, or the band you gave isn\'t an array');
         this.bands = bands;
         await this.voiceConnection.node.send({
             op: 'equalizer',
@@ -226,7 +227,7 @@ class ShoukakuPlayer extends EventEmitter {
      */
     async setVolume(volume) {
         if (!volume) 
-            throw new Error('No volume specfied, please input the new volume');
+            throw new ShoukakuError('No volume specfied, please input the new volume');
         volume = Math.min(1000, Math.max(0, volume));
         await this.voiceConnection.node.send({
             op: 'volume',
@@ -244,7 +245,7 @@ class ShoukakuPlayer extends EventEmitter {
      */
     async seekTo(position) {
         if (!position) 
-            throw new Error('No position specified, please input the new position');
+            throw new ShoukakuError('No position specified, please input the new position');
         await this.voiceConnection.node.send({
             op: 'seek',
             guildId: this.voiceConnection.guildID,
