@@ -228,8 +228,8 @@ class Shoukaku extends EventEmitter {
     _close(name, code, reason) {
         this.emit('close', name, code, reason);
         const node = this.nodes.get(name);
-        if (node.reconnectAttempts > this.options.reconnectTries)
-            return this.removeNode(name, `Failed to reconnect in ${this.options.reconnectTries} attempts`);
+        if (node.reconnectAttempts >= this.options.reconnectTries)
+            return this.removeNode(name, `Failed to reconnect in ${this.options.reconnectTries} attempt(s)`);
         try {
             node.reconnectAttempts++;
             node.connect(this.id, this.shardCount, this.options.resumable);
