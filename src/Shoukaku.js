@@ -1,6 +1,6 @@
 const { RawRouter } = require('./router/ShoukakuRouter.js');
-const util = require('./util/ShoukakuUtil.js');
-const constants = require('./constants/ShoukakuConstants.js');
+const { ShoukakuOptions, ShoukakuNodeOptions, ShoukakuStatus } = require('./constants/ShoukakuConstants.js');
+const { mergeDefault } = require('./util/ShoukakuUtil.js');
 const ShoukakuError = require('./constants/ShoukakuError.js');
 const ShoukakuSocket = require('./node/ShoukakuSocket.js');
 const EventEmitter = require('events');
@@ -43,19 +43,22 @@ class Shoukaku extends EventEmitter {
         */
         this.shardCount = 1;
         /**
-        * The current nodes that is being handled by Shoukaku.
+        * The current nodes that is being handled by Shoukaku. 
         * @type {Map<string, ShoukakuSocket>}
         */
         this.nodes = new Map();
 
-        Object.defineProperty(this, 'options', { value: util.mergeDefault(constants.ShoukakuOptions, options) });
+        Object.defineProperty(this, 'options', { value: mergeDefault(ShoukakuOptions, options) });
         Object.defineProperty(this, 'rawRouter', { value: RawRouter.bind(this) });
 
         this.client.once('ready', () => {
             this.id = this.client.user.id;
-            this.shardCount = this.client.shard ? this.client.shard.count || this.client.shard.shardCount : 1;
+            if (this.client.shard) {
+                this.shardCount = this.client.shard.count || this.client.shard.shardCount;
+                if (typeof this.shardCount !== 'number') this.shardCount = 1;
+            }
             for (let node of nodes) {
-                node = util.mergeDefault(constants.ShoukakuNodeOptions, node);
+                node = mergeDefault(ShoukakuNodeOptions, node);
                 this.addNode(node);
             }
             this.client.on('raw', this.rawRouter);
@@ -155,11 +158,11 @@ class Shoukaku extends EventEmitter {
             throw new ShoukakuError('Shoukaku is not yet ready to execute this method. Please wait and try again.');
         const node = this.nodes.get(name);
         if (!node) return;
-        node.state = constants.ShoukakuStatus.DISCONNECTING;
+        node.state = ShoukakuStatus.DISCONNECTING;
         node.executeCleaner()
             .catch(error => this.emit('error', name, error))
             .finally(() => {
-                node.state = constants.ShoukakuStatus.DISCONNECTED;
+                node.state = ShoukakuStatus.DISCONNECTED;
                 this.nodes.delete(name);
                 this.removeListener('packetUpdate', node.packetRouter);
                 node.removeAllListeners();
@@ -189,18 +192,18 @@ class Shoukaku extends EventEmitter {
         if (!this.id)
             throw new ShoukakuError('Shoukaku is not yet ready to execute this method. Please wait and try again.');
         if (!this.nodes.size)
-            throw new ShoukakuError('No nodes available. What happened?');
+            throw new ShoukakuError('No nodes available, please add a node first.');
         if (name) {
             const node = this.nodes.get(name);
             if (!node)
                 throw new ShoukakuError('The node name you specified is not one of my nodes');
-            if (node.state !== constants.ShoukakuStatus.CONNECTED)
+            if (node.state !== ShoukakuStatus.CONNECTED)
                 throw new ShoukakuError('This node is not yet ready');
             return node;
         }
-        const nodes = [...this.nodes.values()].filter(node => node.state === constants.ShoukakuStatus.CONNECTED);
+        const nodes = [...this.nodes.values()].filter(node => node.state === ShoukakuStatus.CONNECTED);
         if (!nodes.length)
-            throw new ShoukakuError('No nodes are ready for communication.');
+            throw new ShoukakuError('There are nodes, but none of the nodes are connected.');
         return nodes.sort((a, b) => a.penalties - b.penalties).shift();
     }
     /**

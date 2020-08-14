@@ -1,4 +1,4 @@
-const Util = require('util');
+const { promisify } = require('util');
 const { ShoukakuStatus } = require('../constants/ShoukakuConstants.js');
 const ShoukakuError = require('../constants/ShoukakuError.js');
 
@@ -85,7 +85,7 @@ class ShoukakuLink {
             mute: this.selfMute,
             deaf: this.selfDeaf
         };
-        await Util.promisify(this.connect.bind(this))(options);
+        await promisify(this.connect.bind(this))(options);
         return this.player;
     }
 
@@ -108,6 +108,7 @@ class ShoukakuLink {
         this.selfDeaf = data.self_deaf;
         this.selfMute = data.self_mute;
         if (data.channel_id) this.voiceChannelID = data.channel_id;
+        if (!data.channel_id && this.state !== ShoukakuStatus.CONNECTING) this.state = ShoukakuStatus.DISCONNECTED;
         if (data.session_id) this.sessionID = data.session_id;
     }
 
@@ -121,9 +122,11 @@ class ShoukakuLink {
             })
             .catch(error => {
                 clearTimeout(this.timeout);
-                if (this.state !== ShoukakuStatus.CONNECTING) return this.player.emit('error', error);
+                if (this.state !== ShoukakuStatus.CONNECTING)
+                    return this.player.emit('error', error);
+                this.send({ guild_id: this.guildID, channel_id: null, self_mute: false, self_deaf: false });
                 this.state = ShoukakuStatus.DISCONNECTED;
-                if (this.callback) this.callback(error);
+                if (this.callback) this.callback(error);            
             })
             .finally(() => {
                 this.callback = null;
@@ -148,11 +151,12 @@ class ShoukakuLink {
         this.state = ShoukakuStatus.CONNECTING;
         this.callback = callback;
         this.timeout = setTimeout(() => {
+            this.send({ guild_id: this.guildID, channel_id: null, self_mute: false, self_deaf: false });
             this.state = ShoukakuStatus.DISCONNECTED;
-            this.callback(new ShoukakuError('The voice connection is not established in 20 seconds'));
-            this.callback = null;
             clearTimeout(this.timeout);
             this.timeout = null;
+            this.callback(new ShoukakuError('The voice connection is not established in 20 seconds'));
+            this.callback = null;
         }, 20000);
         
         const { guildID, voiceChannelID, deaf, mute } = options;
@@ -170,10 +174,9 @@ class ShoukakuLink {
         this.node.send({ op: 'destroy', guildId: this.guildID })
             .catch(error => this.node.shoukaku.emit('error', this.node.name, error))
             .finally(() => {
-                if (this.state !== ShoukakuStatus.DISCONNECTED) {
-                    this.send({ guild_id: this.guildID, channel_id: null, self_mute: false, self_deaf: false });
-                    this.state = ShoukakuStatus.DISCONNECTED;
-                }
+                if (this.state === ShoukakuStatus.DISCONNECTED) return;
+                this.send({ guild_id: this.guildID, channel_id: null, self_mute: false, self_deaf: false });
+                this.state = ShoukakuStatus.DISCONNECTED;
             });
     }
 }

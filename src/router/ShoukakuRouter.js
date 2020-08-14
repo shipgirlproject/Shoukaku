@@ -1,18 +1,12 @@
-const { ShoukakuStatus } = require('../constants/ShoukakuConstants.js');
+const AllowedPackets = ['VOICE_STATE_UPDATE', 'VOICE_SERVER_UPDATE'];
 /**
  * Router for certain events used & sent by Shoukaku
  * @class ShoukakuRouter
  */
 class ShoukakuRouter {
     static RawRouter(packet) {
-        switch (packet.t) {
-            case 'VOICE_STATE_UPDATE': 
-                if (packet.d.user_id !== this.id) return;
-                this.emit('packetUpdate', packet);
-                break;
-            case 'VOICE_SERVER_UPDATE':
-                this.emit('packetUpdate', packet);
-        }
+        if (!AllowedPackets.includes(packet.t)) return;
+        this.emit('packetUpdate', packet);
     }
 
     static PacketRouter(packet) {
@@ -20,8 +14,8 @@ class ShoukakuRouter {
         if (!player) return;
         switch (packet.t) {
             case 'VOICE_STATE_UPDATE':
+                if (packet.d.user_id !== this.id) break;
                 player.voiceConnection.stateUpdate(packet.d);
-                if (!packet.d.channel_id && ShoukakuStatus.CONNECTING !== player.voiceConnection.state) player.voiceConnection.state = ShoukakuStatus.DISCONNECTED;
                 break;
             case 'VOICE_SERVER_UPDATE':
                 player.voiceConnection.serverUpdate(packet.d);

@@ -1,13 +1,12 @@
-const Websocket = require('ws');
-const EventEmitter = require('events');
-const Util = require('util');
+const { promisify } = require('util');
 const { ShoukakuStatus, ShoukakuNodeStats, ShoukakuJoinOptions } = require('../constants/ShoukakuConstants.js');
 const { PacketRouter, EventRouter } = require('../router/ShoukakuRouter.js');
-const ShoukakuUtil = require('../util/ShoukakuUtil.js');
+const { websocketSend } = require('../util/ShoukakuUtil.js');
 const ShoukakuError = require('../constants/ShoukakuError.js');
-const ShoukakuRest= require('../rest/ShoukakuRest.js');
+const ShoukakuRest = require('../rest/ShoukakuRest.js');
 const ShoukakuPlayer = require('../guild/ShoukakuPlayer.js');
-
+const Websocket = require('ws');
+const EventEmitter = require('events');
 /**
  * ShoukakuSocket, manages a single Lavalink WS connection.
  * @class ShoukakuSocket
@@ -136,19 +135,18 @@ class ShoukakuSocket extends EventEmitter {
 
         let player = this.players.get(options.guildID);
         if (player) {
-            if (player.voiceConnection.state !== ShoukakuStatus.CONNECTED)
-                throw new ShoukakuError('A Player is currently connecting to this channel');
-            return player;
+            if (player.voiceConnection.state === ShoukakuStatus.CONNECTED) return player;
+            throw new ShoukakuError('This player is not yet connected, please wait for it to connect');
         }
 
         const guild = this.shoukaku.client.guilds.cache.get(options.guildID);
         if (!guild)
-            throw new ShoukakuError('Guild not found. Cannot continue creating the voice connection.');
+            throw new ShoukakuError('Guild not found, cannot continue creating this connection.');
 
         player = new ShoukakuPlayer(this, guild);
         this.players.set(guild.id, player);
         try {
-            await Util.promisify(player.connect.bind(player))(options);
+            await promisify(player.connect.bind(player))(options);
             return player;
         } catch (error) {
             this.players.delete(guild.id);
@@ -169,7 +167,7 @@ class ShoukakuSocket extends EventEmitter {
 
     async send(data) {
         if (!this.ws || this.ws.readyState !== 1) return;
-        await ShoukakuUtil.websocketSend(this.ws, JSON.stringify(data));
+        await websocketSend(this.ws, JSON.stringify(data));
     }
 
     async configureResuming() {
