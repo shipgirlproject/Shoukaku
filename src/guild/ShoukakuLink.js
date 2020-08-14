@@ -108,8 +108,8 @@ class ShoukakuLink {
         this.selfDeaf = data.self_deaf;
         this.selfMute = data.self_mute;
         if (data.channel_id) this.voiceChannelID = data.channel_id;
-        if (!data.channel_id && this.state !== ShoukakuStatus.CONNECTING) this.state = ShoukakuStatus.DISCONNECTED;
         if (data.session_id) this.sessionID = data.session_id;
+        if (!data.channel_id && this.state !== ShoukakuStatus.CONNECTING) this.state = ShoukakuStatus.DISCONNECTED;
     }
 
     serverUpdate(data) {

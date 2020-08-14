@@ -13,12 +13,12 @@ class ShoukakuRouter {
         const player = this.players.get(packet.d.guild_id);
         if (!player) return;
         switch (packet.t) {
-            case 'VOICE_STATE_UPDATE':
-                if (packet.d.user_id !== this.id) break;
-                player.voiceConnection.stateUpdate(packet.d);
-                break;
             case 'VOICE_SERVER_UPDATE':
                 player.voiceConnection.serverUpdate(packet.d);
+                break;
+            case 'VOICE_STATE_UPDATE':
+                if (packet.d.user_id !== this.shoukaku.id) break;
+                player.voiceConnection.stateUpdate(packet.d);
         }
     }
 
