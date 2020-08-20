@@ -141,7 +141,7 @@ declare module 'shoukaku' {
     public timeout: number;
     public url: string;
 
-    public resolve(identifier: string, search: Source): Promise<ShoukakuTrackList | null>;
+    public resolve(identifier: string, search?: Source): Promise<ShoukakuTrackList | null>;
     public decode(track: Base64String): Promise<Object>;
     public getRoutePlannerStatus(): Promise<Object>;
     public unmarkFailedAddress(address: string): Promise<number>;
