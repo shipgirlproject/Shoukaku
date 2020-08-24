@@ -277,7 +277,7 @@ class ShoukakuPlayer extends EventEmitter {
             return super.emit(event, data);
         }
 
-        if (event === "start") {
+        if (event === 'start') {
             this.track = data.track;
         }
 
