@@ -276,6 +276,11 @@ class ShoukakuPlayer extends EventEmitter {
             event === 'nodeDisconnect' ? this.reset(true) : this.reset();
             return super.emit(event, data);
         }
+
+        if (event === "start") {
+            this.track = data.track;
+        }
+
         if (data && data.position) this.position = data.position;
         return super.emit(event, data);
     }
