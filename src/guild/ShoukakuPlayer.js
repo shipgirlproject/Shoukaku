@@ -244,7 +244,7 @@ class ShoukakuPlayer extends EventEmitter {
      * @returns {Promise<ShoukakuPlayer>}
      */
     async seekTo(position) {
-        if (!position) 
+        if (position !== 0 && !position) 
             throw new ShoukakuError('No position specified, please input the new position');
         await this.voiceConnection.node.send({
             op: 'seek',
