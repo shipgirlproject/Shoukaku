@@ -7,7 +7,7 @@
 ![NPM](https://img.shields.io/npm/l/shoukaku?style=flat-square)
 
 <p align="center">
-  <img src="https://github.com/Deivu/Shoukaku/blob/master/assets/cover.jpg">
+  <img src="https://raw.githubusercontent.com/Deivu/Shoukaku/master/assets/cover.jpg">
 </p>
 
 The ShipGirl Project, feat Shoukaku & Zuikaku 
