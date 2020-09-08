@@ -10,7 +10,9 @@
   <img src="https://github.com/Deivu/Shoukaku/blob/master/assets/cover.jpg">
 </p>
 
-The ShipGirl Project, feat Shoukaku (<=) & Zuikaku (=>) `(c) Kancolle for our cute girls`
+The ShipGirl Project, feat Shoukaku & Zuikaku 
+
+> (c) Kancolle for our cute girls
 
 ### A Lavalink wrapper for Discord.js v12.x.x
 
@@ -30,7 +32,7 @@ The ShipGirl Project, feat Shoukaku (<=) & Zuikaku (=>) `(c) Kancolle for our cu
 
 ✅ Feature-rich.
 
-✅ Very cute and reliable Shipgirl ❤ (Very Very Important)
+✅ Very cute shipgirl ❤ (Very Important)
 
 ### Documentation
 https://deivu.github.io/Shoukaku/?api
@@ -45,24 +47,16 @@ For Master
 npm i Deivu/Shoukaku
 ```
 
+### What is Lavalink?
+Click [THIS](https://github.com/Frederikam/Lavalink/blob/master/README.md) to open Lavalink's readme.
+
 ### Changelogs
-You can view it on [CHANGELOGS.MD](https://github.com/Deivu/Shoukaku/blob/master/CHANGELOGS.MD) file in this repository.
+Click [THIS](https://github.com/Deivu/Shoukaku/blob/master/CHANGELOGS.MD) to open changelogs.
 
 ### Support Server
-Join in [ShipGirls Community](https://discordapp.com/invite/FVqbtGu) and ask at `#support` channel. 
+Click [THIS](https://discordapp.com/invite/FVqbtGu) to join our Discord server.
 
-### Issues or Bugs
-Feel free to open an issue in the [Issues](https://github.com/Deivu/Shoukaku/issues) section of this repository.
-
-### Starting a Lavalink Server
-[View Lavalink README here](https://github.com/Frederikam/Lavalink/blob/master/README.md)
-
-### Example on a fully functional Discord Bot
-> Serves as your guide on how I implement my own library
-
-[View Kongou's source code here](https://github.com/Deivu/Kongou)
-
-### Really simple example of using this
+### Simple example of using Shoukaku
 ```js
 const { Client } = require('discord.js');
 const { Shoukaku } = require('shoukaku');
@@ -83,11 +77,10 @@ class ExampleBot extends Client {
     }
 
     _setupShoukakuEvents() {
-        this.shoukaku.on('ready', (name) => console.log(`Lavalink Node: ${name} is now connected`));
-        // You must handle error event
-        this.shoukaku.on('error', (name, error) => console.log(`Lavalink Node: ${name} emitted an error.`, error));
-        this.shoukaku.on('close', (name, code, reason) => console.log(`Lavalink Node: ${name} closed with code ${code}. Reason: ${reason || 'No reason'}`));
-        this.shoukaku.on('disconnected', (name, reason) => console.log(`Lavalink Node: ${name} disconnected. Reason: ${reason || 'No reason'}`));
+        this.shoukaku.on('ready', (name) => console.log(`Lavalink ${name}: Ready!`));
+        this.shoukaku.on('error', (name, error) => console.error(`Lavalink ${name}: Error Caught,`, error));
+        this.shoukaku.on('close', (name, code, reason) => console.warn(`Lavalink ${name}: Closed, Code ${code}, Reason ${reason || 'No reason'}`));
+        this.shoukaku.on('disconnected', (name, reason) => console.warn(`Lavalink ${name}: Disconnected, Reason ${reason || 'No reason'}`));
     }
 
     _setupClientEvents() {
@@ -103,15 +96,12 @@ class ExampleBot extends Client {
             const player = await node.joinVoiceChannel({
                 guildID: msg.guild.id,
                 voiceChannelID: msg.member.voice.channelID
-            });
-            const cleanFunction = (param) => {
-                console.log(param);
+            }); 
+            player.on('error', (error) => {
+                console.error(error);
                 player.disconnect();
-            }
-            player.on('end', cleanFunction);
-            player.on('closed', cleanFunction);
-            player.on('error', cleanFunction);
-            player.on('nodeDisconnect', cleanFunction);
+            });
+            for (const event of ['end', 'closed', 'nodeDisconnect']) player.on(event, () => player.disconnect());
             data = data.tracks.shift();
             await player.playTrack(data); 
             await msg.channel.send("Now Playing: " + data.info.title);
@@ -124,3 +114,6 @@ new ExampleBot()
     .login('token')
     .catch(console.error);
 ```
+### Example of using Shoukaku with Queue system
+
+Click [THIS](https://github.com/Deivu/Kongou) to see a bot based on it
