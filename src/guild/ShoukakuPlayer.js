@@ -254,10 +254,14 @@ class ShoukakuPlayer extends EventEmitter {
 
     async resume() {
         try {
-            await this.playTrack(this.track, { startTime: this.position });
             if (this.bands.length) await this.setEqualizer(this.bands);
             if (this.volume !== 100) await this.setVolume(this.volume);
-            this.emit('resumed', null);
+            if (!this.track) {
+                this.emit('end', { type: 'ShoukakuResumeEvent', reason: 'Tried to resume, but there is no track to use' });
+            } else {
+                await this.playTrack(this.track, { startTime: this.position });
+                this.emit('resumed', null);
+            }
         } catch (error) {
             this.emit('error', error);
         }
