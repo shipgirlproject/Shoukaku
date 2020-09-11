@@ -95,7 +95,8 @@ class ShoukakuLink {
         this.node = node;
         await this.node.send({ op: 'voiceUpdate', guildId: this.guildID, sessionId: this.sessionID, event: this.lastServerUpdate });
         this.node.players.set(this.guildID, this.player);
-        await this.player.resume();
+        await this.player.resume()
+            .catch(error => this.player.emit('error', error));
     }
 
     send(d) {

@@ -183,14 +183,9 @@ class ShoukakuSocket extends EventEmitter {
         if (!this.cleaner) return this.cleaner = true;
         const nodes = [...this.shoukaku.nodes.values()].filter(node => node.state === ShoukakuStatus.CONNECTED);
         if (this.moveOnDisconnect && nodes.length > 0) {
-            const ideal = nodes.sort((a, b) => a.penalties - b.penalties).shift();
             for (const player of this.players.values()) {
-                await player.voiceConnection.move(ideal)
-                    .catch(error => {
-                        this.emit('error', this.name, error);
-                        player.emit('nodeDisconnect', new ShoukakuError(`Node '${this.name}' disconnected, either there is no more nodes available to migrate to, or moveOnDisconnect is disabled.`));
-                        player.voiceConnection.disconnect();
-                    });
+                await player.moveToNode(nodes.sort((a, b) => a.penalties - b.penalties).shift())
+                    .catch(error => this.emit('error', this.name, error));
             }
         } else {
             for (const player of this.players.values()) {
