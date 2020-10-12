@@ -58,7 +58,6 @@ class ShoukakuSocket extends EventEmitter {
         Object.defineProperty(this, 'url', { value: `ws://${node.host}:${node.port}` });
         Object.defineProperty(this, 'auth', { value: node.auth });
         Object.defineProperty(this, 'resumed', { value: false, writable: true });
-        Object.defineProperty(this, 'cleaner', { value: false, writable: true });
         Object.defineProperty(this, 'packetRouter', { value: PacketRouter.bind(this) });
         Object.defineProperty(this, 'eventRouter', { value: EventRouter.bind(this) });
     }
@@ -73,6 +72,10 @@ class ShoukakuSocket extends EventEmitter {
 
     get moveOnDisconnect() {
         return this.shoukaku.options.moveOnDisconnect;
+    }
+
+    get groupForReconnecting() {
+        return this.shoukaku.options.groupForReconnecting;
     }
 
     /**
@@ -180,18 +183,15 @@ class ShoukakuSocket extends EventEmitter {
     }
 
     async executeCleaner() {
-        if (!this.cleaner) return this.cleaner = true;
-        const nodes = [...this.shoukaku.nodes.values()].filter(node => node.state === ShoukakuStatus.CONNECTED);
-        if (this.moveOnDisconnect && nodes.length > 0) {
-            for (const player of this.players.values()) {
-                await player.moveToNode(nodes.sort((a, b) => a.penalties - b.penalties).shift())
-                    .catch(error => this.emit('error', this.name, error));
-            }
-        } else {
-            for (const player of this.players.values()) {
-                player.emit('nodeDisconnect', new ShoukakuError(`Node '${this.name}' disconnected, either there is no more nodes available to migrate to, or moveOnDisconnect is disabled.`));
-                player.voiceConnection.disconnect();
-            }
+        if (this.resumed) return;
+        if (this.moveOnDisconnect && this.shoukaku.nodes.size > 0) {
+            await Promise.all([...this.players.values()].map(player => player.voiceConnection.move(this.shoukaku._getIdeal(this.groupForReconnecting))));
+            return;
+        }
+        const error = this.moveOnDisconnect ? new ShoukakuError(`Node '${this.name}' disconnected; moveOnReconnect is disabled`) : new ShoukakuError(`Node '${this.name}' disconnected; No nodes to reconnect to`);
+        for (const player of this.players.values()) {
+            player.emit('nodeDisconnect', error);
+            player.voiceConnection.disconnect();
         }
     }
 

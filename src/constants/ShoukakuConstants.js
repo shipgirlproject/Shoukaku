@@ -86,6 +86,7 @@ class ShoukakuConstants {
     * @property {number} [reconnectTries=2] Amount of tries to connect to the lavalink Node before it decides that the node is unreconnectable.
     * @property {number} [moveOnDisconnect=false] Specifies if the library will attempt to reconnect players on a disconnected node to another node.
     * @property {number} [restTimeout=10000] Timeout on rest requests to your lavalink node.
+    * @property {Array<string>} [groupForReconnecting=["a"]] Group of node to be used when moveOnDisconnect is true
     * @memberof ShoukakuConstants#
     */
     static get ShoukakuOptions() {
@@ -94,7 +95,8 @@ class ShoukakuConstants {
             resumableTimeout: 30,
             reconnectTries: 2,
             moveOnDisconnect: false,
-            restTimeout: 10000
+            restTimeout: 10000,
+            groupForReconnecting: ['a']
         };
     }
     /**
@@ -104,6 +106,7 @@ class ShoukakuConstants {
     * @property {string} [host] Your node host / ip address of where the lavalink is hosted.
     * @property {number} [port] The Port Number of your lavalink instance.
     * @property {string} [auth] The authentication key you set on your lavalink config.
+    * @property {string} [group="a"] Group of this node, used for grouping specific nodes.
     * @memberof ShoukakuConstants#
     */
     static get ShoukakuNodeOptions() {
@@ -111,7 +114,8 @@ class ShoukakuConstants {
             name: null,
             host: null,
             port: null,
-            auth: null
+            auth: null,
+            group: 'a'
         };
     }
     /**

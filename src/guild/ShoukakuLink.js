@@ -90,13 +90,17 @@ class ShoukakuLink {
     }
 
     async move(node) {
-        await this.node.send({ op: 'destroy', guildId: this.guildID });
-        this.node.players.delete(this.guildID);
-        this.node = node;
-        await this.node.send({ op: 'voiceUpdate', guildId: this.guildID, sessionId: this.sessionID, event: this.lastServerUpdate });
-        this.node.players.set(this.guildID, this.player);
-        await this.player.resume()
-            .catch(error => this.player.emit('error', error));
+        try {
+            if (!node) throw new ShoukakuError('No available nodes to reconnect to');
+            await this.node.send({ op: 'destroy', guildId: this.guildID });
+            this.node.players.delete(this.guildID);
+            this.node = node;
+            await this.node.send({ op: 'voiceUpdate', guildId: this.guildID, sessionId: this.sessionID, event: this.lastServerUpdate });
+            this.node.players.set(this.guildID, this.player);
+            await this.player.resume();
+        } catch (error) {
+            this.player.emit('error', error);
+        }
     }
 
     send(d) {

@@ -1,16 +1,10 @@
 const { RawRouter } = require('./router/ShoukakuRouter.js');
 const { ShoukakuOptions, ShoukakuNodeOptions, ShoukakuStatus } = require('./constants/ShoukakuConstants.js');
 const { mergeDefault } = require('./util/ShoukakuUtil.js');
+const { version } = require('discord.js');
 const ShoukakuError = require('./constants/ShoukakuError.js');
 const ShoukakuSocket = require('./node/ShoukakuSocket.js');
 const EventEmitter = require('events');
-
-let version;
-try {
-    version = require('discord.js').version;
-} catch (_) {
-    version = null;
-}
 
 /**
   * Shoukaku, governs the client's node connections.
@@ -57,12 +51,9 @@ class Shoukaku extends EventEmitter {
                 this.shardCount = this.client.shard.count || this.client.shard.shardCount;
                 if (typeof this.shardCount !== 'number') this.shardCount = 1;
             }
-            for (let node of nodes) {
-                node = mergeDefault(ShoukakuNodeOptions, node);
-                this.addNode(node);
-            }
-            this.client.on('raw', this.rawRouter);
+            for (const node of nodes) this.addNode(mergeDefault(ShoukakuNodeOptions, node));
         });
+        this.client.on('raw', this.rawRouter);
     }
     /**
      * Gets all the Players that is currently active on all nodes in this instance.
@@ -135,7 +126,7 @@ class Shoukaku extends EventEmitter {
     */
     addNode(nodeOptions) {
         if (!this.id)
-            throw new ShoukakuError('Shoukaku is not yet ready to execute this method. Please wait and try again.');
+            throw new ShoukakuError('The lib is not yet ready, make sure to initialize Shoukaku before the library fires "ready" event');
         const node = new ShoukakuSocket(this, nodeOptions);
         node.connect(this.id, this.shardCount, false);
         node.on('debug', (name, data) => this.emit('debug', name, data));
@@ -155,7 +146,7 @@ class Shoukaku extends EventEmitter {
      */
     removeNode(name, reason) {
         if (!this.id)
-            throw new ShoukakuError('Shoukaku is not yet ready to execute this method. Please wait and try again.');
+            throw new ShoukakuError('The lib is not yet ready, make sure to initialize Shoukaku before the library fires "ready" event');
         const node = this.nodes.get(name);
         if (!node) return;
         node.state = ShoukakuStatus.DISCONNECTING;
@@ -175,7 +166,7 @@ class Shoukaku extends EventEmitter {
     }
     /**
      * Shortcut to get the Ideal Node or a manually specified Node from the current nodes that Shoukaku governs.
-     * @param {?string} [name] If blank, Shoukaku will automatically return the Ideal Node for you to connect to. If name is specifed, she will try to return the node you specified.
+     * @param {?string|?Array<string>} [query] If blank, Shoukaku will return an ideal node from default group of nodes. If a string is specified, will return a node from it's name, if an array of string groups, Shoukaku will return an ideal node from the specified array of grouped nodes.
      * @memberof Shoukaku
      * @returns {ShoukakuSocket}
      * @example
@@ -188,23 +179,19 @@ class Shoukaku extends EventEmitter {
      *         }).then(player => player.playTrack(data.track))
      *     })
      */
-    getNode(name) {
+    getNode(query = ['a']) {
         if (!this.id)
-            throw new ShoukakuError('Shoukaku is not yet ready to execute this method. Please wait and try again.');
+            throw new ShoukakuError('The lib is not yet ready, make sure to initialize Shoukaku before the library fires "ready" event');
         if (!this.nodes.size)
             throw new ShoukakuError('No nodes available, please add a node first.');
-        if (name) {
-            const node = this.nodes.get(name);
-            if (!node)
-                throw new ShoukakuError('The node name you specified is not one of my nodes');
-            if (node.state !== ShoukakuStatus.CONNECTED)
-                throw new ShoukakuError('This node is not yet ready');
-            return node;
-        }
-        const nodes = [...this.nodes.values()].filter(node => node.state === ShoukakuStatus.CONNECTED);
-        if (!nodes.length)
-            throw new ShoukakuError('There are nodes, but none of the nodes are connected.');
-        return nodes.sort((a, b) => a.penalties - b.penalties).shift();
+        if (Array.isArray(query)) 
+            return this._getIdeal(query);
+        const node = this.nodes.get(query);
+        if (!node)
+            throw new ShoukakuError('The node name you specified is not one of my nodes');
+        if (node.state !== ShoukakuStatus.CONNECTED)
+            throw new ShoukakuError('This node is not yet ready');
+        return node;
     }
     /**
     * Shortcut to get the Player of a guild, if there is any.
@@ -214,18 +201,15 @@ class Shoukaku extends EventEmitter {
     */
     getPlayer(guildID) {
         if (!this.id)
-            throw new ShoukakuError('Shoukaku is not yet ready to execute this method. Please wait and try again.');
-        if (!guildID || !this.nodes.size) return null;
+            throw new ShoukakuError('The lib is not yet ready, make sure to initialize Shoukaku before the library fires "ready" event');
+        if (!guildID) return null;
         return this.players.get(guildID);
     }
 
-    async _ready(name, resumed) {
-        const node = this.nodes.get(name);
-        if (!resumed) {
-            await node.executeCleaner()
-                .catch(error => this.emit('error', name, error));
-        }
-        this.emit('ready', name, resumed);
+    _ready(name, resumed) {
+        this.nodes.get(name).executeCleaner()
+            .catch(error => this.emit('error', name, error))
+            .finally(() => this.emit('ready', name, resumed));
     }
 
     _close(name, code, reason) {
@@ -240,6 +224,13 @@ class Shoukaku extends EventEmitter {
             this.emit('error', name, error);
             setTimeout(() => this._reconnect(name, code, reason), 2500);
         }
+    }
+
+    _getIdeal(group) {
+        const nodes = [...this.nodes.values()]
+            .filter(node => node.state === ShoukakuStatus.CONNECTED)
+            .filter(node => group.includes(node.group));
+        return nodes.sort((a, b) => a.penalties - b.penalties).shift();
     }
 }
 module.exports = Shoukaku;
