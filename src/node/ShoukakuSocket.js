@@ -55,7 +55,7 @@ class ShoukakuSocket extends EventEmitter {
         */
         this.name = node.name;
         /**
-        * Name of this Socket that you can use on .getNode() method of Shoukaku.
+        * Group of this socket
         * @type {string}
         */
         this.group = node.group;
