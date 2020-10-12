@@ -54,7 +54,12 @@ class ShoukakuSocket extends EventEmitter {
         * @type {string}
         */
         this.name = node.name;
-
+        /**
+        * Name of this Socket that you can use on .getNode() method of Shoukaku.
+        * @type {string}
+        */
+        this.group = node.group;
+        
         Object.defineProperty(this, 'url', { value: `ws://${node.host}:${node.port}` });
         Object.defineProperty(this, 'auth', { value: node.auth });
         Object.defineProperty(this, 'resumed', { value: false, writable: true });
