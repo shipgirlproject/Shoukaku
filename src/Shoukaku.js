@@ -32,11 +32,6 @@ class Shoukaku extends EventEmitter {
         */
         this.id = null;
         /**
-        * The shard count of the bot that is being governed by Shoukaku.
-        * @type {number}
-        */
-        this.shardCount = 1;
-        /**
         * The current nodes that is being handled by Shoukaku. 
         * @type {Map<string, ShoukakuSocket>}
         */
@@ -47,10 +42,6 @@ class Shoukaku extends EventEmitter {
 
         this.client.once('ready', () => {
             this.id = this.client.user.id;
-            if (this.client.shard) {
-                this.shardCount = this.client.shard.count || this.client.shard.shardCount;
-                if (typeof this.shardCount !== 'number') this.shardCount = 1;
-            }
             for (const node of nodes) this.addNode(mergeDefault(ShoukakuNodeOptions, node));
         });
         this.client.on('raw', this.rawRouter);
@@ -128,7 +119,7 @@ class Shoukaku extends EventEmitter {
         if (!this.id)
             throw new ShoukakuError('The lib is not yet ready, make sure to initialize Shoukaku before the library fires "ready" event');
         const node = new ShoukakuSocket(this, nodeOptions);
-        node.connect(this.id, this.shardCount, false);
+        node.connect(this.id, false);
         node.on('debug', (name, data) => this.emit('debug', name, data));
         node.on('error', (name, error) => this.emit('error', name, error));
         const _close = this._close.bind(this);
@@ -219,7 +210,7 @@ class Shoukaku extends EventEmitter {
             return this.removeNode(name, `Failed to reconnect in ${this.options.reconnectTries} attempt(s)`);
         try {
             node.reconnectAttempts++;
-            node.connect(this.id, this.shardCount, this.options.resumable);
+            node.connect(this.id, this.options.resumable);
         } catch (error) {
             this.emit('error', name, error);
             setTimeout(() => this._reconnect(name, code, reason), 2500);

@@ -1,4 +1,5 @@
 ## Shoukaku
+### A Lavalink wrapper for Discord.JS v12.x.x
 [![Discord](https://img.shields.io/discord/423116740810244097?style=flat-square)](https://discordapp.com/invite/FVqbtGu)
 [![npm](https://img.shields.io/npm/v/shoukaku?style=flat-square)](https://www.npmjs.com/package/shoukaku)
 ![Github Stars](https://img.shields.io/github/stars/Deivu/Shoukaku?style=flat-square)
@@ -7,30 +8,22 @@
 ![NPM](https://img.shields.io/npm/l/shoukaku?style=flat-square)
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/Deivu/Shoukaku/master/assets/cover.jpg">
+  <img width="497" height="768" alt="Shoukaku" src="https://raw.githubusercontent.com/Deivu/Shoukaku/master/assets/cover.png"></img>
 </p>
 
-The ShipGirl Project, feat Shoukaku & Zuikaku 
+```
+The ShipGirl Project, feat Shoukaku; ⓒ Kancolle
+```
 
-> (c) Kancolle for our cute girls
+### Why use me?
 
-### A Lavalink wrapper for Discord.js v12.x.x
+✅ Straightforward
 
-✅ Currently being used by: 
+✅ Stable
 
-[![DBL](https://discordbots.org/api/widget/424137718961012737.svg)](https://discordbots.org/bot/424137718961012737)
+✅ Feature-rich
 
-### Why Shoukaku?
-
-✅ Straightforward.
-
-✅ Maintained.
-
-✅ Reliable.
-
-✅ Stable.
-
-✅ Feature-rich.
+and ......
 
 ✅ Very cute shipgirl ❤ (Very Important)
 

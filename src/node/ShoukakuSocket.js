@@ -101,16 +101,14 @@ class ShoukakuSocket extends EventEmitter {
     /**
     * Connects this Socket.
     * @param {string} id Your Bot's / Client user id.
-    * @param {number} shardCount Your Bot's / Client shard count.
     * @param {boolean|string} resumable Determines if we should try to resume the connection.
     * @memberof ShoukakuSocket
     * @returns {void}
     */
-    connect(id, shardCount, resumable) {
+    connect(id, resumable) {
         this.state = ShoukakuStatus.CONNECTING;
         const headers = {
             'Authorization': this.auth,
-            'Num-Shards': shardCount,
             'User-Id': id
         };
         if (resumable) headers['Resume-Key'] = resumable;

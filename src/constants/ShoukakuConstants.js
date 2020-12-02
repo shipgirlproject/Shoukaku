@@ -126,18 +126,75 @@ class ShoukakuConstants {
     static get ShoukakuNodes() {
         return [].push(ShoukakuConstants.ShoukakuNodeOptions);
     }
-
     /**
-     * Equalizer Band Object for Shoukaku's setEqualizer() object.
+     * Available settings for an Equalizer Band
      * @typedef {EqualizerBand} EqualizerBand
-     * @property {number} [band] There are 15 bands (0-14) from lowest to highest frequency
-     * @property {number} [gain] Gain for this band, range can be -0.25 to 1.0 with -0.25 mutes the band, 0.25 doubles the band gain
+     * @property {number} [band] Equalizer Band Level
+     * @property {number} [gain] Equalizer Gain Level
      * @memberof ShoukakuConstants#
      */
     static get EqualizerBand() {
         return {
             band: 0,
             gain: 0
+        };
+    }
+    /**
+     * Available settings for Karaoke
+     * @typedef {KaraokeValue} KaraokeValue
+     * @property {number} [level] Karaoke level
+     * @property {number} [monoLevel] Karaoke MonoLevel
+     * @property {number} [filterBand] Karaoke FilterBand
+     * @property {number} [filterWidth] Karaoke FilterWidth
+     * @memberof ShoukakuConstants#
+     */
+    static get KaraokeValue() {
+        return {
+            level: 1.0,
+            monoLevel: 1.0,
+            filterBand: 220.0,
+            filterWidth: 100.0
+        };
+    }
+    /**
+     * Available settings for Timescale
+     * @typedef {TimescaleValue} TimescaleValue
+     * @property {number} [speed] Timescale Speed
+     * @property {number} [pitch] Timescale Pitch
+     * @property {number} [rate] Timescale Rate
+     * @memberof ShoukakuConstants#
+     */
+    static get TimescaleValue() {
+        return {
+            speed: 1.0,
+            pitch: 1.0,
+            rate: 1.0
+        };
+    }
+    /**
+     * Available settings for Tremolo
+     * @typedef {TremoloValue} TremoloValue
+     * @property {number} [frequency] Tremolo Frequency
+     * @property {number} [depth] Tremolo Depth
+     * @memberof ShoukakuConstants#
+     */
+    static get TremoloValue() {
+        return {
+            frequency: 2.0,
+            depth: 0.5
+        };
+    }
+    /**
+     * Available settings for Vibrato
+     * @typedef {VibratoValue} VibratoValue
+     * @property {number} [frequency] Vibrato Frequency
+     * @property {number} [depth] Vibrato Depth
+     * @memberof ShoukakuConstants#
+     */
+    static get VibratoValue() {
+        return {
+            frequency: 2.0, 
+            depth: 0.5
         };
     }
 }

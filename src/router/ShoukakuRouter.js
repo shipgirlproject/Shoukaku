@@ -1,8 +1,5 @@
 const AllowedPackets = ['VOICE_STATE_UPDATE', 'VOICE_SERVER_UPDATE'];
-/**
- * Router for certain events used & sent by Shoukaku
- * @class ShoukakuRouter
- */
+
 class ShoukakuRouter {
     static RawRouter(packet) {
         if (!AllowedPackets.includes(packet.t)) return;

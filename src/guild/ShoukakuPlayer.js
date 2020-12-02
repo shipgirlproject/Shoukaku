@@ -2,6 +2,7 @@ const EventEmitter = require('events');
 const { ShoukakuPlayOptions, ShoukakuStatus } = require('../constants/ShoukakuConstants.js');
 const util = require('../util/ShoukakuUtil.js');
 const ShoukakuLink = require('./ShoukakuLink.js');
+const ShoukakuFilter = require('../constants/ShoukakuFilter.js');
 const ShoukakuError = require('../constants/ShoukakuError.js');
 const ShoukakuTrack = require('../constants/ShoukakuTrack.js');
 
@@ -35,20 +36,15 @@ class ShoukakuPlayer extends EventEmitter {
          */
         this.paused = false;
         /**
-         * The current volume of this player
-         * @type {number}
-         */
-        this.volume = 100;
-        /**
-         * The current equalizer bands set in this player.
-         * @type {Array<EqualizerBand>}
-         */
-        this.bands = [];
-        /**
          * The current postion in ms of this player
          * @type {number}
          */
         this.position = 0;
+        /**
+         * Current filter settings for this player
+         * @type {ShoukakuFilter}
+         */
+        this.filters = new ShoukakuFilter();
     }
 
     /**
@@ -200,42 +196,6 @@ class ShoukakuPlayer extends EventEmitter {
         return this;
     }
     /**
-     * Sets the equalizer of your lavalink player
-     * @param {Array<ShoukakuConstants#EqualizerBand>} bands An array of Lavalink bands.
-     * @memberOf ShoukakuPlayer
-     * @returns {Promise<ShoukakuPlayer>}
-     */
-    async setEqualizer(bands) {
-        if (!bands || !Array.isArray(bands)) 
-            throw new ShoukakuError('No bands, or the band you gave isn\'t an array');
-        this.bands = bands;
-        await this.voiceConnection.node.send({
-            op: 'equalizer',
-            guildId: this.voiceConnection.guildID,
-            bands
-        });
-        this.bands = JSON.parse(JSON.stringify(bands));
-        return this;
-    }
-    /**
-     * Sets the playback volume of your lavalink player
-     * @param {number} volume The new volume you want to set on the player.
-     * @memberOf ShoukakuPlayer
-     * @returns {Promise<ShoukakuPlayer>}
-     */
-    async setVolume(volume) {
-        if (!Number.isInteger(volume)) 
-            throw new ShoukakuError('Please input a valid number for volume');
-        volume = Math.min(1000, Math.max(0, volume));
-        await this.voiceConnection.node.send({
-            op: 'volume',
-            guildId: this.voiceConnection.guildID,
-            volume
-        });
-        if (volume !== this.volume) this.volume = volume;
-        return this;
-    }
-    /**
      * Seeks your player to the time you want
      * @param {number} position position in MS you want to seek to.
      * @memberOf ShoukakuPlayer
@@ -250,6 +210,112 @@ class ShoukakuPlayer extends EventEmitter {
             position
         });
         return this;
+    }
+    /**
+     * Sets the playback volume of your lavalink player
+     * @param {number} volume The new volume you want to set on the player.
+     * @memberOf ShoukakuPlayer
+     * @returns {Promise<ShoukakuPlayer>}
+     */
+    async setVolume(volume) {
+        if (!Number.isInteger(volume)) 
+            throw new ShoukakuError('Please input a valid number for volume');
+        volume = Math.min(10, Math.max(0, volume));
+        if (volume === this.filters.volume) return this;
+        this.filters.volume = volume;
+        await this.updateFilters();
+        return this;
+    }
+    /**
+     * Sets the equalizer of your lavalink player
+     * @param {Array<ShoukakuConstants#EqualizerBand>} bands An array of Lavalink bands.
+     * @memberOf ShoukakuPlayer
+     * @returns {Promise<ShoukakuPlayer>}
+     */
+    async setEqualizer(bands) {
+        if (!bands || !Array.isArray(bands)) 
+            throw new ShoukakuError('No bands, or the band you gave isn\'t an array');
+        this.filters.equalizer = bands;
+        await this.updateFilters();
+        return this;
+    }
+    /**
+     * Sets the karaoke effect of your lavalink player
+     * @param {ShoukakuConstants#KaraokeValue} karaokeValue Karaoke settings for this playback
+     * @memberOf ShoukakuPlayer
+     * @returns {Promise<ShoukakuPlayer>}
+     */
+    async setKaraoke(karaokeValue) {
+        if (!karaokeValue)
+            throw new ShoukakuError('Please input the Karaoke Settings for karaoke');
+        const keys = Object.keys(karaokeValue);
+        for (const key of keys) {
+            if (this.filters.karaoke[key]) this.filters.karaoke[key] = karaokeValue[key];
+        }
+        await this.updateFilters();
+        return this;
+    }
+    /**
+     * Sets the timescale effect of your lavalink player
+     * @param {ShoukakuConstants#TimescaleValue} timescaleValue Timescale settings for this playback
+     * @memberOf ShoukakuPlayer
+     * @returns {Promise<ShoukakuPlayer>}
+     */
+    async setTimescale(timescaleValue) {
+        if (!timescaleValue) 
+            throw new ShoukakuError('Please input the Timescale Settings for timescale');
+        const keys = Object.keys(timescaleValue);
+        for (const key of keys) {
+            if (this.filters.timescale[key]) this.filters.timescale[key] = timescaleValue[key];
+        }
+        await this.updateFilters();
+        return this;
+    }
+    /**
+     * Sets the tremolo effect of your lavalink player
+     * @param {ShoukakuConstants#TremoloValue} tremoloValue Tremolo settings for this playback
+     * @memberOf ShoukakuPlayer
+     * @returns {Promise<ShoukakuPlayer>}
+     */
+    async setTremolo(tremoloValue) {
+        if (!tremoloValue) 
+            throw new ShoukakuError('Please input the Tremolo Settings for tremolo');
+        const keys = Object.keys(tremoloValue);
+        for (const key of keys) {
+            if (this.filters.tremolo[key]) this.filters.tremolo[key] = tremoloValue[key];
+        }
+        await this.updateFilters();
+        return this;
+    }
+    /**
+     * Sets the vibrato effect of your lavalink player
+     * @param {ShoukakuConstants#VibratoValue} vibratoValue Vibrato settings for this playback
+     * @memberOf ShoukakuPlayer
+     * @returns {Promise<ShoukakuPlayer>}
+     */
+    async setVibrato(vibratoValue) {
+        if (!vibratoValue) 
+            throw new ShoukakuError('Please input the Vibrato Settings for tremolo');
+        const keys = Object.keys(vibratoValue);
+        for (const key of keys) {
+            if (this.filters.vibrato[key]) this.filters.vibrato[key] = vibratoValue[key];
+        }
+        await this.updateFilters();
+        return this;
+    }
+
+    async updateFilters() {
+        const { volume, equalizer, karaoke, timescale, tremolo, vibrato } = this.filters;
+        await this.voiceConnection.node.send({
+            op: 'filters',
+            guildId: this.voiceConnection.guildID,
+            volume,
+            equalizer, 
+            karaoke,
+            timescale,
+            tremolo, 
+            vibrato
+        });
     }
 
     async resume() {

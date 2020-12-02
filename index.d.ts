@@ -40,11 +40,6 @@ declare module 'shoukaku' {
     };
   }
 
-  export interface EqualizerBand {
-    band: number;
-    gain: number;
-  }
-
   export type Source = 'youtube' | 'soundcloud';
 
   export enum ShoukakuStatus {
@@ -52,6 +47,24 @@ declare module 'shoukaku' {
     CONNECTED = 'CONNECTED',
     DISCONNECTING = 'DISCONNECTING',
     DISCONNECTED = 'DISCONNECTED',
+  }
+
+  export interface Reason {
+    op: string;
+    reason: string;
+    code: number;
+    byRemote: boolean;
+    type: string;
+    guildId: string;
+  }
+
+  export interface PlayerUpdate {
+    op: "playerUpdate";
+    guildId: string;
+    state: {
+      time: number;
+      position: number;
+    }
   }
 
   export interface ShoukakuNodeStats {
@@ -107,6 +120,34 @@ declare module 'shoukaku' {
     group: string;
   }
 
+  export interface EqualizerBand {
+    band: number;
+    gain: number;
+  }
+
+  export interface KaraokeValue {
+    level: number;
+    monoLevel: number;
+    filterBand: number;
+    filterWidth: number;
+  }
+
+  export interface TimescaleValue {
+    speed: number;
+    pitch: number;
+    rate: number;
+  }
+
+  export interface TremoloValue {
+    frequency: number;
+    depth: number;
+  }
+
+  export interface VibratoValue {
+    frequency: number;
+    depth: number;
+  }
+
   class ShoukakuConstants {
     static ShoukakuStatus: ShoukakuStatus;
     static ShoukakuNodeStats: ShoukakuNodeStats;
@@ -115,28 +156,24 @@ declare module 'shoukaku' {
     static ShoukakuOptions: ShoukakuOptions;
     static ShoukakuNodeOptions: ShoukakuNodeOptions;
     static ShoukakuNodes: Array<ShoukakuNodeOptions>;
+    static EqualizerBand: EqualizerBand;
+    static KaraokeValue: KaraokeValue;
+    static TimescaleValue: TimescaleValue;
+    static TremoloValue: TremoloValue;
+    static VibratoValue: VibratoValue;
   }
 
   export { ShoukakuConstants as Constants };
 
-  export interface Reason {
-    op: string;
-    reason: string;
-    code: number;
-    byRemote: boolean;
-    type: string;
-    guildId: string;
+  export class ShoukakuFilter {
+    public volume: number;
+    public equalizer: EqualizerBand[];
+    public karaoke: KaraokeValue;
+    public timescale: TimescaleValue;
+    public tremolo: TremoloValue;
+    public vibrato: VibratoValue;
   }
-
-  export interface PlayerUpdate {
-    op: "playerUpdate";
-    guildId: string;
-    state: {
-      time: number;
-      position: number;
-    }
-  }
-
+  
   export class ShoukakuRest {
     constructor(host: string, port: string, auth: string, timeout: number);
     private auth: string;
@@ -182,31 +219,32 @@ declare module 'shoukaku' {
     public voiceConnection: ShoukakuLink;
     public track: string | null;
     public paused: boolean;
-    public volume: number;
-    public bands: EqualizerBand[];
     public position: number;
-
-    private connect(options: unknown, callback:(error: ShoukakuError | Error | null, player: ShoukakuPlayer) => void): void;
+    public filters: ShoukakuFilter;
 
     public disconnect(): void;
-    public moveToNode(name: string): Promise<void>;
+    public moveToNode(name: string): Promise<ShoukakuPlayer>;
+    public playTrack(track: string | ShoukakuTrack, options?: ShoukakuPlayOptions): Promise<ShoukakuPlayer>;
+    public stopTrack(): Promise<ShoukakuPlayer>;
+    public setPaused(pause?: boolean): Promise<ShoukakuPlayer>;
+    public seekTo(position: number): Promise<ShoukakuPlayer>;
+    public setVolume(volume: number): Promise<ShoukakuPlayer>;
+    public setEqualizer(bands: EqualizerBand[]): Promise<ShoukakuPlayer>;
+    public setKaraoke(karaokeValue: KaraokeValue): Promise<ShoukakuPlayer>;
+    public setTimescale(timescalevalue: TimescaleValue): Promise<ShoukakuPlayer>;
+    public setTremolo(tremoloValue: TremoloValue): Promise<ShoukakuPlayer>;
+    public setVibrato(vibratoValue: VibratoValue): Promise<ShoukakuPlayer>;
 
-    public playTrack(track: string | ShoukakuTrack, options?: ShoukakuPlayOptions): Promise<boolean>;
-    public stopTrack(): Promise<boolean>;
-    public setPaused(pause?: boolean): Promise<boolean>;
-    public setEqualizer(bands: EqualizerBand[]): Promise<boolean>;
-    public setVolume(volume: number): Promise<boolean>;
-    public seekTo(position: number): Promise<boolean>;
-
-    private reset(cleanBand: boolean): void;
+    private connect(options: unknown, callback:(error: ShoukakuError | Error | null, player: ShoukakuPlayer) => void): void;
+    private updateFilters(): Promise<void>;
     private resume(): Promise<void>;
+    private reset(cleanBand: boolean): void;
   }
 
   export class ShoukakuLink {
     constructor(node: ShoukakuSocket, player: ShoukakuPlayer, guild: Guild);
     public node: ShoukakuSocket;
     public player: ShoukakuPlayer;
-
     public guildID: string;
     public shardID: number;
     public userID: string;
@@ -220,11 +258,10 @@ declare module 'shoukaku' {
     private _callback: (err: ShoukakuError | Error | null, player: ShoukakuPlayer) => void | null;
     private _timeout: number | null;
 
-    private stateUpdate(data: unknown);
-    private serverUpdate(data: unknown);
-
     public attemptReconnect(): Promise<ShoukakuPlayer>;
 
+    private stateUpdate(data: unknown);
+    private serverUpdate(data: unknown);
     private connect(d: unknown, callback: (err: ShoukakuError | Error | null, player: ShoukakuPlayer) => void);
     private disconnect(): void;
     private move(): Promise<void>;
@@ -241,23 +278,23 @@ declare module 'shoukaku' {
     public reconnectAttempts: number;
     public name: string;
     public url: string;
+    public penalties: number;
+
     private auth: string;
     private resumed: boolean;
     private cleaner: boolean;
     private packetRouter: unknown;
     private eventRouter: unknown;
-
     private resumable: boolean;
     private resumableTimeout: number;
-    public penalties: number;
-    public connect(id: string, shardCount: number, resumable: boolean | string): void;
+
+    public connect(id: string, resumable: boolean | string): void;
     public joinVoiceChannel(options: ShoukakuJoinOptions): Promise<ShoukakuPlayer>;
     public leaveVoiceChannel(guildID: string): void;
 
     private send(data: unknown): Promise<boolean>;
     private configureResuming(): Promise<boolean>;
     private executeCleaner(): Promise<void>;
-    
     private _upgrade(response: unknown): void;
     private _open(): void;
     private _message(message: string): void;
@@ -287,7 +324,6 @@ declare module 'shoukaku' {
     constructor(client: DiscordClient, nodes: ShoukakuNodeOptions[], options: ShoukakuOptions);
     public client: DiscordClient;
     public id: string | null;
-    public shardCount: number | null;
     public nodes: Map<string, ShoukakuSocket>;
 
     public players: Map<string, ShoukakuPlayer>;
@@ -298,10 +334,11 @@ declare module 'shoukaku' {
 
     public addNode(nodeOptions: ShoukakuNodeOptions): void;
     public removeNode(name: string, reason?: string): void;
-    public getNode(name?: string): ShoukakuSocket;
+    public getNode(name: string | string[] | null): ShoukakuSocket;
     public getPlayer(guildId: string): ShoukakuPlayer | null;
 
     private _ready(name: string, resumed: boolean): void;
     private _close(name: string, code: number, reason: string): void;
+    private _getIdeal(group: string): ShoukakuSocket;
   }
 }
