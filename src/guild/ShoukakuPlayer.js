@@ -1,5 +1,5 @@
 const EventEmitter = require('events');
-const { ShoukakuPlayOptions, ShoukakuStatus } = require('../constants/ShoukakuConstants.js');
+const { ShoukakuPlayOptions, ShoukakuStatus, KaraokeValue, TimescaleValue, TremoloValue, VibratoValue } = require('../constants/ShoukakuConstants.js');
 const util = require('../util/ShoukakuUtil.js');
 const ShoukakuLink = require('./ShoukakuLink.js');
 const ShoukakuFilter = require('../constants/ShoukakuFilter.js');
@@ -235,7 +235,8 @@ class ShoukakuPlayer extends EventEmitter {
     async setEqualizer(bands) {
         if (!bands || !Array.isArray(bands))
             throw new ShoukakuError('No bands, or the band you gave isn\'t an array');
-        this.filters.equalizer = bands;
+        // input sanitation, to ensure no additional keys is being introduced
+        this.filters.equalizer = bands.map(({ band, gain }) => { return { band, gain }; });
         await this.updateFilters();
         return this;
     }
@@ -249,11 +250,12 @@ class ShoukakuPlayer extends EventEmitter {
         if (!karaokeValue) {
             this.filters.karaoke = null;
         } else {
-            if (!this.filters.karaoke) this.filters.karaoke = {};
-            const keys = Object.keys(karaokeValue);
-            for (const key of keys) {
-                this.filters.karaoke[key] = karaokeValue[key];
+            // input sanitation, to ensure no additional keys is being introduced
+            const values = {};
+            for (const key of Object.keys(karaokeValue)) {
+                if (KaraokeValue[key]) values[key] = karaokeValue[key];
             }
+            this.filters.karaoke = values;
         }
         await this.updateFilters();
         return this;
@@ -268,11 +270,12 @@ class ShoukakuPlayer extends EventEmitter {
         if (!timescaleValue) {
             this.filters.timescale = null;
         } else {
-            if (!this.filters.timescale) this.filters.timescale = {};
-            const keys = Object.keys(timescaleValue);
-            for (const key of keys) {
-                this.filters.timescale[key] = timescaleValue[key];
+            // input sanitation, to ensure no additional keys is being introduced
+            const values = {};
+            for (const key of Object.keys(timescaleValue)) {
+                if (TimescaleValue[key]) values[key] = timescaleValue[key];
             }
+            this.filters.timescale = values;
         }
         await this.updateFilters();
         return this;
@@ -287,11 +290,12 @@ class ShoukakuPlayer extends EventEmitter {
         if (!tremoloValue) {
             this.filters.tremolo = null;
         } else {
-            if (!this.filters.tremolo) this.filters.tremolo = {};
-            const keys = Object.keys(tremoloValue);
-            for (const key of keys) {
-                this.filters.tremolo[key] = tremoloValue[key];
+            // input sanitation, to ensure no additional keys is being introduced
+            const values = {};
+            for (const key of Object.keys(tremoloValue)) {
+                if (TremoloValue[key]) values[key] = tremoloValue[key];
             }
+            this.filters.tremolo = values;
         }
         await this.updateFilters();
         return this;
@@ -306,11 +310,12 @@ class ShoukakuPlayer extends EventEmitter {
         if (!vibratoValue) {
             this.filters.vibrato = null;
         } else {
-            if (this.filters.vibrato) this.filters.vibrato = {};
-            const keys = Object.keys(vibratoValue);
-            for (const key of keys) {
-                this.filters.vibrato[key] = vibratoValue[key];
+            // input sanitation, to ensure no additional keys is being introduced
+            const values = {};
+            for (const key of Object.keys(vibratoValue)) {
+                if (VibratoValue[key]) values[key] = vibratoValue[key];
             }
+            this.filters.vibrato = values;
         }
         await this.updateFilters();
         return this;
