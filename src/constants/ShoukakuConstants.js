@@ -142,10 +142,10 @@ class ShoukakuConstants {
     /**
      * Available settings for Karaoke
      * @typedef {KaraokeValue} KaraokeValue
-     * @property {number} [level] Karaoke level
-     * @property {number} [monoLevel] Karaoke MonoLevel
-     * @property {number} [filterBand] Karaoke FilterBand
-     * @property {number} [filterWidth] Karaoke FilterWidth
+     * @property {?number} [level] Karaoke level
+     * @property {?number} [monoLevel] Karaoke MonoLevel
+     * @property {?number} [filterBand] Karaoke FilterBand
+     * @property {?number} [filterWidth] Karaoke FilterWidth
      * @memberof ShoukakuConstants#
      */
     static get KaraokeValue() {
@@ -159,9 +159,9 @@ class ShoukakuConstants {
     /**
      * Available settings for Timescale
      * @typedef {TimescaleValue} TimescaleValue
-     * @property {number} [speed] Timescale Speed
-     * @property {number} [pitch] Timescale Pitch
-     * @property {number} [rate] Timescale Rate
+     * @property {?number} [speed] Timescale Speed
+     * @property {?number} [pitch] Timescale Pitch
+     * @property {?number} [rate] Timescale Rate
      * @memberof ShoukakuConstants#
      */
     static get TimescaleValue() {
@@ -174,8 +174,8 @@ class ShoukakuConstants {
     /**
      * Available settings for Tremolo
      * @typedef {TremoloValue} TremoloValue
-     * @property {number} [frequency] Tremolo Frequency
-     * @property {number} [depth] Tremolo Depth
+     * @property {?number} [frequency] Tremolo Frequency
+     * @property {?number} [depth] Tremolo Depth
      * @memberof ShoukakuConstants#
      */
     static get TremoloValue() {
@@ -187,8 +187,8 @@ class ShoukakuConstants {
     /**
      * Available settings for Vibrato
      * @typedef {VibratoValue} VibratoValue
-     * @property {number} [frequency] Vibrato Frequency
-     * @property {number} [depth] Vibrato Depth
+     * @property {?number} [frequency] Vibrato Frequency
+     * @property {?number} [depth] Vibrato Depth
      * @memberof ShoukakuConstants#
      */
     static get VibratoValue() {
