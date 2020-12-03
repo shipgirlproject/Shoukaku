@@ -150,7 +150,7 @@ class ShoukakuPlayer extends EventEmitter {
      * @returns {Promise<ShoukakuPlayer>}
      */
     async playTrack(input, options) {
-        if (!input) 
+        if (!input)
             throw new ShoukakuError('No track given to play');
         if (input instanceof ShoukakuTrack) input = input.track;
         options = util.mergeDefault(ShoukakuPlayOptions, options);
@@ -202,7 +202,7 @@ class ShoukakuPlayer extends EventEmitter {
      * @returns {Promise<ShoukakuPlayer>}
      */
     async seekTo(position) {
-        if (!Number.isInteger(position)) 
+        if (!Number.isInteger(position))
             throw new ShoukakuError('Please input a valid number for position');
         await this.voiceConnection.node.send({
             op: 'seek',
@@ -219,8 +219,8 @@ class ShoukakuPlayer extends EventEmitter {
      */
     async setVolume(volume) {
         if (!Number.isInteger(volume)) 
-            throw new ShoukakuError('Please input a valid number for volume');
-        volume = Math.min(10, Math.max(0, volume));
+           throw new ShoukakuError('Please input a valid number for volume');
+        volume = Math.min(5, Math.max(0, volume));
         if (volume === this.filters.volume) return this;
         this.filters.volume = volume;
         await this.updateFilters();
@@ -233,7 +233,7 @@ class ShoukakuPlayer extends EventEmitter {
      * @returns {Promise<ShoukakuPlayer>}
      */
     async setEqualizer(bands) {
-        if (!bands || !Array.isArray(bands)) 
+        if (!bands || !Array.isArray(bands))
             throw new ShoukakuError('No bands, or the band you gave isn\'t an array');
         this.filters.equalizer = bands;
         await this.updateFilters();
@@ -249,8 +249,9 @@ class ShoukakuPlayer extends EventEmitter {
         if (!karaokeValue)
             throw new ShoukakuError('Please input the Karaoke Settings for karaoke');
         const keys = Object.keys(karaokeValue);
+        this.filters.karaoke = {};
         for (const key of keys) {
-            if (this.filters.karaoke[key]) this.filters.karaoke[key] = karaokeValue[key];
+            this.filters.karaoke[key] = karaokeValue[key];
         }
         await this.updateFilters();
         return this;
@@ -262,11 +263,12 @@ class ShoukakuPlayer extends EventEmitter {
      * @returns {Promise<ShoukakuPlayer>}
      */
     async setTimescale(timescaleValue) {
-        if (!timescaleValue) 
+        if (!timescaleValue)
             throw new ShoukakuError('Please input the Timescale Settings for timescale');
         const keys = Object.keys(timescaleValue);
+        this.filters.timescale = {};
         for (const key of keys) {
-            if (this.filters.timescale[key]) this.filters.timescale[key] = timescaleValue[key];
+            this.filters.timescale[key] = timescaleValue[key];
         }
         await this.updateFilters();
         return this;
@@ -278,11 +280,12 @@ class ShoukakuPlayer extends EventEmitter {
      * @returns {Promise<ShoukakuPlayer>}
      */
     async setTremolo(tremoloValue) {
-        if (!tremoloValue) 
+        if (!tremoloValue)
             throw new ShoukakuError('Please input the Tremolo Settings for tremolo');
         const keys = Object.keys(tremoloValue);
+        this.filters.tremolo = {};
         for (const key of keys) {
-            if (this.filters.tremolo[key]) this.filters.tremolo[key] = tremoloValue[key];
+            this.filters.tremolo[key] = tremoloValue[key];
         }
         await this.updateFilters();
         return this;
@@ -294,13 +297,29 @@ class ShoukakuPlayer extends EventEmitter {
      * @returns {Promise<ShoukakuPlayer>}
      */
     async setVibrato(vibratoValue) {
-        if (!vibratoValue) 
+        if (!vibratoValue)
             throw new ShoukakuError('Please input the Vibrato Settings for tremolo');
         const keys = Object.keys(vibratoValue);
+        this.filters.vibrato = {};
         for (const key of keys) {
-            if (this.filters.vibrato[key]) this.filters.vibrato[key] = vibratoValue[key];
+            this.filters.vibrato[key] = vibratoValue[key];
         }
         await this.updateFilters();
+        return this;
+    }
+
+    async clearFilters() {
+        this.filters.vibrato = null;
+        this.filters.tremolo = null;
+        this.filters.timescale = null;
+        this.filters.karaoke = null;
+        this.filters.volume = 1.0;
+        this.filters.equalizer = [];
+
+        await this.voiceConnection.node.send({
+            op: 'filters',
+            guildId: this.voiceConnection.guildID
+        });
         return this;
     }
 
@@ -310,17 +329,18 @@ class ShoukakuPlayer extends EventEmitter {
             op: 'filters',
             guildId: this.voiceConnection.guildID,
             volume,
-            equalizer, 
+            equalizer,
             karaoke,
             timescale,
-            tremolo, 
+            tremolo,
             vibrato
         });
+        return this;
     }
 
     async resume() {
         try {
-            if (this.bands.length) await this.setEqualizer(this.bands);
+            if (this.filters.equalizer.length) await this.setEqualizer(this.filters.equalizer);
             if (this.volume !== 100) await this.setVolume(this.volume);
             if (!this.track) {
                 this.emit('end', { type: 'ShoukakuResumeEvent', guildId: this.voiceConnection.guildID, reason: 'Tried to resume, but there is no track to use' });
@@ -336,9 +356,9 @@ class ShoukakuPlayer extends EventEmitter {
     reset(cleanBand = false) {
         this.track = null;
         this.position = 0;
-        if (cleanBand) this.bands.length = 0;
+        if (cleanBand) this.filters.equalizer.length = 0;
     }
-    
+
     emit(event, data) {
         if (endEvents.includes(event)) {
             event === 'nodeDisconnect' ? this.reset(true) : this.reset();
