@@ -126,26 +126,26 @@ declare module 'shoukaku' {
   }
 
   export interface KaraokeValue {
-    level: number;
-    monoLevel: number;
-    filterBand: number;
-    filterWidth: number;
+    level?: number;
+    monoLevel?: number;
+    filterBand?: number;
+    filterWidth?: number;
   }
 
   export interface TimescaleValue {
-    speed: number;
-    pitch: number;
-    rate: number;
+    speed?: number;
+    pitch?: number;
+    rate?: number;
   }
 
   export interface TremoloValue {
-    frequency: number;
-    depth: number;
+    frequency?: number;
+    depth?: number;
   }
 
   export interface VibratoValue {
-    frequency: number;
-    depth: number;
+    frequency?: number;
+    depth?: number;
   }
 
   class ShoukakuConstants {
@@ -168,10 +168,10 @@ declare module 'shoukaku' {
   export class ShoukakuFilter {
     public volume: number;
     public equalizer: EqualizerBand[];
-    public karaoke: KaraokeValue;
-    public timescale: TimescaleValue;
-    public tremolo: TremoloValue;
-    public vibrato: VibratoValue;
+    public karaoke?: KaraokeValue;
+    public timescale?: TimescaleValue;
+    public tremolo?: TremoloValue;
+    public vibrato?: VibratoValue;
   }
   
   export class ShoukakuRest {
@@ -230,10 +230,11 @@ declare module 'shoukaku' {
     public seekTo(position: number): Promise<ShoukakuPlayer>;
     public setVolume(volume: number): Promise<ShoukakuPlayer>;
     public setEqualizer(bands: EqualizerBand[]): Promise<ShoukakuPlayer>;
-    public setKaraoke(karaokeValue: KaraokeValue): Promise<ShoukakuPlayer>;
-    public setTimescale(timescalevalue: TimescaleValue): Promise<ShoukakuPlayer>;
-    public setTremolo(tremoloValue: TremoloValue): Promise<ShoukakuPlayer>;
-    public setVibrato(vibratoValue: VibratoValue): Promise<ShoukakuPlayer>;
+    public setKaraoke(karaokeValue?: KaraokeValue): Promise<ShoukakuPlayer>;
+    public setTimescale(timescalevalue?: TimescaleValue): Promise<ShoukakuPlayer>;
+    public setTremolo(tremoloValue?: TremoloValue): Promise<ShoukakuPlayer>;
+    public setVibrato(vibratoValue?: VibratoValue): Promise<ShoukakuPlayer>;
+    public clearFilters(): Promise<ShoukakuPlayer>;
 
     private connect(options: unknown, callback:(error: ShoukakuError | Error | null, player: ShoukakuPlayer) => void): void;
     private updateFilters(): Promise<void>;

@@ -219,7 +219,7 @@ class ShoukakuPlayer extends EventEmitter {
      */
     async setVolume(volume) {
         if (!Number.isInteger(volume)) 
-           throw new ShoukakuError('Please input a valid number for volume');
+            throw new ShoukakuError('Please input a valid number for volume');
         volume = Math.min(5, Math.max(0, volume));
         if (volume === this.filters.volume) return this;
         this.filters.volume = volume;
@@ -241,81 +241,87 @@ class ShoukakuPlayer extends EventEmitter {
     }
     /**
      * Sets the karaoke effect of your lavalink player
-     * @param {ShoukakuConstants#KaraokeValue} karaokeValue Karaoke settings for this playback
+     * @param {?ShoukakuConstants#KaraokeValue} karaokeValue Karaoke settings for this playback
      * @memberOf ShoukakuPlayer
      * @returns {Promise<ShoukakuPlayer>}
      */
     async setKaraoke(karaokeValue) {
-        if (!karaokeValue)
-            throw new ShoukakuError('Please input the Karaoke Settings for karaoke');
-        const keys = Object.keys(karaokeValue);
-        this.filters.karaoke = {};
-        for (const key of keys) {
-            this.filters.karaoke[key] = karaokeValue[key];
+        if (!karaokeValue) {
+            this.filters.karaoke = null;
+        } else {
+            if (!this.filters.karaoke) this.filters.karaoke = {};
+            const keys = Object.keys(karaokeValue);
+            for (const key of keys) {
+                this.filters.karaoke[key] = karaokeValue[key];
+            }
         }
         await this.updateFilters();
         return this;
     }
     /**
      * Sets the timescale effect of your lavalink player
-     * @param {ShoukakuConstants#TimescaleValue} timescaleValue Timescale settings for this playback
+     * @param {?ShoukakuConstants#TimescaleValue} timescaleValue Timescale settings for this playback
      * @memberOf ShoukakuPlayer
      * @returns {Promise<ShoukakuPlayer>}
      */
     async setTimescale(timescaleValue) {
-        if (!timescaleValue)
-            throw new ShoukakuError('Please input the Timescale Settings for timescale');
-        const keys = Object.keys(timescaleValue);
-        this.filters.timescale = {};
-        for (const key of keys) {
-            this.filters.timescale[key] = timescaleValue[key];
+        if (!timescaleValue) {
+            this.filters.timescale = null;
+        } else {
+            if (!this.filters.timescale) this.filters.timescale = {};
+            const keys = Object.keys(timescaleValue);
+            for (const key of keys) {
+                this.filters.timescale[key] = timescaleValue[key];
+            }
         }
         await this.updateFilters();
         return this;
     }
     /**
      * Sets the tremolo effect of your lavalink player
-     * @param {ShoukakuConstants#TremoloValue} tremoloValue Tremolo settings for this playback
+     * @param {?ShoukakuConstants#TremoloValue} tremoloValue Tremolo settings for this playback
      * @memberOf ShoukakuPlayer
      * @returns {Promise<ShoukakuPlayer>}
      */
     async setTremolo(tremoloValue) {
-        if (!tremoloValue)
-            throw new ShoukakuError('Please input the Tremolo Settings for tremolo');
-        const keys = Object.keys(tremoloValue);
-        this.filters.tremolo = {};
-        for (const key of keys) {
-            this.filters.tremolo[key] = tremoloValue[key];
+        if (!tremoloValue) {
+            this.filters.tremolo = null;
+        } else {
+            if (!this.filters.tremolo) this.filters.tremolo = {};
+            const keys = Object.keys(tremoloValue);
+            for (const key of keys) {
+                this.filters.tremolo[key] = tremoloValue[key];
+            }
         }
         await this.updateFilters();
         return this;
     }
     /**
      * Sets the vibrato effect of your lavalink player
-     * @param {ShoukakuConstants#VibratoValue} vibratoValue Vibrato settings for this playback
+     * @param {?ShoukakuConstants#VibratoValue} vibratoValue Vibrato settings for this playback
      * @memberOf ShoukakuPlayer
      * @returns {Promise<ShoukakuPlayer>}
      */
     async setVibrato(vibratoValue) {
-        if (!vibratoValue)
-            throw new ShoukakuError('Please input the Vibrato Settings for tremolo');
-        const keys = Object.keys(vibratoValue);
-        this.filters.vibrato = {};
-        for (const key of keys) {
-            this.filters.vibrato[key] = vibratoValue[key];
+        if (!vibratoValue) {
+            this.filters.vibrato = null;
+        } else {
+            if (this.filters.vibrato) this.filters.vibrato = {};
+            const keys = Object.keys(vibratoValue);
+            for (const key of keys) {
+                this.filters.vibrato[key] = vibratoValue[key];
+            }
         }
         await this.updateFilters();
         return this;
     }
-
+    /**
+     * Clears all the filter applied on this player
+     * @memberOf ShoukakuPlayer
+     * @returns {Promise<ShoukakuPlayer>}
+     */
     async clearFilters() {
-        this.filters.vibrato = null;
-        this.filters.tremolo = null;
-        this.filters.timescale = null;
-        this.filters.karaoke = null;
-        this.filters.volume = 1.0;
-        this.filters.equalizer = [];
-
+        this.filters = new ShoukakuFilter();
         await this.voiceConnection.node.send({
             op: 'filters',
             guildId: this.voiceConnection.guildID
@@ -335,7 +341,6 @@ class ShoukakuPlayer extends EventEmitter {
             tremolo,
             vibrato
         });
-        return this;
     }
 
     async resume() {
