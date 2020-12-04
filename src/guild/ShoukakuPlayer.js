@@ -218,7 +218,7 @@ class ShoukakuPlayer extends EventEmitter {
      * @returns {Promise<ShoukakuPlayer>}
      */
     async setVolume(volume) {
-        if (!Number.isInteger(volume)) 
+        if (Number.isNaN(volume)) 
             throw new ShoukakuError('Please input a valid number for volume');
         volume = Math.min(5, Math.max(0, volume));
         if (volume === this.filters.volume) return this;
