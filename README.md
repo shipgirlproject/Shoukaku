@@ -62,6 +62,7 @@ Docker images are available on the [Docker](https://hub.docker.com/r/fredboat/la
 > Bot Implementation: https://github.com/Deivu/Kongou
 
 > Basic Implementation:
+
 ```js
 const { Client } = require('discord.js');
 const { Shoukaku } = require('shoukaku');
