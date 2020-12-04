@@ -15,7 +15,7 @@
 The ShipGirl Project, feat Shoukaku; ⓒ Kancolle
 ```
 
-### Why use me?
+### Features
 
 ✅ Straightforward
 
