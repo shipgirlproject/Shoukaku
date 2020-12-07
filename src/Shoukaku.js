@@ -131,7 +131,7 @@ class Shoukaku extends EventEmitter {
     /**
      * Function to remove a Lavalink Node
      * @param {string} name The Lavalink Node to remove
-     * @param {string} reason Optional reason for this disconnect.
+     * @param {?string} [reason] Optional reason for this disconnect.
      * @memberof Shoukaku
      * @returns {void}
      */

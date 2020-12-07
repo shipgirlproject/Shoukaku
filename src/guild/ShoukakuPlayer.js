@@ -242,7 +242,7 @@ class ShoukakuPlayer extends EventEmitter {
     }
     /**
      * Sets the karaoke effect of your lavalink player
-     * @param {?ShoukakuConstants#KaraokeValue} karaokeValue Karaoke settings for this playback
+     * @param {?ShoukakuConstants#KaraokeValue} [karaokeValue] Karaoke settings for this playback
      * @memberOf ShoukakuPlayer
      * @returns {Promise<ShoukakuPlayer>}
      */
@@ -262,7 +262,7 @@ class ShoukakuPlayer extends EventEmitter {
     }
     /**
      * Sets the timescale effect of your lavalink player
-     * @param {?ShoukakuConstants#TimescaleValue} timescaleValue Timescale settings for this playback
+     * @param {?ShoukakuConstants#TimescaleValue} [timescaleValue] Timescale settings for this playback
      * @memberOf ShoukakuPlayer
      * @returns {Promise<ShoukakuPlayer>}
      */
@@ -282,7 +282,7 @@ class ShoukakuPlayer extends EventEmitter {
     }
     /**
      * Sets the tremolo effect of your lavalink player
-     * @param {?ShoukakuConstants#TremoloValue} tremoloValue Tremolo settings for this playback
+     * @param {?ShoukakuConstants#TremoloValue} [tremoloValue] Tremolo settings for this playback
      * @memberOf ShoukakuPlayer
      * @returns {Promise<ShoukakuPlayer>}
      */
@@ -302,7 +302,7 @@ class ShoukakuPlayer extends EventEmitter {
     }
     /**
      * Sets the vibrato effect of your lavalink player
-     * @param {?ShoukakuConstants#VibratoValue} vibratoValue Vibrato settings for this playback
+     * @param {?ShoukakuConstants#VibratoValue} [vibratoValue] Vibrato settings for this playback
      * @memberOf ShoukakuPlayer
      * @returns {Promise<ShoukakuPlayer>}
      */
@@ -317,6 +317,23 @@ class ShoukakuPlayer extends EventEmitter {
             }
             this.filters.vibrato = values;
         }
+        await this.updateFilters();
+        return this;
+    }
+    /**
+     * Ability to set filters by group instead of 1 by 1
+     * @param {?Object} [settings] object containing filter settings
+     * @param {?Number} [settings.volume] volume of this filter
+     * @param {?Array<ShoukakuConstants#EqualizerBand>} [settings.equalizer] equalizer of this filter
+     * @param {?ShoukakuConstants#KaraokeValue} [settings.karaoke] karaoke settings of this filter
+     * @param {?ShoukakuConstants#TimescaleValue} [settings.timescale] timescale settings of this filter
+     * @param {?ShoukakuConstants#TremoloValue} [settings.tremolo] tremolo settings of this filter
+     * @param {?ShoukakuConstants#VibratoValue} [settings.vibrato] vibrato settings of this filter
+     * @memberOf ShoukakuPlayer
+     * @returns {Promise<ShoukakuPlayer>}
+     */
+    async setGroupedFilters(settings) {
+        this.filters = new ShoukakuFilter(settings);
         await this.updateFilters();
         return this;
     }
