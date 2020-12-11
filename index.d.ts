@@ -234,6 +234,7 @@ declare module 'shoukaku' {
     public setTimescale(timescalevalue?: TimescaleValue): Promise<ShoukakuPlayer>;
     public setTremolo(tremoloValue?: TremoloValue): Promise<ShoukakuPlayer>;
     public setVibrato(vibratoValue?: VibratoValue): Promise<ShoukakuPlayer>;
+    public setGroupedFilters(settings?: ShoukakuFilter): Promise<ShoukakuPlayer>;
     public clearFilters(): Promise<ShoukakuPlayer>;
 
     private connect(options: unknown, callback:(error: ShoukakuError | Error | null, player: ShoukakuPlayer) => void): void;
