@@ -1,3 +1,4 @@
+const { name, version, repository } = require('../../package.json');
 /**
  * Constants for Shoukaku.
  * @class ShoukakuConstants
@@ -84,8 +85,9 @@ class ShoukakuConstants {
     * @property {boolean|string} [resumable=false] If you want your node to support resuming. Just replace the false with the resume-key you want to enable resuming.
     * @property {number} [resumableTimeout=30] Timeout when Lavalink will decide a player isn't resumed and will destroy the connection to it.
     * @property {number} [reconnectTries=2] Amount of tries to connect to the lavalink Node before it decides that the node is unreconnectable.
-    * @property {number} [moveOnDisconnect=false] Specifies if the library will attempt to reconnect players on a disconnected node to another node.
-    * @property {number} [restTimeout=10000] Timeout on rest requests to your lavalink node.
+    * @property {boolean} [moveOnDisconnect=false] Specifies if the library will attempt to reconnect players on a disconnected node to another node.
+    * @property {number} [restTimeout=15000] Timeout on rest requests to your lavalink node.
+    * @property {string} [userAgent="{name}/{version} (+{url})"] Timeout on rest requests to your lavalink node.
     * @property {Array<string>} [groupForReconnecting=["a"]] Group of node to be used when moveOnDisconnect is true
     * @memberof ShoukakuConstants#
     */
@@ -95,7 +97,8 @@ class ShoukakuConstants {
             resumableTimeout: 30,
             reconnectTries: 2,
             moveOnDisconnect: false,
-            restTimeout: 10000,
+            restTimeout: 15000,
+            userAgent: `${name}/${version} (+${repository.url})`,
             groupForReconnecting: ['a']
         };
     }

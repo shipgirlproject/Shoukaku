@@ -15,9 +15,10 @@ class ShoukakuRest {
      * @param {string} host Your node host / ip address of where the lavalink is hosted.
      * @param {string} port The Port Number of your lavalink instance.
      * @param {string} auth The authentication key you set on your lavalink config.
-     * @param {number} timeout Timeout before a request times out.
+     * @param {string} userAgent User agent to use per request
+     * @param {?number} [timeout=15000] Timeout before a request times out.
      */
-    constructor(host, port, auth, timeout) {
+    constructor(host, port, auth, userAgent, timeout) {
         /**
         * URL of the host used by this resolver instance.
         * @type {string}
@@ -27,9 +28,10 @@ class ShoukakuRest {
          * This Resolver Timeout before it decides to cancel the request.
          * @type {number}
          */
-        this.timeout = timeout || 10000;
+        this.timeout = timeout || 15000;
 
         Object.defineProperty(this, 'auth', { value: auth });
+        Object.defineProperty(this, 'userAgent', { value: userAgent });
     }
     /**
     * Resolves a identifier into a lavalink track.
@@ -89,7 +91,7 @@ class ShoukakuRest {
     _getFetch(endpoint) {
         const controller = new Abort();
         const timeout = setTimeout(() => controller.abort(), this.timeout);
-        return Fetch(this.url + endpoint, { headers: { Authorization: this.auth }, signal: controller.signal })
+        return Fetch(this.url + endpoint, { headers: { 'User-Agent': this.userAgent, Authorization: this.auth }, signal: controller.signal })
             .then(res => {
                 if (!res.ok)
                     throw new ShoukakuError(`Rest request failed with response code: ${res.status}`);
@@ -108,6 +110,7 @@ class ShoukakuRest {
             method: 'POST',
             controller: controller.signal,
             headers: {
+                'User-Agent': this.userAgent,
                 Authorization: this.auth
             }
         };

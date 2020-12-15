@@ -33,7 +33,7 @@ class ShoukakuSocket extends EventEmitter {
         * The REST API of this Socket, mostly to load balance your REST requests instead of relying on a single node.
         * @type {ShoukakuRest}
         */
-        this.rest = new ShoukakuRest(node.host, node.port, node.auth, shoukaku.options.restTimeout);
+        this.rest = new ShoukakuRest(node.host, node.port, node.auth, shoukaku.options.userAgent, shoukaku.options.restTimeout);
         /**
         * The state of this Socket.
         * @type {ShoukakuConstants#ShoukakuStatus}
@@ -65,6 +65,10 @@ class ShoukakuSocket extends EventEmitter {
         Object.defineProperty(this, 'resumed', { value: false, writable: true });
         Object.defineProperty(this, 'packetRouter', { value: PacketRouter.bind(this) });
         Object.defineProperty(this, 'eventRouter', { value: EventRouter.bind(this) });
+    }
+
+    get userAgent() {
+        return this.shoukaku.options.userAgent;
     }
 
     get resumable() {
@@ -108,6 +112,7 @@ class ShoukakuSocket extends EventEmitter {
     connect(id, resumable) {
         this.state = ShoukakuStatus.CONNECTING;
         const headers = {
+            'User-Agent': this.userAgent,
             'Authorization': this.auth,
             'User-Id': id
         };
