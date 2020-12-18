@@ -97,7 +97,7 @@ class ShoukakuConstants {
             reconnectTries: 2,
             moveOnDisconnect: false,
             restTimeout: 15000,
-            userAgent: `${name}/${version} (+${repository.url})`
+            userAgent: `${name}/${version} (${repository.url})`
         };
     }
     /**

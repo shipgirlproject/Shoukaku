@@ -108,6 +108,7 @@ class ShoukakuSocket extends EventEmitter {
     connect(id, resumable) {
         this.state = ShoukakuStatus.CONNECTING;
         const headers = {
+            'Client-Name': this.userAgent,
             'User-Agent': this.userAgent,
             'Authorization': this.auth,
             'User-Id': id
