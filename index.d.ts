@@ -109,7 +109,6 @@ declare module 'shoukaku' {
     reconnectTries?: number;
     moveOnDisconnect?: boolean;
     restTimeout?: number;
-    groupForReconnecting?: Array<string>;
   }
 
   export interface ShoukakuNodeOptions {

@@ -82,11 +82,7 @@ class ShoukakuSocket extends EventEmitter {
     get moveOnDisconnect() {
         return this.shoukaku.options.moveOnDisconnect;
     }
-
-    get groupForReconnecting() {
-        return this.shoukaku.options.groupForReconnecting;
-    }
-
+    
     /**
     * Penalties of this Socket. The higher the return number, the more loaded the server is.
     * @type {number}
@@ -193,10 +189,16 @@ class ShoukakuSocket extends EventEmitter {
     async executeCleaner() {
         if (this.resumed) return;
         if (this.moveOnDisconnect && this.shoukaku.nodes.size > 0) {
-            await Promise.all([...this.players.values()].map(player => player.voiceConnection.move(this.shoukaku._getIdeal(this.groupForReconnecting))));
+            const players = [...this.players.values()];
+            await Promise.all(players.map(player => player.voiceConnection.move(this.shoukaku._getIdeal(player.node.group))));
             return;
         }
-        const error = this.moveOnDisconnect ? new ShoukakuError(`Node '${this.name}' disconnected; moveOnReconnect is disabled`) : new ShoukakuError(`Node '${this.name}' disconnected; No nodes to reconnect to`);
+        let error;
+        if (this.moveOnDisconnect) {
+            error = new ShoukakuError(`Node '${this.name}' disconnected; moveOnReconnect is disabled`);
+        } else {
+            error = new ShoukakuError(`Node '${this.name}' disconnected; No nodes to reconnect to`);
+        }
         for (const player of this.players.values()) {
             player.emit('nodeDisconnect', error);
             player.voiceConnection.disconnect();

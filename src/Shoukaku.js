@@ -170,12 +170,12 @@ class Shoukaku extends EventEmitter {
      *         }).then(player => player.playTrack(data.track))
      *     })
      */
-    getNode(query = ['a']) {
+    getNode(query) {
         if (!this.id)
             throw new ShoukakuError('The lib is not yet ready, make sure to initialize Shoukaku before the library fires "ready" event');
         if (!this.nodes.size)
             throw new ShoukakuError('No nodes available, please add a node first.');
-        if (Array.isArray(query)) 
+        if (!query || Array.isArray(query)) 
             return this._getIdeal(query);
         const node = this.nodes.get(query);
         if (!node)
@@ -219,9 +219,16 @@ class Shoukaku extends EventEmitter {
 
     _getIdeal(group) {
         const nodes = [...this.nodes.values()]
-            .filter(node => node.state === ShoukakuStatus.CONNECTED)
-            .filter(node => group.includes(node.group));
-        return nodes.sort((a, b) => a.penalties - b.penalties).shift();
+            .filter(node => node.state === ShoukakuStatus.CONNECTED);
+        if (!group) {
+            return nodes
+                .sort((a, b) => a.penalties - b.penalties)
+                .shift();
+        }
+        return nodes
+            .filter(node => group.includes(node.group))
+            .sort((a, b) => a.penalties - b.penalties)
+            .shift();
     }
 }
 module.exports = Shoukaku;
