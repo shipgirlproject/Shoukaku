@@ -116,7 +116,7 @@ class ShoukakuConstants {
             host: null,
             port: null,
             auth: null,
-            group: null
+            group: undefined
         };
     }
     /**
