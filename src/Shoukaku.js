@@ -131,7 +131,7 @@ class Shoukaku extends EventEmitter {
     /**
      * Function to remove a Lavalink Node
      * @param {string} name The Lavalink Node to remove
-     * @param {?string} [reason] Optional reason for this disconnect.
+     * @param {string} [reason] Optional reason for this disconnect.
      * @memberof Shoukaku
      * @returns {void}
      */
@@ -157,12 +157,12 @@ class Shoukaku extends EventEmitter {
     }
     /**
      * Shortcut to get the Ideal Node or a manually specified Node from the current nodes that Shoukaku governs.
-     * @param {?string|?Array<string>} [query] If blank, Shoukaku will return an ideal node from default group of nodes. If a string is specified, will return a node from it's name, if an array of string groups, Shoukaku will return an ideal node from the specified array of grouped nodes.
+     * @param {string|Array<string>} [query] If blank, Shoukaku will return an ideal node from default group of nodes. If a string is specified, will return a node from it's name, if an array of string groups, Shoukaku will return an ideal node from the specified array of grouped nodes.
      * @memberof Shoukaku
      * @returns {ShoukakuSocket}
      * @example
      * const node = <Shoukaku>.getNode();
-     * node.rest.resolve('Kongou Burning Love', 'youtube')
+     * node.rest.resolve('Kongou Burning Love', 'y  outube')
      *     .then(data => {
      *         node.joinVoiceChannel({
      *             guildID: 'guild_id',

@@ -68,15 +68,15 @@ class ShoukakuConstants {
     * Required Object in Shoukaku's join method.
     * @typedef {Object} ShoukakuPlayOptions
     * @property {boolean} [noReplace=true] Specifies if the player will not replace the current track when executing this action.
-    * @property {boolean|number} [startTime=false] In milliseconds on when to start.
-    * @property {boolean|number} [endTime=false] In milliseconds on when to end.
+    * @property {?number} [startTime] In milliseconds on when to start.
+    * @property {?number} [endTime] In milliseconds on when to end.
     * @memberof ShoukakuConstants#
     */
     static get ShoukakuPlayOptions() {
         return {
             noReplace: true,
-            startTime: false,
-            endTime: false
+            startTime: undefined,
+            endTime: undefined
         };
     }
     /**
@@ -103,10 +103,10 @@ class ShoukakuConstants {
     /**
     * Options that Shoukaku needs to initialize a lavalink node.
     * @typedef {Object} ShoukakuNodeOptions
-    * @property {string} [name] Your Node Name, anything you want to name your node.
-    * @property {string} [host] Your node host / ip address of where the lavalink is hosted.
-    * @property {number} [port] The Port Number of your lavalink instance.
-    * @property {string} [auth] The authentication key you set on your lavalink config.
+    * @property {string} name Your Node Name, anything you want to name your node.
+    * @property {string} host Your node host / ip address of where the lavalink is hosted.
+    * @property {number} port The Port Number of your lavalink instance.
+    * @property {string} auth The authentication key you set on your lavalink config.
     * @property {?string} [group] Group of this node, used for grouping specific nodes.
     * @memberof ShoukakuConstants#
     */
@@ -130,8 +130,8 @@ class ShoukakuConstants {
     /**
      * Available settings for an Equalizer Band
      * @typedef {EqualizerBand} EqualizerBand
-     * @property {number} [band] Equalizer Band Level
-     * @property {number} [gain] Equalizer Gain Level
+     * @property {number} band Equalizer Band Level
+     * @property {number} gain Equalizer Gain Level
      * @memberof ShoukakuConstants#
      */
     static get EqualizerBand() {
@@ -143,10 +143,10 @@ class ShoukakuConstants {
     /**
      * Available settings for Karaoke
      * @typedef {KaraokeValue} KaraokeValue
-     * @property {?number} [level] Karaoke level
-     * @property {?number} [monoLevel] Karaoke MonoLevel
-     * @property {?number} [filterBand] Karaoke FilterBand
-     * @property {?number} [filterWidth] Karaoke FilterWidth
+     * @property {number} [level] Karaoke level
+     * @property {number} [monoLevel] Karaoke MonoLevel
+     * @property {number} [filterBand] Karaoke FilterBand
+     * @property {number} [filterWidth] Karaoke FilterWidth
      * @memberof ShoukakuConstants#
      */
     static get KaraokeValue() {
@@ -160,9 +160,9 @@ class ShoukakuConstants {
     /**
      * Available settings for Timescale
      * @typedef {TimescaleValue} TimescaleValue
-     * @property {?number} [speed] Timescale Speed
-     * @property {?number} [pitch] Timescale Pitch
-     * @property {?number} [rate] Timescale Rate
+     * @property {number} [speed] Timescale Speed
+     * @property {number} [pitch] Timescale Pitch
+     * @property {number} [rate] Timescale Rate
      * @memberof ShoukakuConstants#
      */
     static get TimescaleValue() {
@@ -175,8 +175,8 @@ class ShoukakuConstants {
     /**
      * Available settings for Tremolo
      * @typedef {TremoloValue} TremoloValue
-     * @property {?number} [frequency] Tremolo Frequency
-     * @property {?number} [depth] Tremolo Depth
+     * @property {number} [frequency] Tremolo Frequency
+     * @property {number} [depth] Tremolo Depth
      * @memberof ShoukakuConstants#
      */
     static get TremoloValue() {
@@ -188,8 +188,8 @@ class ShoukakuConstants {
     /**
      * Available settings for Vibrato
      * @typedef {VibratoValue} VibratoValue
-     * @property {?number} [frequency] Vibrato Frequency
-     * @property {?number} [depth] Vibrato Depth
+     * @property {number} [frequency] Vibrato Frequency
+     * @property {number} [depth] Vibrato Depth
      * @memberof ShoukakuConstants#
      */
     static get VibratoValue() {

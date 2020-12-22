@@ -4,13 +4,13 @@
  */
 class ShoukakuFilter {
     /**
-     * @param {?Object} [settings] settings to intialize this filter with
-     * @param {?Number} [settings.volume] volume of this filter
-     * @param {?Array<ShoukakuConstants#EqualizerBand>} [settings.equalizer] equalizer of this filter
-     * @param {?ShoukakuConstants#KaraokeValue} [settings.karaoke] karaoke settings of this filter
-     * @param {?ShoukakuConstants#TimescaleValue} [settings.timescale] timescale settings of this filter
-     * @param {?ShoukakuConstants#TremoloValue} [settings.tremolo] tremolo settings of this filter
-     * @param {?ShoukakuConstants#VibratoValue} [settings.vibrato] vibrato settings of this filter
+     * @param {Object} [settings] settings to intialize this filter with
+     * @param {Number} [settings.volume=1.0] volume of this filter
+     * @param {Array<ShoukakuConstants#EqualizerBand>} [settings.equalizer=[]] equalizer of this filter
+     * @param {ShoukakuConstants#KaraokeValue} [settings.karaoke] karaoke settings of this filter
+     * @param {ShoukakuConstants#TimescaleValue} [settings.timescale] timescale settings of this filter
+     * @param {ShoukakuConstants#TremoloValue} [settings.tremolo] tremolo settings of this filter
+     * @param {ShoukakuConstants#VibratoValue} [settings.vibrato] vibrato settings of this filter
      */
     constructor(settings = {}) {
         const { volume, equalizer, karaoke, timescale, tremolo, vibrato } = settings;

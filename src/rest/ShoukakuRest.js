@@ -16,7 +16,7 @@ class ShoukakuRest {
      * @param {string} port The Port Number of your lavalink instance.
      * @param {string} auth The authentication key you set on your lavalink config.
      * @param {string} userAgent User agent to use per request
-     * @param {?number} [timeout=15000] Timeout before a request times out.
+     * @param {number} [timeout=15000] Timeout before a request times out.
      */
     constructor(host, port, auth, userAgent, timeout) {
         /**

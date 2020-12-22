@@ -99,8 +99,8 @@ declare module 'shoukaku' {
 
   export interface ShoukakuPlayOptions {
     noReplace?: boolean,
-    startTime?: boolean | number;
-    endTime?: boolean | number;
+    startTime?: number;
+    endTime?: number;
   }
 
   export interface ShoukakuOptions {
@@ -116,7 +116,7 @@ declare module 'shoukaku' {
     host: string;
     port: number;
     auth: string;
-    group: string;
+    group?: string;
   }
 
   export interface EqualizerBand {
@@ -195,21 +195,24 @@ declare module 'shoukaku' {
     on(event: 'nodeDisconnect', listener: (name: string) => void): this;
     on(event: 'resumed', listener: () => void): this;
     on(event: 'playerUpdate', listener: (data: PlayerUpdate) => void): this;
-    on(event: 'closed' | 'trackException', listener: (data: unknown) => void): this;
+    on(event: 'trackException', listener: (data: unknown) => void): this;
+    on(event: 'closed', listener: (data: unknown) => void): this;
     on(event: 'start', listener: (data: unknown) => void): this;
     once(event: 'end', listener: (reason: Reason) => void): this;
     once(event: 'error', listener: (err: ShoukakuError | Error) => void): this;
     once(event: 'nodeDisconnect', listener: (name: string) => void): this;
     once(event: 'resumed', listener: () => void): this;
     once(event: 'playerUpdate', listener: (data: PlayerUpdate) => void): this;
-    once(event: 'closed' | 'trackException', listener: (data: unknown) => void): this;
+    once(event: 'trackException', listener: (data: unknown) => void): this;
+    once(event: 'closed', listener: (data: unknown) => void): this;
     once(event: 'start', listener: (data: unknown) => void): this;
     off(event: 'end', listener: (reason: Reason) => void): this;
     off(event: 'error', listener: (err: ShoukakuError | Error) => void): this;
     off(event: 'nodeDisconnect', listener: (name: string) => void): this;
     off(event: 'resumed', listener: () => void): this;
     off(event: 'playerUpdate', listener: (data: PlayerUpdate) => void): this;
-    off(event: 'closed' | 'trackException', listener: (data: unknown) => void): this;
+    off(event: 'trackException', listener: (data: unknown) => void): this;
+    off(event: 'closed', listener: (data: unknown) => void): this;
     off(event: 'start', listener: (data: unknown) => void): this;
   }
 
@@ -335,7 +338,7 @@ declare module 'shoukaku' {
 
     public addNode(nodeOptions: ShoukakuNodeOptions): void;
     public removeNode(name: string, reason?: string): void;
-    public getNode(name: string | string[] | null): ShoukakuSocket;
+    public getNode(name?: string | string[]): ShoukakuSocket;
     public getPlayer(guildId: string): ShoukakuPlayer | null;
 
     private _ready(name: string, resumed: boolean): void;

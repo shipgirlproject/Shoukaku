@@ -145,7 +145,7 @@ class ShoukakuPlayer extends EventEmitter {
     /**
      * Plays a track.
      * @param {string|ShoukakuTrack} track The Base64 track from the Lavalink Rest API or a ShoukakuTrack.
-     * @param {ShoukakuPlayOptions} [options=ShoukakuPlayOptions] Used if you want to put a custom track start or end time.
+     * @param {ShoukakuPlayOptions} [options] Used if you want to put a custom track start or end time.
      * @memberOf ShoukakuPlayer
      * @returns {Promise<ShoukakuPlayer>}
      */
@@ -242,7 +242,7 @@ class ShoukakuPlayer extends EventEmitter {
     }
     /**
      * Sets the karaoke effect of your lavalink player
-     * @param {?ShoukakuConstants#KaraokeValue} [karaokeValue] Karaoke settings for this playback
+     * @param {ShoukakuConstants#KaraokeValue} [karaokeValue] Karaoke settings for this playback
      * @memberOf ShoukakuPlayer
      * @returns {Promise<ShoukakuPlayer>}
      */
@@ -262,7 +262,7 @@ class ShoukakuPlayer extends EventEmitter {
     }
     /**
      * Sets the timescale effect of your lavalink player
-     * @param {?ShoukakuConstants#TimescaleValue} [timescaleValue] Timescale settings for this playback
+     * @param {ShoukakuConstants#TimescaleValue} [timescaleValue] Timescale settings for this playback
      * @memberOf ShoukakuPlayer
      * @returns {Promise<ShoukakuPlayer>}
      */
@@ -282,7 +282,7 @@ class ShoukakuPlayer extends EventEmitter {
     }
     /**
      * Sets the tremolo effect of your lavalink player
-     * @param {?ShoukakuConstants#TremoloValue} [tremoloValue] Tremolo settings for this playback
+     * @param {ShoukakuConstants#TremoloValue} [tremoloValue] Tremolo settings for this playback
      * @memberOf ShoukakuPlayer
      * @returns {Promise<ShoukakuPlayer>}
      */
@@ -302,7 +302,7 @@ class ShoukakuPlayer extends EventEmitter {
     }
     /**
      * Sets the vibrato effect of your lavalink player
-     * @param {?ShoukakuConstants#VibratoValue} [vibratoValue] Vibrato settings for this playback
+     * @param {ShoukakuConstants#VibratoValue} [vibratoValue] Vibrato settings for this playback
      * @memberOf ShoukakuPlayer
      * @returns {Promise<ShoukakuPlayer>}
      */
@@ -322,13 +322,13 @@ class ShoukakuPlayer extends EventEmitter {
     }
     /**
      * Ability to set filters by group instead of 1 by 1
-     * @param {?Object} [settings] object containing filter settings
-     * @param {?Number} [settings.volume] volume of this filter
-     * @param {?Array<ShoukakuConstants#EqualizerBand>} [settings.equalizer] equalizer of this filter
-     * @param {?ShoukakuConstants#KaraokeValue} [settings.karaoke] karaoke settings of this filter
-     * @param {?ShoukakuConstants#TimescaleValue} [settings.timescale] timescale settings of this filter
-     * @param {?ShoukakuConstants#TremoloValue} [settings.tremolo] tremolo settings of this filter
-     * @param {?ShoukakuConstants#VibratoValue} [settings.vibrato] vibrato settings of this filter
+     * @param {Object} [settings] object containing filter settings
+     * @param {Number} [settings.volume=1.0] volume of this filter
+     * @param {Array<ShoukakuConstants#EqualizerBand>} [settings.equalizer=[]] equalizer of this filter
+     * @param {ShoukakuConstants#KaraokeValue} [settings.karaoke] karaoke settings of this filter
+     * @param {ShoukakuConstants#TimescaleValue} [settings.timescale] timescale settings of this filter
+     * @param {ShoukakuConstants#TremoloValue} [settings.tremolo] tremolo settings of this filter
+     * @param {ShoukakuConstants#VibratoValue} [settings.vibrato] vibrato settings of this filter
      * @memberOf ShoukakuPlayer
      * @returns {Promise<ShoukakuPlayer>}
      */
