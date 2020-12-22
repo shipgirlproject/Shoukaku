@@ -162,7 +162,7 @@ class Shoukaku extends EventEmitter {
      * @returns {ShoukakuSocket}
      * @example
      * const node = <Shoukaku>.getNode();
-     * node.rest.resolve('Kongou Burning Love', 'y  outube')
+     * node.rest.resolve('Kongou Burning Love', 'youtube')
      *     .then(data => {
      *         node.joinVoiceChannel({
      *             guildID: 'guild_id',
