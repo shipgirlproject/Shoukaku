@@ -173,6 +173,15 @@ declare module 'shoukaku' {
     public vibrato?: VibratoValue;
   }
   
+  export class ShoukakuGroupedFilterOptions {
+    public volume?: number;
+    public equalizer?: EqualizerBand[];
+    public karaoke?: KaraokeValue;
+    public timescale?: TimescaleValue;
+    public tremolo?: TremoloValue;
+    public vibrato?: VibratoValue;
+  }
+
   export class ShoukakuRest {
     constructor(host: string, port: string, auth: string, timeout: number);
     private auth: string;
@@ -236,7 +245,7 @@ declare module 'shoukaku' {
     public setTimescale(timescalevalue?: TimescaleValue): Promise<ShoukakuPlayer>;
     public setTremolo(tremoloValue?: TremoloValue): Promise<ShoukakuPlayer>;
     public setVibrato(vibratoValue?: VibratoValue): Promise<ShoukakuPlayer>;
-    public setGroupedFilters(settings?: ShoukakuFilter): Promise<ShoukakuPlayer>;
+    public setGroupedFilters(settings?: ShoukakuGroupedFilterOptions): Promise<ShoukakuPlayer>;
     public clearFilters(): Promise<ShoukakuPlayer>;
 
     private connect(options: unknown, callback:(error: ShoukakuError | Error | null, player: ShoukakuPlayer) => void): void;
