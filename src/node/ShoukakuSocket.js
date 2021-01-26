@@ -56,7 +56,7 @@ class ShoukakuSocket extends EventEmitter {
         this.name = node.name;
         /**
         * Group of this socket
-        * @type {string}
+        * @type {?string}
         */
         this.group = node.group;
         
@@ -191,7 +191,7 @@ class ShoukakuSocket extends EventEmitter {
         if (this.resumed) return;
         if (this.moveOnDisconnect && this.shoukaku.nodes.size > 0) {
             const players = [...this.players.values()];
-            await Promise.all(players.map(player => player.voiceConnection.move(this.shoukaku._getIdeal(player.node.group))));
+            await Promise.all(players.map(player => player.voiceConnection.move(this.shoukaku._getIdeal(player.voiceConnection.node.group))));
             return;
         }
         let error;

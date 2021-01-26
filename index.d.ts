@@ -292,6 +292,7 @@ declare module 'shoukaku' {
     public name: string;
     public url: string;
     public penalties: number;
+    public group?: string;
 
     private auth: string;
     private resumed: boolean;
