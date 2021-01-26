@@ -368,7 +368,7 @@ class ShoukakuPlayer extends EventEmitter {
     async resume() {
         try {
             if (this.filters.equalizer.length) await this.setEqualizer(this.filters.equalizer);
-            if (this.filters.volume !== 1) await this.setVolume(this.volume);
+            if (this.filters.volume !== 1) await this.setVolume(this.filters.volume);
             if (!this.track) {
                 this.emit('end', { type: 'ShoukakuResumeEvent', guildId: this.voiceConnection.guildID, reason: 'Tried to resume, but there is no track to use' });
             } else {
