@@ -32,7 +32,7 @@ class Shoukaku extends EventEmitter {
         */
         this.id = null;
         /**
-        * The current nodes that is being handled by Shoukaku. 
+        * The current nodes that is being handled by Shoukaku.
         * @type {Map<string, ShoukakuSocket>}
         */
         this.nodes = new Map();
@@ -120,12 +120,10 @@ class Shoukaku extends EventEmitter {
             throw new ShoukakuError('The lib is not yet ready, make sure to initialize Shoukaku before the library fires "ready" event');
         const node = new ShoukakuSocket(this, nodeOptions);
         node.connect(this.id, false);
-        node.on('debug', (name, data) => this.emit('debug', name, data));
-        node.on('error', (name, error) => this.emit('error', name, error));
-        const _close = this._close.bind(this);
-        const _ready = this._ready.bind(this);
-        node.on('ready', _ready);
-        node.on('close', _close);
+        node.on('debug', ...args => this.emit('debug', ...args));
+        node.on('error', ...args => this.emit('error', ...args));
+        node.on('ready', ...args => this._ready(...args));
+        node.on('close', ...args => this._close(...args));
         this.nodes.set(node.name, node);
     }
     /**
@@ -175,7 +173,7 @@ class Shoukaku extends EventEmitter {
             throw new ShoukakuError('The lib is not yet ready, make sure to initialize Shoukaku before the library fires "ready" event');
         if (!this.nodes.size)
             throw new ShoukakuError('No nodes available, please add a node first.');
-        if (!query || Array.isArray(query)) 
+        if (!query || Array.isArray(query))
             return this._getIdeal(query);
         const node = this.nodes.get(query);
         if (!node)
@@ -205,15 +203,18 @@ class Shoukaku extends EventEmitter {
 
     _close(name, code, reason) {
         this.emit('close', name, code, reason);
-        const node = this.nodes.get(name);
+        this._reconnect(this.nodes.get(name));
+    }
+
+    _reconnect(node) {
         if (node.reconnectAttempts >= this.options.reconnectTries)
-            return this.removeNode(name, `Failed to reconnect in ${this.options.reconnectTries} attempt(s)`);
+            return this.removeNode(node.name, `Failed to reconnect in ${this.options.reconnectTries} attempt(s)`);
         try {
             node.reconnectAttempts++;
             node.connect(this.id, this.options.resumable);
         } catch (error) {
-            this.emit('error', name, error);
-            setTimeout(() => this._reconnect(name, code, reason), 2500);
+            this.emit('error', node.name, error);
+            setTimeout(() => this._reconnect(node), this.options.reconnectInterval);
         }
     }
 

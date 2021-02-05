@@ -75,9 +75,9 @@ class ShoukakuLink {
      * @returns {Promise<ShoukakuPlayer>}
      */
     async attemptReconnect() {
-        if (!this.voiceChannelID) 
+        if (!this.voiceChannelID)
             throw new ShoukakuError('No voice channel to reconnect to');
-        if (this.state !== ShoukakuStatus.DISCONNECTED) 
+        if (this.state !== ShoukakuStatus.DISCONNECTED)
             throw new ShoukakuError('You can only reconnect connections that are on disconnected state');
         const options = {
             guildID: this.guildID,
@@ -131,14 +131,14 @@ class ShoukakuLink {
                     return this.player.emit('error', error);
                 this.send({ guild_id: this.guildID, channel_id: null, self_mute: false, self_deaf: false });
                 this.state = ShoukakuStatus.DISCONNECTED;
-                if (this.callback) this.callback(error);            
+                if (this.callback) this.callback(error);
             })
             .finally(() => {
                 this.callback = null;
                 this.timeout = null;
             });
     }
-    
+
     connect(options, callback) {
         if (!callback)
             throw new ShoukakuError('No callback supplied.');
@@ -163,7 +163,7 @@ class ShoukakuLink {
             this.callback(new ShoukakuError('The voice connection is not established in 20 seconds'));
             this.callback = null;
         }, 20000);
-        
+
         const { guildID, voiceChannelID, deaf, mute } = options;
         this.send({ guild_id: guildID, channel_id: voiceChannelID, self_deaf: deaf, self_mute: mute });
     }
@@ -172,7 +172,7 @@ class ShoukakuLink {
         if (this.state !== ShoukakuStatus.DISCONNECTED) this.state = ShoukakuStatus.DISCONNECTING;
         this.node.players.delete(this.guildID);
         this.player.removeAllListeners();
-        this.player.reset(true);
+        this.player.reset();
         this.lastServerUpdate = null;
         this.sessionID = null;
         this.voiceChannelID = null;

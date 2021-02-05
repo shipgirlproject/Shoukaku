@@ -15,10 +15,15 @@ class ShoukakuTrackList {
          */
         this.type = Types[raw.loadType];
         /**
-         * Name of this playlist, if type is PLAYLIST
+         * Name of this Playlist, defaults to null of the result is not a Playlist
          * @type {?string}
          */
         this.playlistName = this.type === Types.PLAYLIST_LOADED ? raw.playlistInfo.name : null;
+        /**
+         * Selected Track in this Playlist, defaults to 0 if not a playlist, or if the raw result is equal to -1
+         * @type {number}
+         */
+        this.selectedTrack = this.type === Types.PLAYLIST_LOADED && raw.playlistInfo.selectedTrack !== -1 ? raw.playlistInfo.selectedTrack : 0;
         /**
          * An array of tracks from this TrackList
          * @type {Array<ShoukakuTrack>}

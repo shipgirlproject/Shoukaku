@@ -1,14 +1,13 @@
 /**
-  * ShoukakuTimeout, Timeout Error class of Shoukaku.
   * @class ShoukakuTimeout
   * @extends {Error}
   */
 class ShoukakuTimeout extends Error {
     /**
-     * @param message The Error Message
+     * @param time Time limit of the request
      */
-    constructor(message) {
-        super(message);
+    constructor(time) {
+        super(`Rest request timed out. Took more than ${Math.round(time / 1000)} seconds to resolve`);
         this.name = 'ShoukakuTimeout';
     }
 }

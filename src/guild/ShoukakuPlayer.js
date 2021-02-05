@@ -218,7 +218,7 @@ class ShoukakuPlayer extends EventEmitter {
      * @returns {Promise<ShoukakuPlayer>}
      */
     async setVolume(volume) {
-        if (Number.isNaN(volume)) 
+        if (Number.isNaN(volume))
             throw new ShoukakuError('Please input a valid number for volume');
         volume = Math.min(5, Math.max(0, volume));
         if (volume === this.filters.volume) return this;
@@ -367,30 +367,27 @@ class ShoukakuPlayer extends EventEmitter {
 
     async resume() {
         try {
+            if (!this.track) {
+                this.emit('error', new ShoukakuError('Tried to resume, but the track is null'));
+                return;
+            }
             if (this.filters.equalizer.length) await this.setEqualizer(this.filters.equalizer);
             if (this.filters.volume !== 1) await this.setVolume(this.filters.volume);
-            if (!this.track) {
-                this.emit('end', { type: 'ShoukakuResumeEvent', guildId: this.voiceConnection.guildID, reason: 'Tried to resume, but there is no track to use' });
-            } else {
-                await this.playTrack(this.track, { startTime: this.position });
-                this.emit('resumed', null);
-            }
+            await this.playTrack(this.track, { startTime: this.position });
+            this.emit('resumed', null);
         } catch (error) {
             this.emit('error', error);
         }
     }
 
-    reset(cleanBand = false) {
+    reset() {
         this.track = null;
         this.position = 0;
-        if (cleanBand) this.filters.equalizer.length = 0;
+        this.filters.equalizer.length = 0;
     }
 
     emit(event, data) {
-        if (endEvents.includes(event)) {
-            event === 'nodeDisconnect' ? this.reset(true) : this.reset();
-            return super.emit(event, data);
-        }
+        if (endEvents.includes(event)) return super.emit(event, data);
         if (event === 'start') this.track = data.track;
         if (event === 'playerUpdate') this.position = data.position;
         return super.emit(event, data);

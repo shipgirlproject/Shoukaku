@@ -10,7 +10,7 @@ declare module 'shoukaku' {
   }
 
   export class ShoukakuTimeout extends Error {
-    constructor(message: string);
+    constructor(time: number);
     public name: string;
   }
 
@@ -23,6 +23,7 @@ declare module 'shoukaku' {
   export class ShoukakuTrackList {
     type: string;
     playlistName?: string;
+    selectedTrack: number;
     tracks: Array<ShoukakuTrack>;
   }
 
@@ -104,11 +105,13 @@ declare module 'shoukaku' {
   }
 
   export interface ShoukakuOptions {
-    resumable?: boolean;
+    resumable?: boolean | string;
     resumableTimeout?: number;
     reconnectTries?: number;
     moveOnDisconnect?: boolean;
     restTimeout?: number;
+    reconnectInterval?: number;
+    userAgent?: string;
   }
 
   export interface ShoukakuNodeOptions {
@@ -172,7 +175,7 @@ declare module 'shoukaku' {
     public tremolo?: TremoloValue;
     public vibrato?: VibratoValue;
   }
-  
+
   export class ShoukakuGroupedFilterOptions {
     public volume?: number;
     public equalizer?: EqualizerBand[];
@@ -251,7 +254,7 @@ declare module 'shoukaku' {
     private connect(options: unknown, callback:(error: ShoukakuError | Error | null, player: ShoukakuPlayer) => void): void;
     private updateFilters(): Promise<void>;
     private resume(): Promise<void>;
-    private reset(cleanBand: boolean): void;
+    private reset(): void;
   }
 
   export class ShoukakuLink {

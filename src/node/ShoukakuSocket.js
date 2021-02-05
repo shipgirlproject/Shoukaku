@@ -115,12 +115,11 @@ class ShoukakuSocket extends EventEmitter {
         };
         if (resumable) headers['Resume-Key'] = resumable;
         this.ws = new Websocket(this.url, { headers });
-        this.ws.once('upgrade', this._upgrade.bind(this));
-        this.ws.once('open', this._open.bind(this));
-        this.ws.once('error', this._error.bind(this));
-        this.ws.once('close', this._close.bind(this));
-        const message = this._message.bind(this);
-        this.ws.on('message', message);
+        this.ws.once('upgrade', ...args => this._upgrade(...args));
+        this.ws.once('open', ...args => this._open(...args));
+        this.ws.once('error', ...args => this._error(...args));
+        this.ws.once('close', ...args => this._close(...args));
+        this.ws.on('message', ...args => this._message(...args));
         this.shoukaku.on('packetUpdate', this.packetRouter);
     }
     /**
