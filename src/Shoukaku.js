@@ -119,10 +119,10 @@ class Shoukaku extends EventEmitter {
             throw new ShoukakuError('The lib is not yet ready, make sure to initialize Shoukaku before the library fires "ready" event');
         const node = new ShoukakuSocket(this, nodeOptions);
         node.connect(this.id, false);
-        node.on('debug', ...args => this.emit('debug', ...args));
-        node.on('error', ...args => this.emit('error', ...args));
-        node.on('ready', ...args => this._ready(...args));
-        node.on('close', ...args => this._close(...args));
+        node.on('debug', (...args) => this.emit('debug', ...args));
+        node.on('error', (...args) => this.emit('error', ...args));
+        node.on('ready', (...args) => this._ready(...args));
+        node.on('close', (...args) => this._close(...args));
         this.nodes.set(node.name, node);
     }
     /**
