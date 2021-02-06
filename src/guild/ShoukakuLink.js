@@ -8,21 +8,21 @@ const ShoukakuError = require('../constants/ShoukakuError.js');
  */
 class ShoukakuLink {
     /**
-     * @param {ShoukakuSocket} node The node that governs this link.
      * @param {ShoukakuPlayer} player The player of this link.
+     * @param {ShoukakuSocket} node The node that governs this link.
      * @param {Guild} guild A Discord.js Guild Object.
      */
-    constructor(node, player, guild) {
-        /**
-         * The node that governs this Link
-         * @type {ShoukakuSocket}
-         */
-        this.node = node;
+    constructor(player, node, guild) {
         /**
          * The player class of this link.
          * @type {ShoukakuPlayer}
          */
         this.player = player;
+        /**
+         * The node that governs this Link
+         * @type {ShoukakuSocket}
+         */
+        this.node = node;
         /**
          * The ID of the guild that is being governed by this Link.
          * @type {string}

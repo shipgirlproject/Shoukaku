@@ -20,7 +20,7 @@ class Shoukaku extends EventEmitter {
     constructor(client, nodes, options) {
         super();
         if (version && !version.startsWith('12'))
-            throw new ShoukakuError('Shoukaku will only work in Discord.JS v12 / Discord.JS Master Branch. Versions below Discord.JS v12 is not supported.');
+            throw new ShoukakuError('Shoukaku will only work in Discord.JS v12. Versions below Discord.JS v12 is not supported.');
         /**
         * The instance of Discord.js client used with Shoukaku.
         * @type {external.Client}
@@ -39,7 +39,6 @@ class Shoukaku extends EventEmitter {
 
         Object.defineProperty(this, 'options', { value: mergeDefault(ShoukakuOptions, options) });
         Object.defineProperty(this, 'rawRouter', { value: RawRouter.bind(this) });
-
         this.client.once('ready', () => {
             this.id = this.client.user.id;
             for (const node of nodes) this.addNode(mergeDefault(ShoukakuNodeOptions, node));
@@ -142,7 +141,6 @@ class Shoukaku extends EventEmitter {
         node.executeCleaner()
             .catch(error => this.emit('error', name, error))
             .finally(() => {
-                node.state = ShoukakuStatus.DISCONNECTED;
                 this.nodes.delete(name);
                 this.removeListener('packetUpdate', node.packetRouter);
                 node.removeAllListeners();
@@ -150,6 +148,7 @@ class Shoukaku extends EventEmitter {
                     node.ws.removeAllListeners();
                     node.ws.close(4011, 'Remove node executed.');
                 }
+                node.state = ShoukakuStatus.DISCONNECTED;
                 this.emit('disconnected', name, reason);
             });
     }

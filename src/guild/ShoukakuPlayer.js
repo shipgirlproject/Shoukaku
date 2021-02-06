@@ -24,7 +24,7 @@ class ShoukakuPlayer extends EventEmitter {
          * The Voice Connection of this Player.
          * @type {ShoukakuLink}
          */
-        this.voiceConnection = new ShoukakuLink(node, this, guild);
+        this.voiceConnection = new ShoukakuLink(this, node, guild);
         /**
          * The Track that is currently being played by this player.
          * @type {?string}

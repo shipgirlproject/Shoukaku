@@ -258,9 +258,9 @@ declare module 'shoukaku' {
   }
 
   export class ShoukakuLink {
-    constructor(node: ShoukakuSocket, player: ShoukakuPlayer, guild: Guild);
-    public node: ShoukakuSocket;
+    constructor(player: ShoukakuPlayer, node: ShoukakuSocket, guild: Guild);
     public player: ShoukakuPlayer;
+    public node: ShoukakuSocket;
     public guildID: string;
     public shardID: number;
     public userID: string;
