@@ -1,5 +1,5 @@
-const { RawRouter } = require('./router/ShoukakuRouter.js');
 const { ShoukakuOptions, ShoukakuNodeOptions, ShoukakuStatus } = require('./constants/ShoukakuConstants.js');
+const { CONNECTED, DISCONNECTING, DISCONNECTED } = ShoukakuStatus;
 const { mergeDefault } = require('./util/ShoukakuUtil.js');
 const { version } = require('discord.js');
 const ShoukakuError = require('./constants/ShoukakuError.js');
@@ -38,12 +38,9 @@ class Shoukaku extends EventEmitter {
         this.nodes = new Map();
 
         Object.defineProperty(this, 'options', { value: mergeDefault(ShoukakuOptions, options) });
-        Object.defineProperty(this, 'rawRouter', { value: RawRouter.bind(this) });
-        this.client.once('ready', () => {
-            this.id = this.client.user.id;
-            for (const node of nodes) this.addNode(mergeDefault(ShoukakuNodeOptions, node));
-        });
-        this.client.on('raw', this.rawRouter);
+
+        this.client.once('ready', () => this._onClientReady(nodes));
+        this.client.on('raw', event => this._onClientRaw(event));
     }
     /**
      * Gets all the Players that is currently active on all nodes in this instance.
@@ -137,18 +134,17 @@ class Shoukaku extends EventEmitter {
             throw new ShoukakuError('The lib is not yet ready, make sure to initialize Shoukaku before the library fires "ready" event');
         const node = this.nodes.get(name);
         if (!node) return;
-        node.state = ShoukakuStatus.DISCONNECTING;
+        node.state = DISCONNECTING;
         node.executeCleaner()
             .catch(error => this.emit('error', name, error))
             .finally(() => {
                 this.nodes.delete(name);
-                this.removeListener('packetUpdate', node.packetRouter);
                 node.removeAllListeners();
                 if (node.ws) {
                     node.ws.removeAllListeners();
                     node.ws.close(4011, 'Remove node executed.');
                 }
-                node.state = ShoukakuStatus.DISCONNECTED;
+                node.state = DISCONNECTED;
                 this.emit('disconnected', name, reason);
             });
     }
@@ -177,7 +173,7 @@ class Shoukaku extends EventEmitter {
         const node = this.nodes.get(query);
         if (!node)
             throw new ShoukakuError('The node name you specified is not one of my nodes');
-        if (node.state !== ShoukakuStatus.CONNECTED)
+        if (node.state !== CONNECTED)
             throw new ShoukakuError('This node is not yet ready');
         return node;
     }
@@ -219,7 +215,7 @@ class Shoukaku extends EventEmitter {
 
     _getIdeal(group) {
         const nodes = [...this.nodes.values()]
-            .filter(node => node.state === ShoukakuStatus.CONNECTED);
+            .filter(node => node.state === CONNECTED);
         if (!group) {
             return nodes
                 .sort((a, b) => a.penalties - b.penalties)
@@ -229,6 +225,16 @@ class Shoukaku extends EventEmitter {
             .filter(node => group.includes(node.group))
             .sort((a, b) => a.penalties - b.penalties)
             .shift();
+    }
+
+    _onClientReady(nodes) {
+        this.id = this.client.user.id;
+        for (const node of nodes) this.addNode(mergeDefault(ShoukakuNodeOptions, node));
+    }
+
+    _onClientRaw(packet) {
+        if (!['VOICE_STATE_UPDATE', 'VOICE_SERVER_UPDATE'].includes(packet.t)) return;
+        for (const node of [...this.nodes.values()]) node._onClientFilteredRaw(packet);
     }
 }
 module.exports = Shoukaku;

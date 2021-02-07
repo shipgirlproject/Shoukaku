@@ -1,12 +1,13 @@
 const { promisify } = require('util');
 const { ShoukakuStatus, ShoukakuNodeStats, ShoukakuJoinOptions } = require('../constants/ShoukakuConstants.js');
-const { PacketRouter, EventRouter } = require('../router/ShoukakuRouter.js');
+const { CONNECTED, CONNECTING, DISCONNECTED } = ShoukakuStatus;
 const { websocketSend } = require('../util/ShoukakuUtil.js');
 const ShoukakuError = require('../constants/ShoukakuError.js');
 const ShoukakuRest = require('../rest/ShoukakuRest.js');
 const ShoukakuPlayer = require('../guild/ShoukakuPlayer.js');
 const Websocket = require('ws');
 const EventEmitter = require('events');
+
 /**
  * ShoukakuSocket, manages a single Lavalink WS connection.
  * @class ShoukakuSocket
@@ -38,7 +39,7 @@ class ShoukakuSocket extends EventEmitter {
         * The state of this Socket.
         * @type {ShoukakuConstants#ShoukakuStatus}
         */
-        this.state = ShoukakuStatus.DISCONNECTED;
+        this.state = DISCONNECTED;
         /**
         * The current stats of this Socket.
         * @type {ShoukakuConstants#ShoukakuNodeStats}
@@ -63,8 +64,6 @@ class ShoukakuSocket extends EventEmitter {
         Object.defineProperty(this, 'url', { value: `ws://${node.host}:${node.port}` });
         Object.defineProperty(this, 'auth', { value: node.auth });
         Object.defineProperty(this, 'resumed', { value: false, writable: true });
-        Object.defineProperty(this, 'packetRouter', { value: PacketRouter.bind(this) });
-        Object.defineProperty(this, 'eventRouter', { value: EventRouter.bind(this) });
     }
 
     get userAgent() {
@@ -106,7 +105,7 @@ class ShoukakuSocket extends EventEmitter {
     * @returns {void}
     */
     connect(id, resumable) {
-        this.state = ShoukakuStatus.CONNECTING;
+        this.state = CONNECTING;
         const headers = {
             'Client-Name': this.userAgent,
             'User-Agent': this.userAgent,
@@ -120,7 +119,6 @@ class ShoukakuSocket extends EventEmitter {
         this.ws.once('error', (...args) => this._error(...args));
         this.ws.once('close', (...args) => this._close(...args));
         this.ws.on('message', (...args) => this._message(...args));
-        this.shoukaku.on('packetUpdate', this.packetRouter);
     }
     /**
      * Creates a player and connects your bot to the specified guild's voice channel
@@ -137,12 +135,12 @@ class ShoukakuSocket extends EventEmitter {
         if (!options.guildID || !options.voiceChannelID)
             throw new ShoukakuError('Guild ID or Channel ID is not specified.');
 
-        if (this.state !== ShoukakuStatus.CONNECTED)
+        if (this.state !== CONNECTED)
             throw new ShoukakuError('This node is not yet ready.');
 
         let player = this.players.get(options.guildID);
         if (player) {
-            if (player.voiceConnection.state === ShoukakuStatus.CONNECTED) return player;
+            if (player.voiceConnection.state === CONNECTED) return player;
             throw new ShoukakuError('This player is not yet connected, please wait for it to connect');
         }
 
@@ -213,7 +211,7 @@ class ShoukakuSocket extends EventEmitter {
         this.configureResuming()
             .then(() => {
                 this.reconnectAttempts = 0;
-                this.state = ShoukakuStatus.CONNECTED;
+                this.state = CONNECTED;
                 this.emit('ready', this.name, this.resumed);
             })
             .catch(error => {
@@ -224,10 +222,7 @@ class ShoukakuSocket extends EventEmitter {
 
     _message(message) {
         try {
-            const json = JSON.parse(message);
-            if (json.op !== 'playerUpdate') this.emit('debug', this.name, json);
-            if (json.op === 'stats') return this.stats = json;
-            this.eventRouter(json);
+            this._onLavalinkMessage(JSON.parse(message));
         } catch (error) {
             this.emit('error', this.name, error);
         }
@@ -239,11 +234,62 @@ class ShoukakuSocket extends EventEmitter {
     }
 
     _close(code, reason) {
-        this.state = ShoukakuStatus.DISCONNECTED;
+        this.state = DISCONNECTED;
         this.ws.removeAllListeners();
-        this.shoukaku.removeListener('packetUpdate', this.packetRouter);
         this.ws = null;
         this.emit('close', this.name, code, reason);
+    }
+
+    _onClientFilteredRaw(packet) {
+        const player = this.players.get(packet.d.guild_id);
+        if (!player) return;
+        if (packet.t === 'VOICE_SERVER_UPDATE') {
+            player.voiceConnection.serverUpdate(packet.d);
+        }
+        else if (packet.t === 'VOICE_STATE_UPDATE') {
+            if (packet.d.user_id !== this.shoukaku.id) return;
+            if (!player.voiceConnection.voiceChannelID) return player.voiceConnection.stateUpdate(packet.d);
+            const oldChannel = player.voiceConnection.voiceChannelID.repeat(1);
+            player.voiceConnection.moved = oldChannel !== packet.d.channel_id;
+        }
+
+    }
+
+    _onLavalinkMessage(json) {
+        const player = this.players.get(json.guildId);
+        switch (json.op) {
+            case 'stats':
+                this.stats = json;
+                break;
+            case 'playerUpdate': 
+                if (!player) break;
+                player.emit('playerUpdate', json.state);
+                break;
+            case 'event': 
+                if (!player) break;
+                switch (json.type) {
+                    case 'TrackEndEvent':
+                        player.emit('end', json);
+                        break;
+                    case 'TrackStuckEvent':
+                        player.emit('end', json);
+                        break;
+                    case 'TrackStartEvent':
+                        player.emit('start', json);
+                        break;
+                    case 'TrackExceptionEvent':
+                        player.emit('trackException', json);
+                        break;
+                    case 'WebSocketClosedEvent':
+                        player.emit('closed', json);
+                        break;
+                    default:
+                        this.emit('debug', this.name, `Unknown player event received: ${json.type}`);
+                }
+                break;
+            default: 
+                this.emit('debug', this.name, json);
+        }
     }
 }
 module.exports = ShoukakuSocket;

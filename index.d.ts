@@ -197,8 +197,8 @@ declare module 'shoukaku' {
     public unmarkFailedAddress(address: string): Promise<number>;
     public unmarkAllFailedAddress(): Promise<number>;
 
-    private _getFetch(url: string): Promise<JSON>;
-    private _postFetch(url: string, body: Object): Promise<number>;
+    private _get(url: string): Promise<JSON>;
+    private _post(url: string, body: Object): Promise<number>;
   }
 
   export interface ShoukakuPlayer {
@@ -269,6 +269,7 @@ declare module 'shoukaku' {
     public selfMute: boolean;
     public selfDeaf: boolean;
     public state: ShoukakuStatus;
+    public moved: boolean;
 
     private lastServerUpdate: unknown | null;
     private _callback: (err: ShoukakuError | Error | null, player: ShoukakuPlayer) => void | null;
@@ -278,7 +279,7 @@ declare module 'shoukaku' {
 
     private stateUpdate(data: unknown);
     private serverUpdate(data: unknown);
-    private connect(d: unknown, callback: (err: ShoukakuError | Error | null, player: ShoukakuPlayer) => void);
+    private connect(d: unknown, callback: (err: ShoukakuError | Error | null, player: ShoukakuPlayer) => void): void;
     private disconnect(): void;
     private move(): Promise<void>;
     private send(d: unknown): void;
@@ -300,8 +301,6 @@ declare module 'shoukaku' {
     private auth: string;
     private resumed: boolean;
     private cleaner: boolean;
-    private packetRouter: unknown;
-    private eventRouter: unknown;
     private resumable: boolean;
     private resumableTimeout: number;
 
@@ -309,14 +308,17 @@ declare module 'shoukaku' {
     public joinVoiceChannel(options: ShoukakuJoinOptions): Promise<ShoukakuPlayer>;
     public leaveVoiceChannel(guildID: string): void;
 
-    private send(data: unknown): Promise<boolean>;
-    private configureResuming(): Promise<boolean>;
+    private send(data: unknown): Promise<void>;
+    private configureResuming(): Promise<void>;
     private executeCleaner(): Promise<void>;
+
     private _upgrade(response: unknown): void;
     private _open(): void;
-    private _message(message: string): void;
+    private _message(message: Object): void;
     private _error(error: Error): void;
     private _close(code: number, reason: string): void;
+    private _onClientFilteredRaw(packet: Object): void;
+    private __onLavalinkMessag(json: Object): void;
   }
 
   export interface Shoukaku {
@@ -347,7 +349,6 @@ declare module 'shoukaku' {
     public totalPlayers: number;
 
     private options: ShoukakuOptions;
-    private rawRouter: unknown;
 
     public addNode(nodeOptions: ShoukakuNodeOptions): void;
     public removeNode(name: string, reason?: string): void;
@@ -356,6 +357,9 @@ declare module 'shoukaku' {
 
     private _ready(name: string, resumed: boolean): void;
     private _close(name: string, code: number, reason: string): void;
+    private _reconnect(node: ShoukakuSocket): void;
     private _getIdeal(group: string): ShoukakuSocket;
+    private _onClientReady(nodes: ShoukakuNodeOptions): void;
+    private _onClientRaw(packet: Object): void;
   }
 }

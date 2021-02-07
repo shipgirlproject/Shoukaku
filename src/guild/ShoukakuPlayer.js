@@ -1,12 +1,11 @@
 const EventEmitter = require('events');
 const { ShoukakuPlayOptions, ShoukakuStatus, KaraokeValue, TimescaleValue, TremoloValue, VibratoValue } = require('../constants/ShoukakuConstants.js');
+const { CONNECTED } = ShoukakuStatus;
 const util = require('../util/ShoukakuUtil.js');
 const ShoukakuLink = require('./ShoukakuLink.js');
 const ShoukakuFilter = require('../constants/ShoukakuFilter.js');
 const ShoukakuError = require('../constants/ShoukakuError.js');
 const ShoukakuTrack = require('../constants/ShoukakuTrack.js');
-
-const endEvents = ['end', 'closed', 'error', 'trackException', 'nodeDisconnect'];
 
 /**
  * ShoukakuPlayer, used to control the player on the guildused to control the player on the guild.
@@ -67,7 +66,7 @@ class ShoukakuPlayer extends EventEmitter {
     /**
      * Emitted when this library encounters an error in ShoukakuPlayer or ShoukakuLink class. MUST BE HANDLED.
      * @event ShoukakuPlayer#error
-     * @param {Error} error The error encountered.
+     * @param {ShoukakuError|Error} error The error encountered.
      * @memberOf ShoukakuPlayer
      * @example
      * // <Player> is your ShoukakuPlayer instance
@@ -137,7 +136,7 @@ class ShoukakuPlayer extends EventEmitter {
     async moveToNode(name) {
         const node = this.voiceConnection.node.shoukaku.nodes.get(name);
         if (!node || node.name === this.voiceConnection.node.name) return this;
-        if (node.state !== ShoukakuStatus.CONNECTED)
+        if (node.state !== CONNECTED)
             throw new ShoukakuError('The node you specified is not ready.');
         await this.voiceConnection.move(node);
         return this;
@@ -150,8 +149,7 @@ class ShoukakuPlayer extends EventEmitter {
      * @returns {Promise<ShoukakuPlayer>}
      */
     async playTrack(input, options) {
-        if (!input)
-            throw new ShoukakuError('No track given to play');
+        if (!input) throw new ShoukakuError('No track given to play');
         if (input instanceof ShoukakuTrack) input = input.track;
         options = util.mergeDefault(ShoukakuPlayOptions, options);
         const { noReplace, startTime, endTime } = options;
@@ -186,7 +184,6 @@ class ShoukakuPlayer extends EventEmitter {
      * @returns {Promise<ShoukakuPlayer>}
      */
     async setPaused(pause = true) {
-        if (pause === this.paused) return this;
         await this.voiceConnection.node.send({
             op: 'pause',
             guildId: this.voiceConnection.guildID,
@@ -218,10 +215,8 @@ class ShoukakuPlayer extends EventEmitter {
      * @returns {Promise<ShoukakuPlayer>}
      */
     async setVolume(volume) {
-        if (Number.isNaN(volume))
-            throw new ShoukakuError('Please input a valid number for volume');
+        if (Number.isNaN(volume)) throw new ShoukakuError('Please input a valid number for volume');
         volume = Math.min(5, Math.max(0, volume));
-        if (volume === this.filters.volume) return this;
         this.filters.volume = volume;
         await this.updateFilters();
         return this;
@@ -233,8 +228,7 @@ class ShoukakuPlayer extends EventEmitter {
      * @returns {Promise<ShoukakuPlayer>}
      */
     async setEqualizer(bands) {
-        if (!bands || !Array.isArray(bands))
-            throw new ShoukakuError('No bands, or the band you gave isn\'t an array');
+        if (!bands || !Array.isArray(bands)) throw new ShoukakuError('No bands, or the band you gave isn\'t an array');
         // input sanitation, to ensure no additional keys is being introduced
         this.filters.equalizer = bands.map(({ band, gain }) => { return { band, gain }; });
         await this.updateFilters();
@@ -387,9 +381,14 @@ class ShoukakuPlayer extends EventEmitter {
     }
 
     emit(event, data) {
-        if (endEvents.includes(event)) return super.emit(event, data);
         if (event === 'start') this.track = data.track;
         if (event === 'playerUpdate') this.position = data.position;
+        if (event === 'closed' && this.voiceConnection.moved) {
+            this.voiceConnection.voiceUpdate()
+                .then(() => this.voiceConnection.moved = false)
+                .catch(error => this.emit('error', error));
+            return;
+        }
         return super.emit(event, data);
     }
 }

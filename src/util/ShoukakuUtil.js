@@ -27,5 +27,9 @@ class ShoukakuUtil {
     static websocketSend(ws, payload) {
         return new Promise(resolve => ws.send(payload, () => resolve()));
     }
+
+    static wait(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
 }
 module.exports = ShoukakuUtil;
