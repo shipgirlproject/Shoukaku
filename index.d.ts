@@ -314,11 +314,11 @@ declare module 'shoukaku' {
 
     private _upgrade(response: unknown): void;
     private _open(): void;
-    private _message(message: Object): void;
+    private _message(packet: Object): void;
     private _error(error: Error): void;
     private _close(code: number, reason: string): void;
     private _onClientFilteredRaw(packet: Object): void;
-    private __onLavalinkMessag(json: Object): void;
+    private _onLavalinkMessag(json: Object): void;
   }
 
   export interface Shoukaku {
