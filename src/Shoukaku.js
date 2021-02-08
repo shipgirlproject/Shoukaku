@@ -1,5 +1,5 @@
 const { ShoukakuOptions, ShoukakuNodeOptions, ShoukakuStatus } = require('./constants/ShoukakuConstants.js');
-const { CONNECTED, DISCONNECTING, DISCONNECTED } = ShoukakuStatus;
+const { CONNECTED } = ShoukakuStatus;
 const { mergeDefault } = require('./util/ShoukakuUtil.js');
 const { version } = require('discord.js');
 const ShoukakuError = require('./constants/ShoukakuError.js');
@@ -129,22 +129,17 @@ class Shoukaku extends EventEmitter {
      * @memberof Shoukaku
      * @returns {void}
      */
-    removeNode(name, reason) {
+    removeNode(name, reason = 'Remove node executed') {
         if (!this.id)
             throw new ShoukakuError('The lib is not yet ready, make sure to initialize Shoukaku before the library fires "ready" event');
         const node = this.nodes.get(name);
         if (!node) return;
-        node.state = DISCONNECTING;
         node.executeCleaner()
             .catch(error => this.emit('error', name, error))
             .finally(() => {
                 this.nodes.delete(name);
-                node.removeAllListeners();
-                if (node.ws) {
-                    node.ws.removeAllListeners();
-                    node.ws.close(4011, 'Remove node executed.');
-                }
-                node.state = DISCONNECTED;
+                node.emit('debug', node.name, `[Shoukaku](Main) Node Removed => Name: ${node.name}`);
+                node.ws.close(1000, reason);
                 this.emit('disconnected', name, reason);
             });
     }
@@ -191,24 +186,33 @@ class Shoukaku extends EventEmitter {
     }
 
     _ready(name, resumed) {
-        this.nodes.get(name).executeCleaner()
-            .catch(error => this.emit('error', name, error))
-            .finally(() => this.emit('ready', name, resumed));
+        const node = this.nodes.get(name);
+        node.executeCleaner()
+            .then(() => node.emit('debug', node.name, `[Shoukaku](Main) Node Ready => Name: ${node.name}`))
+            .then(() => this.emit('ready', name, resumed))
+            .catch(error => this.emit('error', name, error));
     }
 
     _close(name, code, reason) {
+        const node = this.nodes.get(name);
+        if (!node) return;
         this.emit('close', name, code, reason);
-        this._reconnect(this.nodes.get(name));
+        this._reconnect(node);
     }
 
     _reconnect(node) {
-        if (node.reconnectAttempts >= this.options.reconnectTries)
-            return this.removeNode(node.name, `Failed to reconnect in ${this.options.reconnectTries} attempt(s)`);
+        if (node.reconnectAttempts >= this.options.reconnectTries) {
+            node.emit('debug', node.name, `[Shoukaku](Main) Node Disconnecting => Node ${node.name}, Failed reconnection in ${this.options.reconnectTries} attempt(s)`);
+            this.removeNode(node.name, `Failed to reconnect in ${this.options.reconnectTries} attempt(s)`);
+            return;
+        }
         try {
             node.reconnectAttempts++;
+            node.emit('debug', node.name, `[Shoukaku](Main) Node Reconnecting => Node ${node.name}, ${this.options.reconnectTries - node.reconnectAttempts} reconnect tries left`);
             node.connect(this.id, this.options.resumable);
         } catch (error) {
             this.emit('error', node.name, error);
+            node.emit('debug', node.name, `[Shoukaku](Main) Node Reconnecting => Node ${node.name}, Trying again in ${this.options.reconnectInterval}ms`);
             setTimeout(() => this._reconnect(node), this.options.reconnectInterval);
         }
     }
@@ -234,7 +238,7 @@ class Shoukaku extends EventEmitter {
 
     _onClientRaw(packet) {
         if (!['VOICE_STATE_UPDATE', 'VOICE_SERVER_UPDATE'].includes(packet.t)) return;
-        for (const node of [...this.nodes.values()]) node._onClientFilteredRaw(packet);
+        for (const node of this.nodes.values()) node._onClientFilteredRaw(packet);
     }
 }
 module.exports = Shoukaku;

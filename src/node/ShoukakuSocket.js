@@ -60,10 +60,18 @@ class ShoukakuSocket extends EventEmitter {
         * @type {?string}
         */
         this.group = node.group;
+        /**
+        * Websocket URL of this socket
+        * @type {string}
+        */
+        this.url = `ws://${node.host}:${node.port}`;
+        /**
+        * If this socket was resumed
+        * @type {boolean}
+        */
+        this.resumed = false;
         
-        Object.defineProperty(this, 'url', { value: `ws://${node.host}:${node.port}` });
         Object.defineProperty(this, 'auth', { value: node.auth });
-        Object.defineProperty(this, 'resumed', { value: false, writable: true });
     }
 
     get userAgent() {
@@ -106,6 +114,7 @@ class ShoukakuSocket extends EventEmitter {
     */
     connect(id, resumable) {
         this.state = CONNECTING;
+        this.emit('debug', this.name, `[Shoukaku](Socket) Connecting => Node ${this.name}`);
         const headers = {
             'Client-Name': this.userAgent,
             'User-Agent': this.userAgent,
@@ -205,6 +214,7 @@ class ShoukakuSocket extends EventEmitter {
 
     _upgrade(response) {
         this.resumed = response.headers['session-resumed'] === 'true';
+        this.emit('debug', this.name, `[Shoukaku](Socket) Connecting, Upgrade Response Received => Node ${this.name}, Waiting for WS Open Event...`);
     }
 
     _open() {
@@ -212,11 +222,12 @@ class ShoukakuSocket extends EventEmitter {
             .then(() => {
                 this.reconnectAttempts = 0;
                 this.state = CONNECTED;
+                this.emit('debug', this.name, `[Shoukaku](Socket) Connected => Node ${this.name}, Resumed Connection? ${this.resumed}`);
                 this.emit('ready', this.name, this.resumed);
             })
             .catch(error => {
+                this.ws.close(1011, 'Failed to send the resume packet');
                 this.emit('error', this.name, error);
-                this.ws.close(4011, 'Failed to send the resume packet');
             });
     }
 
@@ -230,13 +241,15 @@ class ShoukakuSocket extends EventEmitter {
 
     _error(error) {
         this.emit('error', this.name, error);
-        this.ws.close(4011, 'Reconnecting the Websocket due to an error');
+        this.emit('debug', this.name, `[Shoukaku](Socket) Errored, Closing => Node ${this.name}`);
+        this.ws.close(1011, 'Reconnecting the Websocket due to an error');
     }
 
     _close(code, reason) {
-        this.state = DISCONNECTED;
         this.ws.removeAllListeners();
         this.ws = null;
+        this.state = DISCONNECTED;
+        this.emit('debug', this.name, `[Shoukaku](Socket) Disconnected => Node ${this.name}`);
         this.emit('close', this.name, code, reason);
     }
 
@@ -245,14 +258,14 @@ class ShoukakuSocket extends EventEmitter {
         if (!player) return;
         if (packet.t === 'VOICE_SERVER_UPDATE') {
             player.voiceConnection.serverUpdate(packet.d);
+            return;
         }
-        else if (packet.t === 'VOICE_STATE_UPDATE') {
-            if (packet.d.user_id !== this.shoukaku.id) return;
-            if (!player.voiceConnection.voiceChannelID) return player.voiceConnection.stateUpdate(packet.d);
+        if (packet.d.user_id !== this.shoukaku.id) return;
+        if (player.voiceConnection.voiceChannelID) {
             const oldChannel = player.voiceConnection.voiceChannelID.repeat(1);
-            player.voiceConnection.moved = oldChannel !== packet.d.channel_id;
+            player.voiceConnection.moved = packet.d.channel_id && oldChannel !== packet.d.channel_id;
         }
-
+        player.voiceConnection.stateUpdate(packet.d);
     }
 
     _onLavalinkMessage(json) {
@@ -284,11 +297,11 @@ class ShoukakuSocket extends EventEmitter {
                         player.emit('closed', json);
                         break;
                     default:
-                        this.emit('debug', this.name, `Unknown player event received: ${json.type}`);
+                        this.emit('debug', this.name, `[Shoukaku](Socket) Unknown player event => ${json.type}`);
                 }
                 break;
             default: 
-                this.emit('debug', this.name, json);
+                this.emit('debug', this.name, `[Shoukaku](Socket) Unknown OP => ${json.op}`);
         }
     }
 }

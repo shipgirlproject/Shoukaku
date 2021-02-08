@@ -1,7 +1,7 @@
 const EventEmitter = require('events');
 const { ShoukakuPlayOptions, ShoukakuStatus, KaraokeValue, TimescaleValue, TremoloValue, VibratoValue } = require('../constants/ShoukakuConstants.js');
 const { CONNECTED } = ShoukakuStatus;
-const util = require('../util/ShoukakuUtil.js');
+const { mergeDefault, wait } = require('../util/ShoukakuUtil.js');
 const ShoukakuLink = require('./ShoukakuLink.js');
 const ShoukakuFilter = require('../constants/ShoukakuFilter.js');
 const ShoukakuError = require('../constants/ShoukakuError.js');
@@ -151,7 +151,7 @@ class ShoukakuPlayer extends EventEmitter {
     async playTrack(input, options) {
         if (!input) throw new ShoukakuError('No track given to play');
         if (input instanceof ShoukakuTrack) input = input.track;
-        options = util.mergeDefault(ShoukakuPlayOptions, options);
+        options = mergeDefault(ShoukakuPlayOptions, options);
         const { noReplace, startTime, endTime } = options;
         const payload = {
             op: 'play',
@@ -359,16 +359,23 @@ class ShoukakuPlayer extends EventEmitter {
         });
     }
 
-    async resume() {
+    async resume(moved = false) {
         try {
-            if (!this.track) {
-                this.emit('error', new ShoukakuError('Tried to resume, but the track is null'));
-                return;
+            if (!moved) {
+                if (!this.track) {
+                    this.emit('error', new ShoukakuError('Tried to resume, but the track is null'));
+                    return;
+                }
+                if (this.filters.equalizer.length) await this.setEqualizer(this.filters.equalizer);
+                if (this.filters.volume !== 1) await this.setVolume(this.filters.volume);
+                await this.playTrack(this.track, { startTime: this.position });
+            } else {
+                await wait(850);
+                await this.setPaused();
+                await wait(850);
+                await this.setPaused(false);
             }
-            if (this.filters.equalizer.length) await this.setEqualizer(this.filters.equalizer);
-            if (this.filters.volume !== 1) await this.setVolume(this.filters.volume);
-            await this.playTrack(this.track, { startTime: this.position });
-            this.emit('resumed', null);
+            this.emit('resumed');
         } catch (error) {
             this.emit('error', error);
         }
@@ -383,13 +390,18 @@ class ShoukakuPlayer extends EventEmitter {
     emit(event, data) {
         if (event === 'start') this.track = data.track;
         if (event === 'playerUpdate') this.position = data.position;
-        if (event === 'closed' && this.voiceConnection.moved) {
-            this.voiceConnection.voiceUpdate()
-                .then(() => this.voiceConnection.moved = false)
-                .catch(error => this.emit('error', error));
-            return;
-        }
-        return super.emit(event, data);
+        wait(250).then(() => {
+            if (event === 'closed' && this.voiceConnection.moved) {
+                this.voiceConnection.node.emit('debug', this.voiceConnection.node.name, `[Shoukaku](Player) Channel Move => Guild ${this.voiceConnection.node.name}`);
+                this.voiceConnection.voiceUpdate()
+                    .then(() => this.voiceConnection.moved = false)
+                    .then(() => this.resume(true))
+                    .then(() => this.voiceConnection.node.emit('debug', this.voiceConnection.node.name, `[Shoukaku](Player) Channel Move Succesful => Guild ${this.voiceConnection.node.name}`))
+                    .catch(error => this.emit('error', error));
+                return;
+            }
+            super.emit(event, data);
+        });
     }
 }
 module.exports = ShoukakuPlayer;

@@ -253,7 +253,7 @@ declare module 'shoukaku' {
 
     private connect(options: unknown, callback:(error: ShoukakuError | Error | null, player: ShoukakuPlayer) => void): void;
     private updateFilters(): Promise<void>;
-    private resume(): Promise<void>;
+    private resume(moved: boolean): Promise<void>;
     private reset(): void;
   }
 
@@ -294,15 +294,16 @@ declare module 'shoukaku' {
     public stats: ShoukakuNodeStats;
     public reconnectAttempts: number;
     public name: string;
-    public url: string;
-    public penalties: number;
     public group?: string;
+    public url: string;
+    public resumed: boolean;
+    public penalties: number;
 
     private auth: string;
-    private resumed: boolean;
-    private cleaner: boolean;
-    private resumable: boolean;
+    private userAgent: string;
+    private resumable: boolean | string;
     private resumableTimeout: number;
+    private moveOnDisconnect: boolean;
 
     public connect(id: string, resumable: boolean | string): void;
     public joinVoiceChannel(options: ShoukakuJoinOptions): Promise<ShoukakuPlayer>;
@@ -318,7 +319,7 @@ declare module 'shoukaku' {
     private _error(error: Error): void;
     private _close(code: number, reason: string): void;
     private _onClientFilteredRaw(packet: Object): void;
-    private _onLavalinkMessag(json: Object): void;
+    private _onLavalinkMessage(json: Object): void;
   }
 
   export interface Shoukaku {
@@ -349,7 +350,7 @@ declare module 'shoukaku' {
     public totalPlayers: number;
 
     private options: ShoukakuOptions;
-
+    
     public addNode(nodeOptions: ShoukakuNodeOptions): void;
     public removeNode(name: string, reason?: string): void;
     public getNode(name?: string | string[]): ShoukakuSocket;
