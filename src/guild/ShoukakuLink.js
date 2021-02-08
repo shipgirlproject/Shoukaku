@@ -65,19 +65,27 @@ class ShoukakuLink {
          */
         this.state = DISCONNECTED;
         /**
-         * If this link detected a channel change.
+         * If this link detected a voice channel change.
          * @type {boolean}
          */
-        this.moved = false;
+        this.channelMoved = false;
+        /**
+         * If this link detected a voice server change.
+         * @type {boolean}
+         */
+        this.voiceMoved = false;
 
         Object.defineProperty(this, 'lastServerUpdate', { value: null, writable: true });
         Object.defineProperty(this, 'callback', { value: null, writable: true });
         Object.defineProperty(this, 'timeout', { value: null, writable: true });
     }
 
+    get guild() {
+        return this.node.shoukaku.client.guilds.cache.get(this.guildID);
+    }
+
     get voiceChannelExists() {
-        const guild = this.node.shoukaku.client.guilds.cache.get(this.guildID);
-        return guild && (!guild.deleted && (guild.channels.cache.has(this.voiceChannelID) && !guild.channels.cache.get(this.voiceChannelID).deleted));
+        return this.guild && (!this.guild.deleted && (this.guild.channels.cache.has(this.voiceChannelID) && !this.guild.channels.cache.get(this.voiceChannelID).deleted));
     }
 
     /**
@@ -112,9 +120,8 @@ class ShoukakuLink {
     }
 
     send(d) {
-        const guild = this.node.shoukaku.client.guilds.cache.get(this.guildID);
-        if (!guild) return;
-        guild.shard.send({ op: 4, d });
+        if (!this.guild) return;
+        this.guild.shard.send({ op: 4, d });
     }
 
     stateUpdate(data) {
@@ -127,13 +134,13 @@ class ShoukakuLink {
         }
         if (data.channel_id) {
             this.voiceChannelID = data.channel_id;
-            this.node.emit('debug', this.node.name, `[Shoukaku](Voice) State Update Received => Guild ${this.guildID}, Channel ${data.channel_id}, Moved? ${this.moved}`);
+            this.node.emit('debug', this.node.name, `[Shoukaku](Voice) State Update Received => Guild ${this.guildID}, Channel ${data.channel_id}, Channel Moved? ${this.channelMoved}`);
         }
     }
 
     serverUpdate(data) {
         this.lastServerUpdate = data;
-        this.node.emit('debug', this.node.name, `[Shoukaku](Voice) Forwarding Server Update => Node ${this.node.name}`);
+        this.node.emit('debug', this.node.name, `[Shoukaku](Voice) Forwarding Server Update => Node ${this.node.name}, Voice Server Moved? ${this.voiceMoved}`);
         return this.voiceUpdate()
             .then(() => {
                 this.node.emit('debug', this.node.name, `[Shoukaku](Voice) Established => Guild ${this.guildID}, Channel ${this.voiceChannelID}`);

@@ -257,13 +257,17 @@ class ShoukakuSocket extends EventEmitter {
         const player = this.players.get(packet.d.guild_id);
         if (!player) return;
         if (packet.t === 'VOICE_SERVER_UPDATE') {
+            if (player.voiceConnection.lastServerUpdate) {
+                const oldServer = player.voiceConnection.lastServerUpdate.endpoint.split('.').shift();
+                player.voiceConnection.voiceMoved = player.voiceConnection.guild && !oldServer.startsWith(player.voiceConnection.guild.region);
+            }
             player.voiceConnection.serverUpdate(packet.d);
             return;
         }
         if (packet.d.user_id !== this.shoukaku.id) return;
         if (player.voiceConnection.voiceChannelID) {
             const oldChannel = player.voiceConnection.voiceChannelID.repeat(1);
-            player.voiceConnection.moved = packet.d.channel_id && oldChannel !== packet.d.channel_id;
+            player.voiceConnection.channelMoved = packet.d.channel_id && oldChannel !== packet.d.channel_id;
         }
         player.voiceConnection.stateUpdate(packet.d);
     }

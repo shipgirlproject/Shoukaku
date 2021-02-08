@@ -370,9 +370,9 @@ class ShoukakuPlayer extends EventEmitter {
                 if (this.filters.volume !== 1) await this.setVolume(this.filters.volume);
                 await this.playTrack(this.track, { startTime: this.position });
             } else {
-                await wait(850);
+                await wait(1050);
                 await this.setPaused();
-                await wait(850);
+                await wait(1050);
                 await this.setPaused(false);
             }
             this.emit('resumed');
@@ -391,15 +391,27 @@ class ShoukakuPlayer extends EventEmitter {
         if (event === 'start') this.track = data.track;
         if (event === 'playerUpdate') this.position = data.position;
         wait(250).then(() => {
-            if (event === 'closed' && this.voiceConnection.moved) {
-                this.voiceConnection.node.emit('debug', this.voiceConnection.node.name, `[Shoukaku](Player) Channel Move => Guild ${this.voiceConnection.node.name}`);
-                this.voiceConnection.voiceUpdate()
-                    .then(() => this.voiceConnection.moved = false)
-                    .then(() => this.resume(true))
-                    .then(() => this.voiceConnection.node.emit('debug', this.voiceConnection.node.name, `[Shoukaku](Player) Channel Move Succesful => Guild ${this.voiceConnection.node.name}`))
-                    .catch(error => this.emit('error', error));
-                return;
+            if (event === 'closed') {
+                if (this.voiceConnection.channelMoved) {
+                    this.voiceConnection.node.emit('debug', this.voiceConnection.node.name, `[Shoukaku](Player) Channel Move => Guild ${this.voiceConnection.guildID}`);
+                    this.voiceConnection.voiceUpdate()
+                        .then(() => this.voiceConnection.channelMoved = false)
+                        .then(() => this.resume(true))
+                        .then(() => this.voiceConnection.node.emit('debug', this.voiceConnection.node.name, `[Shoukaku](Player) Channel Move Succesful => Guild ${this.voiceConnection.guildID}`))
+                        .catch(error => this.emit('error', error));
+                    return;
+                }
+                if (this.voiceConnection.voiceMoved) {
+                    this.voiceConnection.node.emit('debug', this.voiceConnection.node.name, `[Shoukaku](Player) Voice Server Move => Guild ${this.voiceConnection.guildID}`);
+                    this.voiceConnection.voiceUpdate()
+                        .then(() => this.voiceConnection.voiceMoved = false)
+                        .then(() => this.resume(true))
+                        .then(() => this.voiceConnection.node.emit('debug', this.voiceConnection.node.name, `[Shoukaku](Player) Voice Server Move Succesful => Guild ${this.voiceConnection.guildID}`))
+                        .catch(error => this.emit('error', error));
+                    return;
+                }
             }
+
             super.emit(event, data);
         });
     }
