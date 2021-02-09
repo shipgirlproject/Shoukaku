@@ -197,7 +197,7 @@ class ShoukakuSocket extends EventEmitter {
         if (this.resumed) return;
         if (this.moveOnDisconnect && this.shoukaku.nodes.size > 0) {
             const players = [...this.players.values()];
-            await Promise.all(players.map(player => player.voiceConnection.move(this.shoukaku._getIdeal(player.voiceConnection.node.group))));
+            await Promise.all(players.map(player => player.voiceConnection.moveToNode(this.shoukaku._getIdeal(player.voiceConnection.node.group))));
             return;
         }
         let error;
@@ -257,18 +257,14 @@ class ShoukakuSocket extends EventEmitter {
         const player = this.players.get(packet.d.guild_id);
         if (!player) return;
         if (packet.t === 'VOICE_SERVER_UPDATE') {
-            if (player.voiceConnection.lastServerUpdate) {
-                const oldServer = player.voiceConnection.lastServerUpdate.endpoint.split('.').shift();
-                player.voiceConnection.voiceMoved = player.voiceConnection.guild && !oldServer.startsWith(player.voiceConnection.guild.region);
-            }
+            if (player.voiceConnection.lastServerUpdate) 
+                player.voiceConnection.voiceMoved = !packet.d.endpoint.startsWith(player.voiceConnection.region);
             player.voiceConnection.serverUpdate(packet.d);
             return;
         }
         if (packet.d.user_id !== this.shoukaku.id) return;
-        if (player.voiceConnection.voiceChannelID) {
-            const oldChannel = player.voiceConnection.voiceChannelID.repeat(1);
-            player.voiceConnection.channelMoved = packet.d.channel_id && oldChannel !== packet.d.channel_id;
-        }
+        if (player.voiceConnection.voiceChannelID) 
+            player.voiceConnection.channelMoved = packet.d.channel_id && player.voiceConnection.voiceChannelID !== packet.d.channel_id;
         player.voiceConnection.stateUpdate(packet.d);
     }
 

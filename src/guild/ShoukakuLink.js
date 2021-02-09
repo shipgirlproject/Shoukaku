@@ -30,16 +30,6 @@ class ShoukakuLink {
          */
         this.guildID = guild.id;
         /**
-         * The ID of the shard where this guild is in
-         * @type {number}
-         */
-        this.shardID = guild.shardID;
-        /**
-         * The ID of the user that is being governed by this Link
-         * @type {string}
-         */
-        this.userID = this.node.shoukaku.id;
-        /**
          * The sessionID of this Link
          * @type {?string}
          */
@@ -49,6 +39,11 @@ class ShoukakuLink {
          * @type {?string}
          */
         this.voiceChannelID = null;
+        /**
+         * Voice region where this link is connected.
+         * @type {?string}
+         */
+        this.region = null;
         /**
          * If the client user is self muted.
          * @type {boolean}
@@ -103,7 +98,7 @@ class ShoukakuLink {
         return this.player;
     }
 
-    async move(node) {
+    async moveToNode(node) {
         try {
             if (!node) throw new ShoukakuError('No available nodes to reconnect to');
             this.node.emit('debug', this.node.name, `[Shoukaku](Voice) Moving from Node ${this.node.name} => Node ${node.name} | Guild ${this.guildID}, Channel ${this.voiceChannelID}`);
@@ -140,6 +135,7 @@ class ShoukakuLink {
 
     serverUpdate(data) {
         this.lastServerUpdate = data;
+        this.region = data.endpoint.split('.').shift().replace(/[0-9]/g, '');
         this.node.emit('debug', this.node.name, `[Shoukaku](Voice) Forwarding Server Update => Node ${this.node.name}, Voice Server Moved? ${this.voiceMoved}`);
         return this.voiceUpdate()
             .then(() => {

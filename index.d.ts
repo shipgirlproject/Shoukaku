@@ -262,14 +262,14 @@ declare module 'shoukaku' {
     public player: ShoukakuPlayer;
     public node: ShoukakuSocket;
     public guildID: string;
-    public shardID: number;
-    public userID: string;
     public sessionID: string | null;
     public voiceChannelID: string | null;
+    public region: string | null;
     public selfMute: boolean;
     public selfDeaf: boolean;
     public state: ShoukakuStatus;
-    public moved: boolean;
+    public channelMoved: boolean;
+    public voiceMoved: boolean;
 
     private lastServerUpdate: unknown | null;
     private _callback: (err: ShoukakuError | Error | null, player: ShoukakuPlayer) => void | null;
@@ -281,8 +281,9 @@ declare module 'shoukaku' {
     private serverUpdate(data: unknown);
     private connect(d: unknown, callback: (err: ShoukakuError | Error | null, player: ShoukakuPlayer) => void): void;
     private disconnect(): void;
-    private move(): Promise<void>;
+    private moveToNode(): Promise<void>;
     private send(d: unknown): void;
+    private voiceUpdate(): Promise<void>;
   }
 
   export class ShoukakuSocket {

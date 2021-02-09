@@ -138,7 +138,7 @@ class ShoukakuPlayer extends EventEmitter {
         if (!node || node.name === this.voiceConnection.node.name) return this;
         if (node.state !== CONNECTED)
             throw new ShoukakuError('The node you specified is not ready.');
-        await this.voiceConnection.move(node);
+        await this.voiceConnection.moveToNode(node);
         return this;
     }
     /**
