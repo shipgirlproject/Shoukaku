@@ -163,7 +163,7 @@ declare module 'shoukaku' {
     tanScale?: number;
     offset?: number;
     scale?: number;
-};
+}
 
   class ShoukakuConstants {
     static ShoukakuStatus: ShoukakuStatus;
@@ -202,6 +202,8 @@ declare module 'shoukaku' {
     public timescale?: TimescaleValue;
     public tremolo?: TremoloValue;
     public vibrato?: VibratoValue;
+    public rotation?: RotationValue;
+    public distortion?: DistortionValue;
   }
 
   export class ShoukakuRest {
