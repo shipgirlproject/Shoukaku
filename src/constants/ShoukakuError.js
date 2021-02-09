@@ -1,11 +1,10 @@
 /**
-  * ShoukakuError. Extended Error class.
   * @class ShoukakuError
   * @extends {Error}
   */
 class ShoukakuError extends Error {
     /**
-     * @param message The Error Message
+     * @param message The error message
      */
     constructor(message) {
         super(message);

@@ -1,9 +1,6 @@
 const ShoukakuError = require('../constants/ShoukakuError.js');
 const SearchTypes = { 'soundcloud': 'scsearch', 'youtube': 'ytsearch' };
-/**
- * Misc utilities used by Shoukaku
- * @class ShoukakuUtil
- */
+
 class ShoukakuUtil {
     static mergeDefault(def, given) {
         if (!given) return def;
@@ -29,6 +26,10 @@ class ShoukakuUtil {
 
     static websocketSend(ws, payload) {
         return new Promise(resolve => ws.send(payload, () => resolve()));
+    }
+
+    static wait(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
     }
 }
 module.exports = ShoukakuUtil;

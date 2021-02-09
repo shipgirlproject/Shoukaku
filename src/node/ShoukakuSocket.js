@@ -1,12 +1,13 @@
 const { promisify } = require('util');
 const { ShoukakuStatus, ShoukakuNodeStats, ShoukakuJoinOptions } = require('../constants/ShoukakuConstants.js');
-const { PacketRouter, EventRouter } = require('../router/ShoukakuRouter.js');
+const { CONNECTED, CONNECTING, DISCONNECTED } = ShoukakuStatus;
 const { websocketSend } = require('../util/ShoukakuUtil.js');
 const ShoukakuError = require('../constants/ShoukakuError.js');
 const ShoukakuRest = require('../rest/ShoukakuRest.js');
 const ShoukakuPlayer = require('../guild/ShoukakuPlayer.js');
 const Websocket = require('ws');
 const EventEmitter = require('events');
+
 /**
  * ShoukakuSocket, manages a single Lavalink WS connection.
  * @class ShoukakuSocket
@@ -33,12 +34,12 @@ class ShoukakuSocket extends EventEmitter {
         * The REST API of this Socket, mostly to load balance your REST requests instead of relying on a single node.
         * @type {ShoukakuRest}
         */
-        this.rest = new ShoukakuRest(node.host, node.port, node.auth, shoukaku.options.restTimeout);
+        this.rest = new ShoukakuRest(node.host, node.port, node.auth, shoukaku.options.userAgent, shoukaku.options.restTimeout);
         /**
         * The state of this Socket.
         * @type {ShoukakuConstants#ShoukakuStatus}
         */
-        this.state = ShoukakuStatus.DISCONNECTED;
+        this.state = DISCONNECTED;
         /**
         * The current stats of this Socket.
         * @type {ShoukakuConstants#ShoukakuNodeStats}
@@ -56,15 +57,25 @@ class ShoukakuSocket extends EventEmitter {
         this.name = node.name;
         /**
         * Group of this socket
-        * @type {string}
+        * @type {?string}
         */
         this.group = node.group;
+        /**
+        * Websocket URL of this socket
+        * @type {string}
+        */
+        this.url = `ws://${node.host}:${node.port}`;
+        /**
+        * If this socket was resumed
+        * @type {boolean}
+        */
+        this.resumed = false;
         
-        Object.defineProperty(this, 'url', { value: `ws://${node.host}:${node.port}` });
         Object.defineProperty(this, 'auth', { value: node.auth });
-        Object.defineProperty(this, 'resumed', { value: false, writable: true });
-        Object.defineProperty(this, 'packetRouter', { value: PacketRouter.bind(this) });
-        Object.defineProperty(this, 'eventRouter', { value: EventRouter.bind(this) });
+    }
+
+    get userAgent() {
+        return this.shoukaku.options.userAgent;
     }
 
     get resumable() {
@@ -78,11 +89,7 @@ class ShoukakuSocket extends EventEmitter {
     get moveOnDisconnect() {
         return this.shoukaku.options.moveOnDisconnect;
     }
-
-    get groupForReconnecting() {
-        return this.shoukaku.options.groupForReconnecting;
-    }
-
+    
     /**
     * Penalties of this Socket. The higher the return number, the more loaded the server is.
     * @type {number}
@@ -101,27 +108,26 @@ class ShoukakuSocket extends EventEmitter {
     /**
     * Connects this Socket.
     * @param {string} id Your Bot's / Client user id.
-    * @param {number} shardCount Your Bot's / Client shard count.
     * @param {boolean|string} resumable Determines if we should try to resume the connection.
     * @memberof ShoukakuSocket
     * @returns {void}
     */
-    connect(id, shardCount, resumable) {
-        this.state = ShoukakuStatus.CONNECTING;
+    connect(id, resumable) {
+        this.state = CONNECTING;
+        this.emit('debug', this.name, `[Shoukaku](Socket) Connecting => Node ${this.name}`);
         const headers = {
+            'Client-Name': this.userAgent,
+            'User-Agent': this.userAgent,
             'Authorization': this.auth,
-            'Num-Shards': shardCount,
             'User-Id': id
         };
         if (resumable) headers['Resume-Key'] = resumable;
         this.ws = new Websocket(this.url, { headers });
-        this.ws.once('upgrade', this._upgrade.bind(this));
-        this.ws.once('open', this._open.bind(this));
-        this.ws.once('error', this._error.bind(this));
-        this.ws.once('close', this._close.bind(this));
-        const message = this._message.bind(this);
-        this.ws.on('message', message);
-        this.shoukaku.on('packetUpdate', this.packetRouter);
+        this.ws.once('upgrade', (...args) => this._upgrade(...args));
+        this.ws.once('open', () => this._open());
+        this.ws.once('error', (...args) => this._error(...args));
+        this.ws.once('close', (...args) => this._close(...args));
+        this.ws.on('message', (...args) => this._message(...args));
     }
     /**
      * Creates a player and connects your bot to the specified guild's voice channel
@@ -129,21 +135,19 @@ class ShoukakuSocket extends EventEmitter {
      * @memberof ShoukakuSocket
      * @returns {Promise<ShoukakuPlayer>}
      * @example
-     * <ShoukakuSocket>.joinVoiceChannel({
-     *     guildID: 'guild_id',
-     *     voiceChannelID: 'voice_channel_id'
-     * }).then((player) => player.playTrack('lavalink_track'));
+     * <ShoukakuSocket>.joinVoiceChannel({ guildID: 'guild_id', voiceChannelID: 'voice_channel_id' })
+     *     .then((player) => player.playTrack('lavalink_track')); 
      */
     async joinVoiceChannel(options = ShoukakuJoinOptions) {
         if (!options.guildID || !options.voiceChannelID)
             throw new ShoukakuError('Guild ID or Channel ID is not specified.');
 
-        if (this.state !== ShoukakuStatus.CONNECTED)
+        if (this.state !== CONNECTED)
             throw new ShoukakuError('This node is not yet ready.');
 
         let player = this.players.get(options.guildID);
         if (player) {
-            if (player.voiceConnection.state === ShoukakuStatus.CONNECTED) return player;
+            if (player.voiceConnection.state === CONNECTED) return player;
             throw new ShoukakuError('This player is not yet connected, please wait for it to connect');
         }
 
@@ -190,10 +194,16 @@ class ShoukakuSocket extends EventEmitter {
     async executeCleaner() {
         if (this.resumed) return;
         if (this.moveOnDisconnect && this.shoukaku.nodes.size > 0) {
-            await Promise.all([...this.players.values()].map(player => player.voiceConnection.move(this.shoukaku._getIdeal(this.groupForReconnecting))));
+            const players = [...this.players.values()];
+            await Promise.all(players.map(player => player.voiceConnection.moveToNode(this.shoukaku._getIdeal(player.voiceConnection.node.group))));
             return;
         }
-        const error = this.moveOnDisconnect ? new ShoukakuError(`Node '${this.name}' disconnected; moveOnReconnect is disabled`) : new ShoukakuError(`Node '${this.name}' disconnected; No nodes to reconnect to`);
+        let error;
+        if (this.moveOnDisconnect) {
+            error = new ShoukakuError(`Node '${this.name}' disconnected; moveOnReconnect is disabled`);
+        } else {
+            error = new ShoukakuError(`Node '${this.name}' disconnected; No nodes to reconnect to`);
+        }
         for (const player of this.players.values()) {
             player.emit('nodeDisconnect', error);
             player.voiceConnection.disconnect();
@@ -202,27 +212,26 @@ class ShoukakuSocket extends EventEmitter {
 
     _upgrade(response) {
         this.resumed = response.headers['session-resumed'] === 'true';
+        this.emit('debug', this.name, `[Shoukaku](Socket) Connecting, Upgrade Response Received => Node ${this.name}, Waiting for WS Open Event...`);
     }
 
     _open() {
         this.configureResuming()
             .then(() => {
                 this.reconnectAttempts = 0;
-                this.state = ShoukakuStatus.CONNECTED;
+                this.state = CONNECTED;
+                this.emit('debug', this.name, `[Shoukaku](Socket) Connected => Node ${this.name}, Resumed Connection? ${this.resumed}`);
                 this.emit('ready', this.name, this.resumed);
             })
             .catch(error => {
+                this.ws.close(1011, 'Failed to send the resume packet');
                 this.emit('error', this.name, error);
-                this.ws.close(4011, 'Failed to send the resume packet');
             });
     }
 
-    _message(message) {
+    async _message(message) {
         try {
-            const json = JSON.parse(message);
-            if (json.op !== 'playerUpdate') this.emit('debug', this.name, json);
-            if (json.op === 'stats') return this.stats = json;
-            this.eventRouter(json);
+            await this._onLavalinkMessage(JSON.parse(message));
         } catch (error) {
             this.emit('error', this.name, error);
         }
@@ -230,15 +239,34 @@ class ShoukakuSocket extends EventEmitter {
 
     _error(error) {
         this.emit('error', this.name, error);
-        this.ws.close(4011, 'Reconnecting the Websocket due to an error');
+        this.emit('debug', this.name, `[Shoukaku](Socket) Errored, Closing => Node ${this.name}`);
+        this.ws.close(1011, 'Reconnecting the Websocket due to an error');
     }
 
     _close(code, reason) {
-        this.state = ShoukakuStatus.DISCONNECTED;
         this.ws.removeAllListeners();
-        this.shoukaku.removeListener('packetUpdate', this.packetRouter);
         this.ws = null;
+        this.state = DISCONNECTED;
+        this.emit('debug', this.name, `[Shoukaku](Socket) Disconnected => Node ${this.name}`);
         this.emit('close', this.name, code, reason);
+    }
+
+    _onClientFilteredRaw(packet) {
+        const player = this.players.get(packet.d.guild_id);
+        if (!player) return;
+        if (packet.t === 'VOICE_SERVER_UPDATE') {
+            player.voiceConnection.serverUpdate(packet.d);
+            return;
+        }
+        if (packet.d.user_id !== this.shoukaku.id) return;
+        player.voiceConnection.stateUpdate(packet.d);
+    }
+
+    async _onLavalinkMessage(json) {
+        if (json.op === 'stats') return this.stats = json;
+        const player = this.players.get(json.guildId);
+        if (!player) return;
+        await player._onLavalinkMessage(json);
     }
 }
 module.exports = ShoukakuSocket;

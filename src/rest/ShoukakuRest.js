@@ -15,9 +15,10 @@ class ShoukakuRest {
      * @param {string} host Your node host / ip address of where the lavalink is hosted.
      * @param {string} port The Port Number of your lavalink instance.
      * @param {string} auth The authentication key you set on your lavalink config.
-     * @param {number} timeout Timeout before a request times out.
+     * @param {string} userAgent User agent to use per request
+     * @param {number} [timeout=15000] Timeout before a request times out.
      */
-    constructor(host, port, auth, timeout) {
+    constructor(host, port, auth, userAgent, timeout) {
         /**
         * URL of the host used by this resolver instance.
         * @type {string}
@@ -27,9 +28,10 @@ class ShoukakuRest {
          * This Resolver Timeout before it decides to cancel the request.
          * @type {number}
          */
-        this.timeout = timeout || 10000;
+        this.timeout = timeout || 15000;
 
         Object.defineProperty(this, 'auth', { value: auth });
+        Object.defineProperty(this, 'userAgent', { value: userAgent });
     }
     /**
     * Resolves a identifier into a lavalink track.
@@ -39,14 +41,9 @@ class ShoukakuRest {
     * @returns {Promise<null|ShoukakuTrackList>} The parsed data from Lavalink rest
     */
     async resolve(identifier, search) {
-        if (!identifier)
-            throw new ShoukakuError('Query cannot be null');
-
-        if (search)
-            identifier = `${ShoukakuUtil.searchType(search)}:${identifier}`;
-
-        const data = await this._getFetch(`/loadtracks?${new URLSearchParams({ identifier }).toString()}`);
-
+        if (!identifier) throw new ShoukakuError('Identifier cannot be null');
+        if (search) identifier = `${ShoukakuUtil.searchType(search)}:${identifier}`;
+        const data = await this._get(`/loadtracks?${new URLSearchParams({ identifier }).toString()}`);
         return Success.includes(data.loadType) ? new ShoukakuTrackList(data) : null;
     }
     /**
@@ -56,9 +53,8 @@ class ShoukakuRest {
      * @returns {Promise<Object>} The Lavalink Track details.
      */
     decode(track) {
-        if (!track)
-            throw new ShoukakuError('Track cannot be null');
-        return this._getFetch(`/decodetrack?${new URLSearchParams({ track }).toString()}`);
+        if (!track) throw new ShoukakuError('Track cannot be null');
+        return this._get(`/decodetrack?${new URLSearchParams({ track }).toString()}`);
     }
     /**
      * Gets the status of the "RoutePlanner API" for this Lavalink node.
@@ -66,7 +62,7 @@ class ShoukakuRest {
      * @returns {Promise<Object>} Refer to `https://github.com/Frederikam/Lavalink/blob/master/IMPLEMENTATION.md#routeplanner-api`
      */
     getRoutePlannerStatus() {
-        return this._getFetch('/routeplanner/status');
+        return this._get('/routeplanner/status');
     }
     /**
      * Unmarks a failed IP in the "RoutePlanner API" on this Lavalink node.
@@ -75,7 +71,7 @@ class ShoukakuRest {
      * @returns {Promise<number>} Request status code
      */
     unmarkFailedAddress(address) {
-        return this._postFetch('/routeplanner/free/address', { address });
+        return this._post('/routeplanner/free/address', { address });
     }
     /**
      * Unmarks all the failed IP(s) in the "RoutePlanner API" on this Lavalink node.
@@ -83,31 +79,31 @@ class ShoukakuRest {
      * @returns {Promise<number>} Request status code
      */
     unmarkAllFailedAddress() {
-        return this._postFetch('/routeplanner/free/all');
+        return this._post('/routeplanner/free/all');
     }
 
-    _getFetch(endpoint) {
+    _get(endpoint) {
         const controller = new Abort();
         const timeout = setTimeout(() => controller.abort(), this.timeout);
-        return Fetch(this.url + endpoint, { headers: { Authorization: this.auth }, signal: controller.signal })
+        return Fetch(this.url + endpoint, { headers: { 'User-Agent': this.userAgent, Authorization: this.auth }, signal: controller.signal })
             .then(res => {
-                if (!res.ok)
-                    throw new ShoukakuError(`Rest request failed with response code: ${res.status}`);
-                return res.json();
+                if (res.ok) return res.json();
+                throw new ShoukakuError(`Rest request failed with response code: ${res.status}`);
             })
             .catch(error => {
-                if (error.name === 'AbortError') error = new ShoukakuTimeout(`Rest request timed out. Took more than ${Math.round(this.timeout / 1000)}s to resolve`);
-                throw error;
+                if (error.name !== 'AbortError') throw error;
+                throw new ShoukakuTimeout(this.timeout);
             })
             .finally(() => clearTimeout(timeout));
     }
 
-    _postFetch(endpoint, body) {
+    _post(endpoint, body) {
         const controller = new Abort();
         const options = {
             method: 'POST',
             controller: controller.signal,
             headers: {
+                'User-Agent': this.userAgent,
                 Authorization: this.auth
             }
         };
@@ -118,13 +114,12 @@ class ShoukakuRest {
         const timeout = setTimeout(() => controller.abort(), this.timeout);
         return Fetch(this.url + endpoint, options)
             .then(res => {
-                if (!res.ok)
-                    throw new ShoukakuError(`Rest request failed with response code: ${res.status}`);
-                return res.status;
+                if (res.ok) return res.status;
+                throw new ShoukakuError(`Rest request failed with response code: ${res.status}`);
             })
             .catch(error => {
-                if (error.name === 'AbortError') error = new ShoukakuTimeout(`Rest request timed out. Took more than ${Math.round(this.timeout / 1000)}s to resolve`);
-                throw error;
+                if (error.name !== 'AbortError') throw error;
+                throw new ShoukakuTimeout(this.timeout);
             })
             .finally(() => clearTimeout(timeout));
     }

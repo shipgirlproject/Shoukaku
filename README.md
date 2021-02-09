@@ -1,4 +1,5 @@
 ## Shoukaku
+### A Lavalink wrapper for Discord.JS v12.x.x
 [![Discord](https://img.shields.io/discord/423116740810244097?style=flat-square)](https://discordapp.com/invite/FVqbtGu)
 [![npm](https://img.shields.io/npm/v/shoukaku?style=flat-square)](https://www.npmjs.com/package/shoukaku)
 ![Github Stars](https://img.shields.io/github/stars/Deivu/Shoukaku?style=flat-square)
@@ -7,35 +8,22 @@
 ![NPM](https://img.shields.io/npm/l/shoukaku?style=flat-square)
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/Deivu/Shoukaku/master/assets/cover.jpg">
+  <img width="497" height="768" alt="Shoukaku" src="https://raw.githubusercontent.com/Deivu/Shoukaku/master/assets/cover.png"></img>
 </p>
 
-The ShipGirl Project, feat Shoukaku & Zuikaku 
+```
+The ShipGirl Project, feat Shoukaku; ⓒ Kancolle
+```
 
-> (c) Kancolle for our cute girls
+### Features
 
-### A Lavalink wrapper for Discord.js v12.x.x
+✅ Straightforward
 
-✅ Currently being used by: 
+✅ Stable
 
-[![DBL](https://discordbots.org/api/widget/424137718961012737.svg)](https://discordbots.org/bot/424137718961012737)
-
-### Why Shoukaku?
-
-✅ Straightforward.
-
-✅ Maintained.
-
-✅ Reliable.
-
-✅ Stable.
-
-✅ Feature-rich.
+✅ Feature-rich
 
 ✅ Very cute shipgirl ❤ (Very Important)
-
-### Documentation
-https://deivu.github.io/Shoukaku/?api
 
 ### Installation
 For Stable
@@ -47,16 +35,34 @@ For Master
 npm i Deivu/Shoukaku
 ```
 
-### What is Lavalink?
-Click [THIS](https://github.com/Frederikam/Lavalink/blob/master/README.md) to open Lavalink's readme.
+### Documentation
+
+> https://deivu.github.io/Shoukaku/?api
 
 ### Changelogs
-Click [THIS](https://github.com/Deivu/Shoukaku/blob/master/CHANGELOGS.MD) to open changelogs.
 
-### Support Server
-Click [THIS](https://discordapp.com/invite/FVqbtGu) to join our Discord server.
+> https://github.com/Deivu/Shoukaku/blob/master/CHANGELOGS.MD
 
-### Simple example of using Shoukaku
+### Getting Lavalink
+
+Download binaries from the [CI server](https://ci.fredboat.com/viewLog.html?buildId=lastSuccessful&buildTypeId=Lavalink_Build&tab=artifacts&guest=1) or the [GitHub](https://github.com/Frederikam/Lavalink/releases) releases.
+
+Put an [application.yml](https://github.com/Frederikam/Lavalink/blob/master/LavalinkServer/application.yml.example) file in your working directory.
+
+Run with `java -jar Lavalink.jar`
+
+Docker images are available on the [Docker](https://hub.docker.com/r/fredboat/lavalink/) hub.
+
+### Other Links
+
+[Support](https://discord.gg/FVqbtGu) | [Lavalink](https://github.com/Frederikam/Lavalink)
+
+### Example
+
+> Bot Implementation: https://github.com/Deivu/Kongou
+
+> Basic Implementation:
+
 ```js
 const { Client } = require('discord.js');
 const { Shoukaku } = require('shoukaku');
@@ -114,6 +120,5 @@ new ExampleBot()
     .login('token')
     .catch(console.error);
 ```
-### Example of using Shoukaku with Queue system
 
-Click [THIS](https://github.com/Deivu/Kongou) to see a bot based on it
+> Made with ❤ by @Sāya#0113
