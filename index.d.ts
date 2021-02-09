@@ -271,11 +271,12 @@ declare module 'shoukaku' {
     public setDistortion(distortionValue?: DistortionValue): Promise<ShoukakuPlayer>;
     public setGroupedFilters(settings?: ShoukakuGroupedFilterOptions): Promise<ShoukakuPlayer>;
     public clearFilters(): Promise<ShoukakuPlayer>;
+    public resume(moved: boolean): Promise<void>;
 
     private connect(options: unknown, callback:(error: ShoukakuError | Error | null, player: ShoukakuPlayer) => void): void;
     private updateFilters(): Promise<void>;
-    private resume(moved: boolean): Promise<void>;
     private reset(): void;
+    private _onLavalinkMessage(json: Object): Promise<void>;
   }
 
   export class ShoukakuLink {
@@ -337,11 +338,11 @@ declare module 'shoukaku' {
 
     private _upgrade(response: unknown): void;
     private _open(): void;
-    private _message(packet: Object): void;
+    private _message(packet: Object): Promise<void>;
     private _error(error: Error): void;
     private _close(code: number, reason: string): void;
     private _onClientFilteredRaw(packet: Object): void;
-    private _onLavalinkMessage(json: Object): void;
+    private _onLavalinkMessage(json: Object): Promise<void>;
   }
 
   export interface Shoukaku {

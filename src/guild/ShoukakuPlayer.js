@@ -8,14 +8,14 @@ const ShoukakuError = require('../constants/ShoukakuError.js');
 const ShoukakuTrack = require('../constants/ShoukakuTrack.js');
 
 /**
- * ShoukakuPlayer, used to control the player on the guildused to control the player on the guild.
+ * ShoukakuPlayer, used to control the player on a guild
  * @class ShoukakuPlayer
  * @extends {EventEmitter}
  */
 class ShoukakuPlayer extends EventEmitter {
     /**
-     * @param  {ShoukakuSocket} node The node that governs this player.
-     * @param  {Guild} guild A Discord.JS Guild Object.
+     * @param  {ShoukakuSocket} node The node that governs this player
+     * @param  {Guild} guild A Discord.JS Guild Object
      */
     constructor(node, guild) {
         super();
@@ -25,7 +25,7 @@ class ShoukakuPlayer extends EventEmitter {
          */
         this.voiceConnection = new ShoukakuLink(this, node, guild);
         /**
-         * The Track that is currently being played by this player.
+         * The Track that is currently being played by this player
          * @type {?string}
          */
         this.track = null;
@@ -47,65 +47,57 @@ class ShoukakuPlayer extends EventEmitter {
     }
 
     /**
-     * Emitted when the Lavalink Player emits a TrackEnd or TrackStuck event.
+     * Emitted when the Lavalink Server sends a TrackEndEvent or TrackStuckEvent, MUST BE HANDLED.
      * @event ShoukakuPlayer#end
      * @param {Object} reason
      * @memberOf ShoukakuPlayer
      */
     /**
-     * Emitted when the voiceConnection got closed.
+     * Emitted when the Lavalink Server sends a WebsocketClosedEvent, MUST BE HANDLED.
      * @event ShoukakuPlayer#closed
      * @param {Object} reason
      * @memberOf ShoukakuPlayer
      * @example
      * // <Player> is your ShoukakuPlayer instance
-     * <Player>.on('closed', (reason) => {
-     *   <Player>.disconnect();
-     * })
+     * <Player>.on('closed', reason => console.log(reason) & <Player>.disconnect())
      */
     /**
-     * Emitted when this library encounters an error in ShoukakuPlayer or ShoukakuLink class. MUST BE HANDLED.
+     * Emitted when this library encounters an internal error in ShoukakuPlayer or ShoukakuLink, MUST BE HANDLED.
      * @event ShoukakuPlayer#error
      * @param {ShoukakuError|Error} error The error encountered.
      * @memberOf ShoukakuPlayer
      * @example
      * // <Player> is your ShoukakuPlayer instance
-     * <Player>.on('error', (error) => {
-     *   console.error(error);
-     *   <Player>.disconnect();
-     * })
+     * <Player>.on('error', error => console.error(error) & <Player>.disconnect());
      */
     /**
-     * Emitted when this player's node was disconnected. MUST BE HANDLED.
+     * Emitted when this player's node was disconnected, MUST BE HANDLED.
      * @event ShoukakuPlayer#nodeDisconnect
      * @param {string} name The name of the node that disconnected.
      * @memberOf ShoukakuPlayer
      * @example
      * // <Player> is your ShoukakuPlayer instance
-     * <Player>.on('nodeDisconnect', (name) => {
-     *   console.log(`Node ${name} which governs this player disconnected.`);
-     *   <Player>.disconnect();
-     * })
+     * <Player>.on('nodeDisconnect', name => console.log(`Node ${name} which governs this player disconnected`) & <Player>.disconnect());
      */
     /**
-     * Emitted when the Lavalink Player emits a TrackStartEvent event. Optional.
+     * Emitted when the Lavalink Server sends a TrackStartEvent, Optional.
      * @event ShoukakuPlayer#start
      * @param {Object} data
      * @memberOf ShoukakuPlayer
      */
     /**
-     * Emitted when Lavalink encounters an error on playing the song. Optional.
+     * Emitted when the Lavalink Server sends a TrackExceptionEvent, Automatically fires TrackEndEvent so handling this is optional, Optional.
      * @event ShoukakuPlayer#trackException
      * @param {Object} reason
      * @memberOf ShoukakuPlayer
      */
     /**
-     * Emitted when the Shoukaku Player resumes the session by resending the playing data. Optional.
+     * Emitted when this library managed to resume playing this player, Optional.
      * @event ShoukakuPlayer#resumed
      * @memberOf ShoukakuPlayer
      */
     /**
-     * Emitted when Lavalink gives a Player Update event. Optional.
+     * Emitted when the Lavalink Server sends a PlayerUpdate OP, Optional.
      * @event ShoukakuPlayer#playerUpdate
      * @param {Object} data
      * @memberOf ShoukakuPlayer
@@ -386,6 +378,35 @@ class ShoukakuPlayer extends EventEmitter {
         });
         return this;
     }
+    /**
+     * Used when you invoke `<ShoukakuLink>.attemptReconnect();` so you can resume the playback of your player
+     * @param {boolean} [moved = false] When moved is set to false, this will try to do a hard player resume. If set to true, it will try to do a soft player resume
+     * @memberOf ShoukakuPlayer
+     * @returns {Promise<void>}
+     * @example
+     * <ShoukakuPlayer>.voiceConnection.attemptReconnect()
+     *     .then(() => <ShoukakuPlayer>.resume());
+     */
+    async resume(moved = false) {
+        try {
+            if (!moved) {
+                if (!this.track) {
+                    this.emit('error', new ShoukakuError('Tried to resume, but the track is null'));
+                    return;
+                }
+                await this.updateFilters();
+                await this.playTrack(this.track, { startTime: this.position });
+            } else {
+                await wait(500);
+                await this.setPaused();
+                await wait(500);
+                await this.setPaused(false);
+            }
+            this.emit('resumed');
+        } catch (error) {
+            this.emit('error', error);
+        }
+    }
 
     async updateFilters() {
         const { volume, equalizer, karaoke, timescale, tremolo, vibrato, rotation, distortion } = this.filters;
@@ -403,60 +424,49 @@ class ShoukakuPlayer extends EventEmitter {
         });
     }
 
-    async resume(moved = false) {
-        try {
-            if (!moved) {
-                if (!this.track) {
-                    this.emit('error', new ShoukakuError('Tried to resume, but the track is null'));
-                    return;
-                }
-                await this.updateFilters();
-                await this.playTrack(this.track, { startTime: this.position });
-            } else {
-                await wait(1000);
-                await this.setPaused();
-                await wait(1000);
-                await this.setPaused(false);
-            }
-            this.emit('resumed');
-        } catch (error) {
-            this.emit('error', error);
-        }
-    }
-
     reset() {
         this.track = null;
         this.position = 0;
         this.filters = new ShoukakuFilter();
     }
 
-    emit(event, data) {
-        if (event === 'start') this.track = data.track;
-        if (event === 'playerUpdate') this.position = data.position;
-        wait(250).then(() => {
-            if (event === 'closed') {
-                if (this.voiceConnection.channelMoved) {
-                    this.voiceConnection.node.emit('debug', this.voiceConnection.node.name, `[Shoukaku](Player) Channel Move => Guild ${this.voiceConnection.guildID}`);
-                    this.voiceConnection.voiceUpdate()
-                        .then(() => this.voiceConnection.channelMoved = false)
-                        .then(() => this.resume(true))
-                        .then(() => this.voiceConnection.node.emit('debug', this.voiceConnection.node.name, `[Shoukaku](Player) Channel Move Succesful => Guild ${this.voiceConnection.guildID}`))
-                        .catch(error => this.emit('error', error));
-                    return;
-                }
-                if (this.voiceConnection.voiceMoved) {
-                    this.voiceConnection.node.emit('debug', this.voiceConnection.node.name, `[Shoukaku](Player) Voice Server Move => Guild ${this.voiceConnection.guildID}`);
-                    this.voiceConnection.voiceUpdate()
-                        .then(() => this.voiceConnection.voiceMoved = false)
-                        .then(() => this.resume(true))
-                        .then(() => this.voiceConnection.node.emit('debug', this.voiceConnection.node.name, `[Shoukaku](Player) Voice Server Move Succesful => Guild ${this.voiceConnection.guildID}`))
-                        .catch(error => this.emit('error', error));
-                    return;
-                }
+    async _onLavalinkMessage(json) {
+        if (json.op === 'playerUpdate') {
+            this.position = json.state.position;
+            this.emit('playerUpdate', json.state);
+            return;
+        } 
+        if (json.op === 'event') {
+            switch (json.type) {
+                case 'TrackStartEvent':
+                    this.track = json.track;
+                    this.emit('start', json);
+                    break;
+                case 'TrackEndEvent':
+                case 'TrackStuckEvent':
+                    this.emit('end', json);
+                    break;
+                case 'TrackExceptionEvent':
+                    this.emit('trackException', json);
+                    break;
+                case 'WebSocketClosedEvent':
+                    if (this.voiceConnection.channelMoved || this.voiceConnection.voiceMoved) {
+                        await wait(1000);
+                        this.voiceConnection.channelMoved = false;
+                        this.voiceConnection.voiceMoved = false;
+                        await this.resume(true);
+                        this.voiceConnection.node.emit('debug', this.voiceConnection.node.name, `[Shoukaku](Player) Channel / Voice Server Moved => Guild ${this.voiceConnection.guildID}`);
+                        break;
+                    }
+                    this.voiceConnection.node.emit('debug', this.voiceConnection.node.name, `[Shoukaku](Player) Voice Websocket Close Event => Guild ${this.voiceConnection.guildID}, Reason: ${json.code} ${json.reason}`);
+                    this.emit('closed', json);
+                    break;
+                default:
+                    this.voiceConnection.node.emit('debug', this.voiceConnection.node.name, `[Shoukaku](Player) Unknown player event => ${json.type}`);
             }
-
-            super.emit(event, data);
-        });
+            return;
+        }
+        this.voiceConnection.node.emit('debug', this.voiceConnection.node.name, `[Shoukaku](Player) Unknown OP => ${json.op}`);
     }
 }
 module.exports = ShoukakuPlayer;

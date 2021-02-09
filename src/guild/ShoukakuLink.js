@@ -2,6 +2,7 @@ const { promisify } = require('util');
 const { ShoukakuStatus } = require('../constants/ShoukakuConstants.js');
 const { CONNECTED, CONNECTING, DISCONNECTING, DISCONNECTED } = ShoukakuStatus;
 const ShoukakuError = require('../constants/ShoukakuError.js');
+const { wait } = require('../util/ShoukakuUtil.js');
 
 /**
  * ShoukakuLink, contains data about the voice connection on the guild.
@@ -84,15 +85,22 @@ class ShoukakuLink {
     }
 
     /**
-     * Attempts to reconnect a Disconnected Link
+     * Attempts to reconnect this ShoukakuLink, A use case for this is when your Discord Websocket re-identifies
      * @memberOf ShoukakuLink
      * @returns {Promise<ShoukakuPlayer>}
      */
     async attemptReconnect() {
         if (!this.voiceChannelExists)
             throw new ShoukakuError('Voice channel doesn\'t exist to reconnect on');
-        if (this.state !== DISCONNECTED)
-            throw new ShoukakuError('You can only reconnect connections that are on disconnected state');
+        try {
+            this.node.players.delete(this.guildID);
+            await this.node.send({ op: 'destroy', guildId: this.guildID });
+            await wait(750);
+            this.node.players.set(this.guildID, this.player);
+        } catch (error) {
+            if (!this.node.players.has(this.guildID)) this.node.players.set(this.guildID, this.player);
+            throw error;
+        }
         this.lastServerUpdate = null;
         await promisify(this.connect.bind(this))({ guildID: this.guildID, voiceChannelID: this.voiceChannelID, mute: this.selfMute, deaf: this.selfDeaf });
         return this.player;
@@ -122,6 +130,7 @@ class ShoukakuLink {
     stateUpdate(data) {
         this.selfDeaf = data.self_deaf;
         this.selfMute = data.self_mute;
+        if (this.voiceChannelID) this.channelMoved = data.channel_id && this.voiceChannelID !== data.channel_id;
         if (data.session_id) this.sessionID = data.session_id;
         if (!data.channel_id) {
             this.state = DISCONNECTED;
@@ -134,6 +143,7 @@ class ShoukakuLink {
     }
 
     serverUpdate(data) {
+        if (this.lastServerUpdate) this.voiceMoved = !data.endpoint.startsWith(this.region);
         this.lastServerUpdate = data;
         this.region = data.endpoint.split('.').shift().replace(/[0-9]/g, '');
         this.node.emit('debug', this.node.name, `[Shoukaku](Voice) Forwarding Server Update => Node ${this.node.name}, Voice Server Moved? ${this.voiceMoved}`);
@@ -196,7 +206,7 @@ class ShoukakuLink {
         this.voiceChannelID = null;
         this.node.send({ op: 'destroy', guildId: this.guildID })
             .then(() => this.node.emit('debug', this.node.name, `[Shoukaku](Voice) Destroyed => Guild ${this.guildID}`))
-            .catch(error => this.node.shoukaku.emit('error', this.node.name, error))
+            .catch(error => this.node.emit('error', this.node.name, error))
             .finally(() => {
                 if (this.state === DISCONNECTED) return;
                 this.send({ guild_id: this.guildID, channel_id: null, self_mute: false, self_deaf: false });

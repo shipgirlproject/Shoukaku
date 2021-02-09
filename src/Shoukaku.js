@@ -66,47 +66,47 @@ class Shoukaku extends EventEmitter {
     }
 
     /**
-     * Emitted when a Lavalink Node sends a debug event.
+     * Debug related things, enable if you have an issue and planning to report it to the developer of this Lib.
      * @event Shoukaku#debug
-     * @param {string} name The name of the Lavalink Node that sent a debug event.
+     * @param {string} name The name of the ShoukakuSocket that sent a debug event.
      * @param {Object} data The actual debug data
      * @memberof Shoukaku
      */
     /**
-     * Emitted when a lavalink Node encouters an error. This event MUST BE HANDLED.
+     * Emitted when a ShoukakuSocket encounters an internal error, MUST BE HANDLED.
      * @event Shoukaku#error
-     * @param {string} name The name of the Lavalink Node that sent an error event or 'Shoukaku' if the error is from Shoukaku.
+     * @param {string} name The name of the ShoukakuSocket that sent an error event.
      * @param {Error} error The error encountered.
      * @memberof Shoukaku
      * @example
      * // <Shoukaku> is your own instance of Shoukaku
      * <Shoukaku>.on('error', console.error);
      */
-    /** name, code, reason, isReconnectable
-     * Emitted when a Lavalink Node becomes Ready from a Reconnection or First Connection.
+    /** 
+     * Emitted when a ShoukakuSocket becomes Ready from a reconnection or first initialization.
      * @event Shoukaku#ready
-     * @param {string} name The name of the Lavalink Node that sent a ready event.
-     * @param {boolean} reconnect True if the session reconnected, otherwise false.
+     * @param {string} name The name of the ShoukakuSocket that sent a ready event.
+     * @param {boolean} reconnect true if the session reconnected, otherwise false.
      * @memberof Shoukaku
      */
     /**
-     * Emitted when a Lavalink Node closed.
+     * Emitted when a ShoukakuSocket closed it's websocket connection to a Lavalink Server.
      * @event Shoukaku#close
-     * @param {string} name The name of the Lavalink Node that sent a close event.
+     * @param {string} name The name of the ShoukakuSocket that sent a close event.
      * @param {number} code The WebSocket close code https://github.com/Luka967/websocket-close-codes
      * @param {reason} reason The reason for this close event.
      * @memberof Shoukaku
      */
     /**
-     * Emitted when a Lavalink Node will not try to reconnect again.
+     * Emitted when a ShoukakuSocket is removed and will not try to reconnect again.
      * @event Shoukaku#disconnected
-     * @param {string} name The name of the Lavalink Node that sent a close event.
+     * @param {string} name The name of the ShoukakuSocket that sent a close event.
      * @param {string} reason The reason for the disconnect.
      * @memberof Shoukaku
      */
 
     /**
-    * Function to register a Lavalink Node
+    * Function to register a new ShoukakuSocket
     * @param {ShoukakuConstants#ShoukakuNodeOptions} nodeOptions The Node Options to be used to connect to.
     * @memberof Shoukaku
     * @returns {void}
@@ -123,7 +123,7 @@ class Shoukaku extends EventEmitter {
         this.nodes.set(node.name, node);
     }
     /**
-     * Function to remove a Lavalink Node
+     * Function to remove an existing ShoukakuSocket
      * @param {string} name The Lavalink Node to remove
      * @param {string} [reason] Optional reason for this disconnect.
      * @memberof Shoukaku
@@ -151,12 +151,10 @@ class Shoukaku extends EventEmitter {
      * @example
      * const node = <Shoukaku>.getNode();
      * node.rest.resolve('Kongou Burning Love', 'youtube')
-     *     .then(data => {
-     *         node.joinVoiceChannel({
-     *             guildID: 'guild_id',
-     *             voiceChannelID: 'voice_channel_id'
-     *         }).then(player => player.playTrack(data.track))
-     *     })
+     *     .then(data => 
+     *         node.joinVoiceChannel({ guildID: 'guild_id', voiceChannelID: 'voice_channel_id' })
+     *             .then(player => player.playTrack(data.track))   
+     *     )
      */
     getNode(query) {
         if (!this.id)
@@ -173,8 +171,8 @@ class Shoukaku extends EventEmitter {
         return node;
     }
     /**
-    * Shortcut to get the Player of a guild, if there is any.
-    * @param {string} guildID The guildID of the guild we are trying to get.
+    * Shortcut to get the player of a guild, if there is any.
+    * @param {string} guildID The guildID of the guild you are trying to get.
     * @memberof Shoukaku
     * @returns {?ShoukakuPlayer}
     */

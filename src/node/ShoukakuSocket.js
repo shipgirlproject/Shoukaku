@@ -135,10 +135,8 @@ class ShoukakuSocket extends EventEmitter {
      * @memberof ShoukakuSocket
      * @returns {Promise<ShoukakuPlayer>}
      * @example
-     * <ShoukakuSocket>.joinVoiceChannel({
-     *     guildID: 'guild_id',
-     *     voiceChannelID: 'voice_channel_id'
-     * }).then((player) => player.playTrack('lavalink_track'));
+     * <ShoukakuSocket>.joinVoiceChannel({ guildID: 'guild_id', voiceChannelID: 'voice_channel_id' })
+     *     .then((player) => player.playTrack('lavalink_track')); 
      */
     async joinVoiceChannel(options = ShoukakuJoinOptions) {
         if (!options.guildID || !options.voiceChannelID)
@@ -231,9 +229,9 @@ class ShoukakuSocket extends EventEmitter {
             });
     }
 
-    _message(message) {
+    async _message(message) {
         try {
-            this._onLavalinkMessage(JSON.parse(message));
+            await this._onLavalinkMessage(JSON.parse(message));
         } catch (error) {
             this.emit('error', this.name, error);
         }
@@ -257,52 +255,18 @@ class ShoukakuSocket extends EventEmitter {
         const player = this.players.get(packet.d.guild_id);
         if (!player) return;
         if (packet.t === 'VOICE_SERVER_UPDATE') {
-            if (player.voiceConnection.lastServerUpdate) 
-                player.voiceConnection.voiceMoved = !packet.d.endpoint.startsWith(player.voiceConnection.region);
             player.voiceConnection.serverUpdate(packet.d);
             return;
         }
         if (packet.d.user_id !== this.shoukaku.id) return;
-        if (player.voiceConnection.voiceChannelID) 
-            player.voiceConnection.channelMoved = packet.d.channel_id && player.voiceConnection.voiceChannelID !== packet.d.channel_id;
         player.voiceConnection.stateUpdate(packet.d);
     }
 
-    _onLavalinkMessage(json) {
+    async _onLavalinkMessage(json) {
+        if (json.op === 'stats') return this.stats = json;
         const player = this.players.get(json.guildId);
-        switch (json.op) {
-            case 'stats':
-                this.stats = json;
-                break;
-            case 'playerUpdate': 
-                if (!player) break;
-                player.emit('playerUpdate', json.state);
-                break;
-            case 'event': 
-                if (!player) break;
-                switch (json.type) {
-                    case 'TrackEndEvent':
-                        player.emit('end', json);
-                        break;
-                    case 'TrackStuckEvent':
-                        player.emit('end', json);
-                        break;
-                    case 'TrackStartEvent':
-                        player.emit('start', json);
-                        break;
-                    case 'TrackExceptionEvent':
-                        player.emit('trackException', json);
-                        break;
-                    case 'WebSocketClosedEvent':
-                        player.emit('closed', json);
-                        break;
-                    default:
-                        this.emit('debug', this.name, `[Shoukaku](Socket) Unknown player event => ${json.type}`);
-                }
-                break;
-            default: 
-                this.emit('debug', this.name, `[Shoukaku](Socket) Unknown OP => ${json.op}`);
-        }
+        if (!player) return;
+        await player._onLavalinkMessage(json);
     }
 }
 module.exports = ShoukakuSocket;
