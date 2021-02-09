@@ -150,6 +150,21 @@ declare module 'shoukaku' {
     depth?: number;
   }
 
+  export interface RotationValue {
+    rotationHz?: number;
+  }
+
+  export interface DistortionValue {
+    sinOffset?: number;
+    sinScale?: number;
+    cosOffset?: number;
+    cosScale?: number;
+    tanOffset?: number;
+    tanScale?: number;
+    offset?: number;
+    scale?: number;
+};
+
   class ShoukakuConstants {
     static ShoukakuStatus: ShoukakuStatus;
     static ShoukakuNodeStats: ShoukakuNodeStats;
@@ -163,6 +178,8 @@ declare module 'shoukaku' {
     static TimescaleValue: TimescaleValue;
     static TremoloValue: TremoloValue;
     static VibratoValue: VibratoValue;
+    static RotationValue: RotationValue;
+    static DistortionValue: DistortionValue;
   }
 
   export { ShoukakuConstants as Constants };
@@ -174,6 +191,8 @@ declare module 'shoukaku' {
     public timescale?: TimescaleValue;
     public tremolo?: TremoloValue;
     public vibrato?: VibratoValue;
+    public rotation?: RotationValue;
+    public distortion?: DistortionValue;
   }
 
   export class ShoukakuGroupedFilterOptions {
@@ -248,6 +267,8 @@ declare module 'shoukaku' {
     public setTimescale(timescalevalue?: TimescaleValue): Promise<ShoukakuPlayer>;
     public setTremolo(tremoloValue?: TremoloValue): Promise<ShoukakuPlayer>;
     public setVibrato(vibratoValue?: VibratoValue): Promise<ShoukakuPlayer>;
+    public setRotation(rotationValue?: RotationValue): Promise<ShoukakuPlayer>;
+    public setDistortion(distortionValue?: DistortionValue): Promise<ShoukakuPlayer>;
     public setGroupedFilters(settings?: ShoukakuGroupedFilterOptions): Promise<ShoukakuPlayer>;
     public clearFilters(): Promise<ShoukakuPlayer>;
 

@@ -1,5 +1,5 @@
 const EventEmitter = require('events');
-const { ShoukakuPlayOptions, ShoukakuStatus, KaraokeValue, TimescaleValue, TremoloValue, VibratoValue } = require('../constants/ShoukakuConstants.js');
+const { ShoukakuPlayOptions, ShoukakuStatus, KaraokeValue, TimescaleValue, TremoloValue, VibratoValue, RotationValue, DistortionValue } = require('../constants/ShoukakuConstants.js');
 const { CONNECTED } = ShoukakuStatus;
 const { mergeDefault, wait } = require('../util/ShoukakuUtil.js');
 const ShoukakuLink = require('./ShoukakuLink.js');
@@ -315,6 +315,46 @@ class ShoukakuPlayer extends EventEmitter {
         return this;
     }
     /**
+     * Sets the rotation effect of your lavalink player
+     * @param {ShoukakuConstants#RotationValue} [rotationValue] Rotation settings for this playback
+     * @memberOf ShoukakuPlayer
+     * @returns {Promise<ShoukakuPlayer>}
+     */
+    async setRotation(rotationValue) {
+        if (!rotationValue) {
+            this.filters.rotation = null;
+        } else {
+            // input sanitation, to ensure no additional keys is being introduced
+            const values = {};
+            for (const key of Object.keys(rotationValue)) {
+                if (RotationValue[key]) values[key] = rotationValue[key];
+            }
+            this.filters.rotation = values;
+        }
+        await this.updateFilters();
+        return this;
+    }
+    /**
+     * Sets the distortion effect of your lavalink player
+     * @param {ShoukakuConstants#DistortionValue} [distortionValue] Distortion settings for this playback
+     * @memberOf ShoukakuPlayer
+     * @returns {Promise<ShoukakuPlayer>}
+     */
+    async setDistortion(distortionValue) {
+        if (!distortionValue) {
+            this.filters.distortion = null;
+        } else {
+            // input sanitation, to ensure no additional keys is being introduced
+            const values = {};
+            for (const key of Object.keys(distortionValue)) {
+                if (DistortionValue[key]) values[key] = distortionValue[key];
+            }
+            this.filters.distortion = values;
+        }
+        await this.updateFilters();
+        return this;
+    }
+    /**
      * Ability to set filters by group instead of 1 by 1
      * @param {Object} [settings] object containing filter settings
      * @param {Number} [settings.volume=1.0] volume of this filter
@@ -323,6 +363,8 @@ class ShoukakuPlayer extends EventEmitter {
      * @param {ShoukakuConstants#TimescaleValue} [settings.timescale] timescale settings of this filter
      * @param {ShoukakuConstants#TremoloValue} [settings.tremolo] tremolo settings of this filter
      * @param {ShoukakuConstants#VibratoValue} [settings.vibrato] vibrato settings of this filter
+     * @param {ShoukakuConstants#RotationValue} [settings.rotation] rotation settings of this filter
+     * @param {ShoukakuConstants#DistortionValue} [settings.distortion] distortion settings of this filter
      * @memberOf ShoukakuPlayer
      * @returns {Promise<ShoukakuPlayer>}
      */
@@ -346,7 +388,7 @@ class ShoukakuPlayer extends EventEmitter {
     }
 
     async updateFilters() {
-        const { volume, equalizer, karaoke, timescale, tremolo, vibrato } = this.filters;
+        const { volume, equalizer, karaoke, timescale, tremolo, vibrato, rotation, distortion } = this.filters;
         await this.voiceConnection.node.send({
             op: 'filters',
             guildId: this.voiceConnection.guildID,
@@ -355,7 +397,9 @@ class ShoukakuPlayer extends EventEmitter {
             karaoke,
             timescale,
             tremolo,
-            vibrato
+            vibrato,
+            rotation, 
+            distortion
         });
     }
 
@@ -366,13 +410,12 @@ class ShoukakuPlayer extends EventEmitter {
                     this.emit('error', new ShoukakuError('Tried to resume, but the track is null'));
                     return;
                 }
-                if (this.filters.equalizer.length) await this.setEqualizer(this.filters.equalizer);
-                if (this.filters.volume !== 1) await this.setVolume(this.filters.volume);
+                await this.updateFilters();
                 await this.playTrack(this.track, { startTime: this.position });
             } else {
-                await wait(1050);
+                await wait(1000);
                 await this.setPaused();
-                await wait(1050);
+                await wait(1000);
                 await this.setPaused(false);
             }
             this.emit('resumed');
@@ -384,7 +427,7 @@ class ShoukakuPlayer extends EventEmitter {
     reset() {
         this.track = null;
         this.position = 0;
-        this.filters.equalizer.length = 0;
+        this.filters = new ShoukakuFilter();
     }
 
     emit(event, data) {

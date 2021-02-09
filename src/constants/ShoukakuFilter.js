@@ -11,39 +11,50 @@ class ShoukakuFilter {
      * @param {ShoukakuConstants#TimescaleValue} [settings.timescale] timescale settings of this filter
      * @param {ShoukakuConstants#TremoloValue} [settings.tremolo] tremolo settings of this filter
      * @param {ShoukakuConstants#VibratoValue} [settings.vibrato] vibrato settings of this filter
+     * @param {ShoukakuConstants#RotationValue} [settings.rotation] rotation settings of this filter
+     * @param {ShoukakuConstants#DistortionValue} [settings.distortion] distortion settings of this filter
      */
     constructor(settings = {}) {
-        const { volume, equalizer, karaoke, timescale, tremolo, vibrato } = settings;
         /**
          * The volume of this filter
          * @type {Number}
          */
-        this.volume = volume || 1.0;
+        this.volume = settings.volume || 1.0;
         /**
          * The equalizer bands set for this filter
          * @type {Array<ShoukakuConstants#EqualizerBand>}
          */
-        this.equalizer = equalizer || [];
+        this.equalizer = settings.equalizer || [];
         /**
          * The karaoke settings set for this filter
          * @type {?ShoukakuConstants#KaraokeValue}
          */
-        this.karaoke = karaoke || null;
+        this.karaoke = settings.karaoke || null;
         /**
          * The timescale settings set for this filter
          * @type {?ShoukakuConstants#TimescaleValue}
          */
-        this.timescale = timescale || null;
+        this.timescale = settings.timescale || null;
         /**
          * The tremolo settings set for this filter
          * @type {?ShoukakuConstants#TremoloValue}
          */
-        this.tremolo = tremolo || null;
+        this.tremolo = settings.tremolo || null;
         /**
          * The vibrato settings set for this filter
          * @type {?ShoukakuConstants#VibratoValue}
          */
-        this.vibrato = vibrato || null;
+        this.vibrato = settings.vibrato || null;
+        /**
+         * The rotation settings set for this filter
+         * @type {?ShoukakuConstants#RotationValue}
+         */
+        this.rotation = settings.rotation || null;
+        /**
+         * The distortion settings set for this filter
+         * @type {?ShoukakuConstants#DistortionValue}
+         */
+        this.distortion = settings.distortion || null;
     }
 }
 

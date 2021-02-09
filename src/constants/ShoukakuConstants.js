@@ -200,5 +200,39 @@ class ShoukakuConstants {
             depth: 0.5
         };
     }
+    /**
+     * Available settings for Rotation
+     * @typedef {RotationValue} RotationValue
+     * @property {?number} [rotationHz] Frequency of the audio rotating
+     * @memberof ShoukakuConstants#
+     */
+    static get RotationValue() {
+        return { rotationHz: 0 };
+    }
+    /**
+     * Available settings for Distortion
+     * @typedef {DistortionValue} DistortionValue
+     * @property {?number} [sinOffset] Sin Offset
+     * @property {?number} [sinScale] Sin Scale
+     * @property {?number} [cosOffset] Cos Offset
+     * @property {?number} [cosScale] Cos Scale
+     * @property {?number} [tanOffset] Tan Offset
+     * @property {?number} [tanScale] Tan Scale
+     * @property {?number} [offset] Offset
+     * @property {?number} [scale] Scale
+     * @memberof ShoukakuConstants#
+     */
+    static get DistortionValue() {
+        return {
+            sinOffset: 0,
+            sinScale: 1,
+            cosOffset: 0,
+            cosScale: 1,
+            tanOffset: 0,
+            tanScale: 1,
+            offset: 0,
+            scale: 1
+        };
+    }
 }
 module.exports = ShoukakuConstants;
