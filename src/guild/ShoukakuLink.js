@@ -132,14 +132,9 @@ class ShoukakuLink {
         this.selfMute = data.self_mute;
         if (this.voiceChannelID) this.channelMoved = data.channel_id && this.voiceChannelID !== data.channel_id;
         if (data.session_id) this.sessionID = data.session_id;
-        if (!data.channel_id) {
-            this.state = DISCONNECTED;
-            this.node.emit('debug', this.node.name, `[Shoukaku](Voice) Disconnected => Guild ${this.guildID}`);
-        }
-        if (data.channel_id) {
-            this.voiceChannelID = data.channel_id;
-            this.node.emit('debug', this.node.name, `[Shoukaku](Voice) State Update Received => Guild ${this.guildID}, Channel ${data.channel_id}, Channel Moved? ${this.channelMoved}`);
-        }
+        if (data.channel_id) this.voiceChannelID = data.channel_id;
+        if (!data.channel_id) this.state = DISCONNECTED;
+        this.node.emit('debug', this.node.name, `[Shoukaku](Voice) State Update Received => Guild ${this.guildID}, Channel ${data.channel_id}, State ${this.state}, Channel Moved? ${!!this.channelMoved}`);
     }
 
     serverUpdate(data) {
