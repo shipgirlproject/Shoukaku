@@ -1,5 +1,3 @@
-import { ShoukakuJoinOptions } from "./src/constants/ShoukakuConstants";
-
 declare module 'shoukaku' {
   import { EventEmitter } from "events";
   import { Client as DiscordClient, Base64String, Guild } from 'discord.js';
