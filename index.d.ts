@@ -213,15 +213,15 @@ declare module 'shoukaku' {
     public distortion?: DistortionValue;
   }
 
-  export class ShoukakuGroupedFilterOptions {
-    public volume?: number;
-    public equalizer?: EqualizerBand[];
-    public karaoke?: KaraokeValue;
-    public timescale?: TimescaleValue;
-    public tremolo?: TremoloValue;
-    public vibrato?: VibratoValue;
-    public rotation?: RotationValue;
-    public distortion?: DistortionValue;
+  export interface ShoukakuGroupedFilterOptions {
+    volume?: number;
+    equalizer?: EqualizerBand[];
+    karaoke?: KaraokeValue;
+    timescale?: TimescaleValue;
+    tremolo?: TremoloValue;
+    vibrato?: VibratoValue;
+    rotation?: RotationValue;
+    distortion?: DistortionValue;
   }
 
   export class ShoukakuRest {
