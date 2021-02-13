@@ -1,5 +1,5 @@
 declare module 'shoukaku' {
-  import { EventEmitter } from "events";
+  import { EventEmitter } from 'events';
   import { Client as DiscordClient, Base64String, Guild } from 'discord.js';
 
   export const version: string;
@@ -56,7 +56,7 @@ declare module 'shoukaku' {
   }
 
   export interface PlayerEndEvent {
-    reason: "FINISHED" | "LOAD_FAILED" | "STOPPED" | "REPLACED" | "CLEANUP";
+    reason: 'FINISHED' | 'LOAD_FAILED' | 'STOPPED' | 'REPLACED' | 'CLEANUP';
     track: string;
     guildId: string;
   }
@@ -65,7 +65,7 @@ declare module 'shoukaku' {
     track: string;
     exception: {
       message: string;
-      severity: "COMMON" | "SUSPICIOUS" | "FAULT";
+      severity: 'COMMON' | 'SUSPICIOUS' | 'FAULT';
       cause: string;
     };
     guildId: string;
@@ -245,7 +245,7 @@ declare module 'shoukaku' {
     on(event: 'error', listener: (err: ShoukakuError | Error) => void): this;
     on(event: 'nodeDisconnect', listener: (err: ShoukakuError) => void): this;
     on(event: 'resumed', listener: () => void): this;
-    on(event: 'playerUpdate', listener: (data: PlayerUpdateEvent["state"]) => void): this;
+    on(event: 'playerUpdate', listener: (data: PlayerUpdateEvent['state']) => void): this;
     on(event: 'trackException', listener: (data: PlayerExceptionEvent) => void): this;
     on(event: 'closed', listener: (data: PlayerClosedEvent) => void): this;
     on(event: 'start', listener: (data: PlayerStartEvent) => void): this;
@@ -253,7 +253,7 @@ declare module 'shoukaku' {
     once(event: 'error', listener: (err: ShoukakuError | Error) => void): this;
     once(event: 'nodeDisconnect', listener: (err: ShoukakuError) => void): this;
     once(event: 'resumed', listener: () => void): this;
-    once(event: 'playerUpdate', listener: (data: PlayerUpdateEvent["state"]) => void): this;
+    once(event: 'playerUpdate', listener: (data: PlayerUpdateEvent['state']) => void): this;
     once(event: 'trackException', listener: (data: PlayerExceptionEvent) => void): this;
     once(event: 'closed', listener: (data: PlayerClosedEvent) => void): this;
     once(event: 'start', listener: (data: PlayerStartEvent) => void): this;
@@ -261,7 +261,7 @@ declare module 'shoukaku' {
     off(event: 'error', listener: (err: ShoukakuError | Error) => void): this;
     off(event: 'nodeDisconnect', listener: (err: ShoukakuError) => void): this;
     off(event: 'resumed', listener: () => void): this;
-    off(event: 'playerUpdate', listener: (data: PlayerUpdateEvent["state"]) => void): this;
+    off(event: 'playerUpdate', listener: (data: PlayerUpdateEvent['state']) => void): this;
     off(event: 'trackException', listener: (data: PlayerExceptionEvent) => void): this;
     off(event: 'closed', listener: (data: PlayerClosedEvent) => void): this;
     off(event: 'start', listener: (data: PlayerStartEvent) => void): this;
