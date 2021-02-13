@@ -52,17 +52,35 @@ declare module 'shoukaku' {
     DISCONNECTED = 'DISCONNECTED',
   }
 
-  export interface Reason {
-    op: string;
-    reason: string;
-    code: number;
-    byRemote: boolean;
-    type: string;
+  export interface PlayerStartEvent {
+    track: string;
     guildId: string;
   }
 
-  export interface PlayerUpdate {
-    op: "playerUpdate";
+  export interface PlayerEndEvent {
+    reason: "FINISHED" | "LOAD_FAILED" | "STOPPED" | "REPLACED" | "CLEANUP";
+    track: string;
+    guildId: string;
+  }
+
+  export interface PlayerExceptionEvent {
+    track: string;
+    exception: {
+      message: string;
+      severity: "COMMON" | "SUSPICIOUS" | "FAULT";
+      cause: string;
+    };
+    guildId: string;
+  }
+
+  export interface PlayerClosedEvent {
+    reason: string;
+    code: number;
+    byRemote: boolean;
+    guildId: string;
+  }
+
+  export interface PlayerUpdateEvent {
     guildId: string;
     state: {
       time: number;
@@ -225,30 +243,30 @@ declare module 'shoukaku' {
   }
 
   export interface ShoukakuPlayer {
-    on(event: 'end', listener: (reason: Reason) => void): this;
+    on(event: 'end', listener: (data: PlayerEndEvent) => void): this;
     on(event: 'error', listener: (err: ShoukakuError | Error) => void): this;
-    on(event: 'nodeDisconnect', listener: (name: string) => void): this;
+    on(event: 'nodeDisconnect', listener: (err: ShoukakuError) => void): this;
     on(event: 'resumed', listener: () => void): this;
-    on(event: 'playerUpdate', listener: (data: PlayerUpdate["state"]) => void): this;
-    on(event: 'trackException', listener: (data: unknown) => void): this;
-    on(event: 'closed', listener: (data: unknown) => void): this;
-    on(event: 'start', listener: (data: unknown) => void): this;
-    once(event: 'end', listener: (reason: Reason) => void): this;
+    on(event: 'playerUpdate', listener: (data: PlayerUpdateEvent["state"]) => void): this;
+    on(event: 'trackException', listener: (data: PlayerExceptionEvent) => void): this;
+    on(event: 'closed', listener: (data: PlayerClosedEvent) => void): this;
+    on(event: 'start', listener: (data: PlayerStartEvent) => void): this;
+    once(event: 'end', listener: (data: PlayerEndEvent) => void): this;
     once(event: 'error', listener: (err: ShoukakuError | Error) => void): this;
-    once(event: 'nodeDisconnect', listener: (name: string) => void): this;
+    once(event: 'nodeDisconnect', listener: (err: ShoukakuError) => void): this;
     once(event: 'resumed', listener: () => void): this;
-    once(event: 'playerUpdate', listener: (data: PlayerUpdate["state"]) => void): this;
-    once(event: 'trackException', listener: (data: unknown) => void): this;
-    once(event: 'closed', listener: (data: unknown) => void): this;
-    once(event: 'start', listener: (data: unknown) => void): this;
-    off(event: 'end', listener: (reason: Reason) => void): this;
+    once(event: 'playerUpdate', listener: (data: PlayerUpdateEvent["state"]) => void): this;
+    once(event: 'trackException', listener: (data: PlayerExceptionEvent) => void): this;
+    once(event: 'closed', listener: (data: PlayerClosedEvent) => void): this;
+    once(event: 'start', listener: (data: PlayerStartEvent) => void): this;
+    off(event: 'end', listener: (data: PlayerEndEvent) => void): this;
     off(event: 'error', listener: (err: ShoukakuError | Error) => void): this;
-    off(event: 'nodeDisconnect', listener: (name: string) => void): this;
+    off(event: 'nodeDisconnect', listener: (err: ShoukakuError) => void): this;
     off(event: 'resumed', listener: () => void): this;
-    off(event: 'playerUpdate', listener: (data: PlayerUpdate["state"]) => void): this;
-    off(event: 'trackException', listener: (data: unknown) => void): this;
-    off(event: 'closed', listener: (data: unknown) => void): this;
-    off(event: 'start', listener: (data: unknown) => void): this;
+    off(event: 'playerUpdate', listener: (data: PlayerUpdateEvent["state"]) => void): this;
+    off(event: 'trackException', listener: (data: PlayerExceptionEvent) => void): this;
+    off(event: 'closed', listener: (data: PlayerClosedEvent) => void): this;
+    off(event: 'start', listener: (data: PlayerStartEvent) => void): this;
   }
 
   export class ShoukakuPlayer extends EventEmitter {
