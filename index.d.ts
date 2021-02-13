@@ -23,7 +23,7 @@ declare module 'shoukaku' {
   }
 
   export class ShoukakuTrackList {
-    type: string;
+    type: 'PLAYLIST' | 'TRACK' | 'SEARCH';
     playlistName?: string;
     selectedTrack: number;
     tracks: Array<ShoukakuTrack>;
