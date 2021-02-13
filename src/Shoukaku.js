@@ -138,7 +138,7 @@ class Shoukaku extends EventEmitter {
             .catch(error => this.emit('error', name, error))
             .finally(() => {
                 this.nodes.delete(name);
-                node.emit('debug', node.name, `[Shoukaku](Main) Node Removed => Name: ${node.name}`);
+                node.emit('debug', node.name, `[Main] Node Removed => Name: ${node.name}`);
                 node.ws.close(1000, reason);
                 this.emit('disconnected', name, reason);
             });
@@ -186,7 +186,7 @@ class Shoukaku extends EventEmitter {
     _ready(name, resumed) {
         const node = this.nodes.get(name);
         node.executeCleaner()
-            .then(() => node.emit('debug', node.name, `[Shoukaku](Main) Node Ready => Name: ${node.name}`))
+            .then(() => node.emit('debug', node.name, `[Main] Node Ready => Name: ${node.name}`))
             .then(() => this.emit('ready', name, resumed))
             .catch(error => this.emit('error', name, error));
     }
@@ -200,17 +200,17 @@ class Shoukaku extends EventEmitter {
 
     _reconnect(node) {
         if (node.reconnectAttempts >= this.options.reconnectTries) {
-            node.emit('debug', node.name, `[Shoukaku](Main) Node Disconnecting => Node ${node.name}, Failed reconnection in ${this.options.reconnectTries} attempt(s)`);
+            node.emit('debug', node.name, `[Main] Node Disconnecting => Node ${node.name}, Failed reconnection in ${this.options.reconnectTries} attempt(s)`);
             this.removeNode(node.name, `Failed to reconnect in ${this.options.reconnectTries} attempt(s)`);
             return;
         }
         try {
             node.reconnectAttempts++;
-            node.emit('debug', node.name, `[Shoukaku](Main) Node Reconnecting => Node ${node.name}, ${this.options.reconnectTries - node.reconnectAttempts} reconnect tries left`);
+            node.emit('debug', node.name, `[Main] Node Reconnecting => Node ${node.name}, ${this.options.reconnectTries - node.reconnectAttempts} reconnect tries left`);
             node.connect(this.id, this.options.resumable);
         } catch (error) {
             this.emit('error', node.name, error);
-            node.emit('debug', node.name, `[Shoukaku](Main) Node Reconnecting => Node ${node.name}, Trying again in ${this.options.reconnectInterval}ms`);
+            node.emit('debug', node.name, `[Main] Node Reconnecting => Node ${node.name}, Trying again in ${this.options.reconnectInterval}ms`);
             setTimeout(() => this._reconnect(node), this.options.reconnectInterval);
         }
     }

@@ -114,7 +114,7 @@ class ShoukakuSocket extends EventEmitter {
     */
     connect(id, resumable) {
         this.state = CONNECTING;
-        this.emit('debug', this.name, `[Shoukaku](Socket) Connecting => Node ${this.name}`);
+        this.emit('debug', this.name, `[Socket] Connecting => Node ${this.name}`);
         const headers = {
             'Client-Name': this.userAgent,
             'User-Agent': this.userAgent,
@@ -212,7 +212,7 @@ class ShoukakuSocket extends EventEmitter {
 
     _upgrade(response) {
         this.resumed = response.headers['session-resumed'] === 'true';
-        this.emit('debug', this.name, `[Shoukaku](Socket) Connecting, Upgrade Response Received => Node ${this.name}, Waiting for WS Open Event...`);
+        this.emit('debug', this.name, `[Socket] Connecting, Upgrade Response Received => Node ${this.name}, Waiting for WS Open Event...`);
     }
 
     _open() {
@@ -220,7 +220,7 @@ class ShoukakuSocket extends EventEmitter {
             .then(() => {
                 this.reconnectAttempts = 0;
                 this.state = CONNECTED;
-                this.emit('debug', this.name, `[Shoukaku](Socket) Connected => Node ${this.name}, Resumed Connection? ${this.resumed}`);
+                this.emit('debug', this.name, `[Socket] Connected => Node ${this.name}, Resumed Connection? ${this.resumed}`);
                 this.emit('ready', this.name, this.resumed);
             })
             .catch(error => {
@@ -239,7 +239,7 @@ class ShoukakuSocket extends EventEmitter {
 
     _error(error) {
         this.emit('error', this.name, error);
-        this.emit('debug', this.name, `[Shoukaku](Socket) Errored, Closing => Node ${this.name}`);
+        this.emit('debug', this.name, `[Socket] Errored, Closing => Node ${this.name}`);
         this.ws.close(1011, 'Reconnecting the Websocket due to an error');
     }
 
@@ -247,7 +247,7 @@ class ShoukakuSocket extends EventEmitter {
         this.ws.removeAllListeners();
         this.ws = null;
         this.state = DISCONNECTED;
-        this.emit('debug', this.name, `[Shoukaku](Socket) Disconnected => Node ${this.name}`);
+        this.emit('debug', this.name, `[Socket] Disconnected => Node ${this.name}`);
         this.emit('close', this.name, code, reason);
     }
 
@@ -263,6 +263,7 @@ class ShoukakuSocket extends EventEmitter {
     }
 
     async _onLavalinkMessage(json) {
+        this.emit('debug', this.name, `[Socket] Message OP: ${json.op} => Node ${this.name}`);
         if (json.op === 'stats') return this.stats = json;
         const player = this.players.get(json.guildId);
         if (!player) return;
