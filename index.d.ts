@@ -1,3 +1,5 @@
+import { ShoukakuJoinOptions } from "./src/constants/ShoukakuConstants";
+
 declare module 'shoukaku' {
   import { EventEmitter } from "events";
   import { Client as DiscordClient, Base64String, Guild } from 'discord.js';
@@ -227,7 +229,7 @@ declare module 'shoukaku' {
     on(event: 'error', listener: (err: ShoukakuError | Error) => void): this;
     on(event: 'nodeDisconnect', listener: (name: string) => void): this;
     on(event: 'resumed', listener: () => void): this;
-    on(event: 'playerUpdate', listener: (data: PlayerUpdate) => void): this;
+    on(event: 'playerUpdate', listener: (data: PlayerUpdate["state"]) => void): this;
     on(event: 'trackException', listener: (data: unknown) => void): this;
     on(event: 'closed', listener: (data: unknown) => void): this;
     on(event: 'start', listener: (data: unknown) => void): this;
@@ -235,7 +237,7 @@ declare module 'shoukaku' {
     once(event: 'error', listener: (err: ShoukakuError | Error) => void): this;
     once(event: 'nodeDisconnect', listener: (name: string) => void): this;
     once(event: 'resumed', listener: () => void): this;
-    once(event: 'playerUpdate', listener: (data: PlayerUpdate) => void): this;
+    once(event: 'playerUpdate', listener: (data: PlayerUpdate["state"]) => void): this;
     once(event: 'trackException', listener: (data: unknown) => void): this;
     once(event: 'closed', listener: (data: unknown) => void): this;
     once(event: 'start', listener: (data: unknown) => void): this;
@@ -243,7 +245,7 @@ declare module 'shoukaku' {
     off(event: 'error', listener: (err: ShoukakuError | Error) => void): this;
     off(event: 'nodeDisconnect', listener: (name: string) => void): this;
     off(event: 'resumed', listener: () => void): this;
-    off(event: 'playerUpdate', listener: (data: PlayerUpdate) => void): this;
+    off(event: 'playerUpdate', listener: (data: PlayerUpdate["state"]) => void): this;
     off(event: 'trackException', listener: (data: unknown) => void): this;
     off(event: 'closed', listener: (data: unknown) => void): this;
     off(event: 'start', listener: (data: unknown) => void): this;
