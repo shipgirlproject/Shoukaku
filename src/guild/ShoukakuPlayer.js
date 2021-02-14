@@ -239,7 +239,7 @@ class ShoukakuPlayer extends EventEmitter {
             // input sanitation, to ensure no additional keys is being introduced
             const values = {};
             for (const key of Object.keys(karaokeValue)) {
-                if (KaraokeValue[key]) values[key] = karaokeValue[key];
+                if (key in KaraokeValue) values[key] = karaokeValue[key];
             }
             this.filters.karaoke = values;
         }
@@ -259,7 +259,7 @@ class ShoukakuPlayer extends EventEmitter {
             // input sanitation, to ensure no additional keys is being introduced
             const values = {};
             for (const key of Object.keys(timescaleValue)) {
-                if (TimescaleValue[key]) values[key] = timescaleValue[key];
+                if (key in TimescaleValue) values[key] = timescaleValue[key];
             }
             this.filters.timescale = values;
         }
@@ -279,7 +279,7 @@ class ShoukakuPlayer extends EventEmitter {
             // input sanitation, to ensure no additional keys is being introduced
             const values = {};
             for (const key of Object.keys(tremoloValue)) {
-                if (TremoloValue[key]) values[key] = tremoloValue[key];
+                if (key in TremoloValue) values[key] = tremoloValue[key];
             }
             this.filters.tremolo = values;
         }
@@ -299,7 +299,7 @@ class ShoukakuPlayer extends EventEmitter {
             // input sanitation, to ensure no additional keys is being introduced
             const values = {};
             for (const key of Object.keys(vibratoValue)) {
-                if (VibratoValue[key]) values[key] = vibratoValue[key];
+                if (key in VibratoValue) values[key] = vibratoValue[key];
             }
             this.filters.vibrato = values;
         }
@@ -319,7 +319,7 @@ class ShoukakuPlayer extends EventEmitter {
             // input sanitation, to ensure no additional keys is being introduced
             const values = {};
             for (const key of Object.keys(rotationValue)) {
-                if (RotationValue[key]) values[key] = rotationValue[key];
+                if (key in RotationValue) values[key] = rotationValue[key];
             }
             this.filters.rotation = values;
         }
@@ -339,7 +339,7 @@ class ShoukakuPlayer extends EventEmitter {
             // input sanitation, to ensure no additional keys is being introduced
             const values = {};
             for (const key of Object.keys(distortionValue)) {
-                if (DistortionValue[key]) values[key] = distortionValue[key];
+                if (key in DistortionValue) values[key] = DistortionValue[key];
             }
             this.filters.distortion = values;
         }
@@ -419,7 +419,7 @@ class ShoukakuPlayer extends EventEmitter {
             timescale,
             tremolo,
             vibrato,
-            rotation, 
+            rotation,
             distortion
         });
     }
@@ -435,7 +435,7 @@ class ShoukakuPlayer extends EventEmitter {
             this.position = json.state.position;
             this.emit('playerUpdate', json.state);
             return;
-        } 
+        }
         if (json.op === 'event') {
             switch (json.type) {
                 case 'TrackStartEvent':
