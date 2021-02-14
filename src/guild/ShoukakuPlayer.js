@@ -397,9 +397,9 @@ class ShoukakuPlayer extends EventEmitter {
                 await this.updateFilters();
                 await this.playTrack(this.track, { startTime: this.position });
             } else {
-                await wait(500);
+                await wait(1000);
                 await this.setPaused();
-                await wait(500);
+                await wait(1000);
                 await this.setPaused(false);
             }
             this.emit('resumed');
@@ -455,18 +455,18 @@ class ShoukakuPlayer extends EventEmitter {
                         this.voiceConnection.channelMoved = false;
                         this.voiceConnection.voiceMoved = false;
                         await this.resume(true);
-                        this.voiceConnection.node.emit('debug', this.voiceConnection.node.name, `[Shoukaku](Player) Channel / Voice Server Moved => Guild ${this.voiceConnection.guildID}`);
+                        this.voiceConnection.node.emit('debug', this.voiceConnection.node.name, `[Player] Channel / Voice Server Moved => Guild ${this.voiceConnection.guildID}`);
                         break;
                     }
-                    this.voiceConnection.node.emit('debug', this.voiceConnection.node.name, `[Shoukaku](Player) Voice Websocket Close Event => Guild ${this.voiceConnection.guildID}, Reason: ${json.code} ${json.reason}`);
+                    this.voiceConnection.node.emit('debug', this.voiceConnection.node.name, `[Player] Voice Websocket Close Event => Guild ${this.voiceConnection.guildID}, Reason: ${json.code} ${json.reason}`);
                     this.emit('closed', json);
                     break;
                 default:
-                    this.voiceConnection.node.emit('debug', this.voiceConnection.node.name, `[Shoukaku](Player) Unknown player event => ${json.type}`);
+                    this.voiceConnection.node.emit('debug', this.voiceConnection.node.name, `[Player] Unknown player event => ${json.type}`);
             }
             return;
         }
-        this.voiceConnection.node.emit('debug', this.voiceConnection.node.name, `[Shoukaku](Player) Unknown OP => ${json.op}`);
+        this.voiceConnection.node.emit('debug', this.voiceConnection.node.name, `[Player] Unknown OP => ${json.op}`);
     }
 }
 module.exports = ShoukakuPlayer;
