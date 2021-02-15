@@ -137,8 +137,8 @@ declare module 'shoukaku' {
     host: string;
     port: number;
     auth: string;
-    group?: string;
     secure: boolean;
+    group?: string;
   }
 
   export interface EqualizerBand {
@@ -342,7 +342,7 @@ declare module 'shoukaku' {
     public url: string;
     public resumed: boolean;
     public penalties: number;
-    
+
     private auth: string;
     private userAgent: string;
     private resumable: boolean | string;
