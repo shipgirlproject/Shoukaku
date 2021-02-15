@@ -17,13 +17,14 @@ class ShoukakuRest {
      * @param {string} auth The authentication key you set on your lavalink config.
      * @param {string} userAgent User agent to use per request
      * @param {number} [timeout=15000] Timeout before a request times out.
+     * @param {boolean} secure use secure protocol or no
      */
-    constructor(host, port, auth, userAgent, timeout) {
+    constructor(host, port, auth, userAgent, timeout, secure) {
         /**
         * URL of the host used by this resolver instance.
         * @type {string}
         */
-        this.url = `http://${host}:${port}/`;
+        this.url = `http${secure ? 's' : ''}://${host}:${port}/`;
         /**
          * This Resolver Timeout before it decides to cancel the request.
          * @type {number}
