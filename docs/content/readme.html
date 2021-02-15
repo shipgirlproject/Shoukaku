@@ -45,7 +45,7 @@
 <pre><code class="js">const { Client } = require('discord.js');
 const { Shoukaku } = require('shoukaku');
 
-const LavalinkServer = [{ name: 'Localhost', host: 'localhost', port: 6969, auth: 'big_weeb' }];
+const LavalinkServer = [{ name: 'Localhost', host: 'localhost', port: 6969, auth: 'big_weeb', secure: false, group: 'main' }];
 const ShoukakuOptions = { moveOnDisconnect: false, resumable: false, resumableTimeout: 30, reconnectTries: 2, restTimeout: 10000 };
 
 class ExampleBot extends Client {
