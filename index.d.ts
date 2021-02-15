@@ -137,7 +137,7 @@ declare module 'shoukaku' {
     host: string;
     port: number;
     auth: string;
-    secure: boolean;
+    secure?: boolean;
     group?: string;
   }
 
