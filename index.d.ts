@@ -41,7 +41,7 @@ declare module 'shoukaku' {
     };
   }
 
-  export type Source = 'youtube' | 'soundcloud';
+  export type Source = 'youtube' | 'soundcloud' | 'youtubemusic';
 
   export enum ShoukakuStatus {
     CONNECTING = 'CONNECTING',

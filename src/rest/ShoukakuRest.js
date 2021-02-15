@@ -36,7 +36,7 @@ class ShoukakuRest {
     /**
     * Resolves a identifier into a lavalink track.
     * @param {string} identifier Anything you want for lavalink to search for
-    * @param {string} search Either `youtube` or `soundcloud`. If specified, resolve will return search results.
+    * @param {string} [search] Either `youtube` or `soundcloud` or `youtubemusic`. If specified, resolve will return search results.
     * @memberof ShoukakuRest
     * @returns {Promise<null|ShoukakuTrackList>} The parsed data from Lavalink rest
     */

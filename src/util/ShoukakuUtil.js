@@ -1,5 +1,5 @@
 const ShoukakuError = require('../constants/ShoukakuError.js');
-const SearchTypes = { 'soundcloud': 'scsearch', 'youtube': 'ytsearch' };
+const SearchTypes = { 'soundcloud': 'scsearch', 'youtube': 'ytsearch', 'youtubemusic': 'ytmsearch' };
 
 class ShoukakuUtil {
     static mergeDefault(def, given) {
