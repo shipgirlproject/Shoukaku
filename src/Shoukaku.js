@@ -19,7 +19,7 @@ class Shoukaku extends EventEmitter {
      */
     constructor(client, nodes, options) {
         super();
-        if (version && !version.startsWith('12'))
+        if (!version.startsWith('12'))
             throw new ShoukakuError('Shoukaku will only work in Discord.JS v12. Versions below Discord.JS v12 is not supported.');
         if (!nodes || !nodes.length) 
             throw new ShoukakuError('No nodes supplied');
