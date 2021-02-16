@@ -137,6 +137,7 @@ declare module 'shoukaku' {
     host: string;
     port: number;
     auth: string;
+    secure?: boolean;
     group?: string;
   }
 
@@ -225,7 +226,7 @@ declare module 'shoukaku' {
   }
 
   export class ShoukakuRest {
-    constructor(host: string, port: string, auth: string, timeout: number);
+    constructor(host: string, port: string, auth: string, timeout: number, secure: boolean);
     private auth: string;
     public timeout: number;
     public url: string;

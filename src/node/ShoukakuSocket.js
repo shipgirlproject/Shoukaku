@@ -34,7 +34,7 @@ class ShoukakuSocket extends EventEmitter {
         * The REST API of this Socket, mostly to load balance your REST requests instead of relying on a single node.
         * @type {ShoukakuRest}
         */
-        this.rest = new ShoukakuRest(node.host, node.port, node.auth, shoukaku.options.userAgent, shoukaku.options.restTimeout);
+        this.rest = new ShoukakuRest(node.host, node.port, node.auth, shoukaku.options.userAgent, shoukaku.options.restTimeout, node.secure);
         /**
         * The state of this Socket.
         * @type {ShoukakuConstants#ShoukakuStatus}
@@ -64,7 +64,7 @@ class ShoukakuSocket extends EventEmitter {
         * Websocket URL of this socket
         * @type {string}
         */
-        this.url = `ws://${node.host}:${node.port}`;
+        this.url = `ws${node.secure ? 's' : ''}://${node.host}:${node.port}`;
         /**
         * If this socket was resumed
         * @type {boolean}

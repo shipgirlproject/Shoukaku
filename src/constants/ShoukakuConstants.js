@@ -109,6 +109,7 @@ class ShoukakuConstants {
     * @property {string} host Your node host / ip address of where the lavalink is hosted.
     * @property {number} port The Port Number of your lavalink instance.
     * @property {string} auth The authentication key you set on your lavalink config.
+    * @property {?boolean} [secure] the protocols should secure or no.
     * @property {?string} [group] Group of this node, used for grouping specific nodes.
     * @memberof ShoukakuConstants#
     */
@@ -118,6 +119,7 @@ class ShoukakuConstants {
             host: null,
             port: null,
             auth: null,
+            secure: false,
             group: undefined
         };
     }
