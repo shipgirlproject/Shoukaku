@@ -26,11 +26,16 @@ The ShipGirl Project, feat Shoukaku; ⓒ Kancolle
 ✅ Very cute shipgirl ❤ (Very Important)
 
 ### Installation
-For Stable
+
+For Lavalink `Master` branch with commits no newer than https://github.com/Frederikam/Lavalink/commit/45f8de045fdd75034b75c63c410121d8315e6b75
 ```
-npm i shoukaku
+npm i shoukaku@1.5.2
 ```
-For Master
+For Lavalink `Dev` branch, or anything that doesn't fall into the scope of commits above
+```
+npm i shoukaku@1.6.x // Replace x with the latest semver patch available
+```
+If you live on the edge, and want any update available on Shoukaku
 ```
 npm i Deivu/Shoukaku
 ```
