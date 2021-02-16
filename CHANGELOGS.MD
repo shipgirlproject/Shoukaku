@@ -1,7 +1,7 @@
 ### 1.6.x 
 > Not compatible with older `Master` branch Lavalink until `Dev` branch gets merged into `Master`
 
-> Support for Lavalink Filters
+> Support for Lavalink Filters, Check out https://deivu.github.io/Shoukaku/?api#ShoukakuPlayer
 
 > ShoukakuPlayer#equalizer and ShoukakuPlayer#volume is removed in favor of ShoukakuPlayer#filters
 
