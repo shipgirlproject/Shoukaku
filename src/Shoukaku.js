@@ -135,13 +135,15 @@ class Shoukaku extends EventEmitter {
         if (!this.id)
             throw new ShoukakuError('The lib is not yet ready, make sure to initialize Shoukaku before the library fires "ready" event');
         const node = this.nodes.get(name);
-        if (!node) return;
+        if (!node) 
+            throw new ShoukakuError('The node name you specified doesn\'t exist');
+        this.nodes.delete(node.name);
+        node.removeAllListeners();
         node.executeCleaner()
             .catch(error => this.emit('error', name, error))
             .finally(() => {
-                this.nodes.delete(name);
+                if (node.ws) node.ws.close(1000, reason);
                 node.emit('debug', node.name, `[Main] Node Removed => Name: ${node.name}`);
-                node.ws.close(1000, reason);
                 this.emit('disconnected', name, reason);
             });
     }
@@ -206,15 +208,9 @@ class Shoukaku extends EventEmitter {
             this.removeNode(node.name, `Failed to reconnect in ${this.options.reconnectTries} attempt(s)`);
             return;
         }
-        try {
-            node.reconnectAttempts++;
-            node.emit('debug', node.name, `[Main] Node Reconnecting => Node ${node.name}, ${this.options.reconnectTries - node.reconnectAttempts} reconnect tries left`);
-            node.connect(this.id, this.options.resumable);
-        } catch (error) {
-            this.emit('error', node.name, error);
-            node.emit('debug', node.name, `[Main] Node Reconnecting => Node ${node.name}, Trying again in ${this.options.reconnectInterval}ms`);
-            setTimeout(() => this._reconnect(node), this.options.reconnectInterval);
-        }
+        node.reconnectAttempts++;
+        node.emit('debug', node.name, `[Main] Node Reconnecting => Node ${node.name}, ${this.options.reconnectTries - node.reconnectAttempts} reconnect tries left, Connecting in ${this.options.reconnectInterval}ms`);
+        setTimeout(() => node.connect(this.id, this.options.resumable), this.options.reconnectInterval);
     }
 
     _getIdeal(group) {
