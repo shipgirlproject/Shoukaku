@@ -83,6 +83,7 @@ declare module 'shoukaku' {
     state: {
       time: number;
       position: number;
+      connected: boolean;
     }
   }
 
@@ -120,6 +121,7 @@ declare module 'shoukaku' {
     noReplace?: boolean,
     startTime?: number;
     endTime?: number;
+    pause?: boolean;
   }
 
   export interface ShoukakuOptions {
@@ -226,8 +228,9 @@ declare module 'shoukaku' {
   }
 
   export class ShoukakuRest {
-    constructor(host: string, port: string, auth: string, timeout: number, secure: boolean);
+    constructor(host: string, port: string, auth: string, userAgent: string, timeout: number, secure: boolean);
     private auth: string;
+    private userAgent: string;
     public timeout: number;
     public url: string;
 
