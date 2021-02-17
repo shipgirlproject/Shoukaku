@@ -144,16 +144,18 @@ class ShoukakuPlayer extends EventEmitter {
         if (!input) throw new ShoukakuError('No track given to play');
         if (input instanceof ShoukakuTrack) input = input.track;
         options = mergeDefault(ShoukakuPlayOptions, options);
-        const { noReplace, startTime, endTime } = options;
+        const { noReplace, startTime, endTime, pause } = options;
         const payload = {
             op: 'play',
             guildId: this.voiceConnection.guildID,
             track: input,
-            noReplace
+            noReplace,
+            pause
         };
         if (startTime) payload.startTime = startTime;
         if (endTime) payload.endTime = endTime;
         await this.voiceConnection.node.send(payload);
+        this.paused = pause;
         return this;
     }
     /**
