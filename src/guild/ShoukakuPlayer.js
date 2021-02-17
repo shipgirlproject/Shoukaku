@@ -339,7 +339,7 @@ class ShoukakuPlayer extends EventEmitter {
             // input sanitation, to ensure no additional keys is being introduced
             const values = {};
             for (const key of Object.keys(distortionValue)) {
-                if (key in DistortionValue) values[key] = DistortionValue[key];
+                if (key in DistortionValue) values[key] = distortionValue[key];
             }
             this.filters.distortion = values;
         }
