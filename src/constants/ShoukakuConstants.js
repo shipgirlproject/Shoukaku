@@ -68,17 +68,17 @@ class ShoukakuConstants {
     * Required Object in Shoukaku's join method.
     * @typedef {Object} ShoukakuPlayOptions
     * @property {boolean} [noReplace=true] Specifies if the player will not replace the current track when executing this action.
+    * @property {boolean} [pause=false] If `true`, the player will pause when the track starts playing.
     * @property {?number} [startTime] In milliseconds on when to start.
     * @property {?number} [endTime] In milliseconds on when to end.
-    * @property {boolean} [pause=false] If `true`, the player will pause when the track starts playing.
     * @memberof ShoukakuConstants#
     */
     static get ShoukakuPlayOptions() {
         return {
             noReplace: true,
+            pause: false,
             startTime: undefined,
-            endTime: undefined,
-            pause: false
+            endTime: undefined
         };
     }
     /**

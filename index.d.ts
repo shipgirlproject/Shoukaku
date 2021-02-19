@@ -119,9 +119,9 @@ declare module 'shoukaku' {
 
   export interface ShoukakuPlayOptions {
     noReplace?: boolean,
+    pause?: boolean;
     startTime?: number;
     endTime?: number;
-    pause?: boolean;
   }
 
   export interface ShoukakuOptions {
