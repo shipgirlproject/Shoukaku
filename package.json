@@ -1,6 +1,6 @@
 {
   "name": "shoukaku",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "description": "A lavalink client for Discord.js v12 only",
   "main": "index.js",
   "scripts": {
