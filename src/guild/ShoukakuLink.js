@@ -102,6 +102,7 @@ class ShoukakuLink {
             throw error;
         }
         this.lastServerUpdate = null;
+        await wait(750);
         await promisify(this.connect.bind(this))({ guildID: this.guildID, voiceChannelID: this.voiceChannelID, mute: this.selfMute, deaf: this.selfDeaf });
         return this.player;
     }
