@@ -139,9 +139,11 @@ class ShoukakuLink {
     }
 
     serverUpdate(data) {
-        if (this.lastServerUpdate) this.voiceMoved = !data.endpoint.startsWith(this.region);
         this.lastServerUpdate = data;
-        this.region = data.endpoint.split('.').shift().replace(/[0-9]/g, '');
+        if (data.endpoint) {
+            if (this.lastServerUpdate) this.voiceMoved = !data.endpoint.startsWith(this.region);
+            this.region = data.endpoint.split('.').shift().replace(/[0-9]/g, '');
+        }
         this.node.emit('debug', this.node.name, `[Voice] Forwarding Server Update => Node ${this.node.name}, Voice Server Moved? ${this.voiceMoved}`);
         return this.voiceUpdate()
             .then(() => {
