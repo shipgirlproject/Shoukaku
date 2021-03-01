@@ -155,6 +155,7 @@ class ShoukakuPlayer extends EventEmitter {
         if (startTime) payload.startTime = startTime;
         if (endTime) payload.endTime = endTime;
         await this.voiceConnection.node.send(payload);
+        this.track = input;
         this.paused = pause;
         return this;
     }
@@ -441,7 +442,6 @@ class ShoukakuPlayer extends EventEmitter {
         if (json.op === 'event') {
             switch (json.type) {
                 case 'TrackStartEvent':
-                    this.track = json.track;
                     this.emit('start', json);
                     break;
                 case 'TrackEndEvent':

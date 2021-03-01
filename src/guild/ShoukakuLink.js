@@ -111,8 +111,8 @@ class ShoukakuLink {
         try {
             if (!node) throw new ShoukakuError('No available nodes to reconnect to');
             this.node.emit('debug', this.node.name, `[Voice] Moving from Node ${this.node.name} => Node ${node.name} | Guild ${this.guildID}, Channel ${this.voiceChannelID}`);
-            await this.node.send({ op: 'destroy', guildId: this.guildID });
             this.node.players.delete(this.guildID);
+            await this.node.send({ op: 'destroy', guildId: this.guildID });
             this.node = node;
             await this.voiceUpdate();
             await this.player.resume();

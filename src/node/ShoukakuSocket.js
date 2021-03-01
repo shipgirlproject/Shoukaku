@@ -206,7 +206,7 @@ class ShoukakuSocket extends EventEmitter {
         }
         for (const player of this.players.values()) {
             player.emit('nodeDisconnect', error);
-            player.voiceConnection.disconnect();
+            player.disconnect();
         }
     }
 
