@@ -394,7 +394,7 @@ class ShoukakuPlayer extends EventEmitter {
         try {
             if (!moved) {
                 await this.updateFilters();
-                if (this.track) await this.playTrack(this.track, { startTime: this.position });
+                if (this.track) await this.playTrack(this.track, { startTime: this.position, pause: this.paused });
             } else {
                 await wait(1000);
                 await this.setPaused();
