@@ -393,12 +393,8 @@ class ShoukakuPlayer extends EventEmitter {
     async resume(moved = false) {
         try {
             if (!moved) {
-                if (!this.track) {
-                    this.emit('error', new ShoukakuError('Tried to resume, but the track is null'));
-                    return;
-                }
                 await this.updateFilters();
-                await this.playTrack(this.track, { startTime: this.position });
+                if (this.track) await this.playTrack(this.track, { startTime: this.position });
             } else {
                 await wait(1000);
                 await this.setPaused();
