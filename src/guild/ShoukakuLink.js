@@ -1,6 +1,6 @@
 const EventEmitter = require('events');
 const { ShoukakuStatus } = require('../constants/ShoukakuConstants.js');
-const { CONNECTING, DISCONNECTING, DISCONNECTED } = ShoukakuStatus;
+const { CONNECTED, CONNECTING, DISCONNECTING, DISCONNECTED } = ShoukakuStatus;
 const ShoukakuError = require('../constants/ShoukakuError.js');
 const ShoukakuSocket = require('../node/ShoukakuSocket.js');
 const { wait } = require('../util/ShoukakuUtil.js');
@@ -177,6 +177,7 @@ class ShoukakuLink extends EventEmitter {
             this.once('ready', () => {
                 clearTimeout(this.connectTimeout);
                 this.removeListener('error', reject);
+                this.state = CONNECTED;
                 resolve();
             });
             this.connectTimeout = setTimeout(() => {
