@@ -331,6 +331,7 @@ declare module 'shoukaku' {
     private disconnect(): void;
     private send(d: unknown, important: boolean): void;
     private voiceUpdate(): Promise<void>;
+    private authenticateFailed(error: ShoukakuError): void;
   }
 
   export class ShoukakuSocket {

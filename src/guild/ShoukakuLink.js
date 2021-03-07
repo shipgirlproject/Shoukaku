@@ -134,11 +134,6 @@ class ShoukakuLink extends EventEmitter {
         }
     }
 
-    send(d, important = false) {
-        if (!this.guild) return;
-        this.guild.shard.send({ op: 4, d }, important);
-    }
-
     setStateUpdate({ session_id, channel_id, self_deaf, self_mute }) {
         this.lastVoiceChannelID = this.voiceChannelID ? this.voiceChannelID.repeat(1) : null;
         this.channelMoved = !!this.lastVoiceChannelID && this.lastVoiceChannelID !== (channel_id || this.lastVoiceChannelID);
@@ -146,6 +141,11 @@ class ShoukakuLink extends EventEmitter {
         this.selfMute = self_mute;
         this.sessionID = session_id;
         this.voiceChannelID = channel_id;
+        if (!session_id) {
+            this.authenticateFailed(new ShoukakuError('No session_id intact on Discord State Update OP'));
+            return;
+        }
+        this.sessionID = session_id;
         if (!this.voiceChannelID) this.state = DISCONNECTED;
         this.node.emit('debug', this.node.name, `[Voice] State Update Received => Guild ${this.guildID}, Channel ${channel_id}, State ${this.state}, Channel Moved? ${this.channelMoved}`);
     }
@@ -161,7 +161,7 @@ class ShoukakuLink extends EventEmitter {
             await this.voiceUpdate();
             this.emit('ready');
         } catch (error) {
-            this.state !== CONNECTING ? this.player.emit('error', error) : this.emit('error');
+            this.authenticateFailed(error);
         }
     }
     
@@ -180,10 +180,8 @@ class ShoukakuLink extends EventEmitter {
                 resolve();
             });
             this.connectTimeout = setTimeout(() => {
-                this.send({ guild_id: this.guildID, channel_id: null, self_mute: false, self_deaf: false }, true);
-                this.state = DISCONNECTED;
+                this.authenticateFailed(new ShoukakuError('The voice connection is not established in 15 seconds'));
                 this.node.emit('debug', this.node.name, `[Voice] Request Connection Timeout => Guild ${this.guildID}, Channel ${voiceChannelID}`);
-                this.emit('error', new ShoukakuError('The voice connection is not established in 15 seconds'));
             }, 15000);
             this.send({ guild_id: guildID, channel_id: voiceChannelID, self_deaf: deaf, self_mute: mute }, true);
             this.node.emit('debug', this.node.name, `[Voice] Request Connection => Guild ${this.guildID}, Channel ${voiceChannelID}`);
@@ -202,11 +200,24 @@ class ShoukakuLink extends EventEmitter {
         this.serverUpdate = null;
         this.sessionID = null;
         this.voiceChannelID = null;
+        this.lastVoiceChannelID = null;
         this.node
             .send({ op: 'destroy', guildId: this.guildID })
             .catch(error => this.node.emit('error', this.node.name, error));
         this.state = DISCONNECTED;
         this.node.emit('debug', this.node.name, `[Voice] Destroyed => Guild ${this.guildID}`);
+    }
+
+    authenticateFailed(error) {
+        clearTimeout(this.connectTimeout);
+        this.removeAllListeners('ready');
+        this.listenerCount('error') > 0 ? this.emit('error', error) : this.player.emit('error', error);
+        this.state = DISCONNECTED;
+    }
+
+    send(d, important = false) {
+        if (!this.guild) return;
+        this.guild.shard.send({ op: 4, d }, important);
     }
 
     voiceUpdate() {
