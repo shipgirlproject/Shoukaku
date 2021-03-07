@@ -1,4 +1,3 @@
-const { promisify } = require('util');
 const { ShoukakuStatus, ShoukakuNodeStats, ShoukakuJoinOptions } = require('../constants/ShoukakuConstants.js');
 const { CONNECTED, CONNECTING, DISCONNECTED } = ShoukakuStatus;
 const { websocketSend } = require('../util/ShoukakuUtil.js');
@@ -158,7 +157,7 @@ class ShoukakuSocket extends EventEmitter {
         player = new ShoukakuPlayer(this, guild);
         this.players.set(guild.id, player);
         try {
-            await promisify(player.connect.bind(player))(options);
+            await player.connect(options);
             return player;
         } catch (error) {
             this.players.delete(guild.id);
@@ -262,12 +261,12 @@ class ShoukakuSocket extends EventEmitter {
         player.voiceConnection.stateUpdate(packet.d);
     }
 
-    async _onLavalinkMessage(json) {
+    _onLavalinkMessage(json) {
         this.emit('debug', this.name, `[Socket] Message OP: ${json.op} => Node ${this.name}`);
         if (json.op === 'stats') return this.stats = json;
         const player = this.players.get(json.guildId);
         if (!player) return;
-        await player._onLavalinkMessage(json);
+        player._onLavalinkMessage(json);
     }
 }
 module.exports = ShoukakuSocket;
