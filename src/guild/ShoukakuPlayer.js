@@ -157,6 +157,7 @@ class ShoukakuPlayer extends EventEmitter {
         await this.voiceConnection.node.send(payload);
         this.track = input;
         this.paused = pause;
+        this.position = 0;
         return this;
     }
     /**
@@ -428,6 +429,7 @@ class ShoukakuPlayer extends EventEmitter {
             return;
         }
         if (json.op === 'event') {
+            this.position = 0;
             switch (json.type) {
                 case 'TrackStartEvent':
                     this.emit('start', json);
