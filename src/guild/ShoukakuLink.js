@@ -153,14 +153,14 @@ class ShoukakuLink extends EventEmitter {
     async setServerUpdate(data) {
         try {
             if (!data.endpoint) return;
-            this.node.emit('debug', this.node.name, `[Voice] Server Update Received => Node ${this.node.name}, Voice Server Moved? ${this.voiceMoved}`);
             clearTimeout(this.connectTimeout);
             this.voiceMoved = this.serverUpdate ? !data.endpoint.startsWith(this.region) : false;
+            this.node.emit('debug', this.node.name, `[Voice] Server Update Received => Node ${this.node.name}, Voice Server Moved? ${this.voiceMoved}`);
             this.region = data.endpoint.split('.').shift().replace(/[0-9]/g, '');
             this.serverUpdate = data;
             await this.voiceUpdate();
             this.node.emit('debug', this.node.name, `[Voice] Server Update Forwarded & Voice Connected => Node ${this.node.name}`);
-            this.emit('ready');
+            if (this.listenerCount('ready') > 0) this.emit('ready');
         } catch (error) {
             this.authenticateFailed(error);
         }
