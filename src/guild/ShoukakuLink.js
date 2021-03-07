@@ -139,9 +139,9 @@ class ShoukakuLink extends EventEmitter {
         this.guild.shard.send({ op: 4, d }, important);
     }
 
-    stateUpdate({ session_id, channel_id, self_deaf, self_mute }) {
+    setStateUpdate({ session_id, channel_id, self_deaf, self_mute }) {
         this.lastVoiceChannelID = this.voiceChannelID ? this.voiceChannelID.repeat(1) : null;
-        this.channelMoved = !!this.lastVoiceChannelID && this.lastVoiceChannelID !== channel_id;
+        this.channelMoved = !!this.lastVoiceChannelID && this.lastVoiceChannelID !== (channel_id || this.lastVoiceChannelID);
         this.selfDeaf = self_deaf;
         this.selfMute = self_mute;
         this.sessionID = session_id;
@@ -150,7 +150,7 @@ class ShoukakuLink extends EventEmitter {
         this.node.emit('debug', this.node.name, `[Voice] State Update Received => Guild ${this.guildID}, Channel ${channel_id}, State ${this.state}, Channel Moved? ${this.channelMoved}`);
     }
 
-    async serverUpdate(data) {
+    async setServerUpdate(data) {
         try {
             if (!data.endpoint) return;
             clearTimeout(this.connectTimeout);

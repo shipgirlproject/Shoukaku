@@ -254,11 +254,11 @@ class ShoukakuSocket extends EventEmitter {
         const player = this.players.get(packet.d.guild_id);
         if (!player) return;
         if (packet.t === 'VOICE_SERVER_UPDATE') {
-            player.voiceConnection.serverUpdate(packet.d);
+            player.voiceConnection.setServerUpdate(packet.d);
             return;
         }
         if (packet.d.user_id !== this.shoukaku.id) return;
-        player.voiceConnection.stateUpdate(packet.d);
+        player.voiceConnection.setStateUpdate(packet.d);
     }
 
     _onLavalinkMessage(json) {
