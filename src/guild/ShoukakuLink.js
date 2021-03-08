@@ -2,7 +2,6 @@ const EventEmitter = require('events');
 const { ShoukakuStatus } = require('../constants/ShoukakuConstants.js');
 const { CONNECTED, CONNECTING, DISCONNECTING, DISCONNECTED } = ShoukakuStatus;
 const ShoukakuError = require('../constants/ShoukakuError.js');
-const ShoukakuSocket = require('../node/ShoukakuSocket.js');
 const { wait } = require('../util/ShoukakuUtil.js');
 
 /**
@@ -117,7 +116,7 @@ class ShoukakuLink extends EventEmitter {
     async moveToNode(node) {
         try {
             if (!node) throw new ShoukakuError('No available nodes to reconnect to');
-            if (!(node instanceof ShoukakuSocket)) throw new ShoukakuError('Node is not an instance of ShoukakuSocket');
+            if (!(node instanceof this.node.constructor)) throw new ShoukakuError('Node is not an instance of ShoukakuSocket');
             this.node.emit('debug', this.node.name, `[Voice] Moving from Node ${this.node.name} => Node ${node.name} | Guild ${this.guildID}, Channel ${this.voiceChannelID}`);
             this.reconnecting = true; 
             await this.node.send({ op: 'destroy', guildId: this.guildID });
