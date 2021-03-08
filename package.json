@@ -31,6 +31,7 @@
   },
   "devDependencies": {
     "discord.js": "^12.5.1",
+    "discord.js-light": "^3.5.4",
     "typescript": "^4.2.3"
   }
 }

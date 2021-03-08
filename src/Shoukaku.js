@@ -1,10 +1,10 @@
 const { ShoukakuOptions, ShoukakuNodeOptions, ShoukakuStatus } = require('./constants/ShoukakuConstants.js');
 const { CONNECTED } = ShoukakuStatus;
-const { mergeDefault } = require('./util/ShoukakuUtil.js');
-const { version } = require('discord.js');
+const { mergeDefault, getVersion } = require('./util/ShoukakuUtil.js');
 const ShoukakuError = require('./constants/ShoukakuError.js');
 const ShoukakuSocket = require('./node/ShoukakuSocket.js');
 const EventEmitter = require('events');
+const { variant, version } = getVersion();
 
 /**
   * Shoukaku, governs the client's node connections.
@@ -19,9 +19,14 @@ class Shoukaku extends EventEmitter {
      */
     constructor(client, nodes, options) {
         super();
-        if (!version.startsWith('12'))
-            throw new ShoukakuError('Shoukaku will only work in Discord.JS v12. Versions below Discord.JS v12 is not supported.');
-        if (!nodes || !nodes.length) 
+        if (variant === 'light') {
+            if (!version.startsWith('3'))
+                throw new ShoukakuError('Shoukaku will only work at Discord.JS-light v3. Versions below Discord.JS-light v3 is not supported.');
+        } else {
+            if (!version.startsWith('12'))
+                throw new ShoukakuError('Shoukaku will only work at Discord.JS v12. Versions below Discord.JS v12 is not supported.');
+        }
+        if (!nodes || !nodes.length)
             throw new ShoukakuError('No nodes supplied');
         /**
         * The instance of Discord.js client used with Shoukaku.
