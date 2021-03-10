@@ -147,6 +147,7 @@ class Shoukaku extends EventEmitter {
         node.executeCleaner();
         if (node.ws) node.ws.close(1000, reason);
         node.emit('debug', node.name, `[Main] Node Removed => Name: ${node.name}`);
+        this.emit('disconnected', name, reason);
     }
     /**
      * Shortcut to get the Ideal Node or a manually specified Node from the current nodes that Shoukaku governs.
