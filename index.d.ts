@@ -124,6 +124,11 @@ declare module 'shoukaku' {
     endTime?: number;
   }
 
+  export interface AttemptReconnectOptions {
+    voiceChannelID?: string;
+    forceReconnect?: boolean;
+  }
+
   export interface ShoukakuOptions {
     resumable?: boolean | string;
     resumableTimeout?: number;
@@ -185,6 +190,8 @@ declare module 'shoukaku' {
     offset?: number;
     scale?: number;
 }
+
+
 
   class ShoukakuConstants {
     static ShoukakuStatus: ShoukakuStatus;
@@ -322,7 +329,7 @@ declare module 'shoukaku' {
     private serverUpdate: object | null;
     private connectTimeout: NodeJS.Timeout | null;
 
-    public attemptReconnect(voiceChannelID: string): Promise<ShoukakuPlayer>;
+    public attemptReconnect(options: AttemptReconnectOptions): Promise<ShoukakuPlayer>;
 
     private stateUpdate(data: object);
     private serverUpdate(data: object);

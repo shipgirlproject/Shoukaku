@@ -191,10 +191,9 @@ class Shoukaku extends EventEmitter {
 
     _ready(name, resumed) {
         const node = this.nodes.get(name);
-        node.executeCleaner()
-            .then(() => node.emit('debug', node.name, `[Main] Node Ready => Name: ${node.name}`))
-            .then(() => this.emit('ready', name, resumed))
-            .catch(error => this.emit('error', name, error));
+        node.executeCleaner();
+        node.emit('debug', node.name, `[Main] Node Ready => Name: ${node.name}`);
+        this.emit('ready', name, resumed);
     }
 
     _close(name, code, reason) {

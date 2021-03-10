@@ -63,7 +63,7 @@ class ShoukakuLink extends EventEmitter {
          */
         this.selfDeaf = false;
         /**
-         * The current state of this link.
+         * Voice connection status to Discord
          * @type {ShoukakuConstants#ShoukakuStatus}
          */
         this.state = DISCONNECTED;
@@ -95,8 +95,8 @@ class ShoukakuLink extends EventEmitter {
      * Attempts to reconnect this ShoukakuLink, A use case for this is when your Discord Websocket re-identifies
      * @memberOf ShoukakuLink
      * @param {Object} [options] options for attemptReconnect
-     * @param {String} [options.voiceChannelID] Voice Channel ID of the voice channel you want to reconnect to, ignored when forceReconnect is false
-     * @param {Boolean} [options.forceReconnect] Forces reconnection by destroying the player on lavalink, then reconnects using the usual connect method
+     * @param {String} [options.voiceChannelID] Will throw an error if not specified, when the state of this link is disconnected, no cached serverUpdate or when forceReconnect is true
+     * @param {Boolean} [options.forceReconnect] Forces a reconnection by re-requesting a connection to Discord, also resets your player
      * @returns {Promise<ShoukakuPlayer>}
      */
     async attemptReconnect({ voiceChannelID, forceReconnect } = {}) {
@@ -105,12 +105,13 @@ class ShoukakuLink extends EventEmitter {
                 throw new ShoukakuError('Please specify the channel you want this node to connect on');
             try {
                 this.reconnecting = true;
-                if (this.state !== DISCONNECTED) {
-                    this.send({ guild_id: this.guildID, channel_id: null, self_mute: false, self_deaf: false }, true);
-                    await wait(1000);
-                }
                 await this.node.send({ op: 'destroy', guildId: this.guildID });
-                await wait(1000);
+                await wait(2500);
+                if (this.state !== DISCONNECTED) {
+                    // probably I'll rewrite this into a promise way, :eyes:
+                    this.send({ guild_id: this.guildID, channel_id: null, self_mute: false, self_deaf: false }, true);
+                    await wait(2500);
+                }
                 this.serverUpdate = null;
                 await this.connect({ guildID: this.guildID, voiceChannelID, mute: this.selfMute, deaf: this.selfDeaf });
                 this.reconnecting = false;
@@ -144,7 +145,7 @@ class ShoukakuLink extends EventEmitter {
     }
 
     setStateUpdate({ session_id, channel_id, self_deaf, self_mute }) {
-        if (!this.voiceChannelID) this.state = DISCONNECTED;
+        if (!channel_id) this.state = DISCONNECTED;
         this.lastVoiceChannelID = this.voiceChannelID ? this.voiceChannelID.repeat(1) : null;
         this.channelMoved = !!this.lastVoiceChannelID && this.lastVoiceChannelID !== (channel_id || this.lastVoiceChannelID);
         this.selfDeaf = self_deaf;
