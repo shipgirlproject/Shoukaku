@@ -94,22 +94,32 @@ class ShoukakuLink extends EventEmitter {
     /**
      * Attempts to reconnect this ShoukakuLink, A use case for this is when your Discord Websocket re-identifies
      * @memberOf ShoukakuLink
+     * @param {Object} [options] options for attemptReconnect
+     * @param {String} [options.voiceChannelID] Voice Channel ID of the voice channel you want to reconnect to, ignored when forceReconnect is false
+     * @param {Boolean} [options.forceReconnect] Forces reconnection by destroying the player on lavalink, then reconnects using the usual connect method
      * @returns {Promise<ShoukakuPlayer>}
      */
-    async attemptReconnect(voiceChannelID) {
-        if (!voiceChannelID)
-            throw new ShoukakuError('Please specify the channel you want this node to connect on');
-        this.reconnecting = true;
-        try {
-            await this.node.send({ op: 'destroy', guildId: this.guildID });
-        } catch (error) {
-            this.reconnecting = false;
-            throw error;
+    async attemptReconnect({ voiceChannelID, forceReconnect } = {}) {
+        if (this.state === DISCONNECTED || !this.serverUpdate || forceReconnect) {
+            if (!voiceChannelID)
+                throw new ShoukakuError('Please specify the channel you want this node to connect on');
+            try {
+                this.reconnecting = true;
+                if (this.state !== DISCONNECTED) {
+                    this.send({ guild_id: this.guildID, channel_id: null, self_mute: false, self_deaf: false }, true);
+                    await wait(1000);
+                }
+                await this.node.send({ op: 'destroy', guildId: this.guildID });
+                await wait(1000);
+                this.serverUpdate = null;
+                await this.connect({ guildID: this.guildID, voiceChannelID, mute: this.selfMute, deaf: this.selfDeaf });
+                this.reconnecting = false;
+            } catch (error) {
+                this.reconnecting = false;
+                throw error;
+            }
         }
-        await wait(1000);
-        this.reconnecting = false;
-        this.serverUpdate = null;
-        await this.connect({ guildID: this.guildID, voiceChannelID, mute: this.selfMute, deaf: this.selfDeaf });
+        else if (this.state === CONNECTED && !forceReconnect) await this.voiceUpdate();
         return this.player;
     }
 
@@ -129,23 +139,20 @@ class ShoukakuLink extends EventEmitter {
             this.node.emit('debug', this.node.name, `[Voice] Success! Now at Node ${node.name} | Guild ${this.guildID}, Channel ${this.voiceChannelID}`);
         } catch (error) {
             this.reconnecting = false;
-            this.player.emit('error', error);
+            throw error;
         }
     }
 
     setStateUpdate({ session_id, channel_id, self_deaf, self_mute }) {
+        if (!this.voiceChannelID) this.state = DISCONNECTED;
         this.lastVoiceChannelID = this.voiceChannelID ? this.voiceChannelID.repeat(1) : null;
         this.channelMoved = !!this.lastVoiceChannelID && this.lastVoiceChannelID !== (channel_id || this.lastVoiceChannelID);
         this.selfDeaf = self_deaf;
         this.selfMute = self_mute;
         this.sessionID = session_id;
         this.voiceChannelID = channel_id;
-        if (!session_id) {
-            this.authenticateFailed(new ShoukakuError('No session_id intact on Discord State Update OP'));
-            return;
-        }
+        if (!session_id) return this.authenticateFailed(new ShoukakuError('No session_id intact on Discord State Update OP'));
         this.sessionID = session_id;
-        if (!this.voiceChannelID) this.state = DISCONNECTED;
         this.node.emit('debug', this.node.name, `[Voice] State Update Received => Guild ${this.guildID}, Channel ${channel_id}, State ${this.state}, Channel Moved? ${this.channelMoved}`);
     }
 
@@ -184,7 +191,7 @@ class ShoukakuLink extends EventEmitter {
                 this.authenticateFailed(new ShoukakuError('The voice connection is not established in 15 seconds'));
                 this.node.emit('debug', this.node.name, `[Voice] Request Connection Timeout => Guild ${this.guildID}, Channel ${voiceChannelID}`);
             }, 15000);
-            this.send({ guild_id: guildID, channel_id: voiceChannelID, self_deaf: deaf, self_mute: mute }, true);
+            this.send({ guild_id: guildID, channel_id: voiceChannelID, self_deaf: deaf, self_mute: mute });
             this.node.emit('debug', this.node.name, `[Voice] Request Connection => Guild ${this.guildID}, Channel ${voiceChannelID}`);
         });
     }
@@ -196,15 +203,15 @@ class ShoukakuLink extends EventEmitter {
             this.node.emit('debug', this.node.name, `[Voice] Disconnected => Guild ${this.guildID}`);
         }
         this.node.players.delete(this.guildID);
+        this.node
+            .send({ op: 'destroy', guildId: this.guildID })
+            .catch(error => this.node.emit('error', this.node.name, error));
         this.player.removeAllListeners();
         this.player.reset();
         this.serverUpdate = null;
         this.sessionID = null;
         this.voiceChannelID = null;
         this.lastVoiceChannelID = null;
-        this.node
-            .send({ op: 'destroy', guildId: this.guildID })
-            .catch(error => this.node.emit('error', this.node.name, error));
         this.state = DISCONNECTED;
         this.node.emit('debug', this.node.name, `[Voice] Destroyed => Guild ${this.guildID}`);
     }

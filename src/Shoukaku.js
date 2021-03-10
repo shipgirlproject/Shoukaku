@@ -144,13 +144,9 @@ class Shoukaku extends EventEmitter {
             throw new ShoukakuError('The node name you specified doesn\'t exist');
         this.nodes.delete(node.name);
         node.removeAllListeners();
-        node.executeCleaner()
-            .catch(error => this.emit('error', name, error))
-            .finally(() => {
-                if (node.ws) node.ws.close(1000, reason);
-                node.emit('debug', node.name, `[Main] Node Removed => Name: ${node.name}`);
-                this.emit('disconnected', name, reason);
-            });
+        node.executeCleaner();
+        if (node.ws) node.ws.close(1000, reason);
+        node.emit('debug', node.name, `[Main] Node Removed => Name: ${node.name}`);
     }
     /**
      * Shortcut to get the Ideal Node or a manually specified Node from the current nodes that Shoukaku governs.
