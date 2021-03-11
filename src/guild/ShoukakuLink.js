@@ -106,11 +106,11 @@ class ShoukakuLink extends EventEmitter {
             try {
                 this.reconnecting = true;
                 await this.node.send({ op: 'destroy', guildId: this.guildID });
-                await wait(2500);
+                await wait(3000);
                 if (this.state !== DISCONNECTED) {
                     // probably I'll rewrite this into a promise way, :eyes:
                     this.send({ guild_id: this.guildID, channel_id: null, self_mute: false, self_deaf: false }, true);
-                    await wait(2500);
+                    await wait(3000);
                 }
                 this.serverUpdate = null;
                 await this.connect({ guildID: this.guildID, voiceChannelID, mute: this.selfMute, deaf: this.selfDeaf });
