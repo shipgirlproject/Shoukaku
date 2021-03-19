@@ -60,11 +60,12 @@ class ShoukakuRest {
     /**
      * Gets the estimated latency from the lavalink server
      * @memberof ShoukakuRest
-     * @returns {Promise<number>} The Lavalink Track details.
+     * @returns {Promise<number>} The "estimated" latency
      */
     async getLatency() {
         const now = Date.now();
-        await this.getRoutePlannerStatus();
+        // since this is just a dummy way of checking ping for LL, well don't parse the result
+        await this.get('/routeplanner/status', false);
         return Date.now() - now;
     }
     /**
@@ -93,7 +94,7 @@ class ShoukakuRest {
         return this.post('/routeplanner/free/all');
     }
 
-    async get(endpoint) {
+    async get(endpoint, parse = true) {
         let res;
         try {
             res = await this.fetch(this.url + endpoint, { headers: { Authorization: this.auth } });
@@ -102,6 +103,7 @@ class ShoukakuRest {
             throw new ShoukakuTimeout(this.timeout);
         }
         if (!res.ok) throw new ShoukakuError(`Rest request failed with response code: ${res.status}`);
+        if (!parse) return res.status;
         return res.json();
     }
 

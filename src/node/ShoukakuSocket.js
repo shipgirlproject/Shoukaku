@@ -310,28 +310,26 @@ class ShoukakuSocket extends EventEmitter {
     }
 
     async _onLavalinkMessage(json) {
-        this.emit('debug', this.name, 
-            '[Node] <- [Lavalink Websocket] : Websocket Message\n' +
-            `  Node                         : ${this.name}\n` +
-            `  OP                           : ${json ? json.op : 'No OP Received'}\n`
-        );
-        if (!json) return;
-        if (json.op === 'stats') {
-            this.stats = json;
-            let ping;
-            try {
-                ping = await this.rest.getLatency();
-            } catch (error) {
-                this.emit('error', this.name, error);
+        try {
+            this.emit('debug', this.name, 
+                '[Node] <- [Lavalink Websocket] : Websocket Message\n' +
+                `  Node                         : ${this.name}\n` +
+                `  OP                           : ${json ? json.op : 'No OP Received'}\n`
+            );
+            if (!json) return;
+            if (json.op === 'stats') {
+                this.stats = json;
+                const ping = await this.rest.getLatency();
+                this.pings.push(ping);
+                if (this.pings.length > 3) this.pings.pop();
+                return;
             }
-            if (!ping) return;
-            this.pings.push(ping);
-            if (this.pings.length > 3) this.pings.pop();
-            return;
+            const player = this.players.get(json.guildId);
+            if (!player) return;
+            await player._onLavalinkMessage(json);
+        } catch (error) {
+            this.emit('error', this.name, error);
         }
-        const player = this.players.get(json.guildId);
-        if (!player) return;
-        await player._onLavalinkMessage(json);
     }
 }
 module.exports = ShoukakuSocket;
