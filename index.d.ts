@@ -331,8 +331,8 @@ declare module 'shoukaku' {
 
     public attemptReconnect(options: AttemptReconnectOptions): Promise<ShoukakuPlayer>;
 
-    private stateUpdate(data: object);
-    private serverUpdate(data: object);
+    private setStateUpdate(data: object);
+    private setServerUpdate(data: object);
     private moveToNode(node: ShoukakuSocket): Promise<void>;
     private connect(d: object): Promise<void>;
     private disconnect(): void;
