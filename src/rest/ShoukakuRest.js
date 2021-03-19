@@ -44,7 +44,7 @@ class ShoukakuRest {
     async resolve(identifier, search) {
         if (!identifier) throw new ShoukakuError('Identifier cannot be null');
         if (search) identifier = `${ShoukakuUtil.searchType(search)}:${identifier}`;
-        const data = await this._get(`/loadtracks?${new URLSearchParams({ identifier }).toString()}`);
+        const data = await this.get(`/loadtracks?${new URLSearchParams({ identifier }).toString()}`);
         return Success.includes(data.loadType) ? new ShoukakuTrackList(data) : null;
     }
     /**
@@ -55,7 +55,17 @@ class ShoukakuRest {
      */
     decode(track) {
         if (!track) throw new ShoukakuError('Track cannot be null');
-        return this._get(`/decodetrack?${new URLSearchParams({ track }).toString()}`);
+        return this.get(`/decodetrack?${new URLSearchParams({ track }).toString()}`);
+    }
+    /**
+     * Gets the estimated latency from the lavalink server
+     * @memberof ShoukakuRest
+     * @returns {Promise<number>} The Lavalink Track details.
+     */
+    async getLatency() {
+        const now = Date.now();
+        await this.getRoutePlannerStatus();
+        return Date.now() - now;
     }
     /**
      * Gets the status of the "RoutePlanner API" for this Lavalink node.
@@ -63,7 +73,7 @@ class ShoukakuRest {
      * @returns {Promise<Object>} Refer to `https://github.com/Frederikam/Lavalink/blob/master/IMPLEMENTATION.md#routeplanner-api`
      */
     getRoutePlannerStatus() {
-        return this._get('/routeplanner/status');
+        return this.get('/routeplanner/status');
     }
     /**
      * Unmarks a failed IP in the "RoutePlanner API" on this Lavalink node.
@@ -72,7 +82,7 @@ class ShoukakuRest {
      * @returns {Promise<number>} Request status code
      */
     unmarkFailedAddress(address) {
-        return this._post('/routeplanner/free/address', { address });
+        return this.post('/routeplanner/free/address', { address });
     }
     /**
      * Unmarks all the failed IP(s) in the "RoutePlanner API" on this Lavalink node.
@@ -80,49 +90,49 @@ class ShoukakuRest {
      * @returns {Promise<number>} Request status code
      */
     unmarkAllFailedAddress() {
-        return this._post('/routeplanner/free/all');
+        return this.post('/routeplanner/free/all');
     }
 
-    _get(endpoint) {
-        const controller = new Abort();
-        const timeout = setTimeout(() => controller.abort(), this.timeout);
-        return Fetch(this.url + endpoint, { headers: { 'User-Agent': this.userAgent, Authorization: this.auth }, signal: controller.signal })
-            .then(res => {
-                if (res.ok) return res.json();
-                throw new ShoukakuError(`Rest request failed with response code: ${res.status}`);
-            })
-            .catch(error => {
-                if (error.name !== 'AbortError') throw error;
-                throw new ShoukakuTimeout(this.timeout);
-            })
-            .finally(() => clearTimeout(timeout));
+    async get(endpoint) {
+        let res;
+        try {
+            res = await this.fetch(this.url + endpoint, { headers: { Authorization: this.auth } });
+        } catch (error) {
+            if (error.name !== 'AbortError') throw error;
+            throw new ShoukakuTimeout(this.timeout);
+        }
+        if (!res.ok) throw new ShoukakuError(`Rest request failed with response code: ${res.status}`);
+        return res.json();
     }
 
-    _post(endpoint, body) {
-        const controller = new Abort();
+    async post(endpoint, body) {
         const options = {
             method: 'POST',
-            controller: controller.signal,
-            headers: {
-                'User-Agent': this.userAgent,
-                Authorization: this.auth
-            }
+            headers: { Authorization: this.auth }
         };
         if (body) {
             options.headers['Content-Type'] = 'application/json';
             options.body = JSON.stringify(body);
         }
+        let res;
+        try {
+            res = await this.fetch(this.url + endpoint, options);
+        } catch (error) {
+            if (error.name !== 'AbortError') throw error;
+            throw new ShoukakuTimeout(this.timeout);
+        }
+        if (!res.ok) throw new ShoukakuError(`Rest request failed with response code: ${res.status}`);
+        return res.status;
+    }
+
+    fetch(url, options) {
+        const controller = new Abort();
+        const fetchOptions = options || {};
+        fetchOptions.signal = controller.signal;
+        if (!fetchOptions.headers) fetchOptions.headers = {};
+        if (!('User-Agent' in fetchOptions.headers)) fetchOptions.headers['User-Agent'] = this.userAgent;
         const timeout = setTimeout(() => controller.abort(), this.timeout);
-        return Fetch(this.url + endpoint, options)
-            .then(res => {
-                if (res.ok) return res.status;
-                throw new ShoukakuError(`Rest request failed with response code: ${res.status}`);
-            })
-            .catch(error => {
-                if (error.name !== 'AbortError') throw error;
-                throw new ShoukakuTimeout(this.timeout);
-            })
-            .finally(() => clearTimeout(timeout));
+        return Fetch(url, fetchOptions).finally(() => clearTimeout(timeout));
     }
 }
 module.exports = ShoukakuRest;

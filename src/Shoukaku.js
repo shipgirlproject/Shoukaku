@@ -122,11 +122,17 @@ class Shoukaku extends EventEmitter {
         if (!this.id)
             throw new ShoukakuError('The lib is not yet ready, make sure to initialize Shoukaku before the library fires "ready" event');
         const node = new ShoukakuSocket(this, nodeOptions);
-        node.connect(this.id, false);
         node.on('debug', (...args) => this.emit('debug', ...args));
         node.on('error', (...args) => this.emit('error', ...args));
         node.on('ready', (...args) => this._ready(...args));
         node.on('close', (...args) => this._close(...args));
+        node.emit('debug', node.name, 
+            '[Shoukaku] <- [Node] : Connecting\n' + 
+            `  Node               : ${node.name}\n` +
+            `  Websocket          : ${node.url}\n` +
+            `  Group              : ${node.group}`
+        );
+        node.connect(this.id, false);
         this.nodes.set(node.name, node);
     }
     /**
@@ -146,7 +152,11 @@ class Shoukaku extends EventEmitter {
         node.removeAllListeners();
         node.executeCleaner();
         if (node.ws) node.ws.close(1000, reason);
-        node.emit('debug', node.name, `[Main] Node Removed => Name: ${node.name}`);
+        node.emit('debug', node.name, 
+            '[Shoukaku] <- [Node] : Disconnected\n' +
+            `  Node               : ${node.name}\n` +
+            `  Reason             : ${reason}`
+        );
         this.emit('disconnected', name, reason);
     }
     /**
@@ -192,7 +202,11 @@ class Shoukaku extends EventEmitter {
     _ready(name, resumed) {
         const node = this.nodes.get(name);
         node.executeCleaner();
-        node.emit('debug', node.name, `[Main] Node Ready => Name: ${node.name}`);
+        node.emit('debug', node.name, 
+            '[Shoukaku] <- [Node] : Connected\n' +
+            `  Node               : ${node.name}\n` +
+            `  Resumed Sesssion?  : ${resumed}`
+        );
         this.emit('ready', name, resumed);
     }
 
@@ -205,12 +219,21 @@ class Shoukaku extends EventEmitter {
 
     _reconnect(node) {
         if (node.reconnectAttempts >= this.options.reconnectTries) {
-            node.emit('debug', node.name, `[Main] Node Disconnecting => Node ${node.name}, Failed reconnection in ${this.options.reconnectTries} attempt(s)`);
-            this.removeNode(node.name, `Failed to reconnect in ${this.options.reconnectTries} attempt(s)`);
+            node.emit('debug', node.name, 
+                '[Shoukaku] <- [Node] : Disconnecting\n' +
+                `  Node               : ${node.name}\n` + 
+                `  Reason             : Can't reconnect after ${this.options.reconnectTries} attempt(s)`
+            );
+            this.removeNode(node.name, `Can't reconnect after ${this.options.reconnectTries} attempt(s)`);
             return;
         }
         node.reconnectAttempts++;
-        node.emit('debug', node.name, `[Main] Node Reconnecting => Node ${node.name}, ${this.options.reconnectTries - node.reconnectAttempts} reconnect tries left, Connecting in ${this.options.reconnectInterval}ms`);
+        node.emit('debug', node.name, 
+            '[Shoukaku] <- [Node] : Reconnecting\n' +
+            `  Node               : ${node.name}\n` +
+            `  Attempts Remaining : ${this.options.reconnectTries - node.reconnectAttempts}\n` + 
+            `  Reconnecting in    : ${this.options.reconnectInterval}ms`
+        );
         setTimeout(() => node.connect(this.id, this.options.resumable), this.options.reconnectInterval);
     }
 
@@ -229,6 +252,11 @@ class Shoukaku extends EventEmitter {
     }
 
     _onClientReady(nodes) {
+        this.emit('debug', 'Manager',
+            '[Shoukaku] [Manager] : Client Ready, Connecting Nodes\n' +
+            `Client ID            : ${this.client.user.id}\n` +
+            `Initial Nodes        : ${nodes.length}`
+        );
         this.id = this.client.user.id;
         for (const node of nodes) this.addNode(mergeDefault(ShoukakuNodeOptions, node));
     }

@@ -243,12 +243,14 @@ declare module 'shoukaku' {
 
     public resolve(identifier: string, search?: Source): Promise<ShoukakuTrackList | null>;
     public decode(track: Base64String): Promise<Object>;
+    public getLatency(): Promise<number>;
     public getRoutePlannerStatus(): Promise<Object>;
     public unmarkFailedAddress(address: string): Promise<number>;
     public unmarkAllFailedAddress(): Promise<number>;
 
-    private _get(url: string): Promise<JSON>;
-    private _post(url: string, body: Object): Promise<number>;
+    private get(url: string): Promise<JSON>;
+    private post(url: string, body: Object): Promise<number>;
+    private fetch(url: string, body: Object): Promise<Response>;
   }
 
   export interface ShoukakuPlayer {
@@ -315,6 +317,7 @@ declare module 'shoukaku' {
     public player: ShoukakuPlayer;
     public node: ShoukakuSocket;
     public guildID: string;
+    public shardID: number;
     public sessionID: string | null;
     public voiceChannelID: string | null;
     public lastVoiceChannelID: string | null;
@@ -325,6 +328,7 @@ declare module 'shoukaku' {
     public channelMoved: boolean;
     public voiceMoved: boolean;
     public reconnecting: boolean;
+    public readonly shardPing: number;
 
     private serverUpdate: object | null;
     private connectTimeout: NodeJS.Timeout | null;
@@ -354,6 +358,8 @@ declare module 'shoukaku' {
     public url: string;
     public resumed: boolean;
     public penalties: number;
+    public pings: Array<number>;
+    public readonly ping: number;
 
     private auth: string;
     private userAgent: string;

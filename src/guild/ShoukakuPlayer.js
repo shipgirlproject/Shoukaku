@@ -1,7 +1,7 @@
 const EventEmitter = require('events');
 const { ShoukakuPlayOptions, ShoukakuStatus, KaraokeValue, TimescaleValue, TremoloValue, VibratoValue, RotationValue, DistortionValue } = require('../constants/ShoukakuConstants.js');
 const { CONNECTED } = ShoukakuStatus;
-const { mergeDefault } = require('../util/ShoukakuUtil.js');
+const { mergeDefault, wait } = require('../util/ShoukakuUtil.js');
 const ShoukakuLink = require('./ShoukakuLink.js');
 const ShoukakuFilter = require('../constants/ShoukakuFilter.js');
 const ShoukakuError = require('../constants/ShoukakuError.js');
@@ -44,6 +44,12 @@ class ShoukakuPlayer extends EventEmitter {
          * @type {ShoukakuFilter}
          */
         this.filters = new ShoukakuFilter();
+    }
+
+    get bridgeWSTimeout() {
+        const discordPing = this.voiceConnection.shardPing;
+        const lavalinkPing = this.voiceConnection.node.ping;
+        return lavalinkPing < discordPing ? discordPing + lavalinkPing : 0;
     }
 
     /**
@@ -422,7 +428,7 @@ class ShoukakuPlayer extends EventEmitter {
         this.filters = new ShoukakuFilter();
     }
 
-    _onLavalinkMessage(json) {
+    async _onLavalinkMessage(json) {
         if (json.op === 'playerUpdate') {
             this.position = json.state.position;
             this.emit('playerUpdate', json.state);
@@ -443,21 +449,41 @@ class ShoukakuPlayer extends EventEmitter {
                     break;
                 case 'WebSocketClosedEvent':
                     if (this.voiceConnection.reconnecting) break;
+                    // to ensure this thing won't execute "BEFORE" Discord WS sends a message, smh race conditions just smh, smh again
+                    await wait(this.bridgeWSTimeout);
                     if (this.voiceConnection.channelMoved || this.voiceConnection.voiceMoved) {
+                        this.voiceConnection.node.emit('debug', this.voiceConnection.node.name, 
+                            '[Player] -> [Voice]   : Channel / Server Move Detected\n' + 
+                            `  Node                : ${this.voiceConnection.node.name}\n` +
+                            `  Channel Moved?      : ${this.voiceConnection.channelMoved}\n` +
+                            `  Voice Server Moved? : ${this.voiceConnection.voiceMoved}\n`
+                        );
                         this.voiceConnection.channelMoved = false;
                         this.voiceConnection.voiceMoved = false;
-                        this.voiceConnection.node.emit('debug', this.voiceConnection.node.name, `[Player] Channel / Voice Server Moved => Guild ${this.voiceConnection.guildID}`);
                         break;
                     }
-                    this.voiceConnection.node.emit('debug', this.voiceConnection.node.name, `[Player] Voice Websocket Close Event => Guild ${this.voiceConnection.guildID}, Reason: ${json.code} ${json.reason}`);
+                    this.voiceConnection.node.emit('debug', this.voiceConnection.node.name, 
+                        '[Player] -> [Voice] : Voice Websocket Closed Event\n' + 
+                        `  Node              : ${this.voiceConnection.node.name}\n` +
+                        `  Code              : ${json.code}\n` +
+                        `  Reason            : ${json.reason}\n`
+                    );
                     this.emit('closed', json);
                     break;
                 default:
-                    this.voiceConnection.node.emit('debug', this.voiceConnection.node.name, `[Player] Unknown player event => ${json.type}`);
+                    this.voiceConnection.node.emit('debug', this.voiceConnection.node.name, 
+                        '[Node] -> [Player] : Unknown Player Event Type\n' + 
+                        `  Node             : ${this.voiceConnection.node.name}\n` +
+                        `  Type             : ${json.type}`
+                    );
             }
             return;
         }
-        this.voiceConnection.node.emit('debug', this.voiceConnection.node.name, `[Player] Unknown OP => ${json.op}`);
+        this.voiceConnection.node.emit('debug', this.voiceConnection.node.name, 
+            '[Node] -> [Player] : Unknown Message OP\n' + 
+            `  Node             : ${this.voiceConnection.node.name}\n` +
+            `  Type             : ${json.op}`
+        );
     }
 }
 module.exports = ShoukakuPlayer;

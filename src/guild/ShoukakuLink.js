@@ -33,6 +33,11 @@ class ShoukakuLink extends EventEmitter {
          */
         this.guildID = guild.id;
         /**
+         * The ID of the shard where this guild id is
+         * @type {number}
+         */
+        this.shardID = guild.shardID;
+        /**
          * The sessionID of this Link
          * @type {?string}
          */
@@ -86,9 +91,20 @@ class ShoukakuLink extends EventEmitter {
         Object.defineProperty(this, 'serverUpdate', { value: null, writable: true });
         Object.defineProperty(this, 'connectTimeout', { value: null, writable: true });
     }
+    /**
+     * Average ping of Discord Websocket
+     * @type {number}
+    */
+    get shardPing() {
+        return this.shard ? this.shard.ping : this.node.shoukaku.client.ws.ping;
+    }
 
     get guild() {
         return this.node.shoukaku.client.guilds.cache.get(this.guildID);
+    }
+
+    get shard() {
+        return this.node.shoukaku.client.ws.shards.get(this.shardID);
     }
 
     /**
@@ -128,7 +144,13 @@ class ShoukakuLink extends EventEmitter {
         try {
             if (!node) throw new ShoukakuError('No available nodes to reconnect to');
             if (!(node instanceof this.node.constructor)) throw new ShoukakuError('Node is not an instance of ShoukakuSocket');
-            this.node.emit('debug', this.node.name, `[Voice] Moving from Node ${this.node.name} => Node ${node.name} | Guild ${this.guildID}, Channel ${this.voiceChannelID}`);
+            this.node.emit('debug', this.node.name, 
+                '[Voice] -> [Node] : Moving\n' +
+                `  From Node       : ${this.node.name}\n` +
+                `  To Node         : ${node.name}\n` +
+                `  Guild           : ${this.guildID}\n` + 
+                `  Channel         : ${this.voiceChannelID}`
+            );
             this.reconnecting = true; 
             await this.node.send({ op: 'destroy', guildId: this.guildID });
             this.node.players.delete(this.guildID);
@@ -137,7 +159,12 @@ class ShoukakuLink extends EventEmitter {
             await this.voiceUpdate();
             this.reconnecting = false;
             await this.player.resume();
-            this.node.emit('debug', this.node.name, `[Voice] Success! Now at Node ${node.name} | Guild ${this.guildID}, Channel ${this.voiceChannelID}`);
+            this.node.emit('debug', this.node.name, 
+                '[Voice] -> [Node] : Moved\n' +
+                `  Node            : ${node.name}\n` +
+                `  Guild           : ${this.guildID}\n` + 
+                `  Channel         : ${this.voiceChannelID}`
+            );
         } catch (error) {
             this.reconnecting = false;
             throw error;
@@ -154,7 +181,13 @@ class ShoukakuLink extends EventEmitter {
         this.voiceChannelID = channel_id;
         if (!session_id) return this.authenticateFailed(new ShoukakuError('No session_id intact on Discord State Update OP'));
         this.sessionID = session_id;
-        this.node.emit('debug', this.node.name, `[Voice] State Update Received => Guild ${this.guildID}, Channel ${channel_id}, State ${this.state}, Channel Moved? ${this.channelMoved}`);
+        this.node.emit('debug', this.node.name, 
+            '[Voice] <- [Discord Websocket] : State Update\n' + 
+            `  Guild                        : ${this.guildID}\n` + 
+            `  Channel                      : ${channel_id}\n` + 
+            `  State                        : ${this.state}\n` + 
+            `  Channel Moved?               : ${this.channelMoved}`
+        );
     }
 
     async setServerUpdate(data) {
@@ -162,11 +195,24 @@ class ShoukakuLink extends EventEmitter {
             if (!data.endpoint) return;
             clearTimeout(this.connectTimeout);
             this.voiceMoved = this.serverUpdate ? !data.endpoint.startsWith(this.region) : false;
-            this.node.emit('debug', this.node.name, `[Voice] Server Update Received => Node ${this.node.name}, Voice Server Moved? ${this.voiceMoved}`);
             this.region = data.endpoint.split('.').shift().replace(/[0-9]/g, '');
             this.serverUpdate = data;
+            this.node.emit('debug', this.node.name, 
+                '[Voice] <- [Discord Websocket] : Server Update\n' + 
+                `  Guild                        : ${this.guildID}\n` + 
+                `  Region                       : ${this.region}\n` + 
+                `  Endpoint                     : ${data.endpoint}\n` + 
+                `  Voice Server Moved?          : ${this.voiceMoved}`
+            );
             await this.voiceUpdate();
-            this.node.emit('debug', this.node.name, `[Voice] Server Update Forwarded & Voice Connected => Node ${this.node.name}`);
+            this.node.emit('debug', this.node.name, 
+                '[Voice] -> [Node]     : Forwarded Server Update\n' + 
+                `  Node                : ${this.node.name}\n` +
+                `  Guild               : ${this.guildID}\n` + 
+                `  Region              : ${this.region}\n` + 
+                `  Endpoint            : ${data.endpoint}\n` + 
+                `  Voice Server Moved? : ${this.voiceMoved}`
+            );
             if (this.listenerCount('ready') > 0) this.emit('ready');
         } catch (error) {
             this.authenticateFailed(error);
@@ -190,10 +236,22 @@ class ShoukakuLink extends EventEmitter {
             });
             this.connectTimeout = setTimeout(() => {
                 this.authenticateFailed(new ShoukakuError('The voice connection is not established in 15 seconds'));
-                this.node.emit('debug', this.node.name, `[Voice] Request Connection Timeout => Guild ${this.guildID}, Channel ${voiceChannelID}`);
+                this.node.emit('debug', this.node.name, 
+                    '[Voice] </- [Discord Websocket] : Request Connection Timeout\n' + 
+                    `  Node                          : ${this.node.name}\n` +
+                    `  Guild                         : ${this.guildID}\n` + 
+                    `  Channel                       : ${voiceChannelID}`
+                );
             }, 15000);
             this.send({ guild_id: guildID, channel_id: voiceChannelID, self_deaf: deaf, self_mute: mute });
-            this.node.emit('debug', this.node.name, `[Voice] Request Connection => Guild ${this.guildID}, Channel ${voiceChannelID}`);
+            this.node.emit('debug', this.node.name, 
+                '[Voice] -> [Discord Websoket] : Requesting Connection\n' + 
+                `  Node                        : ${this.node.name}\n` +
+                `  Guild                       : ${this.guildID}\n` + 
+                `  Channel                     : ${voiceChannelID}\n` + 
+                `  Deaf                        : ${!!deaf}\n` + 
+                `  Mute                        : ${!!mute}`
+            );
         });
     }
 
@@ -201,7 +259,10 @@ class ShoukakuLink extends EventEmitter {
         if (this.state !== DISCONNECTED) {
             this.state = DISCONNECTING;
             this.send({ guild_id: this.guildID, channel_id: null, self_mute: false, self_deaf: false }, true);
-            this.node.emit('debug', this.node.name, `[Voice] Disconnected => Guild ${this.guildID}`);
+            this.node.emit('debug', this.node.name, 
+                '[Voice] -> [Discord Websocket] : Destroyed Connection\n' +
+                `  Guild                        : ${this.guildID}`
+            );
         }
         this.node.players.delete(this.guildID);
         this.node
@@ -214,7 +275,11 @@ class ShoukakuLink extends EventEmitter {
         this.voiceChannelID = null;
         this.lastVoiceChannelID = null;
         this.state = DISCONNECTED;
-        this.node.emit('debug', this.node.name, `[Voice] Destroyed => Guild ${this.guildID}`);
+        this.node.emit('debug', this.node.name, 
+            '[Voice] -> [Node] : Destroyed Player\n' + 
+            `  Node            : ${this.node.name}\n` +
+            `  Guild           : ${this.guildID}`
+        );
     }
 
     authenticateFailed(error) {
