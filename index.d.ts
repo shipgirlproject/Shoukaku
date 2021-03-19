@@ -248,9 +248,9 @@ declare module 'shoukaku' {
     public unmarkFailedAddress(address: string): Promise<number>;
     public unmarkAllFailedAddress(): Promise<number>;
 
-    private get(url: string): Promise<JSON>;
+    private get(url: string, parse: boolean): Promise<JSON>;
     private post(url: string, body: Object): Promise<number>;
-    private fetch(url: string, body: Object): Promise<Response>;
+    private fetch(url: string, options: Object): Promise<Response>;
   }
 
   export interface ShoukakuPlayer {
