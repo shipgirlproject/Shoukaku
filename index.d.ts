@@ -130,7 +130,7 @@ declare module 'shoukaku' {
   }
 
   export interface ShoukakuOptions {
-    resumable?: boolean | string;
+    resumable?: boolean;
     resumableTimeout?: number;
     reconnectTries?: number;
     moveOnDisconnect?: boolean;
@@ -363,11 +363,11 @@ declare module 'shoukaku' {
 
     private auth: string;
     private userAgent: string;
-    private resumable: boolean | string;
+    private resumable: boolean;
     private resumableTimeout: number;
     private moveOnDisconnect: boolean;
 
-    public connect(id: string, resumable: boolean | string): void;
+    public connect(id: string, resumable: boolean): void;
     public joinVoiceChannel(options: ShoukakuJoinOptions): Promise<ShoukakuPlayer>;
     public leaveVoiceChannel(guildID: string): void;
 

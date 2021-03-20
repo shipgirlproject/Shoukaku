@@ -119,7 +119,7 @@ class ShoukakuSocket extends EventEmitter {
     /**
     * Connects this Socket.
     * @param {string} id Your Bot's / Client user id.
-    * @param {boolean|string} resumable Determines if we should try to resume the connection.
+    * @param {boolean} resumable Determines if we should try to resume the connection.
     * @memberof ShoukakuSocket
     * @returns {void}
     */
@@ -131,7 +131,7 @@ class ShoukakuSocket extends EventEmitter {
             'Authorization': this.auth,
             'User-Id': id
         };
-        if (resumable) headers['Resume-Key'] = resumable;
+        if (resumable) headers['Resume-Key'] = (!!resumable).toString(); 
         this.emit('debug', this.name, 
             '[Node] -> [Lavalink Websocket] : Connecting\n' +
             `  Node                         : ${this.name}\n` +
@@ -205,7 +205,7 @@ class ShoukakuSocket extends EventEmitter {
         if (!this.resumable) return;
         await this.send({
             op: 'configureResuming',
-            key: this.resumable,
+            key: (!!this.resumable).toString(),
             timeout: this.resumableTimeout
         });
     }
@@ -245,8 +245,8 @@ class ShoukakuSocket extends EventEmitter {
         this.emit('debug', this.name, 
             '[Node] <- [Lavalink Websocket] : Websocket Open, Sending Configure Resume Packet\n' +
             `  Node                         : ${this.name}\n` +
-            `  Resume-Key                   : ${this.resumable ? this.resumable.split('').map((letter, index) => index === 0 ? letter : '*').join('') : this.resumable}\n` +
-            `  Timeout                      : ${this.resumableTimeout}s`
+            `  Supports Resuming?           : ${!!this.resumable}\n` +
+            `  Resuming Timeout             : ${this.resumableTimeout}s`
         );
         try {
             await this.configureResuming();
@@ -310,26 +310,22 @@ class ShoukakuSocket extends EventEmitter {
     }
 
     async _onLavalinkMessage(json) {
-        try {
-            this.emit('debug', this.name, 
-                '[Node] <- [Lavalink Websocket] : Websocket Message\n' +
-                `  Node                         : ${this.name}\n` +
-                `  OP                           : ${json ? json.op : 'No OP Received'}\n`
-            );
-            if (!json) return;
-            if (json.op === 'stats') {
-                this.stats = json;
-                const ping = await this.rest.getLatency();
-                this.pings.push(ping);
-                if (this.pings.length > 3) this.pings.pop();
-                return;
-            }
-            const player = this.players.get(json.guildId);
-            if (!player) return;
-            await player._onLavalinkMessage(json);
-        } catch (error) {
-            this.emit('error', this.name, error);
+        this.emit('debug', this.name, 
+            '[Node] <- [Lavalink Websocket] : Websocket Message\n' +
+        `  Node                         : ${this.name}\n` +
+        `  OP                           : ${json ? json.op : 'No OP Received'}\n`
+        );
+        if (!json) return;
+        if (json.op === 'stats') {
+            this.stats = json;
+            const ping = await this.rest.getLatency();
+            this.pings.push(ping);
+            if (this.pings.length > 3) this.pings.pop();
+            return;
         }
+        const player = this.players.get(json.guildId);
+        if (!player) return;
+        await player._onLavalinkMessage(json);
     }
 }
 module.exports = ShoukakuSocket;
