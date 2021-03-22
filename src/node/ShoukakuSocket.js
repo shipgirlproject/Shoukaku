@@ -129,7 +129,8 @@ class ShoukakuSocket extends EventEmitter {
             'Client-Name': this.userAgent,
             'User-Agent': this.userAgent,
             'Authorization': this.auth,
-            'User-Id': id
+            'User-Id': id,
+            'Num-Shards': this.shoukaku.client.shard?.count || 1
         };
         if (resumable) headers['Resume-Key'] = (!!resumable).toString(); 
         this.emit('debug', this.name, 
@@ -138,7 +139,8 @@ class ShoukakuSocket extends EventEmitter {
             `  Client Name & User Agent     : ${this.userAgent}\n` +
             `  Authorization                : ${this.auth.split('').map((letter, index) => index === 0 ? letter : '*').join('')}\n` +
             `  User ID                      : ${id}\n` +
-            `  Resumable?                   : ${!!resumable}`
+            `  Resumable?                   : ${!!resumable}\n` +
+            `  Shard count                  : ${this.shoukaku.client.shard?.count || 1}`
         );
         this.ws = new Websocket(this.url, { headers });
         this.ws.once('upgrade', (...args) => this._upgrade(...args));
