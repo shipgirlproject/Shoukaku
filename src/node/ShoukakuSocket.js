@@ -312,8 +312,8 @@ class ShoukakuSocket extends EventEmitter {
     async _onLavalinkMessage(json) {
         this.emit('debug', this.name, 
             '[Node] <- [Lavalink Websocket] : Websocket Message\n' +
-        `  Node                         : ${this.name}\n` +
-        `  OP                           : ${json ? json.op : 'No OP Received'}\n`
+            `  Node                         : ${this.name}\n` +
+            `  OP                           : ${json ? json.op : 'No OP Received'}\n`
         );
         if (!json) return;
         if (json.op === 'stats') {

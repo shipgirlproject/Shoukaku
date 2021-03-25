@@ -24,7 +24,7 @@ class ShoukakuRest {
         * URL of the host used by this resolver instance.
         * @type {string}
         */
-        this.url = `http${secure ? 's' : ''}://${host}:${port}/`;
+        this.url = `http${secure ? 's' : ''}://${host}:${port}`;
         /**
          * This Resolver Timeout before it decides to cancel the request.
          * @type {number}
