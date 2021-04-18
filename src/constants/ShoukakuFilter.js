@@ -1,5 +1,5 @@
 /**
- * Filters available for customization. See https://github.com/Frederikam/Lavalink/blob/dev/IMPLEMENTATION.md#using-filters
+ * Filters available for customization. See https://github.com/freyacodes/Lavalink/blob/dev/IMPLEMENTATION.md#using-filters
  * @class ShoukakuFilter
  */
 class ShoukakuFilter {
