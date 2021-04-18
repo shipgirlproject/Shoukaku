@@ -71,7 +71,7 @@ class ShoukakuRest {
     /**
      * Gets the status of the "RoutePlanner API" for this Lavalink node.
      * @memberof ShoukakuRest
-     * @returns {Promise<Object>} Refer to `https://github.com/Frederikam/Lavalink/blob/master/IMPLEMENTATION.md#routeplanner-api`
+     * @returns {Promise<Object>} Refer to `https://github.com/freyacodes/Lavalink/blob/master/IMPLEMENTATION.md#routeplanner-api`
      */
     getRoutePlannerStatus() {
         return this.get('/routeplanner/status');
