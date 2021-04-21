@@ -98,7 +98,7 @@ class ShoukakuRest {
         try {
             res = await this.fetch(this.url + endpoint, { headers: { Authorization: this.auth } });
         } catch (error) {
-            if (error.name !== 'AbortError') throw error;
+            if (error.name !== 'HeadersTimeoutError') throw error;
             throw new ShoukakuTimeout(this.timeout);
         }
         if (res.status >= 200 && res.statusCode < 300) throw new ShoukakuError(`Rest request failed with response code: ${res.statusCode}`);
@@ -119,7 +119,7 @@ class ShoukakuRest {
         try {
             res = await this.fetch(this.url + endpoint, options);
         } catch (error) {
-            if (error.name !== 'AbortError') throw error;
+            if (error.name !== 'HeadersTimeoutError') throw error;
             throw new ShoukakuTimeout(this.timeout);
         }
         if (res.status >= 200 && res.statusCode < 300) throw new ShoukakuError(`Rest request failed with response code: ${res.statusCode}`);
