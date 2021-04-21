@@ -1,5 +1,4 @@
-const Fetch = require('node-fetch');
-const Abort = require('abort-controller');
+const fetch = require('petitio');
 const ShoukakuTimeout = require('../constants/ShoukakuTimeout.js');
 const ShoukakuError = require('../constants/ShoukakuError.js');
 const ShoukakuUtil = require('../util/ShoukakuUtil.js');
@@ -102,8 +101,8 @@ class ShoukakuRest {
             if (error.name !== 'AbortError') throw error;
             throw new ShoukakuTimeout(this.timeout);
         }
-        if (!res.ok) throw new ShoukakuError(`Rest request failed with response code: ${res.status}`);
-        if (!parse) return res.status;
+        if (res.statusCode !== 200) throw new ShoukakuError(`Rest request failed with response code: ${res.statusCode}`);
+        if (!parse) return res.statusCode;
         return res.json();
     }
 
@@ -123,18 +122,22 @@ class ShoukakuRest {
             if (error.name !== 'AbortError') throw error;
             throw new ShoukakuTimeout(this.timeout);
         }
-        if (!res.ok) throw new ShoukakuError(`Rest request failed with response code: ${res.status}`);
-        return res.status;
+        if (res.statusCode !== 200) throw new ShoukakuError(`Rest request failed with response code: ${res.statusCode}`);
+        return res.statusCode;
     }
 
     fetch(url, options) {
-        const controller = new Abort();
         const fetchOptions = options || {};
-        fetchOptions.signal = controller.signal;
+
         if (!fetchOptions.headers) fetchOptions.headers = {};
         if (!('User-Agent' in fetchOptions.headers)) fetchOptions.headers['User-Agent'] = this.userAgent;
-        const timeout = setTimeout(() => controller.abort(), this.timeout);
-        return Fetch(url, fetchOptions).finally(() => clearTimeout(timeout));
+
+        return fetch(url)
+            .method(fetchOptions?.method ?? 'GET')
+            .headers(fetchOptions.headers)
+            .body(fetchOptions?.body ?? null)
+            .timeout(this.timeout)
+            .send()
     }
 }
 module.exports = ShoukakuRest;
