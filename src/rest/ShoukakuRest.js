@@ -101,7 +101,7 @@ class ShoukakuRest {
             if (error.name !== 'AbortError') throw error;
             throw new ShoukakuTimeout(this.timeout);
         }
-        if (res.statusCode !== 200) throw new ShoukakuError(`Rest request failed with response code: ${res.statusCode}`);
+        if (res.status >= 200 && res.statusCode < 300) throw new ShoukakuError(`Rest request failed with response code: ${res.statusCode}`);
         if (!parse) return res.statusCode;
         return res.json();
     }
@@ -122,7 +122,7 @@ class ShoukakuRest {
             if (error.name !== 'AbortError') throw error;
             throw new ShoukakuTimeout(this.timeout);
         }
-        if (res.statusCode !== 200) throw new ShoukakuError(`Rest request failed with response code: ${res.statusCode}`);
+        if (res.status >= 200 && res.statusCode < 300) throw new ShoukakuError(`Rest request failed with response code: ${res.statusCode}`);
         return res.statusCode;
     }
 
