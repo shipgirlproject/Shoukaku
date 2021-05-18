@@ -27,7 +27,7 @@ The ShipGirl Project, feat Shoukaku; ⓒ Kancolle
 
 ### Installation
 
-For Lavalink `Master` branch with commits no newer than https://github.com/Frederikam/Lavalink/commit/45f8de045fdd75034b75c63c410121d8315e6b75
+For Lavalink `Master` branch with commits no newer than https://github.com/freyacodes/Lavalink/commit/45f8de045fdd75034b75c63c410121d8315e6b75
 ```
 npm i shoukaku@1.5.2
 ```
@@ -50,9 +50,9 @@ npm i Deivu/Shoukaku
 
 ### Getting Lavalink
 
-Download binaries from the [CI server](https://ci.fredboat.com/viewLog.html?buildId=lastSuccessful&buildTypeId=Lavalink_Build&tab=artifacts&guest=1) or the [GitHub](https://github.com/Frederikam/Lavalink/releases) releases.
+Download binaries from the [CI server](https://ci.fredboat.com/viewLog.html?buildId=lastSuccessful&buildTypeId=Lavalink_Build&tab=artifacts&guest=1) or the [GitHub](https://github.com/freyacodes/Lavalink/releases) releases.
 
-Put an [application.yml](https://github.com/Frederikam/Lavalink/blob/master/LavalinkServer/application.yml.example) file in your working directory.
+Put an [application.yml](https://github.com/freyacodes/Lavalink/blob/master/LavalinkServer/application.yml.example) file in your working directory.
 
 Run with `java -jar Lavalink.jar`
 
@@ -60,7 +60,7 @@ Docker images are available on the [Docker](https://hub.docker.com/r/fredboat/la
 
 ### Other Links
 
-[Support](https://discord.gg/FVqbtGu) | [Lavalink](https://github.com/Frederikam/Lavalink)
+[Support](https://discord.gg/FVqbtGu) | [Lavalink](https://github.com/freyacodes/Lavalink)
 
 ### Example
 

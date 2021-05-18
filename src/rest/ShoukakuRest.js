@@ -1,5 +1,4 @@
-const Fetch = require('node-fetch');
-const Abort = require('abort-controller');
+const fetch = require('petitio');
 const ShoukakuTimeout = require('../constants/ShoukakuTimeout.js');
 const ShoukakuError = require('../constants/ShoukakuError.js');
 const ShoukakuUtil = require('../util/ShoukakuUtil.js');
@@ -71,7 +70,7 @@ class ShoukakuRest {
     /**
      * Gets the status of the "RoutePlanner API" for this Lavalink node.
      * @memberof ShoukakuRest
-     * @returns {Promise<Object>} Refer to `https://github.com/Frederikam/Lavalink/blob/master/IMPLEMENTATION.md#routeplanner-api`
+     * @returns {Promise<Object>} Refer to `https://github.com/freyacodes/Lavalink/blob/master/IMPLEMENTATION.md#routeplanner-api`
      */
     getRoutePlannerStatus() {
         return this.get('/routeplanner/status');
@@ -99,11 +98,11 @@ class ShoukakuRest {
         try {
             res = await this.fetch(this.url + endpoint, { headers: { Authorization: this.auth } });
         } catch (error) {
-            if (error.name !== 'AbortError') throw error;
+            if (error.name !== 'HeadersTimeoutError') throw error;
             throw new ShoukakuTimeout(this.timeout);
         }
-        if (!res.ok) throw new ShoukakuError(`Rest request failed with response code: ${res.status}`);
-        if (!parse) return res.status;
+        if (res.status >= 200 && res.statusCode < 300) throw new ShoukakuError(`Rest request failed with response code: ${res.statusCode}`);
+        if (!parse) return res.statusCode;
         return res.json();
     }
 
@@ -120,21 +119,25 @@ class ShoukakuRest {
         try {
             res = await this.fetch(this.url + endpoint, options);
         } catch (error) {
-            if (error.name !== 'AbortError') throw error;
+            if (error.name !== 'HeadersTimeoutError') throw error;
             throw new ShoukakuTimeout(this.timeout);
         }
-        if (!res.ok) throw new ShoukakuError(`Rest request failed with response code: ${res.status}`);
-        return res.status;
+        if (res.status >= 200 && res.statusCode < 300) throw new ShoukakuError(`Rest request failed with response code: ${res.statusCode}`);
+        return res.statusCode;
     }
 
     fetch(url, options) {
-        const controller = new Abort();
         const fetchOptions = options || {};
-        fetchOptions.signal = controller.signal;
+
         if (!fetchOptions.headers) fetchOptions.headers = {};
         if (!('User-Agent' in fetchOptions.headers)) fetchOptions.headers['User-Agent'] = this.userAgent;
-        const timeout = setTimeout(() => controller.abort(), this.timeout);
-        return Fetch(url, fetchOptions).finally(() => clearTimeout(timeout));
+
+        return fetch(url)
+            .method(fetchOptions?.method ?? 'GET')
+            .headers(fetchOptions.headers)
+            .body(fetchOptions?.body ?? null)
+            .timeout(this.timeout)
+            .send()
     }
 }
 module.exports = ShoukakuRest;
