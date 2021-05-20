@@ -126,6 +126,7 @@ class ShoukakuConnection extends EventEmitter {
             .shoukaku
             .client
             .api
+            .guilds(this.guildID)
             .members(this.node.shoukaku.id)
             .patch({ data: { deaf }, reason });
     }
@@ -142,6 +143,7 @@ class ShoukakuConnection extends EventEmitter {
             .shoukaku
             .client
             .api
+            .guilds(this.guildID)
             .members(this.node.shoukaku.id)
             .patch({ data: { mute }, reason });
     }
@@ -158,6 +160,7 @@ class ShoukakuConnection extends EventEmitter {
             .shoukaku
             .client
             .api
+            .guilds(this.guildID)
             .members(this.node.shoukaku.id)
             .patch({ data: { channel }, reason });
     }
@@ -199,7 +202,7 @@ class ShoukakuConnection extends EventEmitter {
         try {
             await once(this, 'serverUpdate', { signal });
         } catch (error) {
-            this.node.emit('debug', this.node.name, '[Voice] </- [Discord] : Request Connection Failed' );
+            this.node.emit('debug', this.node.name, '[Voice] </- [Discord] : Request Connection Failed');
             if (error.name === 'AbortError') 
                 throw new Error('The voice connection is not established in 15 seconds');
             throw error;
