@@ -92,7 +92,7 @@ class ShoukakuPlayer extends EventEmitter {
      */
 
     /**
-     * Moves this Player & VoiceConnection to another lavalink node you specified
+     * Moves this player and connection to another node
      * @param {string} name Name of the Node you want to move to
      * @memberOf ShoukakuPlayer
      * @returns {ShoukakuPlayer}
@@ -318,7 +318,7 @@ class ShoukakuPlayer extends EventEmitter {
      * @memberOf ShoukakuPlayer
      * @returns {ShoukakuPlayer}
      * @example
-     * ShoukakuPlayer.voiceConnection.attemptReconnect()
+     * ShoukakuPlayer.connection.attemptReconnect()
      *     .then(() => <ShoukakuPlayer>.resume());
      */
     resume() {
@@ -384,7 +384,7 @@ class ShoukakuPlayer extends EventEmitter {
                     wait(this.connection.node.shoukaku.options.closedWebsocketEventDelay)
                         .then(() => {
                             if (this.connection.channelMoved || this.connection.voiceMoved) {
-                                this.connection.node.emit('debug', this.connection.node.name, '[Player] -> [Voice] : Channel / Server Move Detected');
+                                this.connection.node.emit('debug', this.connection.node.name, `[Node] -> [${this.connection.node.name}] : Move detected, Channel ${this.connection.channelMoved}; Server ${this.connection.voiceMoved}`);
                                 this.connection.channelMoved = false;
                                 this.connection.voiceMoved = false;
                                 return;
@@ -393,19 +393,11 @@ class ShoukakuPlayer extends EventEmitter {
                         });
                     break;
                 default:
-                    this.voiceConnection.node.emit('debug', this.voiceConnection.node.name, 
-                        '[Node] -> [Player] : Unknown Player Event Type\n' + 
-                        `  Node             : ${this.voiceConnection.node.name}\n` +
-                        `  Type             : ${json.type}`
-                    );
+                    this.connection.node.emit('debug', this.connection.node.name, `[Node] -> [${this.connection.node.name}] : Unknown Player Event Type ${json.type}`);
             }
             return;
         }
-        this.voiceConnection.node.emit('debug', this.voiceConnection.node.name, 
-            '[Node] -> [Player] : Unknown Message OP\n' + 
-            `  Node             : ${this.voiceConnection.node.name}\n` +
-            `  Type             : ${json.op}`
-        );
+        this.connection.node.emit('debug', this.connection.node.name, `[Node] -> [${this.connection.node.name}] : Unknown Message OP ${json.op}`);
     }
 }
 module.exports = ShoukakuPlayer;
