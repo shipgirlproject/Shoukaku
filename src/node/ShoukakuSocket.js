@@ -1,7 +1,7 @@
 const EventEmitter = require('events');
 const Websocket = require('ws');
 const ShoukakuQueue = require('./ShoukakuQueue.js');
-const ShoukakuRest = require('../rest/ShoukakuRest.js');
+const ShoukakuRest = require('./ShoukakuRest.js');
 const ShoukakuPlayer = require('../guild/ShoukakuPlayer.js');
 const ShoukakuNodeStatus = require('../struct/ShoukakuNodeStatus.js');
 

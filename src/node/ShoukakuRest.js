@@ -1,6 +1,6 @@
 const Petitio = require('petitio');
 const ShoukakuRouter = require('./ShoukakuRouter.js');
-const ShoukakuTrackList = require('../constants/ShoukakuTrackList.js');
+const ShoukakuTrackList = require('../struct/ShoukakuTrackList.js');
 const { searchType } = require('../Constants.js');
 
 const Success = ['TRACK_LOADED', 'PLAYLIST_LOADED', 'SEARCH_RESULT'];
