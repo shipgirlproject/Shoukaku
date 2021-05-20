@@ -28,7 +28,7 @@ class ShoukakuTrackList {
          * An array of tracks from this TrackList
          * @type {Array<ShoukakuTrack>}
          */
-        this.tracks = raw.tracks.length ? raw.tracks.map(d => new ShoukakuTrack(d)) : [];
+        this.tracks = raw.tracks?.map(d => new ShoukakuTrack(d)) || [];
     }
 }
 

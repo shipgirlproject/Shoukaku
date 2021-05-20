@@ -1,33 +1,32 @@
-const { ShoukakuOptions, ShoukakuNodeOptions, ShoukakuStatus } = require('./constants/ShoukakuConstants.js');
-const { CONNECTED } = ShoukakuStatus;
-const { mergeDefault, getVersion } = require('./util/ShoukakuUtil.js');
-const ShoukakuError = require('./constants/ShoukakuError.js');
-const ShoukakuSocket = require('./node/ShoukakuSocket.js');
 const EventEmitter = require('events');
-const { variant, version } = getVersion();
+const ShoukakuSocket = require('./node/ShoukakuSocket.js');
+
+const { options, state, nodeOptions } = require('./Constants.js');
+const { mergeDefault, getVersion } = require('./Utils.js');
 
 /**
-  * Shoukaku, governs the client's node connections.
+  * Shoukaku, governs the client's lavalink node connections.
   * @class Shoukaku
   * @extends {EventEmitter}
   */
 class Shoukaku extends EventEmitter {
     /**
-     * @param  {Client} client Your Discord.js client
+     * @param {Client} client Your Discord.js client
      * @param {ShoukakuConstants#ShoukakuNodes} nodes Lavalink Nodes where Shoukaku will try to connect to.
-     * @param {ShoukakuConstants#ShoukakuOptions} options Options to initialize Shoukaku with
+     * @param {ShoukakuConstants#ShoukakuOptions} suppliedOptions Options to initialize Shoukaku with
      */
-    constructor(client, nodes, options) {
+    constructor(client, nodes, suppliedOptions) {
         super();
+        const { variant, version } = getVersion();
         if (variant === 'light') {
             if (!version.startsWith('3'))
-                throw new ShoukakuError('Shoukaku will only work at Discord.JS-light v3. Versions below Discord.JS-light v3 is not supported.');
+                throw new Error('Shoukaku will only work at Discord.JS-light v3. Versions below Discord.JS-light v3 is not supported');
         } else {
             if (!version.startsWith('12'))
-                throw new ShoukakuError('Shoukaku will only work at Discord.JS v12. Versions below Discord.JS v12 is not supported.');
+                throw new Error('Shoukaku will only work at Discord.JS v12. Versions below Discord.JS v12 is not supported');
         }
-        if (!nodes || !nodes.length)
-            throw new ShoukakuError('No nodes supplied');
+        if (!nodes?.length) 
+            throw new Error('No nodes supplied');
         /**
         * The instance of Discord.js client used with Shoukaku.
         * @type {external.Client}
@@ -44,11 +43,12 @@ class Shoukaku extends EventEmitter {
         */
         this.nodes = new Map();
 
-        Object.defineProperty(this, 'options', { value: mergeDefault(ShoukakuOptions, options) });
+        Object.defineProperty(this, 'options', { value: mergeDefault(options, suppliedOptions) });
 
         this.client.once('ready', () => this._onClientReady(nodes));
         this.client.on('raw', event => this._onClientRaw(event));
     }
+
     /**
      * Gets all the Players that is currently active on all nodes in this instance.
      * @type {Map<string, ShoukakuPlayer>}
@@ -60,16 +60,6 @@ class Shoukaku extends EventEmitter {
             for (const [id, player] of node.players) players.set(id, player);
         }
         return players;
-    }
-    /**
-     * Gets the number of total Players that is currently active on all nodes in this instance.
-     * @type {number}
-     * @memberof Shoukaku
-     */
-    get totalPlayers() {
-        let counter = 0;
-        for (const node of this.nodes.values()) counter += node.players.size;
-        return counter;
     }
 
     /**
@@ -86,8 +76,7 @@ class Shoukaku extends EventEmitter {
      * @param {Error} error The error encountered.
      * @memberof Shoukaku
      * @example
-     * // <Shoukaku> is your own instance of Shoukaku
-     * <Shoukaku>.on('error', console.error);
+     * Shoukaku.on('error', console.error);
      */
     /** 
      * Emitted when a ShoukakuSocket becomes Ready from a reconnection or first initialization.
@@ -119,20 +108,13 @@ class Shoukaku extends EventEmitter {
     * @returns {void}
     */
     addNode(nodeOptions) {
-        if (!this.id)
-            throw new ShoukakuError('The lib is not yet ready, make sure to initialize Shoukaku before the library fires "ready" event');
         const node = new ShoukakuSocket(this, nodeOptions);
         node.on('debug', (...args) => this.emit('debug', ...args));
         node.on('error', (...args) => this.emit('error', ...args));
+        node.on('disconnect', (...args) => this.emit('disconnected', ...args));
         node.on('ready', (...args) => this._ready(...args));
         node.on('close', (...args) => this._close(...args));
-        node.emit('debug', node.name, 
-            '[Shoukaku] <- [Node] : Connecting\n' + 
-            `  Node               : ${node.name}\n` +
-            `  Websocket          : ${node.url}\n` +
-            `  Group              : ${node.group}`
-        );
-        node.connect(this.id, false);
+        node.connect();
         this.nodes.set(node.name, node);
     }
     /**
@@ -143,21 +125,11 @@ class Shoukaku extends EventEmitter {
      * @returns {void}
      */
     removeNode(name, reason = 'Remove node executed') {
-        if (!this.id)
-            throw new ShoukakuError('The lib is not yet ready, make sure to initialize Shoukaku before the library fires "ready" event');
         const node = this.nodes.get(name);
-        if (!node) 
-            throw new ShoukakuError('The node name you specified doesn\'t exist');
+        if (!node) throw new Error('The node name you specified doesn\'t exist');
         this.nodes.delete(node.name);
+        node.disconnect(1000, reason);
         node.removeAllListeners();
-        node.executeCleaner();
-        if (node.ws) node.ws.close(1000, reason);
-        node.emit('debug', node.name, 
-            '[Shoukaku] <- [Node] : Disconnected\n' +
-            `  Node               : ${node.name}\n` +
-            `  Reason             : ${reason}`
-        );
-        this.emit('disconnected', name, reason);
     }
     /**
      * Shortcut to get the Ideal Node or a manually specified Node from the current nodes that Shoukaku governs.
@@ -165,7 +137,7 @@ class Shoukaku extends EventEmitter {
      * @memberof Shoukaku
      * @returns {ShoukakuSocket}
      * @example
-     * const node = <Shoukaku>.getNode();
+     * const node = Shoukaku.getNode();
      * node.rest.resolve('Kongou Burning Love', 'youtube')
      *     .then(data => 
      *         node.joinVoiceChannel({ guildID: 'guild_id', voiceChannelID: 'voice_channel_id' })
@@ -173,40 +145,17 @@ class Shoukaku extends EventEmitter {
      *     )
      */
     getNode(query) {
-        if (!this.id)
-            throw new ShoukakuError('The lib is not yet ready, make sure to initialize Shoukaku before the library fires "ready" event');
-        if (!this.nodes.size)
-            throw new ShoukakuError('No nodes available, please add a node first.');
-        if (!query || Array.isArray(query))
-            return this._getIdeal(query);
+        if (!this.nodes.size) throw new Error('No nodes available, please add a node first');
+        if (!query || Array.isArray(query)) return this._getIdeal(query);
         const node = this.nodes.get(query);
-        if (!node)
-            throw new ShoukakuError('The node name you specified is not one of my nodes');
-        if (node.state !== CONNECTED)
-            throw new ShoukakuError('This node is not yet ready');
+        if (!node) throw new Error('The node name you specified is not one of my nodes');
+        if (node.state !== state.CONNECTED) throw new Error('This node is not yet ready');
         return node;
     }
-    /**
-    * Shortcut to get the player of a guild, if there is any.
-    * @param {string} guildID The guildID of the guild you are trying to get.
-    * @memberof Shoukaku
-    * @returns {?ShoukakuPlayer}
-    */
-    getPlayer(guildID) {
-        if (!this.id)
-            throw new ShoukakuError('The lib is not yet ready, make sure to initialize Shoukaku before the library fires "ready" event');
-        if (!guildID) return null;
-        return this.players.get(guildID);
-    }
-
+    
     _ready(name, resumed) {
         const node = this.nodes.get(name);
-        node.executeCleaner();
-        node.emit('debug', node.name, 
-            '[Shoukaku] <- [Node] : Connected\n' +
-            `  Node               : ${node.name}\n` +
-            `  Resumed Sesssion?  : ${resumed}`
-        );
+        node._clean();
         this.emit('ready', name, resumed);
     }
 
@@ -219,27 +168,17 @@ class Shoukaku extends EventEmitter {
 
     _reconnect(node) {
         if (node.reconnectAttempts >= this.options.reconnectTries) {
-            node.emit('debug', node.name, 
-                '[Shoukaku] <- [Node] : Disconnecting\n' +
-                `  Node               : ${node.name}\n` + 
-                `  Reason             : Can't reconnect after ${this.options.reconnectTries} attempt(s)`
-            );
             this.removeNode(node.name, `Can't reconnect after ${this.options.reconnectTries} attempt(s)`);
             return;
         }
         node.reconnectAttempts++;
-        node.emit('debug', node.name, 
-            '[Shoukaku] <- [Node] : Reconnecting\n' +
-            `  Node               : ${node.name}\n` +
-            `  Attempts Remaining : ${this.options.reconnectTries - node.reconnectAttempts}\n` + 
-            `  Reconnecting in    : ${this.options.reconnectInterval}ms`
-        );
+        node.emit('debug', node.name, '[Shoukaku] -> [Node] : Reconnecting');
         setTimeout(() => node.connect(this.id, this.options.resumable), this.options.reconnectInterval);
     }
 
     _getIdeal(group) {
         const nodes = [...this.nodes.values()]
-            .filter(node => node.state === CONNECTED);
+            .filter(node => node.state === state.CONNECTED);
         if (!group) {
             return nodes
                 .sort((a, b) => a.penalties - b.penalties)
@@ -258,7 +197,7 @@ class Shoukaku extends EventEmitter {
             `Initial Nodes        : ${nodes.length}`
         );
         this.id = this.client.user.id;
-        for (const node of nodes) this.addNode(mergeDefault(ShoukakuNodeOptions, node));
+        for (const node of nodes) this.addNode(mergeDefault(nodeOptions, node));
     }
 
     _onClientRaw(packet) {
