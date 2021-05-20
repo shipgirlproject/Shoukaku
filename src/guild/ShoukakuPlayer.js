@@ -327,7 +327,10 @@ class ShoukakuPlayer extends EventEmitter {
         this.emit('resumed');
         return this;
     }
-
+    /**
+     * @memberOf ShoukakuPlayer
+     * @private
+     */
     updateFilters() {
         const { volume, equalizer, karaoke, timescale, tremolo, vibrato, rotation, distortion } = this.filters;
         this.connection.node.send({
@@ -343,17 +346,24 @@ class ShoukakuPlayer extends EventEmitter {
             distortion
         });
     }
-
+    /**
+     * @memberOf ShoukakuPlayer
+     * @protected
+     */
     reset() {
         this.track = null;
         this.position = 0;
         this.filters = new ShoukakuFilter();
     }
-
-    async _onLavalinkMessage(json) {
+    /**
+     * @memberOf ShoukakuPlayer
+     * @param {Object} json
+     * @protected
+     */
+    _onLavalinkMessage(json) {
         if (json.op === 'playerUpdate') {
             this.position = json.state.position;
-            this.emit('playerUpdate', json.state);
+            this.emit('update', json.state);
             return;
         }
         if (json.op === 'event') {
@@ -367,30 +377,20 @@ class ShoukakuPlayer extends EventEmitter {
                     this.emit('end', json);
                     break;
                 case 'TrackExceptionEvent':
-                    this.emit('trackException', json);
+                    this.emit('exception', json);
                     break;
                 case 'WebSocketClosedEvent':
-                    if (this.voiceConnection.reconnecting) break;
-                    // to ensure this thing won't execute "BEFORE" Discord WS sends a message, smh race conditions just smh, smh again
-                    await wait(this.bridgeWSTimeout);
-                    if (this.voiceConnection.channelMoved || this.voiceConnection.voiceMoved) {
-                        this.voiceConnection.node.emit('debug', this.voiceConnection.node.name, 
-                            '[Player] -> [Voice]   : Channel / Server Move Detected\n' + 
-                            `  Node                : ${this.voiceConnection.node.name}\n` +
-                            `  Channel Moved?      : ${this.voiceConnection.channelMoved}\n` +
-                            `  Voice Server Moved? : ${this.voiceConnection.voiceMoved}\n`
-                        );
-                        this.voiceConnection.channelMoved = false;
-                        this.voiceConnection.voiceMoved = false;
-                        break;
-                    }
-                    this.voiceConnection.node.emit('debug', this.voiceConnection.node.name, 
-                        '[Player] -> [Voice] : Voice Websocket Closed Event\n' + 
-                        `  Node              : ${this.voiceConnection.node.name}\n` +
-                        `  Code              : ${json.code}\n` +
-                        `  Reason            : ${json.reason}\n`
-                    );
-                    this.emit('closed', json);
+                    if (this.connection.reconnecting) break;
+                    wait(this.connection.node.shoukaku.options.closedWebsocketEventDelay)
+                        .then(() => {
+                            if (this.connection.channelMoved || this.connection.voiceMoved) {
+                                this.connection.node.emit('debug', this.connection.node.name, '[Player] -> [Voice] : Channel / Server Move Detected');
+                                this.connection.channelMoved = false;
+                                this.connection.voiceMoved = false;
+                                return;
+                            }
+                            this.emit('closed', json);
+                        });
                     break;
                 default:
                     this.voiceConnection.node.emit('debug', this.voiceConnection.node.name, 

@@ -1,7 +1,7 @@
 const AbortController = require('abort-controller');
 const { EventEmitter, once } = require('events');
 const { state } = require('../Constants.js');
-// const { wait } = require('../Utils.js');
+const { wait } = require('../Utils.js');
 
 /**
  * ShoukakuConnection, manages a voice connection between Discord and Lavalink
@@ -87,38 +87,39 @@ class ShoukakuConnection extends EventEmitter {
     }
 
     /**
-     * Attempts to reconnect this ShoukakuLink, A use case for this is when your Discord Websocket re-identifies
-     * @memberOf ShoukakuLink
+     * Attempts to reconnect this connection
+     * @memberOf ShoukakuConnection
      * @param {Object} [options] options for attemptReconnect
      * @param {String} [options.voiceChannelID] Will throw an error if not specified, when the state of this link is disconnected, no cached serverUpdate or when forceReconnect is true
      * @param {Boolean} [options.forceReconnect] Forces a reconnection by re-requesting a connection to Discord, also resets your player
-     * @returns {Promise<ShoukakuPlayer>}
-     *
-    async attemptReconnect({ voiceChannelID, forceReconnect } = {}) {
-        if (this.state === DISCONNECTED || !this.serverUpdate || forceReconnect) {
-            if (!voiceChannelID)
-                throw new ShoukakuError('Please specify the channel you want this node to connect on');
+     * @returns {Promise<void>}
+     */
+    async attemptReconnect({ channelID, forceReconnect } = {}) {
+        if (this.state === state.DISCONNECTED || !this.serverUpdate || forceReconnect) {
+            if (!channelID) throw new Error('Please specify the channel you want this node to connect on');
             try {
                 this.reconnecting = true;
                 await this.node.send({ op: 'destroy', guildId: this.guildID });
-                await wait(3000);
-                if (this.state !== DISCONNECTED) {
-                    // probably I'll rewrite this into a promise way, :eyes:
+                await wait(4000);
+                if (this.state !== state.DISCONNECTED) {
                     this.send({ guild_id: this.guildID, channel_id: null, self_mute: false, self_deaf: false }, true);
-                    await wait(3000);
+                    await wait(4000);
                 }
                 this.serverUpdate = null;
-                await this.connect({ guildID: this.guildID, voiceChannelID, mute: this.selfMute, deaf: this.selfDeaf });
+                await this.connect({ guildID: this.guildID, channelID, mute: this.selfMute, deaf: this.selfDeaf });
+            } finally {
                 this.reconnecting = false;
-            } catch (error) {
-                this.reconnecting = false;
-                throw error;
             }
         }
-        else if (this.state === CONNECTED && !forceReconnect) await this.voiceUpdate();
-        return this.player;
+        else if (this.state === state.CONNECTED && !forceReconnect) await this.voiceUpdate();
     }
-    */
+    /**
+     * Deafens the client
+     * @memberOf ShoukakuConnection
+     * @param {boolean} [deaf=false]
+     * @param {string} [reason] The reason for this action
+     * @returns {Promise<void>}
+     */
     setDeaf(deaf = false, reason) {
         return this
             .node
@@ -128,7 +129,13 @@ class ShoukakuConnection extends EventEmitter {
             .members(this.node.shoukaku.id)
             .patch({ data: { deaf }, reason });
     }
-
+    /**
+     * Mutes the client
+     * @memberOf ShoukakuConnection
+     * @param {boolean} [mute=false]
+     * @param {string} [reason] The reason for this action
+     * @returns {Promise<void>}
+     */
     setMute(mute = false, reason) {
         return this
             .node
@@ -138,7 +145,13 @@ class ShoukakuConnection extends EventEmitter {
             .members(this.node.shoukaku.id)
             .patch({ data: { mute }, reason });
     }
-
+    /**
+     * Deafens the client
+     * @memberOf ShoukakuConnection
+     * @param {string} [channel=null] channel id of the channel to move to, null if you want to disconnect the client
+     * @param {string} [reason] The reason for this action
+     * @returns {Promise<void>}
+     */
     moveChannel(channel = null, reason) {
         return this
             .node
@@ -148,15 +161,38 @@ class ShoukakuConnection extends EventEmitter {
             .members(this.node.shoukaku.id)
             .patch({ data: { channel }, reason });
     }
-    
+    /**
+     * Disconnects this connection
+     * @memberOf ShoukakuConnection
+     * @returns {void}
+     */
+    disconnect() {
+        if (this.state !== state.DISCONNECTED) {
+            this.state = state.DISCONNECTING;
+            this.send({ guild_id: this.guildID, channel_id: null, self_mute: false, self_deaf: false }, true);
+        }
+        this.node.players.delete(this.guildID);
+        this.node.send({ op: 'destroy', guildId: this.guildID });
+        this.player.removeAllListeners();
+        this.player.reset();
+        this.state = state.DISCONNECTED;
+        this.node.emit('debug', this.node.name, '[Voice] -> [Node] [Discord] : Link & Player Destroyed');
+    }
+    /**
+     * Connects this connection
+     * @memberOf ShoukakuConnection
+     * @param {Object} options options to connect
+     * @returns {Promise<void>}
+     * @protected
+     */
     async connect(options) {
         if (!options) 
             throw new Error('No options supplied');
         if (this.state === state.CONNECTING)
             throw Error('Can\'t connect while a connection is connecting. Wait for it to resolve first');
         this.state = state.CONNECTING;
-        const { guildID, voiceChannelID, deaf, mute } = options;
-        this.send({ guild_id: guildID, channel_id: voiceChannelID, self_deaf: deaf, self_mute: mute });
+        const { guildID, channelID, deaf, mute } = options;
+        this.send({ guild_id: guildID, channel_id: channelID, self_deaf: deaf, self_mute: mute });
         this.node.emit('debug', this.node.name, '[Voice] -> [Discord] : Requesting Connection');
         const signal = new AbortController();
         const timeout = setTimeout(() => signal.abort(), 15000);
@@ -171,20 +207,11 @@ class ShoukakuConnection extends EventEmitter {
             clearTimeout(timeout);
         }
     }
-
-    disconnect() {
-        if (this.state !== state.DISCONNECTED) {
-            this.state = state.DISCONNECTING;
-            this.send({ guild_id: this.guildID, channel_id: null, self_mute: false, self_deaf: false }, true);
-        }
-        this.node.players.delete(this.guildID);
-        this.node.send({ op: 'destroy', guildId: this.guildID });
-        this.player.removeAllListeners();
-        this.player.reset();
-        this.state = state.DISCONNECTED;
-        this.node.emit('debug', this.node.name, '[Voice] -> [Node] [Discord] : Link & Player Destroyed');
-    }
-
+    /**
+     * @memberOf ShoukakuConnection
+     * @param {Object}
+     * @protected
+     */
     setStateUpdate({ session_id, channel_id, self_deaf, self_mute }) {
         if (!channel_id) this.state = state.DISCONNECTED;
         this.channelMoved = this.channelID && this.channelID !== channel_id;
@@ -195,7 +222,11 @@ class ShoukakuConnection extends EventEmitter {
         this.node.emit('debug', this.node.name, '[Voice] <- [Discord] : State Update');
         this.emit('stateUpdate');
     }
-
+    /**
+     * @memberOf ShoukakuConnection
+     * @param {Object}
+     * @protected
+     */
     setServerUpdate(data) {
         if (!data.endpoint) return;
         clearTimeout(this.connectTimeout);
@@ -206,7 +237,12 @@ class ShoukakuConnection extends EventEmitter {
         this.node.emit('debug', this.node.name, '[Voice] <- [Discord] : Server Update');
         this.emit('serverUpdate');
     }
-
+    /**
+     * @memberOf ShoukakuConnection
+     * @param {Object} d
+     * @param {boolean} [important=false]
+     * @protected
+     */
     send(d, important = false) {
         if (!this.node.shoukaku.client.guilds.cache.has(this.guildID)) return;
         this.node.shoukaku.client.ws.shards.get(this.shardID)?.send({ op: 4, d }, important);

@@ -1,6 +1,5 @@
-const { EventEmitter, once } = require('events');
+const EventEmitter = require('events');
 const Websocket = require('ws');
-const AbortController = require('abort-controller');
 const ShoukakuQueue = require('./ShoukakuQueue.js');
 const ShoukakuRest = require('../rest/ShoukakuRest.js');
 const ShoukakuPlayer = require('../guild/ShoukakuPlayer.js');
@@ -76,7 +75,6 @@ class ShoukakuSocket extends EventEmitter {
         */
         this.resumed = false;
 
-
         Object.defineProperty(this, 'auth', { value: node.auth });
     }
 
@@ -113,7 +111,7 @@ class ShoukakuSocket extends EventEmitter {
     }
     
     /**
-    * Connects this Socket.
+    * Connects this Socket
     * @memberof ShoukakuSocket
     * @returns {Promise<void>}
     */
@@ -125,42 +123,24 @@ class ShoukakuSocket extends EventEmitter {
             'Authorization': this.auth,
             'User-Id': this.shoukaku.id
         };
-        if (reconnect) headers['Resume-Key'] = (!!this.resumable).toString();
+        if (reconnect) headers['Resume-Key'] = (!!this.resumable).toString(); 
         this.emit('debug', this.name, '[Node] -> [Lavalink] : Connecting');
-        const signal = new AbortController();
-        const timeout = setTimeout(() => signal.abort(), 30000);
         this.ws = new Websocket(this.url, { headers });
-        const [ upgrade ] = await Promise.all([ 
-            once(this, 'upgrade', { signal }), 
-            once(this, 'open' , { signal }) 
-        ]);
-        clearTimeout(timeout);
-        if (this.resumable) {
-            this.emit('debug', this.name, '[Node] -> [Lavalink] : Sending Configure Resume Packet');
-            this.send({
-                op: 'configureResuming',
-                key: (!!this.resumable).toString(),
-                timeout: this.resumableTimeout
-            });
-        }
+        this.ws.once('upgrade', response => this.resumed = response.headers['session-resumed'] === 'true');
+        this.ws.once('open', () => this._open());
         this.ws.once('close', (...args) => this._close(...args));
         this.ws.on('error', (...args) => this._error(...args));
         this.ws.on('message', (...args) => this._message(...args));
-        this.resumed = upgrade.headers['session-resumed'] === 'true';
-        if (this.resumed) this.queue.process();
-        this.reconnects = 0;
-        this.state = state.CONNECTED;
-        this.emit('debug', this.name, '[Node] <- [Lavalink] : Node Ready');
-        this.emit('ready', this.name, this.resumed);
     }
     /**
-    * Disconnects this Socket.
+    * Disconnects this Socket
     * @memberof ShoukakuSocket
     * @returns {Promise<void>}
     */
     disconnect(code = 1000, reason) {
-        this._cleanUp();
+        this._clean();
         this.ws?.close(code, reason);
+        this.ws?.removeAllListeners();
     }
     /**
      * Creates a player and connects your bot to the specified guild's voice channel
@@ -171,7 +151,7 @@ class ShoukakuSocket extends EventEmitter {
      * <ShoukakuSocket>.joinVoiceChannel({ guildID: 'guild_id', voiceChannelID: 'voice_channel_id' })
      *     .then((player) => player.playTrack('lavalink_track')); 
      */
-    async joinVoiceChannel(options = {}) {
+    async joinChannel(options = {}) {
         if (!options.guildID || !options.channelID)
             throw new Error('Supplied options needs to have "guildID" and "channelID" ids');
         if (this.state !== state.CONNECTED)
@@ -185,7 +165,7 @@ class ShoukakuSocket extends EventEmitter {
 
         try {
             if (!this.players.has(guild.id)) this.players.set(guild.id, player);
-            await player.connect(options);
+            await player.connection.connect(options);
             return player;
         } catch (error) {
             this.players.delete(guild.id);
@@ -198,7 +178,7 @@ class ShoukakuSocket extends EventEmitter {
      * @memberOf ShoukakuSocket
      * @returns {void}
      */
-    leaveVoiceChannel(guildID) {
+    leaveChannel(guildID) {
         const player = this.players.get(guildID);
         if (!player) return;
         player.disconnect();
@@ -208,12 +188,29 @@ class ShoukakuSocket extends EventEmitter {
         return this.queue.send(JSON.stringify(data), important);
     }
 
-    async _message(message) {
-        try {
-            await this._onLavalinkMessage(JSON.parse(message));
-        } catch (error) {
-            this.emit('error', this.name, error);
+    _open() {
+        if (this.resumable) {
+            this.send({
+                op: 'configureResuming',
+                key: (!!this.resumable).toString(),
+                timeout: this.resumableTimeout
+            });
         }
+        this.reconnectAttempts = 0;
+        this.state = state.CONNECTED;
+        this.emit('debug', this.name, '[Node] <- [Lavalink] : Node Ready');
+        this.emit('ready', this.name, this.resumed);
+    }
+
+    _message(message) {
+        const json = JSON.parse(message);
+        this.emit('debug', this.name, '[Node] <- [Lavalink Websocket] : Websocket Message');
+        if (!json) return;
+        if (json.op === 'stats') {
+            this.stats = new ShoukakuNodeStatus(json);
+            return;
+        }
+        this.players.get(json.guildId)?._onLavalinkMessage(json);
     }
 
     _error(error) {
@@ -250,30 +247,11 @@ class ShoukakuSocket extends EventEmitter {
         player.voiceConnection.setStateUpdate(packet.d);
     }
 
-    async _onLavalinkMessage(json) {
-        this.emit('debug', this.name, 
-            '[Node] <- [Lavalink Websocket] : Websocket Message\n' +
-            `  Node                         : ${this.name}\n` +
-            `  OP                           : ${json ? json.op : 'No OP Received'}\n`
-        );
-        if (!json) return;
-        if (json.op === 'stats') {
-            this.stats = json;
-            const ping = await this.rest.getLatency();
-            this.pings.push(ping);
-            if (this.pings.length > 3) this.pings.pop();
-            return;
-        }
-        const player = this.players.get(json.guildId);
-        if (!player) return;
-        await player._onLavalinkMessage(json);
-    }
-
     _clean() {
         if (this.resumed) return;
         if (this.moveOnDisconnect && this.shoukaku.nodes.size > 0) {
             for (const player of [...this.players.values()]) {
-                player.voiceConnection
+                player
                     .moveNode(this.shoukaku._getIdeal(this.group))
                     .catch(error => player.emit('error', error));
             }
@@ -282,8 +260,9 @@ class ShoukakuSocket extends EventEmitter {
         const error = new Error(
             this.moveOnDisconnect ? `Node '${this.name}' disconnected; moveOnReconnect is disabled` : `Node '${this.name}' disconnected; No nodes to reconnect to`
         );
-        // must be handled by user
-        this.emit('disconnect', this.name, this.players, error);
+        const players = [...this.players.values()];
+        for (const player of players) player.connection.disconnect();
+        this.emit('disconnected', this.name, players, error);
     }
 }
 module.exports = ShoukakuSocket;

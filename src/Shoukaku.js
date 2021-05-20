@@ -111,7 +111,7 @@ class Shoukaku extends EventEmitter {
         const node = new ShoukakuSocket(this, nodeOptions);
         node.on('debug', (...args) => this.emit('debug', ...args));
         node.on('error', (...args) => this.emit('error', ...args));
-        node.on('disconnect', (...args) => this.emit('disconnected', ...args));
+        node.on('disconnected', (...args) => this.emit('disconnected', ...args));
         node.on('ready', (...args) => this._ready(...args));
         node.on('close', (...args) => this._close(...args));
         node.connect();
