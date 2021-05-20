@@ -43,7 +43,7 @@ class ShoukakuRest {
     async resolve(identifier, search) {
         if (!identifier) throw new Error('Identifier cannot be null');
         if (search) identifier = `${searchType(search)}:${identifier}`;
-        const data = await this.router.loadTracks({ identifier }).get();
+        const data = await this.router.loadtracks({ identifier }).get();
         if (!Success.includes(data.loadType)) return;
         return new ShoukakuTrackList(data);
     }
@@ -55,7 +55,7 @@ class ShoukakuRest {
      */
     decode(track) {
         if (!track) throw new Error('Track cannot be null');
-        return this.router.decodeTrack({ track }).get();
+        return this.router.decodetrack({ track }).get();
     }
     /**
      * Gets the status of the "RoutePlanner API" for this Lavalink node.
@@ -92,7 +92,7 @@ class ShoukakuRest {
         if (method === 'post') headers['Content-Type'] = 'application/json';
         const request = await Petitio(url)
             .method(method.toUpperCase())
-            .headers(headers)
+            .header(headers)
             .body(options?.body ?? null)
             .timeout(this.timeout)
             .send();
