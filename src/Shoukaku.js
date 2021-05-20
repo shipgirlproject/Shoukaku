@@ -111,9 +111,9 @@ class Shoukaku extends EventEmitter {
         const node = new ShoukakuSocket(this, nodeOptions);
         node.on('debug', (...args) => this.emit('debug', ...args));
         node.on('error', (...args) => this.emit('error', ...args));
-        node.on('disconnected', (...args) => this.emit('disconnected', ...args));
+        node.on('disconnect', (...args) => this.emit('disconnect', ...args));
+        node.on('close', (...args) => this.emit('close', ...args));
         node.on('ready', (...args) => this._ready(...args));
-        node.on('close', (...args) => this._close(...args));
         node.connect();
         this.nodes.set(node.name, node);
     }
@@ -153,27 +153,9 @@ class Shoukaku extends EventEmitter {
         return node;
     }
     
-    _ready(name, resumed) {
-        const node = this.nodes.get(name);
+    _ready(node) {
         node._clean();
-        this.emit('ready', name, resumed);
-    }
-
-    _close(name, code, reason) {
-        const node = this.nodes.get(name);
-        if (!node) return;
-        this.emit('close', name, code, reason);
-        this._reconnect(node);
-    }
-
-    _reconnect(node) {
-        if (node.reconnectAttempts >= this.options.reconnectTries) {
-            this.removeNode(node.name, `Can't reconnect after ${this.options.reconnectTries} attempt(s)`);
-            return;
-        }
-        node.reconnectAttempts++;
-        node.emit('debug', node.name, '[Shoukaku] -> [Node] : Reconnecting');
-        setTimeout(() => node.connect(this.id, this.options.resumable), this.options.reconnectInterval);
+        this.emit('ready', node.name, node.resumed);
     }
 
     _getIdeal(group) {
@@ -191,12 +173,8 @@ class Shoukaku extends EventEmitter {
     }
 
     _clientReady(nodes) {
-        this.emit('debug', 'Manager',
-            '[Shoukaku] [Manager] : Client Ready, Connecting Nodes\n' +
-            `Client ID            : ${this.client.user.id}\n` +
-            `Initial Nodes        : ${nodes.length}`
-        );
         this.id = this.client.user.id;
+        this.emit('debug', 'Manager',`[Manager] : Connecting ${nodes.length} nodes`);
         for (const node of nodes) this.addNode(mergeDefault(nodeOptions, node));
     }
 

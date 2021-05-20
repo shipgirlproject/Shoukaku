@@ -117,35 +117,21 @@ class ShoukakuConnection extends EventEmitter {
      * Deafens the client
      * @memberOf ShoukakuConnection
      * @param {boolean} [deaf=false]
-     * @param {string} [reason] The reason for this action
-     * @returns {Promise<void>}
+     * @returns {void}
      */
-    setDeaf(deaf = false, reason) {
-        return this
-            .node
-            .shoukaku
-            .client
-            .api
-            .guilds(this.guildID)
-            .members(this.node.shoukaku.id)
-            .patch({ data: { deaf }, reason });
+    setDeaf(deaf = false) {
+        this.deafened = deaf;
+        return this.send({ guild_id: this.guildID, channel_id: this.channelID, self_deaf: this.deafened, self_mute: this.muted }, true);
     }
     /**
      * Mutes the client
      * @memberOf ShoukakuConnection
      * @param {boolean} [mute=false]
-     * @param {string} [reason] The reason for this action
-     * @returns {Promise<void>}
+     * @returns {void}
      */
-    setMute(mute = false, reason) {
-        return this
-            .node
-            .shoukaku
-            .client
-            .api
-            .guilds(this.guildID)
-            .members(this.node.shoukaku.id)
-            .patch({ data: { mute }, reason });
+    setMute(mute = false) {
+        this.muted = mute;
+        return this.send({ guild_id: this.guildID, channel_id: this.channelID, self_deaf: this.deafened, self_mute: this.muted }, true);
     }
     /**
      * Deafens the client
@@ -195,7 +181,7 @@ class ShoukakuConnection extends EventEmitter {
             throw Error('Can\'t connect while a connection is connecting. Wait for it to resolve first');
         this.state = state.CONNECTING;
         const { guildID, channelID, deaf, mute } = options;
-        this.send({ guild_id: guildID, channel_id: channelID, self_deaf: deaf, self_mute: mute });
+        this.send({ guild_id: guildID, channel_id: channelID, self_deaf: deaf, self_mute: mute }, true);
         this.node.emit('debug', this.node.name, '[Voice] -> [Discord] : Requesting Connection');
         const signal = new AbortController();
         const timeout = setTimeout(() => signal.abort(), 15000);
@@ -216,12 +202,12 @@ class ShoukakuConnection extends EventEmitter {
      * @protected
      */
     setStateUpdate({ session_id, channel_id, self_deaf, self_mute }) {
-        if (!channel_id) this.state = state.DISCONNECTED;
         this.channelMoved = this.channelID && this.channelID !== channel_id;
         this.deafened = self_deaf;
         this.muted = self_mute;
         this.sessionID = session_id;
         this.channelID = channel_id || this.channelID;
+        if (!channel_id) this.state = state.DISCONNECTED;
         this.node.emit('debug', this.node.name, '[Voice] <- [Discord] : State Update');
         this.emit('stateUpdate');
     }

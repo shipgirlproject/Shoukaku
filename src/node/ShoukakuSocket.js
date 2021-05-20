@@ -74,6 +74,11 @@ class ShoukakuSocket extends EventEmitter {
         * @type {boolean}
         */
         this.resumed = false;
+        /**
+        * If this node is destroyed and must not reconnect
+        * @type {boolean}
+        */
+        this.destroyed = false;
 
         Object.defineProperty(this, 'auth', { value: node.auth });
     }
@@ -127,7 +132,7 @@ class ShoukakuSocket extends EventEmitter {
             'User-Id': this.shoukaku.id
         };
         if (reconnect) headers['Resume-Key'] = (!!this.resumable).toString(); 
-        this.emit('debug', this.name, '[Node] -> [Lavalink] : Connecting');
+        this.emit('debug', this.name, `[Socket] -> [${this.name}] : Connecting ${this.url}`);
         this.ws = new Websocket(this.url, { headers });
         this.ws.once('upgrade', response => this.resumed = response.headers['session-resumed'] === 'true');
         this.ws.once('open', () => this._open());
@@ -144,9 +149,9 @@ class ShoukakuSocket extends EventEmitter {
     * @protected
     */
     disconnect(code = 1000, reason) {
+        this.destroyed = true;
         this._clean();
         this.ws?.close(code, reason);
-        this.ws?.removeAllListeners();
     }
     /**
      * Creates a player and connects your bot to the specified guild's voice channel
@@ -210,10 +215,10 @@ class ShoukakuSocket extends EventEmitter {
                 timeout: this.resumableTimeout
             });
         }
-        this.reconnectAttempts = 0;
+        this.reconnects = 0;
         this.state = state.CONNECTED;
-        this.emit('debug', this.name, '[Node] <- [Lavalink] : Node Ready');
-        this.emit('ready', this.name, this.resumed);
+        this.emit('debug', this.name, `[Socket] <-> [${this.name}] : Connection Open ${this.url}`);
+        this.emit('ready', this);
     }
     /**
      * @memberOf ShoukakuSocket
@@ -222,7 +227,7 @@ class ShoukakuSocket extends EventEmitter {
      */
     _message(message) {
         const json = JSON.parse(message);
-        this.emit('debug', this.name, '[Node] <- [Lavalink Websocket] : Websocket Message');
+        this.emit('debug', this.name, `[Socket] <- [${this.name}] : Websocket Message, OP: ${json?.op || 'Unknown'}`);
         if (!json) return;
         if (json.op === 'stats') {
             this.stats = new ShoukakuNodeStatus(json);
@@ -236,16 +241,15 @@ class ShoukakuSocket extends EventEmitter {
      * @protected
      */
     _close(code, reason) {
+        this.emit('debug', this.name, `[Socket] <-/-> [${this.name}] : Connection Closed, Code: ${code || 'Unknown Code'}`);
         this.ws.removeAllListeners();
         this.ws = null;
         this.state = state.DISCONNECTED;
-        this.emit('debug', this.name, 
-            '[Node] <- [Lavalink Websocket] : Websocket Closed\n' +
-            `  Node                         : ${this.name}\n` +
-            `  Code                         : ${code || '1000'}\n` +
-            `  Reason                       : ${reason || 'Unknown'}`
-        );
-        this.emit('close', this.name, code, reason);
+        if (this.destroyed || this.reconnectAttempts > this.shoukaku.options.reconnectTries) {
+            this.emit('close', this.name, code, reason);
+            return;
+        }
+        this._reconnect();
     }
     /**
      * @memberOf ShoukakuSocket
@@ -269,20 +273,27 @@ class ShoukakuSocket extends EventEmitter {
      */ 
     _clean() {
         if (this.resumed) return;
+        const players = [...this.players.values()];
         if (this.moveOnDisconnect && this.shoukaku.nodes.size > 0) {
-            for (const player of [...this.players.values()]) {
-                player
-                    .moveNode(this.shoukaku._getIdeal(this.group))
-                    .catch(error => player.emit('error', error));
-            }
+            for (const player of players) player.moveNode(this.shoukaku._getIdeal(this.group));
             return;
         }
         const error = new Error(
             this.moveOnDisconnect ? `Node '${this.name}' disconnected; moveOnReconnect is disabled` : `Node '${this.name}' disconnected; No nodes to reconnect to`
         );
-        const players = [...this.players.values()];
         for (const player of players) player.connection.disconnect();
-        this.emit('disconnected', this.name, players, error);
+        this.emit('disconnect', this.name, players, error);
+    }
+    /**
+     * @memberOf ShoukakuSocket
+     * @returns {void}
+     * @private
+     */ 
+    _reconnect() {
+        if (this.state !== state.DISCONNECTED) return;
+        this.reconnects++;
+        this.emit('debug', this.name, `[Socket] -> [${this.name}] : Reconnecting. ${this.shoukaku.options.reconnectTries - this.reconnects} tries left`);
+        setTimeout(() => this.connect(), this.shoukaku.options.reconnectInterval);
     }
 }
 module.exports = ShoukakuSocket;
