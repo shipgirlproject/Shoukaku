@@ -45,9 +45,9 @@ class Shoukaku extends EventEmitter {
 
         Object.defineProperty(this, 'options', { value: mergeDefault(options, suppliedOptions) });
 
-        this.client.once('ready', () => this._onClientReady(nodes));
-        this.client.on('raw', event => this._onClientRaw(event));
-    }
+        this.client.once('ready', () => this._clientReady(nodes));
+        this.client.on('raw', event => this._clientRaw(event));
+    } 
 
     /**
      * Gets all the Players that is currently active on all nodes in this instance.
@@ -190,7 +190,7 @@ class Shoukaku extends EventEmitter {
             .shift();
     }
 
-    _onClientReady(nodes) {
+    _clientReady(nodes) {
         this.emit('debug', 'Manager',
             '[Shoukaku] [Manager] : Client Ready, Connecting Nodes\n' +
             `Client ID            : ${this.client.user.id}\n` +
@@ -200,9 +200,9 @@ class Shoukaku extends EventEmitter {
         for (const node of nodes) this.addNode(mergeDefault(nodeOptions, node));
     }
 
-    _onClientRaw(packet) {
+    _clientRaw(packet) {
         if (!['VOICE_STATE_UPDATE', 'VOICE_SERVER_UPDATE'].includes(packet.t)) return;
-        for (const node of this.nodes.values()) node._onClientFilteredRaw(packet);
+        for (const node of this.nodes.values()) node._clientRaw(packet);
     }
 }
 module.exports = Shoukaku;

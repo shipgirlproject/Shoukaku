@@ -20,17 +20,17 @@ class ShoukakuSocket extends EventEmitter {
     constructor(shoukaku, node) {
         super();
         /**
-        * The Instance of Shoukaku where this node initialization is called.
+        * The manager instance of this socket
         * @type {Shoukaku}
         */
         this.shoukaku = shoukaku;
         /**
-        * The active players in this socket/node.
+        * The players being governed by this node
         * @type {Map<string, ShoukakuPlayer>}
         */
         this.players = new Map();
         /**
-        * The REST API of this Socket, mostly to load balance your REST requests instead of relying on a single node.
+        * The rest api for this socket
         * @type {ShoukakuRest}
         */
         this.rest = new ShoukakuRest(node, shoukaku.options);
@@ -40,22 +40,22 @@ class ShoukakuSocket extends EventEmitter {
         */
         this.queue = new ShoukakuQueue(this);
         /**
-        * The state of this Socket.
+        * The state of this socket
         * @type {ShoukakuConstants#ShoukakuStatus}
         */
         this.state = state.DISCONNECTED;
         /**
-        * The current stats of this Socket.
+        * The stats of this socket
         * @type {ShoukakuNodeStatus}
         */
         this.stats = new ShoukakuNodeStatus();
         /**
-        * Attempted reconnects of this Socket. Resets to 0 when the socket opens properly.
+        * Attempted reconnects of this socket. Resets to 0 when the socket opens properly
         * @type {number}
         */
         this.reconnects = 0;
         /**
-        * Name of this Socket that you can use on .getNode() method of Shoukaku.
+        * Name of this socket
         * @type {string}
         */
         this.name = node.name;
@@ -98,6 +98,7 @@ class ShoukakuSocket extends EventEmitter {
     * Penalties of this Socket. The higher the return number, the more loaded the server is.
     * @type {number}
     * @memberof ShoukakuSocket
+    * @protected
     */
     get penalties() {
         let penalties = 0;
@@ -113,9 +114,11 @@ class ShoukakuSocket extends EventEmitter {
     /**
     * Connects this Socket
     * @memberof ShoukakuSocket
-    * @returns {Promise<void>}
+    * @param {boolean} [reconnect=false]
+    * @returns {void}
+    * @protected
     */
-    async connect(reconnect = false) {
+    connect(reconnect = false) {
         this.state = state.CONNECTING;
         const headers = {
             'Client-Name': this.userAgent,
@@ -129,13 +132,16 @@ class ShoukakuSocket extends EventEmitter {
         this.ws.once('upgrade', response => this.resumed = response.headers['session-resumed'] === 'true');
         this.ws.once('open', () => this._open());
         this.ws.once('close', (...args) => this._close(...args));
-        this.ws.on('error', (...args) => this._error(...args));
+        this.ws.on('error', error => this.emit('error', this.name, error));
         this.ws.on('message', (...args) => this._message(...args));
     }
     /**
     * Disconnects this Socket
     * @memberof ShoukakuSocket
-    * @returns {Promise<void>}
+    * @param {number} [code=1000]
+    * @param {string} [reason]
+    * @returns {void}
+    * @protected
     */
     disconnect(code = 1000, reason) {
         this._clean();
@@ -144,11 +150,11 @@ class ShoukakuSocket extends EventEmitter {
     }
     /**
      * Creates a player and connects your bot to the specified guild's voice channel
-     * @param {ShoukakuConstants#ShoukakuJoinOptions} options Join data to send.
+     * @param {ShoukakuConstants#ShoukakuJoinOptions} options join data to send
      * @memberof ShoukakuSocket
      * @returns {Promise<ShoukakuPlayer>}
      * @example
-     * <ShoukakuSocket>.joinVoiceChannel({ guildID: 'guild_id', voiceChannelID: 'voice_channel_id' })
+     * ShoukakuSocket.joinVoiceChannel({ guildID: 'guild_id', channelID: 'voice_channel_id' })
      *     .then((player) => player.playTrack('lavalink_track')); 
      */
     async joinChannel(options = {}) {
@@ -179,15 +185,23 @@ class ShoukakuSocket extends EventEmitter {
      * @returns {void}
      */
     leaveChannel(guildID) {
-        const player = this.players.get(guildID);
-        if (!player) return;
-        player.disconnect();
+        return this.players.get(guildID)?.connection.disconnect();
     }
-
+    /**
+     * Enqueues a message to be sent to Lavalink Server
+     * @param {Object} data Message to be sent
+     * @memberOf ShoukakuSocket
+     * @returns {void}
+     * @protected
+     */
     send(data, important) {
         return this.queue.send(JSON.stringify(data), important);
     }
-
+    /**
+     * @memberOf ShoukakuSocket
+     * @returns {void}
+     * @protected
+     */
     _open() {
         if (this.resumable) {
             this.send({
@@ -201,7 +215,11 @@ class ShoukakuSocket extends EventEmitter {
         this.emit('debug', this.name, '[Node] <- [Lavalink] : Node Ready');
         this.emit('ready', this.name, this.resumed);
     }
-
+    /**
+     * @memberOf ShoukakuSocket
+     * @returns {void}
+     * @protected
+     */
     _message(message) {
         const json = JSON.parse(message);
         this.emit('debug', this.name, '[Node] <- [Lavalink Websocket] : Websocket Message');
@@ -212,17 +230,11 @@ class ShoukakuSocket extends EventEmitter {
         }
         this.players.get(json.guildId)?._onLavalinkMessage(json);
     }
-
-    _error(error) {
-        this.emit('error', this.name, error);
-        this.emit('debug', this.name, 
-            '[Node] <- [Lavalink Websocket] : Websocket Error\n' +
-            `  Node                         : ${this.name}\n` +
-            `  Error                        : ${error ? error.name : 'Unknown'}`
-        );
-        this.ws.close(1011, 'Reconnecting the Websocket due to an error');
-    }
-
+    /**
+     * @memberOf ShoukakuSocket
+     * @returns {void}
+     * @protected
+     */
     _close(code, reason) {
         this.ws.removeAllListeners();
         this.ws = null;
@@ -235,8 +247,12 @@ class ShoukakuSocket extends EventEmitter {
         );
         this.emit('close', this.name, code, reason);
     }
-
-    _onClientFilteredRaw(packet) {
+    /**
+     * @memberOf ShoukakuSocket
+     * @returns {void}
+     * @protected
+     */
+    _clientRaw(packet) {
         const player = this.players.get(packet.d.guild_id);
         if (!player) return;
         if (packet.t === 'VOICE_SERVER_UPDATE') {
@@ -246,7 +262,11 @@ class ShoukakuSocket extends EventEmitter {
         if (packet.d.user_id !== this.shoukaku.id) return;
         player.voiceConnection.setStateUpdate(packet.d);
     }
-
+    /**
+     * @memberOf ShoukakuSocket
+     * @returns {void}
+     * @protected
+     */ 
     _clean() {
         if (this.resumed) return;
         if (this.moveOnDisconnect && this.shoukaku.nodes.size > 0) {
