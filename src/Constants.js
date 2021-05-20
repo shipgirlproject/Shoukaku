@@ -1,9 +1,14 @@
 const { name, version, repository } = require('../package.json');
 
+/**
+ * Statics for some constants
+ * @class Constants
+ */
 module.exports = {
     /**
     * State of nodes or links
     * @enum {number}
+    * @memberof Constants
     */
     state: {
         CONNECTING: 0,
@@ -22,6 +27,7 @@ module.exports = {
     * @property {number} [reconnectInterval=5000] Timeout between reconnect attempts, measured in milliseconds.
     * @property {number} [closedWebsocketEventDelay=500] Timeout before shoukaku processes a websocket closed event, measured in milliseconds.
     * @property {string} [userAgent="{name}/{version} (+{url})"] User-Agent to use on connecting to WS and REST requests
+    * @memberof Constants
     */
     shoukakuOptions: {
         resumable: false,
@@ -41,6 +47,7 @@ module.exports = {
     * @property {string} auth The authentication key you set on your lavalink config.
     * @property {?boolean} [secure=false] If you want to use https and wss instead of http and ws.
     * @property {?string} [group=undefined] Group of this node, used for grouping specific nodes.
+    * @memberof Constants
     */
     nodeOptions: {
         name: null,

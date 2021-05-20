@@ -8,16 +8,21 @@ const ShoukakuNodeStatus = require('../struct/ShoukakuNodeStatus.js');
 const { state } = require('../Constants.js');
 
 /**
- * ShoukakuSocket, manages a single Lavalink node connection.
+ * ShoukakuSocket, manages a single lavalink node connection
  * @class ShoukakuSocket
  */
 class ShoukakuSocket extends EventEmitter {
     /**
      * @extends {EventEmitter}
-     * @param {Shoukaku} shoukaku Your Shoukaku Instance
-     * @param {ShoukakuOptions} node ShoukakuNodeOptions Options to initialize Shoukaku with
+     * @param {Shoukaku} shoukaku The manager that initialized this instance
+     * @param {Object} options The node options to connect
+     * @param {string} options.name Lavalink node name
+     * @param {string} options.url Lavalink node url without prefix like, ex: http://
+     * @param {string} options.auth Lavalink node password
+     * @param {boolean} [options.secure=false] Whether this node should be in secure wss or https mode
+     * @param {string} [options.group=undefined] Lavalink node group
      */
-    constructor(shoukaku, node) {
+    constructor(shoukaku, options) {
         super();
         /**
         * The manager instance of this socket
@@ -33,7 +38,7 @@ class ShoukakuSocket extends EventEmitter {
         * The rest api for this socket
         * @type {ShoukakuRest}
         */
-        this.rest = new ShoukakuRest(node, shoukaku.options);
+        this.rest = new ShoukakuRest(options, shoukaku.options);
         /**
         * List of queued websocket reqeusts
         * @type {ShoukakuQueue}
@@ -41,7 +46,7 @@ class ShoukakuSocket extends EventEmitter {
         this.queue = new ShoukakuQueue(this);
         /**
         * The state of this socket
-        * @type {ShoukakuConstants#ShoukakuStatus}
+        * @type {Constants.state}
         */
         this.state = state.DISCONNECTED;
         /**
@@ -58,17 +63,17 @@ class ShoukakuSocket extends EventEmitter {
         * Name of this socket
         * @type {string}
         */
-        this.name = node.name;
+        this.name = options.name;
         /**
         * Group of this socket
         * @type {?string}
         */
-        this.group = node.group;
+        this.group = options.group;
         /**
         * Websocket URL of this socket
         * @type {string}
         */
-        this.url = `${node.secure ? 'wss' : 'ws'}://${node.url}`;
+        this.url = `${options.secure ? 'wss' : 'ws'}://${options.url}`;
         /**
         * If this socket was resumed
         * @type {boolean}
@@ -80,7 +85,7 @@ class ShoukakuSocket extends EventEmitter {
         */
         this.destroyed = false;
 
-        Object.defineProperty(this, 'auth', { value: node.auth });
+        Object.defineProperty(this, 'auth', { value: options.auth });
     }
     /**
      * @type {string}
@@ -131,7 +136,7 @@ class ShoukakuSocket extends EventEmitter {
         return this.shoukaku.options.reconnectInterval;
     }
     /**
-    * Penalties of this Socket. The higher the return number, the more loaded the server is.
+    * Penalties of this socket. The higher the return number, the more loaded the server is
     * @type {number}
     * @memberof ShoukakuSocket
     */
@@ -147,7 +152,7 @@ class ShoukakuSocket extends EventEmitter {
     }
     
     /**
-    * Connects this Socket
+    * Connects this socket
     * @memberof ShoukakuSocket
     * @param {boolean} [reconnect=false]
     * @returns {void}
@@ -171,7 +176,7 @@ class ShoukakuSocket extends EventEmitter {
         this.ws.on('message', (...args) => this._message(...args));
     }
     /**
-    * Disconnects this Socket
+    * Disconnects this socket
     * @memberof ShoukakuSocket
     * @param {number} [code=1000]
     * @param {string} [reason]
@@ -185,12 +190,21 @@ class ShoukakuSocket extends EventEmitter {
     }
     /**
      * Creates a player and connects your bot to the specified guild's voice channel
-     * @param {ShoukakuConstants#ShoukakuJoinOptions} options join data to send
+     * @param {Object} options Join channel options
+     * @param {string} options.guildID GuildID where the voice channel you want to join is in
+     * @param {string} options.channelID ChannelID of the voice channel where you want to join in
+     * @param {boolean} [options.mute=false] If you want to join this channel muted already
+     * @param {boolean} [options.deaf=false] If you want to join this channel deafened already
      * @memberof ShoukakuSocket
      * @returns {Promise<ShoukakuPlayer>}
      * @example
-     * ShoukakuSocket.joinVoiceChannel({ guildID: 'guild_id', channelID: 'voice_channel_id' })
-     *     .then((player) => player.playTrack('lavalink_track')); 
+     * async function BurningLove() {
+     *   const node = Shoukaku.getNode();
+     *   const list = await node.rest.resolve('Kongou Burning Love', 'youtube');
+     *   const player = await node.joinChannel({ guildID: 'guild_id', voiceChannelID: 'voice_channel_id' });
+     *   player.playTrack(list.tracks.shift());
+     * }
+     * BurningLove();
      */
     async joinChannel(options = {}) {
         if (!options.guildID || !options.channelID)
@@ -214,7 +228,7 @@ class ShoukakuSocket extends EventEmitter {
         }
     }
     /**
-     * Eventually Disconnects the VoiceConnection & Removes the Player from a Guild.
+     * Disconnects and cleans a player in this socket
      * @param {string} guildID The guild id of the player you want to remove.
      * @memberOf ShoukakuSocket
      * @returns {void}
@@ -223,7 +237,7 @@ class ShoukakuSocket extends EventEmitter {
         return this.players.get(guildID)?.connection.disconnect();
     }
     /**
-     * Enqueues a message to be sent to Lavalink Server
+     * Enqueues a message to be sent to lavalink server
      * @param {Object} data Message to be sent
      * @memberOf ShoukakuSocket
      * @returns {void}
