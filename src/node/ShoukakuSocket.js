@@ -82,28 +82,58 @@ class ShoukakuSocket extends EventEmitter {
 
         Object.defineProperty(this, 'auth', { value: node.auth });
     }
-
+    /**
+     * @type {string}
+     * @memberof ShoukakuSocket
+     * @private
+     */
     get userAgent() {
         return this.shoukaku.options.userAgent;
     }
-
+    /**
+     * @type {boolean}
+     * @memberof ShoukakuSocket
+     * @private
+     */
     get resumable() {
         return this.shoukaku.options.resumable;
     }
-
+    /**
+     * @type {number}
+     * @memberof ShoukakuSocket
+     * @private
+     */
     get resumableTimeout() {
         return this.shoukaku.options.resumableTimeout;
     }
-
+    /**
+     * @type {boolean}
+     * @memberof ShoukakuSocket
+     * @private
+     */
     get moveOnDisconnect() {
         return this.shoukaku.options.moveOnDisconnect;
     }
-    
+    /**
+     * @type {number}
+     * @memberof ShoukakuSocket
+     * @private
+     */
+    get reconnectTries() {
+        return this.shoukaku.options.reconnectTries;
+    }
+    /**
+     * @type {number}
+     * @memberof ShoukakuSocket
+     * @private
+     */
+    get reconnectInterval() {
+        return this.shoukaku.options.reconnectInterval;
+    }
     /**
     * Penalties of this Socket. The higher the return number, the more loaded the server is.
     * @type {number}
     * @memberof ShoukakuSocket
-    * @protected
     */
     get penalties() {
         let penalties = 0;
@@ -205,7 +235,7 @@ class ShoukakuSocket extends EventEmitter {
     /**
      * @memberOf ShoukakuSocket
      * @returns {void}
-     * @protected
+     * @private
      */
     _open() {
         if (this.resumable) {
@@ -223,7 +253,7 @@ class ShoukakuSocket extends EventEmitter {
     /**
      * @memberOf ShoukakuSocket
      * @returns {void}
-     * @protected
+     * @private
      */
     _message(message) {
         const json = JSON.parse(message);
@@ -238,14 +268,14 @@ class ShoukakuSocket extends EventEmitter {
     /**
      * @memberOf ShoukakuSocket
      * @returns {void}
-     * @protected
+     * @private
      */
     _close(code, reason) {
         this.emit('debug', this.name, `[Socket] <-/-> [${this.name}] : Connection Closed, Code: ${code || 'Unknown Code'}`);
         this.ws.removeAllListeners();
         this.ws = null;
         this.state = state.DISCONNECTED;
-        if (this.destroyed || this.reconnectAttempts > this.shoukaku.options.reconnectTries) {
+        if (this.destroyed || this.reconnects > this.reconnectTries) {
             this.emit('close', this.name, code, reason);
             return;
         }
@@ -292,8 +322,8 @@ class ShoukakuSocket extends EventEmitter {
     _reconnect() {
         if (this.state !== state.DISCONNECTED) return;
         this.reconnects++;
-        this.emit('debug', this.name, `[Socket] -> [${this.name}] : Reconnecting. ${this.shoukaku.options.reconnectTries - this.reconnects} tries left`);
-        setTimeout(() => this.connect(), this.shoukaku.options.reconnectInterval);
+        this.emit('debug', this.name, `[Socket] -> [${this.name}] : Reconnecting. ${this.reconnectTries - this.reconnects} tries left`);
+        setTimeout(() => this.connect(), this.reconnectInterval);
     }
 }
 module.exports = ShoukakuSocket;

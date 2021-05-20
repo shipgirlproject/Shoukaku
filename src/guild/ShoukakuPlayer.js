@@ -384,7 +384,12 @@ class ShoukakuPlayer extends EventEmitter {
                     wait(this.connection.node.shoukaku.options.closedWebsocketEventDelay)
                         .then(() => {
                             if (this.connection.channelMoved || this.connection.voiceMoved) {
-                                this.connection.node.emit('debug', this.connection.node.name, `[Node] -> [${this.connection.node.name}] : Move detected, Channel ${this.connection.channelMoved}; Server ${this.connection.voiceMoved}`);
+                                this.connection.node.emit('debug', 
+                                    this.connection.node.name, 
+                                    `[Node] -> [${this.connection.node.name}] : Move detected;` + 
+                                    `Channel ${this.connection.channelMoved};` + 
+                                    `Server ${this.connection.voiceMoved}`
+                                );
                                 this.connection.channelMoved = false;
                                 this.connection.voiceMoved = false;
                                 return;

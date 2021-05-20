@@ -23,7 +23,7 @@ module.exports = {
     * @property {number} [closedWebsocketEventDelay=500] Timeout before shoukaku processes a websocket closed event, measured in milliseconds.
     * @property {string} [userAgent="{name}/{version} (+{url})"] User-Agent to use on connecting to WS and REST requests
     */
-    options: {
+    shoukakuOptions: {
         resumable: false,
         resumableTimeout: 30,
         reconnectTries: 2,
