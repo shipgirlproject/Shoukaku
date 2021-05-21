@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>Shoukaku Source: src/Shoukaku.js</title>
+
+	<!--[if lt IE 9]>
+	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+	<link type="text/css" rel="stylesheet" href="styles/sunlight.default.css">
+
+	<link type="text/css" rel="stylesheet" href="styles/site.slate.css">
+
+</head>
+
+<body>
+
+<div class="navbar navbar-default navbar-fixed-top ">
+<div class="container">
+	<div class="navbar-header">
+		<a class="navbar-brand" href="index.html">Shoukaku</a>
+		<button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#topNavigation">
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+        </button>
+	</div>
+	<div class="navbar-collapse collapse" id="topNavigation">
+		<ul class="nav navbar-nav">
+			
+			<li class="dropdown">
+				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="Constants.html">Constants</a></li><li><a href="ShoukakuConnection.html">ShoukakuConnection</a></li><li><a href="ShoukakuPlayer.html">ShoukakuPlayer</a></li><li><a href="ShoukakuQueue.html">ShoukakuQueue</a></li><li><a href="ShoukakuRest.html">ShoukakuRest</a></li><li><a href="ShoukakuRouter.html">ShoukakuRouter</a></li><li><a href="ShoukakuSocket.html">ShoukakuSocket</a></li><li><a href="Shoukaku.html">Shoukaku</a></li><li><a href="ShoukakuFilter.html">ShoukakuFilter</a></li><li><a href="ShoukakuStats.html">ShoukakuStats</a></li><li><a href="ShoukakuTrack.html">ShoukakuTrack</a></li><li><a href="ShoukakuTrackList.html">ShoukakuTrackList</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="events.list.html" class="dropdown-toggle" data-toggle="dropdown">Events<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="ShoukakuPlayer.html#event:end">ShoukakuPlayer#event:end</a></li><li><a href="ShoukakuPlayer.html#event:closed">ShoukakuPlayer#event:closed</a></li><li><a href="ShoukakuPlayer.html#event:error">ShoukakuPlayer#event:error</a></li><li><a href="ShoukakuPlayer.html#event:start">ShoukakuPlayer#event:start</a></li><li><a href="ShoukakuPlayer.html#event:exception">ShoukakuPlayer#event:exception</a></li><li><a href="ShoukakuPlayer.html#event:resumed">ShoukakuPlayer#event:resumed</a></li><li><a href="ShoukakuPlayer.html#event:update">ShoukakuPlayer#event:update</a></li><li><a href="Shoukaku.html#event:debug">Shoukaku#event:debug</a></li><li><a href="Shoukaku.html#event:error">Shoukaku#event:error</a></li><li><a href="Shoukaku.html#event:ready">Shoukaku#event:ready</a></li><li><a href="Shoukaku.html#event:close">Shoukaku#event:close</a></li><li><a href="Shoukaku.html#event:disconnect">Shoukaku#event:disconnect</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="externals.list.html" class="dropdown-toggle" data-toggle="dropdown">Externals<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="external-Client.html">Client</a></li><li><a href="external-Guild.html">Guild</a></li><li><a href="external-EventEmitter.html">EventEmitter</a></li>
+				</ul>
+			</li>
+			
+		</ul>
+        
+            <div class="col-sm-3 col-md-3">
+                <form class="navbar-form" role="search">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Search" name="q" id="search-input">
+                        <div class="input-group-btn">
+                            <button class="btn btn-default" id="search-submit"><i class="glyphicon glyphicon-search"></i></button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        
+	</div>
+
+</div>
+</div>
+
+
+<div class="container" id="toc-content">
+<div class="row">
+
+	
+	<div class="col-md-12">
+	
+		<div id="main">
+			
+
+		<h1 class="page-title">Source: src/Shoukaku.js</h1>
+    
+<section>
+    <article>
+        <pre
+            class="sunlight-highlight-javascript linenums">const EventEmitter = require('events');
+const ShoukakuSocket = require('./node/ShoukakuSocket.js');
+
+const { shoukakuOptions, nodeOptions, state } = require('./Constants.js');
+const { mergeDefault, getVersion } = require('./Utils.js');
+
+/**
+  * Shoukaku, governs the client's lavalink node connections.
+  * @class Shoukaku
+  * @extends {EventEmitter}
+  * @param {Client} client Your Discord.JS initalized client
+  * @param {Object[]} nodes Array of Lavalink nodes to initially connect to
+  * @param {string} nodes.name Lavalink node name
+  * @param {string} nodes.url Lavalink node url without prefix like, ex: http://
+  * @param {string} nodes.auth Lavalink node password
+  * @param {boolean} [nodes.secure=false] Whether this node should be in secure wss or https mode
+  * @param {string} [nodes.group=undefined] Lavalink node group
+  * @param {Object} [options={}] Options to initalize this instance
+  * @param {boolean} [options.resumable=false] If you want your node to support resuming
+  * @param {number} [options.resumableTimeout=30] Timeout when Lavalink will decide a player isn't resumed and will destroy the connection to it, measured in seconds
+  * @param {number} [options.reconnectTries=2] Amount of tries to connect to the Lavalink node before it decides that the node is unreconnectable
+  * @param {boolean} [options.moveOnDisconnect=false] Specifies if the library will attempt to reconnect players on a disconnected node to another node
+  * @param {number} [options.restTimeout=15000] Timeout on rest requests to your lavalink node, measured in milliseconds
+  * @param {number} [options.reconnectInterval=5000] Timeout between reconnect attempts, measured in milliseconds
+  * @param {number} [options.closedWebsocketEventDelay=500] Timeout before shoukaku processes a websocket closed event, measured in milliseconds
+  * @param {string} [options.userAgent="name/version (+url)"] User-Agent to use on connecting to WS and REST requests
+  */
+class Shoukaku extends EventEmitter {
+    constructor(client, nodes, options) {
+        super();
+        const { variant, version } = getVersion();
+        if (variant === 'light') {
+            if (!version.startsWith('3'))
+                throw new Error('Shoukaku will only work at Discord.JS-light v3. Versions below Discord.JS-light v3 is not supported');
+        } else {
+            if (!version.startsWith('12'))
+                throw new Error('Shoukaku will only work at Discord.JS v12. Versions below Discord.JS v12 is not supported');
+        }
+        if (!nodes?.length) 
+            throw new Error('No nodes supplied');
+        /**
+        * The instance of Discord.JS client
+        * @type {Client}
+        */
+        this.client = client;
+        /**
+        * The user id of the bot that is being governed
+        * @type {?string}
+        */
+        this.id = null;
+        /**
+        * The current nodes that is being handled
+        * @type {Map&lt;string, ShoukakuSocket>}
+        */
+        this.nodes = new Map();
+
+        Object.defineProperty(this, 'options', { value: mergeDefault(shoukakuOptions, options) });
+
+        this.client.once('ready', () => this._clientReady(nodes));
+        this.client.on('raw', event => this._clientRaw(event));
+    } 
+
+    /**
+     * Gets all the Players that is currently active on all nodes in this instance.
+     * @type {Map&lt;string, ShoukakuPlayer>}
+     * @memberof Shoukaku
+     */
+    get players() {
+        const players = new Map();
+        for (const node of this.nodes.values()) {
+            for (const [id, player] of node.players) players.set(id, player);
+        }
+        return players;
+    }
+
+    /**
+     * Debug related things
+     * @event Shoukaku#debug
+     * @param {string} name The name of the node that sent the debug info
+     * @param {string} info The debug info
+     * @memberof Shoukaku
+     */
+    /**
+     * Emitted when a node ecountered an internal error
+     * @event Shoukaku#error
+     * @param {string} name The node name that errored
+     * @param {Error} error The error object
+     * @memberof Shoukaku
+     * @example
+     * Shoukaku.on('error', console.error);
+     */
+    /** 
+     * Emitted when a node becomes ready
+     * @event Shoukaku#ready
+     * @param {string} name The node that sent the ready event
+     * @param {boolean} reconnect If the node is a reconnected node
+     * @memberof Shoukaku
+     */
+    /**
+     * Emitted when a node emits a close event
+     * @event Shoukaku#close
+     * @param {string} name The node that sent the ready event
+     * @param {number} code The websocket close code: https://github.com/Luka967/websocket-close-codes
+     * @param {reason} reason The reason for this close event
+     * @memberof Shoukaku
+     */
+    /**
+     * Emitted when a node will not reconnect again
+     * @event Shoukaku#disconnect
+     * @param {string} name The node that sent the disconnect event
+     * @param {ShoukakuPlayer[]} players The players that is in this disconnected node
+     * @param {error} error The error for this disconnect
+     * @memberof Shoukaku
+     */
+
+    /**
+    * Adds a new node to this manager
+    * @param {Object} options The node options to connect
+    * @param {string} options.name Lavalink node name
+    * @param {string} options.url Lavalink node url without prefix like, ex: http://
+    * @param {string} options.auth Lavalink node password
+    * @param {boolean} [options.secure=false] Whether this node should be in secure wss or https mode
+    * @param {string} [options.group=undefined] Lavalink node group
+    * @memberof Shoukaku
+    * @returns {void}
+    */
+    addNode(options) {
+        const node = new ShoukakuSocket(this, options);
+        node.on('debug', (...args) => this.emit('debug', ...args));
+        node.on('error', (...args) => this.emit('error', ...args));
+        node.on('disconnect', (...args) => this.emit('disconnect', ...args));
+        node.on('close', (...args) => this.emit('close', ...args));
+        node.on('ready', (...args) => this._ready(...args));
+        node.connect();
+        this.nodes.set(node.name, node);
+    }
+    /**
+     * Removes a node from this manager
+     * @param {string} name The node to remove
+     * @param {string} [reason='Remove node executed'] The reason for disconnect
+     * @memberof Shoukaku
+     * @returns {void}
+     */
+    removeNode(name, reason = 'Remove node executed') {
+        const node = this.nodes.get(name);
+        if (!node) throw new Error('The node name you specified doesn\'t exist');
+        this.nodes.delete(node.name);
+        node.disconnect(1000, reason);
+        node.removeAllListeners();
+    }
+    /**
+     * Shortcut to get the Ideal Node or a manually specified Node from the current nodes that Shoukaku governs.
+     * @param {string|Array&lt;string>} [query] If unspecified, this will return any ideal node, if specified with a string, it will return the node that matches the string, if an array, this will return an ideal node from a group
+     * @memberof Shoukaku
+     * @returns {ShoukakuSocket}
+     * @example
+     * async function BurningLove() {
+     *   const node = Shoukaku.getNode();
+     *   const list = await node.rest.resolve('Kongou Burning Love', 'youtube');
+     *   const player = await node.joinChannel({ guildID: 'guild_id', voiceChannelID: 'voice_channel_id' });
+     *   player.playTrack(list.tracks.shift());
+     * }
+     * BurningLove();
+     */
+    getNode(query) {
+        if (!this.nodes.size) throw new Error('No nodes available, please add a node first');
+        if (!query || Array.isArray(query)) return this._getIdeal(query);
+        const node = this.nodes.get(query);
+        if (!node) throw new Error('The node name you specified is not one of my nodes');
+        if (node.state !== state.CONNECTED) throw new Error('This node is not yet ready');
+        return node;
+    }
+    /**
+     * @memberOf Shoukaku
+     * @param {ShoukakuSocket} node
+     * @returns {void}
+     * @private
+     */
+    _ready(node) {
+        node._clean();
+        this.emit('ready', node.name, node.resumed);
+    }
+    /**
+     * @memberOf Shoukaku
+     * @param {string} group
+     * @returns {ShoukakuSocket}
+     * @private
+     */
+    _getIdeal(group) {
+        const nodes = [...this.nodes.values()]
+            .filter(node => node.state === state.CONNECTED);
+        if (!group) {
+            return nodes
+                .sort((a, b) => a.penalties - b.penalties)
+                .shift();
+        }
+        return nodes
+            .filter(node => group.includes(node.group))
+            .sort((a, b) => a.penalties - b.penalties)
+            .shift();
+    }
+    /**
+     * @memberOf Shoukaku
+     * @param {Array&lt;Object>} nodes
+     * @returns {void}
+     * @private
+     */
+    _clientReady(nodes) {
+        this.id = this.client.user.id;
+        this.emit('debug', 'Manager',`[Manager] : Connecting ${nodes.length} nodes`);
+        for (const node of nodes) this.addNode(mergeDefault(nodeOptions, node));
+    }
+    /**
+     * @memberOf Shoukaku
+     * @param {Object} packet
+     * @returns {void}
+     * @private
+     */
+    _clientRaw(packet) {
+        if (!['VOICE_STATE_UPDATE', 'VOICE_SERVER_UPDATE'].includes(packet.t)) return;
+        for (const node of this.nodes.values()) node._clientRaw(packet);
+    }
+}
+module.exports = Shoukaku;
+</pre>
+    </article>
+</section>
+
+
+
+
+
+		</div>
+	</div>
+
+	<div class="clearfix"></div>
+
+	
+
+</div>
+</div>
+
+
+    <div class="modal fade" id="searchResults">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">Search results</h4>
+          </div>
+          <div class="modal-body"></div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div>
+
+
+<footer>
+
+
+	<span class="copyright">
+	MIT License | Made with ❤ by @Sāya#0113
+	</span>
+
+<span class="jsdoc-message">
+	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.7</a>
+	
+		on 2021-05-21T23:42:47+08:00
+	
+	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
+</span>
+</footer>
+
+<script src="scripts/docstrap.lib.js"></script>
+<script src="scripts/toc.js"></script>
+
+    <script type="text/javascript" src="scripts/fulltext-search-ui.js"></script>
+
+
+<script>
+$( function () {
+	$( "[id*='$']" ).each( function () {
+		var $this = $( this );
+
+		$this.attr( "id", $this.attr( "id" ).replace( "$", "__" ) );
+	} );
+
+	$( ".tutorial-section pre, .readme-section pre, pre.prettyprint.source" ).each( function () {
+		var $this = $( this );
+
+		var example = $this.find( "code" );
+		exampleText = example.html();
+		var lang = /{@lang (.*?)}/.exec( exampleText );
+		if ( lang && lang[1] ) {
+			exampleText = exampleText.replace( lang[0], "" );
+			example.html( exampleText );
+			lang = lang[1];
+		} else {
+			var langClassMatch = example.parent()[0].className.match(/lang\-(\S+)/);
+			lang = langClassMatch ? langClassMatch[1] : "javascript";
+		}
+
+		if ( lang ) {
+
+			$this
+			.addClass( "sunlight-highlight-" + lang )
+			.addClass( "linenums" )
+			.html( example.html() );
+
+		}
+	} );
+
+	Sunlight.highlightAll( {
+		lineNumbers : true,
+		showMenu : true,
+		enableDoclinks : true
+	} );
+
+	$.catchAnchorLinks( {
+        navbarOffset: 10
+	} );
+	$( "#toc" ).toc( {
+		anchorName  : function ( i, heading, prefix ) {
+			return $( heading ).attr( "id" ) || ( prefix + i );
+		},
+		selectors   : "#toc-content h1,#toc-content h2,#toc-content h3,#toc-content h4",
+		showAndHide : false,
+		smoothScrolling: true
+	} );
+
+	$( "#main span[id^='toc']" ).addClass( "toc-shim" );
+	$( '.dropdown-toggle' ).dropdown();
+
+    $( "table" ).each( function () {
+      var $this = $( this );
+      $this.addClass('table');
+    } );
+
+} );
+</script>
+
+
+
+<!--Navigation and Symbol Display-->
+
+
+<!--Google Analytics-->
+
+
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+            SearcherDisplay.init();
+        });
+    </script>
+
+
+</body>
+</html>

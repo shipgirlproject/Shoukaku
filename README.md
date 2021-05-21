@@ -1,5 +1,7 @@
 ## Shoukaku
-### A Lavalink wrapper for Discord.JS v12.x.x
+
+> A Lavalink wrapper for Discord.JS v12.x.x
+
 [![Discord](https://img.shields.io/discord/423116740810244097?style=flat-square)](https://discordapp.com/invite/FVqbtGu)
 [![npm](https://img.shields.io/npm/v/shoukaku?style=flat-square)](https://www.npmjs.com/package/shoukaku)
 ![Github Stars](https://img.shields.io/github/stars/Deivu/Shoukaku?style=flat-square)
@@ -60,7 +62,7 @@ Docker images are available on the [Docker](https://hub.docker.com/r/fredboat/la
 
 ### Other Links
 
-[Support](https://discord.gg/FVqbtGu) | [Lavalink](https://github.com/freyacodes/Lavalink)
+[Support](https://discord.gg/FVqbtGu) (#Development) | [Lavalink](https://github.com/freyacodes/Lavalink)
 
 ### Example
 

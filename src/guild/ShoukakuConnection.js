@@ -7,77 +7,70 @@ const { wait } = require('../Utils.js');
  * ShoukakuConnection, manages a voice connection between Discord and Lavalink
  * @class ShoukakuConnection
  * @extends {EventEmitter}
+ * @param {ShoukakuPlayer} player The player that initialized this manager
+ * @param {ShoukakuSocket} node The node where this manager is connected to
+ * @param {Guild} guild A Discord.JS guild structure
  */
 class ShoukakuConnection extends EventEmitter {
-    /**
-     * @param {ShoukakuPlayer} player The player of this link.
-     * @param {ShoukakuSocket} node The node that governs this link.
-     * @param {Guild} guild A Discord.js Guild Object.
-     */
     constructor(player, node, guild) {
         super();
         /**
-         * The player class of this link.
+         * The player that initialized this manager
          * @type {ShoukakuPlayer}
          */
         this.player = player;
         /**
-         * The node that governs this Link
+         * The node where this manager is connected to
          * @type {ShoukakuSocket}
          */
         this.node = node;
         /**
-         * The ID of the guild that is being governed by this Link.
+         * The ID of the guild where this connection is
          * @type {string}
          */
         this.guildID = guild.id;
         /**
-         * The ID of the shard where this guild id is
-         * @type {number}
-         */
-        this.shardID = guild.shardID;
-        /**
-         * The sessionID of this Link
-         * @type {?string}
-         */
-        this.sessionID = null;
-        /**
-         * The ID of the voice channel that is being governed by this link.
+         * The ID of the channel where this connection is
          * @type {?string}
          */
         this.channelID = null;
         /**
-         * Voice region where this link is connected.
+         * The ID of the shard where this connection is
+         * @type {number}
+         */
+        this.shardID = guild.shardID;
+        /**
+         * The ID of the current connection session
+         * @type {?string}
+         */
+        this.sessionID = null;
+        /**
+         * The region where this connection is
          * @type {?string}
          */
         this.region = null;
         /**
-         * If the client user is self muted.
+         * If the client user is self muted
          * @type {boolean}
          */
         this.muted = false;
         /**
-         * If the client user is self defeaned.
+         * If the client user is self deafened
          * @type {boolean}
          */
         this.deafened = false;
         /**
-         * Voice connection status to Discord
-         * @type {ShoukakuConstants#ShoukakuStatus}
+         * The state of this connection
+         * @type {Constants.state}
          */
         this.state = state.DISCONNECTED;
         /**
-         * If this link detected a voice channel change.
+         * If this connection detected a voice channel or voice server change
          * @type {boolean}
          */
-        this.channelMoved = false;
+        this.moved = false;
         /**
-         * If this link detected a voice server change.
-         * @type {boolean}
-         */
-        this.voiceMoved = false;
-        /**
-         * If this link is reconnecting via ShoukakuLink.attemptReconnect()
+         * If this connection is trying to force reconnect
          * @type {boolean}
          */
         this.reconnecting = false;
@@ -89,17 +82,21 @@ class ShoukakuConnection extends EventEmitter {
     /**
      * Attempts to reconnect this connection
      * @memberOf ShoukakuConnection
-     * @param {Object} [options] options for attemptReconnect
-     * @param {String} [options.voiceChannelID] Will throw an error if not specified, when the state of this link is disconnected, no cached serverUpdate or when forceReconnect is true
+     * @param {Object} [options] 
+     * @param {String} [options.channelID] Will throw an error if not specified, when the state of this link is disconnected, no cached serverUpdate or when forceReconnect is true
      * @param {Boolean} [options.forceReconnect] Forces a reconnection by re-requesting a connection to Discord, also resets your player
      * @returns {Promise<void>}
      */
     async attemptReconnect({ channelID, forceReconnect } = {}) {
-        if (this.state === state.DISCONNECTED || !this.serverUpdate || forceReconnect) {
-            if (!channelID) throw new Error('Please specify the channel you want this node to connect on');
+        if (!forceReconnect && this.state === state.CONNECTED) {
+            this.node.send({ op: 'voiceUpdate', guildId: this.guildID, sessionId: this.sessionID, event: this.serverUpdate });
+            return;
+        }
+        else if (this.state === state.DISCONNECTED || !this.serverUpdate || forceReconnect) {
             try {
                 this.reconnecting = true;
-                await this.node.send({ op: 'destroy', guildId: this.guildID });
+                if (!channelID) throw new Error('Please specify the channel you want this node to connect on');
+                this.node.send({ op: 'destroy', guildId: this.guildID });
                 await wait(4000);
                 if (this.state !== state.DISCONNECTED) {
                     this.send({ guild_id: this.guildID, channel_id: null, self_mute: false, self_deaf: false }, true);
@@ -111,7 +108,6 @@ class ShoukakuConnection extends EventEmitter {
                 this.reconnecting = false;
             }
         }
-        else if (this.state === state.CONNECTED && !forceReconnect) await this.voiceUpdate();
     }
     /**
      * Deafens the client
@@ -202,7 +198,7 @@ class ShoukakuConnection extends EventEmitter {
      * @protected
      */
     setStateUpdate({ session_id, channel_id, self_deaf, self_mute }) {
-        this.channelMoved = this.channelID && this.channelID !== channel_id;
+        this.moved = this.channelID && this.channelID !== channel_id;
         this.deafened = self_deaf;
         this.muted = self_mute;
         this.sessionID = session_id;
@@ -219,7 +215,7 @@ class ShoukakuConnection extends EventEmitter {
     setServerUpdate(data) {
         if (!data.endpoint) return;
         clearTimeout(this.connectTimeout);
-        this.voiceMoved = this.serverUpdate && !data.endpoint.startsWith(this.region);
+        this.moved = this.serverUpdate && !data.endpoint.startsWith(this.region);
         this.region = data.endpoint.split('.').shift().replace(/[0-9]/g, '');
         this.serverUpdate = data;
         this.node.send({ op: 'voiceUpdate', guildId: this.guildID, sessionId: this.sessionID, event: this.serverUpdate });

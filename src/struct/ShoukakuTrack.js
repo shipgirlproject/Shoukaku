@@ -1,11 +1,9 @@
 /**
  * Represents a track resolved from lavalink's rest
  * @class ShoukakuTrack
+ * @param {Object} raw Raw data from lavalink rest
  */
 class ShoukakuTrack {
-    /**
-     * @param {Object} raw Raw data from lavalink rest
-     */
     constructor(raw) {
         /**
          * Base64 string from the resolved track from lavalink rest

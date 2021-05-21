@@ -10,12 +10,10 @@ const ShoukakuFilter = require('../struct/ShoukakuFilter.js');
  * ShoukakuPlayer, used to control the player on a guild
  * @class ShoukakuPlayer
  * @extends {EventEmitter}
+ * @param {ShoukakuSocket} node The node where this class is initialized
+ * @param {Guild} guild A Discord.JS guild structure
  */
 class ShoukakuPlayer extends EventEmitter {
-    /**
-     * @param  {ShoukakuSocket} node The node that governs this player
-     * @param  {Guild} guild A Discord.JS Guild Object
-     */
     constructor(node, guild) {
         super();
         /**
@@ -34,58 +32,58 @@ class ShoukakuPlayer extends EventEmitter {
          */
         this.paused = false;
         /**
-         * The current postion in ms of this player
+         * The current postion in of this player, in milliseconds
          * @type {number}
          */
         this.position = 0;
         /**
-         * Current filter settings for this player
+         * The current filter settings for this player
          * @type {ShoukakuFilter}
          */
         this.filters = new ShoukakuFilter();
     }
 
     /**
-     * Emitted when the Lavalink Server sends a TrackEndEvent or TrackStuckEvent, MUST BE HANDLED.
+     * Emitted when the lavalink player emits a 'TrackEndEvent' or 'TrackStuckEvent'
      * @event ShoukakuPlayer#end
      * @param {Object} reason
      * @memberOf ShoukakuPlayer
      */
     /**
-     * Emitted when the Lavalink Server sends a WebsocketClosedEvent, MUST BE HANDLED.
+     * Emitted when the lavalink player emits a WebsocketClosedEvent
      * @event ShoukakuPlayer#closed
      * @param {Object} reason
      * @memberOf ShoukakuPlayer
      * @example
-     * Player.on('closed', reason => console.log(reason) & Player.disconnect())
+     * Player.on('closed', reason => console.log(reason) && Player.disconnect());
      */
     /**
-     * Emitted when this library encounters an internal error in ShoukakuPlayer or ShoukakuLink, MUST BE HANDLED.
+     * Emitted when this library encounters an internal error
      * @event ShoukakuPlayer#error
-     * @param {ShoukakuError|Error} error The error encountered.
+     * @param {Error} error The error encountered.
      * @memberOf ShoukakuPlayer
      * @example
-     * Player.on('error', error => console.error(error) & Player.disconnect());
+     * Player.on('error', error => console.error(error) && Player.disconnect());
      */
     /**
-     * Emitted when the Lavalink Server sends a TrackStartEvent, Optional.
+     * Emitted when the lavalink player emits a TrackStartEvent
      * @event ShoukakuPlayer#start
      * @param {Object} data
      * @memberOf ShoukakuPlayer
      */
     /**
-     * Emitted when the Lavalink Server sends a TrackExceptionEvent, Automatically fires TrackEndEvent so handling this is optional, Optional.
+     * Emitted when the lavalink player emits a TrackExceptionEvent, automatically fires TrackEndEvent so handling this is optional
      * @event ShoukakuPlayer#exception
      * @param {Object} reason
      * @memberOf ShoukakuPlayer
      */
     /**
-     * Emitted when this library managed to resume playing this player, Optional.
+     * Emitted when this library managed to resumed this player
      * @event ShoukakuPlayer#resumed
      * @memberOf ShoukakuPlayer
      */
     /**
-     * Emitted when the Lavalink Server sends a PlayerUpdate OP, Optional.
+     * Emitted when the lavalink player emits a PlayerUpdate event
      * @event ShoukakuPlayer#update
      * @param {Object} data
      * @memberOf ShoukakuPlayer
@@ -121,10 +119,10 @@ class ShoukakuPlayer extends EventEmitter {
      * Plays a track
      * @param {string|ShoukakuTrack} track The Base64 track from the Lavalink Rest API or a ShoukakuTrack
      * @param {Object} [options={}] Used if you want to put a custom track start or end time
-     * @property {boolean} [options.noReplace=true] Specifies if the player will not replace the current track when executing this action
-     * @property {boolean} [options.pause=false] If `true`, the player will pause when the track starts playing
-     * @property {?number} [options.startTime=undefined] In milliseconds on when to start
-     * @property {?number} [options.endTime=undefined] In milliseconds on when to end
+     * @param {boolean} [options.noReplace=true] Specifies if the player will not replace the current track when executing this action
+     * @param {boolean} [options.pause=false] If `true`, the player will pause when the track starts playing
+     * @param {?number} [options.startTime=undefined] In milliseconds on when to start
+     * @param {?number} [options.endTime=undefined] In milliseconds on when to end
      * @memberOf ShoukakuPlayer
      * @returns {ShoukakuPlayer}
      */ 
@@ -148,7 +146,7 @@ class ShoukakuPlayer extends EventEmitter {
         return this;
     }
     /**
-     * Stops the player from playing.
+     * Stops the player from playing
      * @memberOf ShoukakuPlayer
      * @returns {ShoukakuPlayer}
      */
@@ -161,7 +159,7 @@ class ShoukakuPlayer extends EventEmitter {
         return this;
     }
     /**
-     * Pauses / Unpauses the player
+     * Pauses or unpauses the player from playing
      * @param {boolean} [pause=true] true to pause, false to unpause
      * @memberOf ShoukakuPlayer
      * @returns {ShoukakuPlayer}
@@ -177,7 +175,7 @@ class ShoukakuPlayer extends EventEmitter {
     }
     /**
      * Seeks your player to the time you want
-     * @param {number} position position in MS you want to seek to.
+     * @param {number} position Time in milliseconds where you want to seek to
      * @memberOf ShoukakuPlayer
      * @returns {ShoukakuPlayer}
      */
@@ -192,7 +190,7 @@ class ShoukakuPlayer extends EventEmitter {
     }
     /**
      * Sets the playback volume of your lavalink player
-     * @param {number} volume The new volume you want to set on the player.
+     * @param {number} volume The new volume you want to set on the player
      * @memberOf ShoukakuPlayer
      * @returns {ShoukakuPlayer}
      */
@@ -205,7 +203,9 @@ class ShoukakuPlayer extends EventEmitter {
     }
     /**
      * Sets the equalizer of your lavalink player
-     * @param {Array<ShoukakuConstants#EqualizerBand>} bands An array of Lavalink bands.
+     * @param {Object[]} bands
+     * @param {number} bands.band Band of the equalizer, can be 0 - 13
+     * @param {number} bands.gain Gain for this band of the equalizer
      * @memberOf ShoukakuPlayer
      * @returns {ShoukakuPlayer}
      */
@@ -217,7 +217,11 @@ class ShoukakuPlayer extends EventEmitter {
     }
     /**
      * Sets the karaoke effect of your lavalink player
-     * @param {ShoukakuConstants#KaraokeValue} [karaokeValue] Karaoke settings for this playback
+     * @param {Object|null} values
+     * @param {number} [values.level] Karaoke effect level
+     * @param {number} [values.monoLevel] Karaoke effect monoLevel
+     * @param {number} [values.filterBand] Karaoke effect filterband
+     * @param {number} [values.filterWidth] Karaoke effect filterwidth
      * @memberOf ShoukakuPlayer
      * @returns {ShoukakuPlayer}
      */
@@ -228,7 +232,10 @@ class ShoukakuPlayer extends EventEmitter {
     }
     /**
      * Sets the timescale effect of your lavalink player
-     * @param {ShoukakuConstants#TimescaleValue} [timescaleValue] Timescale settings for this playback
+     * @param {Object|null} values
+     * @param {number} [values.speed] Timescale effect speed
+     * @param {number} [values.pitch] Timescale effect pitch
+     * @param {number} [values.rate] Timescale effect rate
      * @memberOf ShoukakuPlayer
      * @returns {ShoukakuPlayer}
      */
@@ -239,7 +246,9 @@ class ShoukakuPlayer extends EventEmitter {
     }
     /**
      * Sets the tremolo effect of your lavalink player
-     * @param {ShoukakuConstants#TremoloValue} [tremoloValue] Tremolo settings for this playback
+     * @param {Object|null} values
+     * @param {number} [values.frequency] Tremolo effect frequency
+     * @param {number} [values.depth] Tremolo effect depth
      * @memberOf ShoukakuPlayer
      * @returns {ShoukakuPlayer}
      */
@@ -250,7 +259,9 @@ class ShoukakuPlayer extends EventEmitter {
     }
     /**
      * Sets the vibrato effect of your lavalink player
-     * @param {ShoukakuConstants#VibratoValue} [vibratoValue] Vibrato settings for this playback
+     * @param {Object|null} values
+     * @param {number} [values.frequency] Vibrato effect frequency
+     * @param {number} [values.depth] Vibrato effect depth
      * @memberOf ShoukakuPlayer
      * @returns {ShoukakuPlayer}
      */
@@ -261,8 +272,9 @@ class ShoukakuPlayer extends EventEmitter {
     }
     /**
      * Sets the rotation effect of your lavalink player
-     * @param {ShoukakuConstants#RotationValue} [rotationValue] Rotation settings for this playback
-     * @memberOf ShoukakuPlayer
+     * @param {Object|null} values
+     * @param {number} [values.rotationHz] Rotation effect rotation
+     * @param ShoukakuPlayer
      * @returns {ShoukakuPlayer}
      */
     setRotation(values) {
@@ -272,7 +284,15 @@ class ShoukakuPlayer extends EventEmitter {
     }
     /**
      * Sets the distortion effect of your lavalink player
-     * @param {ShoukakuConstants#DistortionValue} [distortionValue] Distortion settings for this playback
+     * @param {Object|null} values
+     * @param {number} [values.sinOffset] Sin offset of the distortion effect
+     * @param {number} [values.sinScale] Sin scale of the distortion effect
+     * @param {number} [values.cosOffset] Cos offset of the distortion effect
+     * @param {number} [values.cosScale] Cos scale of the distortion effect
+     * @param {number} [values.tanOffset] Tan offset of the distortion effect
+     * @param {number} [values.tanScale] Tan scale of the distortion effect
+     * @param {number} [values.offset] Offset of the distortion effect
+     * @param {number} [values.scale] Scale of the distortion effect
      * @memberOf ShoukakuPlayer
      * @returns {ShoukakuPlayer}
      */
@@ -283,27 +303,19 @@ class ShoukakuPlayer extends EventEmitter {
     }
     /**
      * Ability to set filters by group instead of 1 by 1
-     * @param {Object} [settings] object containing filter settings
-     * @param {Number} [settings.volume=1.0] volume of this filter
-     * @param {Array<ShoukakuConstants#EqualizerBand>} [settings.equalizer=[]] equalizer of this filter
-     * @param {ShoukakuConstants#KaraokeValue} [settings.karaoke] karaoke settings of this filter
-     * @param {ShoukakuConstants#TimescaleValue} [settings.timescale] timescale settings of this filter
-     * @param {ShoukakuConstants#TremoloValue} [settings.tremolo] tremolo settings of this filter
-     * @param {ShoukakuConstants#VibratoValue} [settings.vibrato] vibrato settings of this filter
-     * @param {ShoukakuConstants#RotationValue} [settings.rotation] rotation settings of this filter
-     * @param {ShoukakuConstants#DistortionValue} [settings.distortion] distortion settings of this filter
+     * @param {ShoukakuFilter} [settings] object containing filter settings
      * @memberOf ShoukakuPlayer
-     * @returns {Promise<ShoukakuPlayer>}
+     * @returns {ShoukakuPlayer}
      */
     setFilters(settings) {
         this.filters = new ShoukakuFilter(settings);
         this.updateFilters();
         return this;
     }
-    /**
+    /** 
      * Clears all the filter applied on this player
      * @memberOf ShoukakuPlayer
-     * @returns {Promise<ShoukakuPlayer>}
+     * @returns {ShoukakuPlayer}
      */
     clearFilters() {
         this.filters = new ShoukakuFilter();
@@ -318,8 +330,10 @@ class ShoukakuPlayer extends EventEmitter {
      * @memberOf ShoukakuPlayer
      * @returns {ShoukakuPlayer}
      * @example
-     * ShoukakuPlayer.connection.attemptReconnect()
-     *     .then(() => <ShoukakuPlayer>.resume());
+     * ShoukakuPlayer
+     *   .connection
+     *   .attemptReconnect()
+     *   .then(() => ShoukakuPlayer.resume());
      */
     resume() {
         this.updateFilters();
@@ -366,43 +380,45 @@ class ShoukakuPlayer extends EventEmitter {
             this.emit('update', json.state);
             return;
         }
-        if (json.op === 'event') {
-            this.position = 0;
-            switch (json.type) {
-                case 'TrackStartEvent':
-                    this.emit('start', json);
-                    break;
-                case 'TrackEndEvent':
-                case 'TrackStuckEvent':
-                    this.emit('end', json);
-                    break;
-                case 'TrackExceptionEvent':
-                    this.emit('exception', json);
-                    break;
-                case 'WebSocketClosedEvent':
-                    if (this.connection.reconnecting) break;
-                    wait(this.connection.node.shoukaku.options.closedWebsocketEventDelay)
-                        .then(() => {
-                            if (this.connection.channelMoved || this.connection.voiceMoved) {
-                                this.connection.node.emit('debug', 
-                                    this.connection.node.name, 
-                                    `[Node] -> [${this.connection.node.name}] : Move detected;` + 
-                                    `Channel ${this.connection.channelMoved};` + 
-                                    `Server ${this.connection.voiceMoved}`
-                                );
-                                this.connection.channelMoved = false;
-                                this.connection.voiceMoved = false;
-                                return;
-                            }
-                            this.emit('closed', json);
-                        });
-                    break;
-                default:
-                    this.connection.node.emit('debug', this.connection.node.name, `[Node] -> [${this.connection.node.name}] : Unknown Player Event Type ${json.type}`);
-            }
+        else if (json.op === 'event') {
+            this._onPlayerEvent(json);
             return;
         }
         this.connection.node.emit('debug', this.connection.node.name, `[Node] -> [${this.connection.node.name}] : Unknown Message OP ${json.op}`);
+    }
+    /**
+     * @memberOf ShoukakuPlayer
+     * @param {Object} json
+     * @protected
+     */
+    _onPlayerEvent(json) {
+        this.position = 0;
+        switch (json.type) {
+            case 'TrackStartEvent':
+                this.emit('start', json);
+                break;
+            case 'TrackEndEvent':
+            case 'TrackStuckEvent':
+                this.emit('end', json);
+                break;
+            case 'TrackExceptionEvent':
+                this.emit('exception', json);
+                break;
+            case 'WebSocketClosedEvent':
+                if (this.connection.reconnecting) break;
+                wait(this.connection.node.shoukaku.options.closedWebsocketEventDelay).then(() => {
+                    if (!this.connection.moved) {
+                        this.emit('closed', json);
+                        return;
+                    }
+                    this.connection.node.emit('debug', this.connection.node.name, `[Node] -> [${this.connection.node.name}] : Voice channel or server move detected`);
+                    this.connection.moved = false;                        
+                });
+                break;
+            default:
+                this.connection.node.emit('debug', this.connection.node.name, `[Node] -> [${this.connection.node.name}] : Unknown Player Event Type ${json.type}`);
+        }
+        return;
     }
 }
 module.exports = ShoukakuPlayer;

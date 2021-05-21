@@ -4,7 +4,7 @@
   "description": "A lavalink client for Discord.js v12 only",
   "main": "index.js",
   "scripts": {
-    "doc": "docma"
+    "docs": "jsdoc -c ./jsdoc.json -t ./node_modules/ink-docstrap/template -R README.md -d ./docs/ -r"
   },
   "types": "index.d.ts",
   "keywords": [
@@ -32,6 +32,8 @@
   "devDependencies": {
     "discord.js": "^12.5.1",
     "discord.js-light": "^3.5.4",
+    "ink-docstrap": "^1.3.2",
+    "jsdoc": "^3.6.7",
     "typescript": "^4.2.3"
   }
 }

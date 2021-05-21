@@ -10,18 +10,16 @@ const { state } = require('../Constants.js');
 /**
  * ShoukakuSocket, manages a single lavalink node connection
  * @class ShoukakuSocket
+ * @extends {EventEmitter}
+ * @param {Shoukaku} shoukaku The manager that initialized this instance
+ * @param {Object} options The node options to connect
+ * @param {string} options.name Lavalink node name
+ * @param {string} options.url Lavalink node url without prefix like, ex: http://
+ * @param {string} options.auth Lavalink node password
+ * @param {boolean} [options.secure=false] Whether this node should be in secure wss or https mode
+ * @param {string} [options.group=undefined] Lavalink node group
  */
 class ShoukakuSocket extends EventEmitter {
-    /**
-     * @extends {EventEmitter}
-     * @param {Shoukaku} shoukaku The manager that initialized this instance
-     * @param {Object} options The node options to connect
-     * @param {string} options.name Lavalink node name
-     * @param {string} options.url Lavalink node url without prefix like, ex: http://
-     * @param {string} options.auth Lavalink node password
-     * @param {boolean} [options.secure=false] Whether this node should be in secure wss or https mode
-     * @param {string} [options.group=undefined] Lavalink node group
-     */
     constructor(shoukaku, options) {
         super();
         /**

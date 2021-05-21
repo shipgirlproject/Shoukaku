@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>Shoukaku Source: src/guild/ShoukakuConnection.js</title>
+
+	<!--[if lt IE 9]>
+	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+	<link type="text/css" rel="stylesheet" href="styles/sunlight.default.css">
+
+	<link type="text/css" rel="stylesheet" href="styles/site.slate.css">
+
+</head>
+
+<body>
+
+<div class="navbar navbar-default navbar-fixed-top ">
+<div class="container">
+	<div class="navbar-header">
+		<a class="navbar-brand" href="index.html">Shoukaku</a>
+		<button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#topNavigation">
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+        </button>
+	</div>
+	<div class="navbar-collapse collapse" id="topNavigation">
+		<ul class="nav navbar-nav">
+			
+			<li class="dropdown">
+				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="Constants.html">Constants</a></li><li><a href="ShoukakuConnection.html">ShoukakuConnection</a></li><li><a href="ShoukakuPlayer.html">ShoukakuPlayer</a></li><li><a href="ShoukakuQueue.html">ShoukakuQueue</a></li><li><a href="ShoukakuRest.html">ShoukakuRest</a></li><li><a href="ShoukakuRouter.html">ShoukakuRouter</a></li><li><a href="ShoukakuSocket.html">ShoukakuSocket</a></li><li><a href="Shoukaku.html">Shoukaku</a></li><li><a href="ShoukakuFilter.html">ShoukakuFilter</a></li><li><a href="ShoukakuStats.html">ShoukakuStats</a></li><li><a href="ShoukakuTrack.html">ShoukakuTrack</a></li><li><a href="ShoukakuTrackList.html">ShoukakuTrackList</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="events.list.html" class="dropdown-toggle" data-toggle="dropdown">Events<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="ShoukakuPlayer.html#event:end">ShoukakuPlayer#event:end</a></li><li><a href="ShoukakuPlayer.html#event:closed">ShoukakuPlayer#event:closed</a></li><li><a href="ShoukakuPlayer.html#event:error">ShoukakuPlayer#event:error</a></li><li><a href="ShoukakuPlayer.html#event:start">ShoukakuPlayer#event:start</a></li><li><a href="ShoukakuPlayer.html#event:exception">ShoukakuPlayer#event:exception</a></li><li><a href="ShoukakuPlayer.html#event:resumed">ShoukakuPlayer#event:resumed</a></li><li><a href="ShoukakuPlayer.html#event:update">ShoukakuPlayer#event:update</a></li><li><a href="Shoukaku.html#event:debug">Shoukaku#event:debug</a></li><li><a href="Shoukaku.html#event:error">Shoukaku#event:error</a></li><li><a href="Shoukaku.html#event:ready">Shoukaku#event:ready</a></li><li><a href="Shoukaku.html#event:close">Shoukaku#event:close</a></li><li><a href="Shoukaku.html#event:disconnect">Shoukaku#event:disconnect</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="externals.list.html" class="dropdown-toggle" data-toggle="dropdown">Externals<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="external-Client.html">Client</a></li><li><a href="external-Guild.html">Guild</a></li><li><a href="external-EventEmitter.html">EventEmitter</a></li>
+				</ul>
+			</li>
+			
+		</ul>
+        
+            <div class="col-sm-3 col-md-3">
+                <form class="navbar-form" role="search">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Search" name="q" id="search-input">
+                        <div class="input-group-btn">
+                            <button class="btn btn-default" id="search-submit"><i class="glyphicon glyphicon-search"></i></button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        
+	</div>
+
+</div>
+</div>
+
+
+<div class="container" id="toc-content">
+<div class="row">
+
+	
+	<div class="col-md-12">
+	
+		<div id="main">
+			
+
+		<h1 class="page-title">Source: src/guild/ShoukakuConnection.js</h1>
+    
+<section>
+    <article>
+        <pre
+            class="sunlight-highlight-javascript linenums">const AbortController = require('abort-controller');
+const { EventEmitter, once } = require('events');
+const { state } = require('../Constants.js');
+const { wait } = require('../Utils.js');
+
+/**
+ * ShoukakuConnection, manages a voice connection between Discord and Lavalink
+ * @class ShoukakuConnection
+ * @extends {EventEmitter}
+ * @param {ShoukakuPlayer} player The player that initialized this manager
+ * @param {ShoukakuSocket} node The node where this manager is connected to
+ * @param {Guild} guild A Discord.JS guild structure
+ */
+class ShoukakuConnection extends EventEmitter {
+    constructor(player, node, guild) {
+        super();
+        /**
+         * The player that initialized this manager
+         * @type {ShoukakuPlayer}
+         */
+        this.player = player;
+        /**
+         * The node where this manager is connected to
+         * @type {ShoukakuSocket}
+         */
+        this.node = node;
+        /**
+         * The ID of the guild where this connection is
+         * @type {string}
+         */
+        this.guildID = guild.id;
+        /**
+         * The ID of the channel where this connection is
+         * @type {?string}
+         */
+        this.channelID = null;
+        /**
+         * The ID of the shard where this connection is
+         * @type {number}
+         */
+        this.shardID = guild.shardID;
+        /**
+         * The ID of the current connection session
+         * @type {?string}
+         */
+        this.sessionID = null;
+        /**
+         * The region where this connection is
+         * @type {?string}
+         */
+        this.region = null;
+        /**
+         * If the client user is self muted
+         * @type {boolean}
+         */
+        this.muted = false;
+        /**
+         * If the client user is self deafened
+         * @type {boolean}
+         */
+        this.deafened = false;
+        /**
+         * The state of this connection
+         * @type {Constants.state}
+         */
+        this.state = state.DISCONNECTED;
+        /**
+         * If this connection detected a voice channel or voice server change
+         * @type {boolean}
+         */
+        this.moved = false;
+        /**
+         * If this connection is trying to force reconnect
+         * @type {boolean}
+         */
+        this.reconnecting = false;
+
+        Object.defineProperty(this, 'serverUpdate', { value: null, writable: true });
+        Object.defineProperty(this, 'connectTimeout', { value: null, writable: true });
+    }
+
+    /**
+     * Attempts to reconnect this connection
+     * @memberOf ShoukakuConnection
+     * @param {Object} [options] 
+     * @param {String} [options.channelID] Will throw an error if not specified, when the state of this link is disconnected, no cached serverUpdate or when forceReconnect is true
+     * @param {Boolean} [options.forceReconnect] Forces a reconnection by re-requesting a connection to Discord, also resets your player
+     * @returns {Promise&lt;void>}
+     */
+    async attemptReconnect({ channelID, forceReconnect } = {}) {
+        if (!forceReconnect &amp;&amp; this.state === state.CONNECTED) {
+            this.node.send({ op: 'voiceUpdate', guildId: this.guildID, sessionId: this.sessionID, event: this.serverUpdate });
+            return;
+        }
+        else if (this.state === state.DISCONNECTED || !this.serverUpdate || forceReconnect) {
+            try {
+                this.reconnecting = true;
+                if (!channelID) throw new Error('Please specify the channel you want this node to connect on');
+                this.node.send({ op: 'destroy', guildId: this.guildID });
+                await wait(4000);
+                if (this.state !== state.DISCONNECTED) {
+                    this.send({ guild_id: this.guildID, channel_id: null, self_mute: false, self_deaf: false }, true);
+                    await wait(4000);
+                }
+                this.serverUpdate = null;
+                await this.connect({ guildID: this.guildID, channelID, mute: this.selfMute, deaf: this.selfDeaf });
+            } finally {
+                this.reconnecting = false;
+            }
+        }
+    }
+    /**
+     * Deafens the client
+     * @memberOf ShoukakuConnection
+     * @param {boolean} [deaf=false]
+     * @returns {void}
+     */
+    setDeaf(deaf = false) {
+        this.deafened = deaf;
+        return this.send({ guild_id: this.guildID, channel_id: this.channelID, self_deaf: this.deafened, self_mute: this.muted }, true);
+    }
+    /**
+     * Mutes the client
+     * @memberOf ShoukakuConnection
+     * @param {boolean} [mute=false]
+     * @returns {void}
+     */
+    setMute(mute = false) {
+        this.muted = mute;
+        return this.send({ guild_id: this.guildID, channel_id: this.channelID, self_deaf: this.deafened, self_mute: this.muted }, true);
+    }
+    /**
+     * Deafens the client
+     * @memberOf ShoukakuConnection
+     * @param {string} [channel=null] channel id of the channel to move to, null if you want to disconnect the client
+     * @param {string} [reason] The reason for this action
+     * @returns {Promise&lt;void>}
+     */
+    moveChannel(channel = null, reason) {
+        return this
+            .node
+            .shoukaku
+            .client
+            .api
+            .guilds(this.guildID)
+            .members(this.node.shoukaku.id)
+            .patch({ data: { channel }, reason });
+    }
+    /**
+     * Disconnects this connection
+     * @memberOf ShoukakuConnection
+     * @returns {void}
+     */
+    disconnect() {
+        if (this.state !== state.DISCONNECTED) {
+            this.state = state.DISCONNECTING;
+            this.send({ guild_id: this.guildID, channel_id: null, self_mute: false, self_deaf: false }, true);
+        }
+        this.node.players.delete(this.guildID);
+        this.node.send({ op: 'destroy', guildId: this.guildID });
+        this.player.removeAllListeners();
+        this.player.reset();
+        this.state = state.DISCONNECTED;
+        this.node.emit('debug', this.node.name, '[Voice] -> [Node] [Discord] : Link &amp; Player Destroyed');
+    }
+    /**
+     * Connects this connection
+     * @memberOf ShoukakuConnection
+     * @param {Object} options options to connect
+     * @returns {Promise&lt;void>}
+     * @protected
+     */
+    async connect(options) {
+        if (!options) 
+            throw new Error('No options supplied');
+        if (this.state === state.CONNECTING)
+            throw Error('Can\'t connect while a connection is connecting. Wait for it to resolve first');
+        this.state = state.CONNECTING;
+        const { guildID, channelID, deaf, mute } = options;
+        this.send({ guild_id: guildID, channel_id: channelID, self_deaf: deaf, self_mute: mute }, true);
+        this.node.emit('debug', this.node.name, '[Voice] -> [Discord] : Requesting Connection');
+        const signal = new AbortController();
+        const timeout = setTimeout(() => signal.abort(), 15000);
+        try {
+            await once(this, 'serverUpdate', { signal });
+        } catch (error) {
+            this.node.emit('debug', this.node.name, '[Voice] &lt;/- [Discord] : Request Connection Failed');
+            if (error.name === 'AbortError') 
+                throw new Error('The voice connection is not established in 15 seconds');
+            throw error;
+        } finally {
+            clearTimeout(timeout);
+        }
+    }
+    /**
+     * @memberOf ShoukakuConnection
+     * @param {Object}
+     * @protected
+     */
+    setStateUpdate({ session_id, channel_id, self_deaf, self_mute }) {
+        this.moved = this.channelID &amp;&amp; this.channelID !== channel_id;
+        this.deafened = self_deaf;
+        this.muted = self_mute;
+        this.sessionID = session_id;
+        this.channelID = channel_id || this.channelID;
+        if (!channel_id) this.state = state.DISCONNECTED;
+        this.node.emit('debug', this.node.name, '[Voice] &lt;- [Discord] : State Update');
+        this.emit('stateUpdate');
+    }
+    /**
+     * @memberOf ShoukakuConnection
+     * @param {Object}
+     * @protected
+     */
+    setServerUpdate(data) {
+        if (!data.endpoint) return;
+        clearTimeout(this.connectTimeout);
+        this.moved = this.serverUpdate &amp;&amp; !data.endpoint.startsWith(this.region);
+        this.region = data.endpoint.split('.').shift().replace(/[0-9]/g, '');
+        this.serverUpdate = data;
+        this.node.send({ op: 'voiceUpdate', guildId: this.guildID, sessionId: this.sessionID, event: this.serverUpdate });
+        this.node.emit('debug', this.node.name, '[Voice] &lt;- [Discord] : Server Update');
+        this.emit('serverUpdate');
+    }
+    /**
+     * @memberOf ShoukakuConnection
+     * @param {Object} d
+     * @param {boolean} [important=false]
+     * @protected
+     */
+    send(d, important = false) {
+        if (!this.node.shoukaku.client.guilds.cache.has(this.guildID)) return;
+        this.node.shoukaku.client.ws.shards.get(this.shardID)?.send({ op: 4, d }, important);
+    }
+}
+
+module.exports = ShoukakuConnection;
+</pre>
+    </article>
+</section>
+
+
+
+
+
+		</div>
+	</div>
+
+	<div class="clearfix"></div>
+
+	
+
+</div>
+</div>
+
+
+    <div class="modal fade" id="searchResults">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">Search results</h4>
+          </div>
+          <div class="modal-body"></div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div>
+
+
+<footer>
+
+
+	<span class="copyright">
+	MIT License | Made with ❤ by @Sāya#0113
+	</span>
+
+<span class="jsdoc-message">
+	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.7</a>
+	
+		on 2021-05-21T23:42:47+08:00
+	
+	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
+</span>
+</footer>
+
+<script src="scripts/docstrap.lib.js"></script>
+<script src="scripts/toc.js"></script>
+
+    <script type="text/javascript" src="scripts/fulltext-search-ui.js"></script>
+
+
+<script>
+$( function () {
+	$( "[id*='$']" ).each( function () {
+		var $this = $( this );
+
+		$this.attr( "id", $this.attr( "id" ).replace( "$", "__" ) );
+	} );
+
+	$( ".tutorial-section pre, .readme-section pre, pre.prettyprint.source" ).each( function () {
+		var $this = $( this );
+
+		var example = $this.find( "code" );
+		exampleText = example.html();
+		var lang = /{@lang (.*?)}/.exec( exampleText );
+		if ( lang && lang[1] ) {
+			exampleText = exampleText.replace( lang[0], "" );
+			example.html( exampleText );
+			lang = lang[1];
+		} else {
+			var langClassMatch = example.parent()[0].className.match(/lang\-(\S+)/);
+			lang = langClassMatch ? langClassMatch[1] : "javascript";
+		}
+
+		if ( lang ) {
+
+			$this
+			.addClass( "sunlight-highlight-" + lang )
+			.addClass( "linenums" )
+			.html( example.html() );
+
+		}
+	} );
+
+	Sunlight.highlightAll( {
+		lineNumbers : true,
+		showMenu : true,
+		enableDoclinks : true
+	} );
+
+	$.catchAnchorLinks( {
+        navbarOffset: 10
+	} );
+	$( "#toc" ).toc( {
+		anchorName  : function ( i, heading, prefix ) {
+			return $( heading ).attr( "id" ) || ( prefix + i );
+		},
+		selectors   : "#toc-content h1,#toc-content h2,#toc-content h3,#toc-content h4",
+		showAndHide : false,
+		smoothScrolling: true
+	} );
+
+	$( "#main span[id^='toc']" ).addClass( "toc-shim" );
+	$( '.dropdown-toggle' ).dropdown();
+
+    $( "table" ).each( function () {
+      var $this = $( this );
+      $this.addClass('table');
+    } );
+
+} );
+</script>
+
+
+
+<!--Navigation and Symbol Display-->
+
+
+<!--Google Analytics-->
+
+
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+            SearcherDisplay.init();
+        });
+    </script>
+
+
+</body>
+</html>
