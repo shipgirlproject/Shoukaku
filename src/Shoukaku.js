@@ -130,7 +130,7 @@ class Shoukaku extends EventEmitter {
         node.on('error', (...args) => this.emit('error', ...args));
         node.on('disconnect', (...args) => this.emit('disconnect', ...args));
         node.on('close', (...args) => this.emit('close', ...args));
-        node.on('ready', (...args) => this._ready(...args));
+        node.on('ready', (...args) => this.emit('ready', ...args));
         node.connect();
         this.nodes.set(node.name, node);
     }
@@ -169,16 +169,6 @@ class Shoukaku extends EventEmitter {
         if (!node) throw new Error('The node name you specified is not one of my nodes');
         if (node.state !== state.CONNECTED) throw new Error('This node is not yet ready');
         return node;
-    }
-    /**
-     * @memberOf Shoukaku
-     * @param {ShoukakuSocket} node
-     * @returns {void}
-     * @private
-     */
-    _ready(node) {
-        node._clean();
-        this.emit('ready', node.name, node.resumed);
     }
     /**
      * @memberOf Shoukaku
