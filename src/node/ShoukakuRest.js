@@ -15,12 +15,12 @@ class ShoukakuRest {
      */
     constructor({ url, auth, secure }, { userAgent, timeout }) {
         /**
-        * URL of the host used by this resolver instance.
+        * The url for this rest api
         * @type {string}
         */
         this.url = `${secure ? 'https' : 'http'}://${url}`;
         /**
-         * This Resolver Timeout before it decides to cancel the request.
+         * The timeout before a request will be cancelled
          * @type {number}
          */
         this.timeout = timeout || 15000;
@@ -28,11 +28,15 @@ class ShoukakuRest {
         Object.defineProperty(this, 'auth', { value: auth });
         Object.defineProperty(this, 'userAgent', { value: userAgent });
     }
-
+    /**
+     * The api router for this rest api
+     * @type {number}
+     * @memberof ShoukakuRest
+     * @private
+     */
     get router() {
         return new ShoukakuRouter(this);
     }
-
     /**
     * Resolves a identifier into a lavalink track.
     * @param {string} identifier Anything you want for lavalink to search for
@@ -83,7 +87,13 @@ class ShoukakuRest {
     unmarkAllFailedAddress() {
         return this.router.routeplanner.free.all.post();
     }
-
+    /**
+     * Queries the rest api
+     * @param {string} url The request url
+     * @param {Object} options The request options
+     * @memberof ShoukakuRest
+     * @protected
+     */
     async fetch(url, { method, options }) {
         const headers = {
             'Authorization': this.auth,

@@ -3,7 +3,7 @@ const Websocket = require('ws');
 const ShoukakuQueue = require('./ShoukakuQueue.js');
 const ShoukakuRest = require('./ShoukakuRest.js');
 const ShoukakuPlayer = require('../guild/ShoukakuPlayer.js');
-const ShoukakuNodeStatus = require('../struct/ShoukakuNodeStatus.js');
+const ShoukakuStats = require('../struct/ShoukakuStats.js');
 
 const { state } = require('../Constants.js');
 
@@ -51,9 +51,9 @@ class ShoukakuSocket extends EventEmitter {
         this.state = state.DISCONNECTED;
         /**
         * The stats of this socket
-        * @type {ShoukakuNodeStatus}
+        * @type {ShoukakuStats}
         */
-        this.stats = new ShoukakuNodeStatus();
+        this.stats = new ShoukakuStats();
         /**
         * Attempted reconnects of this socket. Resets to 0 when the socket opens properly
         * @type {number}
@@ -159,6 +159,7 @@ class ShoukakuSocket extends EventEmitter {
     * @protected
     */
     connect(reconnect = false) {
+        this.destroyed = false;
         this.state = state.CONNECTING;
         const headers = {
             'Client-Name': this.userAgent,
@@ -186,7 +187,7 @@ class ShoukakuSocket extends EventEmitter {
     disconnect(code = 1000, reason) {
         this.destroyed = true;
         this._clean();
-        this.ws?.close(code, reason);
+        this._disconnect(code, reason);
     }
     /**
      * Creates a player and connects your bot to the specified guild's voice channel
@@ -237,14 +238,14 @@ class ShoukakuSocket extends EventEmitter {
         return this.players.get(guildID)?.connection.disconnect();
     }
     /**
-     * Enqueues a message to be sent to lavalink server
+     * Shortcut to send a message to this websocket
      * @param {Object} data Message to be sent
+     * @param {imporant} [data=false] If the message should be on top of queue
      * @memberOf ShoukakuSocket
      * @returns {void}
-     * @protected
      */
-    send(data, important) {
-        return this.queue.send(JSON.stringify(data), important);
+    send(data, important = false) {
+        return this.queue.send(data, important);
     }
     /**
      * @memberOf ShoukakuSocket
@@ -266,6 +267,7 @@ class ShoukakuSocket extends EventEmitter {
     }
     /**
      * @memberOf ShoukakuSocket
+     * @param {string} message
      * @returns {void}
      * @private
      */
@@ -274,13 +276,15 @@ class ShoukakuSocket extends EventEmitter {
         this.emit('debug', this.name, `[Socket] <- [${this.name}] : Websocket Message, OP: ${json?.op || 'Unknown'}`);
         if (!json) return;
         if (json.op === 'stats') {
-            this.stats = new ShoukakuNodeStatus(json);
+            this.stats = new ShoukakuStats(json);
             return;
         }
         this.players.get(json.guildId)?._onLavalinkMessage(json);
     }
-    /**
+    /** 
      * @memberOf ShoukakuSocket
+     * @param {number} code
+     * @param {string} reason
      * @returns {void}
      * @private
      */
@@ -289,14 +293,13 @@ class ShoukakuSocket extends EventEmitter {
         this.ws.removeAllListeners();
         this.ws = null;
         this.state = state.DISCONNECTED;
-        if (this.destroyed || this.reconnects > this.reconnectTries) {
-            this.emit('close', this.name, code, reason);
-            return;
-        }
+        this.emit('close', this.name, code, reason);
+        if (this.destroyed || this.reconnects > this.reconnectTries) return;
         this._reconnect();
     }
     /**
      * @memberOf ShoukakuSocket
+     * @param {Object} packet
      * @returns {void}
      * @protected
      */
@@ -338,6 +341,20 @@ class ShoukakuSocket extends EventEmitter {
         this.reconnects++;
         this.emit('debug', this.name, `[Socket] -> [${this.name}] : Reconnecting. ${this.reconnectTries - this.reconnects} tries left`);
         setTimeout(() => this.connect(), this.reconnectInterval);
+    }
+    /**
+     * @memberOf ShoukakuSocket
+     * @param {number} code 
+     * @param {string} reason
+     * @returns {void}
+     * @private
+     */
+    _disconnect(code, reason) {
+        if (this.queue.pending.length) {
+            setImmediate(() => this._disconnect());
+            return;
+        }
+        this.ws?.close(code, reason);
     }
 }
 module.exports = ShoukakuSocket;

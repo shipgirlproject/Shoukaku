@@ -10,7 +10,13 @@ const reflectors = [
     Symbol.toPrimitive,
     Symbol.for('nodejs.util.inspect.custom'),
 ];
-
+/**
+ * ShoukakuRouter, generates an api route for the rest manager
+ * @class ShoukakuRouter
+ * @param {ShoukakuRest} rest The rest manager that initialized this
+ * @returns {Proxy|Object|string|void}
+ * @protected
+ */
 function ShoukakuRouter(rest) {
     let query;
     const route = [''];

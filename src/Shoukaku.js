@@ -110,7 +110,8 @@ class Shoukaku extends EventEmitter {
      * Emitted when a node will not reconnect again
      * @event Shoukaku#disconnect
      * @param {string} name The node that sent the disconnect event
-     * @param {string} reason The reason for this disconnect
+     * @param {ShoukakuPlayer[]} players The players that is in this disconnected node
+     * @param {error} error The error for this disconnect
      * @memberof Shoukaku
      */
 
