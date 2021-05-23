@@ -1,7 +1,7 @@
 {
   "name": "shoukaku",
   "version": "1.6.4",
-  "description": "A lavalink client for Discord.js v12 only",
+  "description": "A lavalink client for Discord.js v12 or higher",
   "main": "index.js",
   "scripts": {
     "docs": "jsdoc -c ./jsdoc.json -t ./node_modules/ink-docstrap/template -R README.md -d ./docs/ -r"
