@@ -1,0 +1,107 @@
+
+<html><head></head><body><h2 id="shoukaku">Shoukaku</h2>
+<hr />
+<blockquote>
+<p>A Lavalink wrapper for Discord.JS v12.x.x</p>
+</blockquote>
+<center>
+
+<p><a href="https://discordapp.com/invite/FVqbtGu"><img src="https://img.shields.io/discord/423116740810244097?style=flat-square" alt="Discord" style="max-width: 100%;"></a>
+<a href="https://www.npmjs.com/package/shoukaku"><img src="https://img.shields.io/npm/v/shoukaku?style=flat-square" alt="npm" style="max-width: 100%;"></a>
+<img src="https://img.shields.io/github/stars/Deivu/Shoukaku?style=flat-square" alt="Github Stars" style="max-width: 100%;">
+<img src="https://img.shields.io/github/issues-raw/Deivu/Shoukaku?style=flat-square" alt="GitHub issues" style="max-width: 100%;">
+<img src="https://img.shields.io/snyk/vulnerabilities/npm/shoukaku?style=flat-square" alt="Snyk Vulnerabilities for npm package" style="max-width: 100%;"> 
+<img src="https://img.shields.io/npm/l/shoukaku?style=flat-square" alt="NPM" style="max-width: 100%;">
+<img width="497" height="768" alt="Shoukaku" src="https://raw.githubusercontent.com/Deivu/Shoukaku/master/assets/cover.png" style="max-width: 100%;"></p>
+</center>
+
+<pre><code>The ShipGirl Project, feat Shoukaku; ⓒ Kancolle</code></pre><h3 id="features">Features</h3>
+<p>✅ Straightforward</p>
+<p>✅ Stable</p>
+<p>✅ Feature-rich</p>
+<p>✅ Very cute shipgirl ❤ (Very Important)</p>
+<h3 id="installation">Installation</h3>
+<p>For Lavalink <code>Master</code> branch with commits no newer than <a href="https://github.com/freyacodes/Lavalink/commit/45f8de045fdd75034b75c63c410121d8315e6b75">https://github.com/freyacodes/Lavalink/commit/45f8de045fdd75034b75c63c410121d8315e6b75</a></p>
+<pre><code>npm i shoukaku@1.5.2</code></pre><p>For Lavalink <code>Dev</code> branch, or anything that doesn't fall into the scope of commits above</p>
+<pre><code>npm i shoukaku@1.6.x // Replace x with the latest semver patch available</code></pre><p>If you live on the edge, and want any update available on Shoukaku</p>
+<pre><code>npm i Deivu/Shoukaku</code></pre><h3 id="documentation">Documentation</h3>
+<blockquote>
+<p><a href="https://deivu.github.io/Shoukaku/?api">https://deivu.github.io/Shoukaku/?api</a></p>
+</blockquote>
+<h3 id="changelogs">Changelogs</h3>
+<blockquote>
+<p><a href="https://github.com/Deivu/Shoukaku/blob/master/CHANGELOGS.MD">https://github.com/Deivu/Shoukaku/blob/master/CHANGELOGS.MD</a></p>
+</blockquote>
+<h3 id="getting-lavalink">Getting Lavalink</h3>
+<p>Download binaries from the <a href="https://ci.fredboat.com/viewLog.html?buildId=lastSuccessful&amp;buildTypeId=Lavalink_Build&amp;tab=artifacts&amp;guest=1">CI server</a> or the <a href="https://github.com/freyacodes/Lavalink/releases">GitHub</a> releases.</p>
+<p>Put an <a href="https://github.com/freyacodes/Lavalink/blob/master/LavalinkServer/application.yml.example">application.yml</a> file in your working directory.</p>
+<p>Run with <code>java -jar Lavalink.jar</code></p>
+<p>Docker images are available on the <a href="https://hub.docker.com/r/fredboat/lavalink/">Docker</a> hub.</p>
+<h3 id="other-links">Other Links</h3>
+<p><a href="https://discord.gg/FVqbtGu">Support</a> (#Development) | <a href="https://github.com/freyacodes/Lavalink">Lavalink</a></p>
+<h3 id="example">Example</h3>
+<blockquote>
+<p>Bot Implementation: <a href="https://github.com/Deivu/Kongou">https://github.com/Deivu/Kongou</a></p>
+</blockquote>
+<blockquote>
+<p>Basic Implementation:</p>
+</blockquote>
+<pre><code class="js">const { Client } = require('discord.js');
+const { Shoukaku } = require('shoukaku');
+
+const LavalinkServer = [{ name: 'Localhost', host: 'localhost', port: 6969, auth: 'big_weeb' }];
+const ShoukakuOptions = { moveOnDisconnect: false, resumable: false, resumableTimeout: 30, reconnectTries: 2, restTimeout: 10000 };
+
+class ExampleBot extends Client {
+    constructor(opts) {
+        super(opts);
+        this.shoukaku = new Shoukaku(this, LavalinkServer, ShoukakuOptions);
+    }
+
+    login(token) {
+        this._setupShoukakuEvents();
+        this._setupClientEvents();
+        return super.login(token);
+    }
+
+    _setupShoukakuEvents() {
+        this.shoukaku.on('ready', (name) =&gt; console.log(`Lavalink ${name}: Ready!`));
+        this.shoukaku.on('error', (name, error) =&gt; console.error(`Lavalink ${name}: Error Caught,`, error));
+        this.shoukaku.on('close', (name, code, reason) =&gt; console.warn(`Lavalink ${name}: Closed, Code ${code}, Reason ${reason || 'No reason'}`));
+        this.shoukaku.on('disconnected', (name, reason) =&gt; console.warn(`Lavalink ${name}: Disconnected, Reason ${reason || 'No reason'}`));
+    }
+
+    _setupClientEvents() {
+        this.on('message', async (msg) =&gt; {
+            if (msg.author.bot || !msg.guild) return;
+            if (!msg.content.startsWith('$play')) return;
+            if (this.shoukaku.getPlayer(msg.guild.id)) return;
+            const args = msg.content.split(' ');
+            if (!args[1]) return;
+            const node = this.shoukaku.getNode();
+            let data = await node.rest.resolve(args[1]);
+            if (!data) return;
+            const player = await node.joinVoiceChannel({
+                guildID: msg.guild.id,
+                voiceChannelID: msg.member.voice.channelID
+            }); 
+            player.on('error', (error) =&gt; {
+                console.error(error);
+                player.disconnect();
+            });
+            for (const event of ['end', 'closed', 'nodeDisconnect']) player.on(event, () =&gt; player.disconnect());
+            data = data.tracks.shift();
+            await player.playTrack(data); 
+            await msg.channel.send("Now Playing: " + data.info.title);
+        });
+        this.on('ready', () =&gt; console.log('Bot is now ready'));
+    }
+}
+
+new ExampleBot()
+    .login('token')
+    .catch(console.error);</code></pre>
+<blockquote>
+<p>Made with ❤ by @Sāya#0113</p>
+</blockquote>
+</body></html>

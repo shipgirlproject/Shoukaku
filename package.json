@@ -1,10 +1,11 @@
 {
   "name": "shoukaku",
-  "version": "1.6.4",
-  "description": "A lavalink client for Discord.js v12 or higher",
+  "version": "2.0.0-dev",
+  "description": "A lavalink wrapper that supports Discord.JS v12 ~ v13",
   "main": "index.js",
   "scripts": {
-    "docs": "jsdoc -c ./jsdoc.json -t ./node_modules/ink-docstrap/template -R README.md -d ./docs/ -r"
+    "docs:build": "docma build",
+    "docs:dev": "docma serve"
   },
   "types": "index.d.ts",
   "keywords": [
@@ -32,8 +33,6 @@
   "devDependencies": {
     "discord.js": "^12.5.1",
     "discord.js-light": "^3.5.4",
-    "ink-docstrap": "^1.3.2",
-    "jsdoc": "^3.6.7",
-    "typescript": "^4.2.3"
+    "docma": "^3.2.2"
   }
 }
