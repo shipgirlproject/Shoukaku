@@ -25,7 +25,7 @@ module.exports = {
     * @property {number} [restTimeout=15000] Timeout on rest requests to your lavalink node, measured in milliseconds
     * @property {number} [reconnectInterval=5000] Timeout between reconnect attempts, measured in milliseconds
     * @property {number} [closedWebsocketEventDelay=500] Timeout before shoukaku processes a websocket closed event, measured in milliseconds
-    * @property {string} [userAgent="{name}/{ver} ({url})"] User-Agent to use on connecting to WS and REST request
+    * @property {string} [userAgent="name/ver(url)"] User-Agent to use on connecting to WS and REST request
     * @memberof Constants
     */
     shoukakuOptions: {
@@ -36,7 +36,7 @@ module.exports = {
         restTimeout: 15000,
         reconnectInterval: 5000,
         closedWebsocketEventDelay: 500,
-        userAgent: `${name}/${version} (${repository.url})`
+        userAgent: `${name}/${version}(${repository.url})`
     },
     /**
     * Options that Shoukaku needs to initialize a lavalink node

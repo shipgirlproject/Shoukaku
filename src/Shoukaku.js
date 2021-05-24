@@ -5,6 +5,24 @@ const { shoukakuOptions, nodeOptions, state } = require('./Constants.js');
 const { mergeDefault, getVersion } = require('./Utils.js');
 
 /**
+ * Discord.JS Client
+ * @external Client
+ * @see {@link https://discord.js.org/#/docs/main/master/class/Client}
+ */
+
+/**
+ * Discord.JS Guild
+ * @external Guild
+ * @see {@link https://discord.js.org/#/docs/main/master/class/Guild}
+ */
+
+/**
+ * Node.js Event Emitter
+ * @external EventEmitter
+ * @see {@link https://nodejs.org/api/events.html}
+ */
+
+/**
   * Shoukaku, governs the client's lavalink node connections.
   * @class Shoukaku
   * @extends {EventEmitter}
