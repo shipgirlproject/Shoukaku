@@ -23,27 +23,29 @@ const { mergeDefault, getVersion } = require('./Utils.js');
  */
 
 /**
-  * Shoukaku, governs the client's lavalink node connections.
-  * @class Shoukaku
-  * @extends {EventEmitter}
-  * @param {Client} client Your Discord.JS initalized client
-  * @param {Object[]} nodes Array of Lavalink nodes to initially connect to
-  * @param {string} nodes.name Lavalink node name
-  * @param {string} nodes.url Lavalink node url without prefix like, ex: http://
-  * @param {string} nodes.auth Lavalink node password
-  * @param {boolean} [nodes.secure=false] Whether this node should be in secure wss or https mode
-  * @param {string} [nodes.group=undefined] Lavalink node group
-  * @param {Object} [options={}] Options to initalize this instance
-  * @param {boolean} [options.resumable=false] If you want your node to support resuming
-  * @param {number} [options.resumableTimeout=30] Timeout when Lavalink will decide a player isn't resumed and will destroy the connection to it, measured in seconds
-  * @param {number} [options.reconnectTries=2] Amount of tries to connect to the Lavalink node before it decides that the node is unreconnectable
-  * @param {boolean} [options.moveOnDisconnect=false] Specifies if the library will attempt to reconnect players on a disconnected node to another node
-  * @param {number} [options.restTimeout=15000] Timeout on rest requests to your lavalink node, measured in milliseconds
-  * @param {number} [options.reconnectInterval=5000] Timeout between reconnect attempts, measured in milliseconds
-  * @param {number} [options.closedWebsocketEventDelay=500] Timeout before shoukaku processes a websocket closed event, measured in milliseconds
-  * @param {string} [options.userAgent="name/version (+url)"] User-Agent to use on connecting to WS and REST requests
-  */
+ * Shoukaku, governs the client's lavalink node connections.
+ * @class Shoukaku
+ * @extends {EventEmitter}
+ */
 class Shoukaku extends EventEmitter {
+    /**
+     * @param {Client} client Your Discord.JS initalized client
+     * @param {Object[]} nodes Array of Lavalink nodes to initially connect to
+     * @param {string} nodes.name Lavalink node name
+     * @param {string} nodes.url Lavalink node url without prefix like, ex: http://
+     * @param {string} nodes.auth Lavalink node password
+     * @param {boolean} [nodes.secure=false] Whether this node should be in secure wss or https mode
+     * @param {string} [nodes.group=undefined] Lavalink node group
+     * @param {Object} [options={}] Options to initalize this instance
+     * @param {boolean} [options.resumable=false] If you want your node to support resuming
+     * @param {number} [options.resumableTimeout=30] Timeout when Lavalink will decide a player isn't resumed and will destroy the connection to it, measured in seconds
+     * @param {number} [options.reconnectTries=2] Amount of tries to connect to the Lavalink node before it decides that the node is unreconnectable
+     * @param {boolean} [options.moveOnDisconnect=false] Specifies if the library will attempt to reconnect players on a disconnected node to another node
+     * @param {number} [options.restTimeout=15000] Timeout on rest requests to your lavalink node, measured in milliseconds
+     * @param {number} [options.reconnectInterval=5000] Timeout between reconnect attempts, measured in milliseconds
+     * @param {number} [options.closedWebsocketEventDelay=500] Timeout before shoukaku processes a websocket closed event, measured in milliseconds
+     * @param {string} [options.userAgent="name/version(url)"] User-Agent to use on connecting to WS and REST requests
+     */
     constructor(client, nodes, options) {
         super();
         const { variant, version } = getVersion();

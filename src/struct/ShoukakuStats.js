@@ -1,9 +1,11 @@
 /**
  * ShoukakuStats, the current status of a lavalink node
  * @class ShoukakuStats
- * @param {Object} status The raw op stats from lavalink
  */
 class ShoukakuStats {
+    /**
+     * @param {Object} status The raw op stats from lavalink
+     */
     constructor(status = {}) {
         /**
          * Amount of players currently in this node

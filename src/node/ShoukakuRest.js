@@ -7,10 +7,12 @@ const Success = ['TRACK_LOADED', 'PLAYLIST_LOADED', 'SEARCH_RESULT'];
 /**
  * ShoukakuRest, provides access to Lavalink REST API
  * @class ShoukakuRest
- * @param {Object} node Options that you passed to initialize a lavalink node
- * @param {Object} options Options of the manager who initialized the node
  */
 class ShoukakuRest {
+    /** 
+     * @param {Object} node Options that you passed to initialize a lavalink node
+     * @param {Object} options Options of the manager who initialized the node
+     */
     constructor({ url, auth, secure }, { userAgent, timeout }) {
         /**
         * The url for this rest api

@@ -1,39 +1,41 @@
 /**
  * Filters available for customization. See https://github.com/freyacodes/Lavalink/blob/dev/IMPLEMENTATION.md#using-filters
  * @class ShoukakuFilter
- * @param {Object} [settings={}] Settings to initialize this filter with
- * @param {Number} [settings.volume=1.0] Volume of this filter 
- * @param {Object[]} [settings.equalizer=[]] Equalizer of this filter
- * @param {number} settings.equalizer.band Band of the equalizer, can be 0 - 13
- * @param {number} settings.equalizer.gain Gain for this band of the equalizer
- * @param {Object} [settings.karaoke=null] Karaoke configuration of this filter
- * @param {number} [settings.karaoke.level] Level of the karaoke effect
- * @param {number} [settings.karaoke.monoLevel] Monolevel of the karaoke effect
- * @param {number} [settings.karaoke.filterBand] Filterband of the karaoke effect
- * @param {number} [settings.karaoke.filterWidth] Filterwidth of the karaoke effect
- * @param {Object} [settings.timescale=null] Timescale configuration of this filter
- * @param {number} [settings.timescale.speed] Speed of the timescale effect
- * @param {number} [settings.timescale.pitch] Pitch of the timescale effect
- * @param {number} [settings.timescale.rate] Rate of the timescale effect
- * @param {Object} [settings.tremolo=null] Tremolo configuration of this filter
- * @param {number} [settings.tremolo.frequency] Frequency of the tremolo effect
- * @param {number} [settings.tremolo.depth] Depth of the tremolo effect
- * @param {Object} [settings.vibrato=null] Vibrato configuration of this filter
- * @param {number} [settings.vibrato.frequency] Frequency of the vibrato effect
- * @param {number} [settings.vibrato.depth] Depth of the vibrato effect
- * @param {Object} [settings.rotation=null] Rotation configuration of this filter
- * @param {number} [settings.rotation.rotationHz] Frequency of the rotation effect
- * @param {Object} [settings.distortion=null] Distortion configuration of this filter
- * @param {number} [settings.distortion.sinOffset] Sin offset of the distortion effect
- * @param {number} [settings.distortion.sinScale] Sin scale of the distortion effect
- * @param {number} [settings.distortion.cosOffset] Cos offset of the distortion effect
- * @param {number} [settings.distortion.cosScale] Cos scale of the distortion effect
- * @param {number} [settings.distortion.tanOffset] Tan offset of the distortion effect
- * @param {number} [settings.distortion.tanScale] Tan scale of the distortion effect
- * @param {number} [settings.distortion.offset] Offset of the distortion effect
- * @param {number} [settings.distortion.scale] Scale of the distortion effect
  */
 class ShoukakuFilter {
+    /** 
+     * @param {Object} [settings={}] Settings to initialize this filter with
+     * @param {Number} [settings.volume=1.0] Volume of this filter 
+     * @param {Object[]} [settings.equalizer=[]] Equalizer of this filter
+     * @param {number} settings.equalizer.band Band of the equalizer, can be 0 - 13
+     * @param {number} settings.equalizer.gain Gain for this band of the equalizer
+     * @param {Object} [settings.karaoke=null] Karaoke configuration of this filter
+     * @param {number} [settings.karaoke.level] Level of the karaoke effect
+     * @param {number} [settings.karaoke.monoLevel] Monolevel of the karaoke effect
+     * @param {number} [settings.karaoke.filterBand] Filterband of the karaoke effect
+     * @param {number} [settings.karaoke.filterWidth] Filterwidth of the karaoke effect
+     * @param {Object} [settings.timescale=null] Timescale configuration of this filter
+     * @param {number} [settings.timescale.speed] Speed of the timescale effect
+     * @param {number} [settings.timescale.pitch] Pitch of the timescale effect
+     * @param {number} [settings.timescale.rate] Rate of the timescale effect
+     * @param {Object} [settings.tremolo=null] Tremolo configuration of this filter
+     * @param {number} [settings.tremolo.frequency] Frequency of the tremolo effect
+     * @param {number} [settings.tremolo.depth] Depth of the tremolo effect
+     * @param {Object} [settings.vibrato=null] Vibrato configuration of this filter
+     * @param {number} [settings.vibrato.frequency] Frequency of the vibrato effect
+     * @param {number} [settings.vibrato.depth] Depth of the vibrato effect
+     * @param {Object} [settings.rotation=null] Rotation configuration of this filter
+     * @param {number} [settings.rotation.rotationHz] Frequency of the rotation effect
+     * @param {Object} [settings.distortion=null] Distortion configuration of this filter
+     * @param {number} [settings.distortion.sinOffset] Sin offset of the distortion effect
+     * @param {number} [settings.distortion.sinScale] Sin scale of the distortion effect
+     * @param {number} [settings.distortion.cosOffset] Cos offset of the distortion effect
+     * @param {number} [settings.distortion.cosScale] Cos scale of the distortion effect
+     * @param {number} [settings.distortion.tanOffset] Tan offset of the distortion effect
+     * @param {number} [settings.distortion.tanScale] Tan scale of the distortion effect
+     * @param {number} [settings.distortion.offset] Offset of the distortion effect
+     * @param {number} [settings.distortion.scale] Scale of the distortion effect
+     */
     constructor(settings = {}) {
         /**
          * The volume of this filter

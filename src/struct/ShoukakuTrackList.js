@@ -3,9 +3,11 @@ const Types = { PLAYLIST_LOADED: 'PLAYLIST', TRACK_LOADED: 'TRACK', SEARCH_RESUL
 /**
  * Represents a list track resolved from lavalink's rest
  * @class ShoukakuTrackList
- * @param {Object} raw Raw data from lavalink rest
  */
 class ShoukakuTrackList {
+    /**
+     * @param {Object} raw Raw data from lavalink rest
+     */
     constructor(raw) {
         /**
          * Type of this list, can be PLAYLIST, TRACK or SEARCH. PLAYLIST and SEARCH can contain more than one tracks in tracks array while TRACK will contain a single track in the tracks array

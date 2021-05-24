@@ -9,11 +9,13 @@ const ShoukakuFilter = require('../struct/ShoukakuFilter.js');
 /**
  * ShoukakuPlayer, used to control the player on a guild
  * @class ShoukakuPlayer
- * @extends {EventEmitter}
- * @param {ShoukakuSocket} node The node where this class is initialized
- * @param {Guild} guild A Discord.JS guild structure
  */
 class ShoukakuPlayer extends EventEmitter {
+    /**
+     * @extends {EventEmitter}
+     * @param {ShoukakuSocket} node The node where this class is initialized
+     * @param {Guild} guild A Discord.JS guild structure
+     */
     constructor(node, guild) {
         super();
         /**

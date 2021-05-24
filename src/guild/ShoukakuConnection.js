@@ -7,11 +7,13 @@ const { wait } = require('../Utils.js');
  * ShoukakuConnection, manages a voice connection between Discord and Lavalink
  * @class ShoukakuConnection
  * @extends {EventEmitter}
- * @param {ShoukakuPlayer} player The player that initialized this manager
- * @param {ShoukakuSocket} node The node where this manager is connected to
- * @param {Guild} guild A Discord.JS guild structure
  */
 class ShoukakuConnection extends EventEmitter {
+    /**
+     * @param {ShoukakuPlayer} player The player that initialized this manager
+     * @param {ShoukakuSocket} node The node where this manager is connected to
+     * @param {Guild} guild A Discord.JS guild structure
+     */
     constructor(player, node, guild) {
         super();
         /**

@@ -1,9 +1,11 @@
 /**
  * ShoukakuRouter, a queue for websocket messages
  * @class ShoukakuQueue
- * @param {ShoukakuSocket} socket The node socket where this queue is attached to
  */
 class ShoukakuQueue {
+    /**
+     * @param {ShoukakuSocket} socket The node socket where this queue is attached to
+     */
     constructor(socket) {
         /**
         * The socket where this queue is attached to
