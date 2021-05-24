@@ -290,7 +290,7 @@ class ShoukakuSocket extends EventEmitter {
      */
     _close(code, reason) {
         this.emit('debug', this.name, `[Socket] <-/-> [${this.name}] : Connection Closed, Code: ${code || 'Unknown Code'}`);
-        this.ws.removeAllListeners();
+        this.ws?.removeAllListeners();
         this.ws = null;
         this.state = state.DISCONNECTED;
         this.emit('close', this.name, code, reason);
@@ -319,7 +319,6 @@ class ShoukakuSocket extends EventEmitter {
      * @protected
      */ 
     _clean() {
-        if (this.resumed) return;
         const players = [...this.players.values()];
         if (this.moveOnDisconnect && this.shoukaku.nodes.size > 0) {
             for (const player of players) player.moveNode(this.shoukaku._getIdeal(this.group));

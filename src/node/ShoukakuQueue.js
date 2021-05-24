@@ -13,7 +13,7 @@ class ShoukakuQueue {
         */
         this.socket = socket;
         /**
-        * The message queue of this socket
+        * The pending messages to be sent by this queue
         * @type {string[]}
         */
         this.pending = [];
@@ -36,12 +36,12 @@ class ShoukakuQueue {
         if (!this.pending.length || this.socket.ws?.readyState !== 1) return;
         const message = this.pending.shift();
         this.socket.ws.send(message, error => {
-            if (error) this.socket.emit('error', this.name, error);
+            if (error) this.socket.emit('error', this.socket.name, error);
         });
         setImmediate(() => this.process());
     }
     /**
-     * Clears the queued websocket messages to be sent
+     * Clears the pending messages to be sent
      * @return {void}
      */
     clear() {

@@ -1,6 +1,6 @@
 const EventEmitter = require('events');
 const { state } = require('../Constants.js');
-const { mergeDefault, wait } = require('../Utils.js');
+const { mergeDefault } = require('../Utils.js');
 
 const ShoukakuConnection = require('./ShoukakuConnection.js');
 const ShoukakuTrack = require('../struct/ShoukakuTrack.js');
@@ -380,18 +380,18 @@ class ShoukakuPlayer extends EventEmitter {
         if (json.op === 'playerUpdate') {
             this.position = json.state.position;
             this.emit('update', json.state);
-            return;
         }
         else if (json.op === 'event') {
             this._onPlayerEvent(json);
-            return;
+        } 
+        else {
+            this.connection.node.emit('debug', this.connection.node.name, `[Node] -> [${this.connection.node.name}] : Unknown Message OP ${json.op}`);
         }
-        this.connection.node.emit('debug', this.connection.node.name, `[Node] -> [${this.connection.node.name}] : Unknown Message OP ${json.op}`);
     }
     /**
      * @memberOf ShoukakuPlayer
      * @param {Object} json
-     * @protected
+     * @private
      */
     _onPlayerEvent(json) {
         this.position = 0;
@@ -406,21 +406,39 @@ class ShoukakuPlayer extends EventEmitter {
             case 'TrackExceptionEvent':
                 this.emit('exception', json);
                 break;
-            case 'WebSocketClosedEvent':
-                if (this.connection.reconnecting) break;
-                wait(this.connection.node.shoukaku.options.closedWebsocketEventDelay).then(() => {
-                    if (!this.connection.moved) {
-                        this.emit('closed', json);
-                        return;
-                    }
-                    this.connection.node.emit('debug', this.connection.node.name, `[Node] -> [${this.connection.node.name}] : Voice channel or server move detected`);
-                    this.connection.moved = false;                        
-                });
+            case 'WebSocketClosedEvent': {
+                this._onWebsocketClosedEvent(json);
                 break;
+            }
             default:
-                this.connection.node.emit('debug', this.connection.node.name, `[Node] -> [${this.connection.node.name}] : Unknown Player Event Type ${json.type}`);
+                this.connection.node.emit(
+                    'debug', 
+                    this.connection.node.name, 
+                    `[Node] -> [${this.connection.node.name}] : Unknown Player Event Type ${json.type}`
+                );
         }
         return;
+    }
+    /**
+     * @memberOf ShoukakuPlayer
+     * @param {Object} json
+     * @private
+     */
+    _onWebsocketClosedEvent(json) {
+        if (this.connection.reconnecting) return;
+        const delay = this.connection.node.shoukaku.options.closedEventDelay;
+        setTimeout(() => {
+            if (!this.connection.moved) {
+                this.emit('closed', json);
+                return;
+            }
+            this.connection.node.emit(
+                'debug', 
+                this.connection.node.name, 
+                `[Node] -> [${this.connection.node.name}] : Voice channel or server move detected`
+            );
+            this.connection.moved = false;  
+        }, delay);
     }
 }
 module.exports = ShoukakuPlayer;
