@@ -120,7 +120,7 @@ class Shoukaku extends EventEmitter {
      * Emitted when a node emits a close event
      * @event Shoukaku#close
      * @param {string} name The node that sent the ready event
-     * @param {number} code The websocket close code: https://github.com/Luka967/websocket-close-codes
+     * @param {number} code The websocket close code. See: https://github.com/Luka967/websocket-close-codes
      * @param {reason} reason The reason for this close event
      * @memberof Shoukaku
      */
@@ -129,7 +129,7 @@ class Shoukaku extends EventEmitter {
      * @event Shoukaku#disconnect
      * @param {string} name The node that sent the disconnect event
      * @param {ShoukakuPlayer[]} players The players that is in this disconnected node
-     * @param {error} error The error for this disconnect
+     * @param {boolean} moved Whether the players in this disconnect event has been moved to another node
      * @memberof Shoukaku
      */
 
@@ -148,7 +148,7 @@ class Shoukaku extends EventEmitter {
         const node = new ShoukakuSocket(this, options);
         node.on('debug', (...args) => this.emit('debug', ...args));
         node.on('error', (...args) => this.emit('error', ...args));
-        node.on('disconnect', (...args) => this.emit('disconnect', ...args));
+        node.on('disconnect', (...args) => this._clean(...args));
         node.on('close', (...args) => this.emit('close', ...args));
         node.on('ready', (...args) => this.emit('ready', ...args));
         node.connect();
@@ -164,7 +164,6 @@ class Shoukaku extends EventEmitter {
     removeNode(name, reason = 'Remove node executed') {
         const node = this.nodes.get(name);
         if (!node) throw new Error('The node name you specified doesn\'t exist');
-        this.nodes.delete(node.name);
         node.disconnect(1000, reason);
         node.removeAllListeners();
     }
@@ -194,7 +193,7 @@ class Shoukaku extends EventEmitter {
      * @memberOf Shoukaku
      * @param {string} group
      * @returns {ShoukakuSocket}
-     * @private
+     * @protected
      */
     _getIdeal(group) {
         const nodes = [...this.nodes.values()]
@@ -229,6 +228,18 @@ class Shoukaku extends EventEmitter {
     _clientRaw(packet) {
         if (!['VOICE_STATE_UPDATE', 'VOICE_SERVER_UPDATE'].includes(packet.t)) return;
         for (const node of this.nodes.values()) node._clientRaw(packet);
+    }
+    /**
+     * @memberOf Shoukaku
+     * @param {string} name
+     * @param {ShoukakuPlayer[]} players
+     * @param {boolean} moved
+     * @returns {void}
+     * @private
+     */
+    _clean(name, players, moved) {
+        this.nodes.delete(name) ;
+        this.emit('disconnect', name, players, moved);
     }
 }
 module.exports = Shoukaku;

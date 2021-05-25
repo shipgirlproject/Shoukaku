@@ -26,16 +26,16 @@ class ShoukakuQueue {
      */
     send(data, important = false) {
         this.pending[important ? 'unshift' : 'push'](JSON.stringify(data));
-        this.process();
+        if (this.socket.ws?.readyState === 1) this.process();
     }
     /**
      * Process the websocket queue
      * @return {void}
      */
     process() {
-        if (!this.pending.length || this.socket.ws?.readyState !== 1) return;
+        if (!this.pending.length) return;
         const message = this.pending.shift();
-        this.socket.ws.send(message, error => {
+        this.socket.ws?.send(message, error => {
             if (error) this.socket.emit('error', this.socket.name, error);
         });
         setImmediate(() => this.process());

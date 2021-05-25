@@ -78,7 +78,6 @@ class ShoukakuConnection extends EventEmitter {
         this.reconnecting = false;
 
         Object.defineProperty(this, 'serverUpdate', { value: null, writable: true });
-        Object.defineProperty(this, 'connectTimeout', { value: null, writable: true });
     }
 
     /**
@@ -216,7 +215,6 @@ class ShoukakuConnection extends EventEmitter {
      */
     setServerUpdate(data) {
         if (!data.endpoint) return;
-        clearTimeout(this.connectTimeout);
         this.moved = this.serverUpdate && !data.endpoint.startsWith(this.region);
         this.region = data.endpoint.split('.').shift().replace(/[0-9]/g, '');
         this.serverUpdate = data;

@@ -75,11 +75,6 @@ class ShoukakuSocket extends EventEmitter {
         */
         this.url = `${options.secure ? 'wss' : 'ws'}://${options.url}`;
         /**
-        * If this socket was resumed
-        * @type {boolean}
-        */
-        this.resumed = false;
-        /**
         * If this node is destroyed and must not reconnect
         * @type {boolean}
         */
@@ -169,9 +164,8 @@ class ShoukakuSocket extends EventEmitter {
         };
         if (reconnect) headers['Resume-Key'] = (!!this.resumable).toString(); 
         this.emit('debug', this.name, `[Socket] -> [${this.name}] : Connecting ${this.url}`);
-        this.ws = new Websocket(this.url, { headers });
-        this.ws.once('upgrade', response => this.resumed = response.headers['session-resumed'] === 'true');
-        this.ws.once('open', () => this._open());
+        this.ws = new Websocket(this.url, { headers }); 
+        this.ws.once('upgrade', response => this.ws.once('open', () => this._open(response)));
         this.ws.once('close', (...args) => this._close(...args));
         this.ws.on('error', error => this.emit('error', this.name, error));
         this.ws.on('message', (...args) => this._message(...args));
@@ -186,6 +180,7 @@ class ShoukakuSocket extends EventEmitter {
     */
     disconnect(code = 1000, reason) {
         this.destroyed = true;
+        this.state = state.DISCONNECTING;
         this._clean();
         this._disconnect(code, reason);
     }
@@ -249,21 +244,24 @@ class ShoukakuSocket extends EventEmitter {
     }
     /**
      * @memberOf ShoukakuSocket
+     * @param {Object} response
      * @returns {void}
      * @private
      */
-    _open() {
-        if (this.resumable) {
+    _open(response) {
+        if (!this.resumable) 
+            this.queue.process();
+        else 
             this.send({
                 op: 'configureResuming',
                 key: (!!this.resumable).toString(),
                 timeout: this.resumableTimeout
             });
-        }
         this.reconnects = 0;
         this.state = state.CONNECTED;
-        this.emit('debug', this.name, `[Socket] <-> [${this.name}] : Connection Open ${this.url} | Resumed: ${this.resumed}`);
-        this.emit('ready', this.name, this.resumed);
+        const resumed = response.headers['session-resumed'] === 'true';
+        this.emit('debug', this.name, `[Socket] <-> [${this.name}] : Connection Open ${this.url} | Resumed: ${resumed}`);
+        this.emit('ready', this.name, resumed);
     }
     /**
      * @memberOf ShoukakuSocket
@@ -289,12 +287,12 @@ class ShoukakuSocket extends EventEmitter {
      * @private
      */
     _close(code, reason) {
+        this.state = state.DISCONNECTED;
         this.emit('debug', this.name, `[Socket] <-/-> [${this.name}] : Connection Closed, Code: ${code || 'Unknown Code'}`);
         this.ws?.removeAllListeners();
         this.ws = null;
-        this.state = state.DISCONNECTED;
         this.emit('close', this.name, code, reason);
-        if (this.destroyed || this.reconnects > this.reconnectTries) return this._clean();
+        if (this.destroyed || this.reconnects >= this.reconnectTries) return this._clean();
         this._reconnect();
     }
     /**
@@ -316,19 +314,16 @@ class ShoukakuSocket extends EventEmitter {
     /**
      * @memberOf ShoukakuSocket
      * @returns {void}
-     * @protected
+     * @private
      */ 
     _clean() {
         const players = [...this.players.values()];
-        if (this.moveOnDisconnect && this.shoukaku.nodes.size > 0) {
+        const moved = this.moveOnDisconnect && this.shoukaku.nodes.size > 0;
+        if (moved)
             for (const player of players) player.moveNode(this.shoukaku._getIdeal(this.group));
-            return;
-        }
-        const error = new Error(
-            this.moveOnDisconnect ? `Node '${this.name}' disconnected; moveOnReconnect is disabled` : `Node '${this.name}' disconnected; No nodes to reconnect to`
-        );
-        for (const player of players) player.connection.disconnect();
-        this.emit('disconnect', this.name, players, error);
+        else 
+            for (const player of players) player.connection.disconnect();
+        this.emit('disconnect', this.name, players, moved);
     }
     /**
      * @memberOf ShoukakuSocket
