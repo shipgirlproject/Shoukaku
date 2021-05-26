@@ -23,7 +23,7 @@ class Shoukaku extends EventEmitter {
             if (!version.startsWith('3'))
                 throw new ShoukakuError('Shoukaku will only work at Discord.JS-light v3. Versions below Discord.JS-light v3 is not supported.');
         } else {
-            if (!version.startsWith('12'))
+            if (!version.startsWith('12') && !version.startsWith('13'))
                 throw new ShoukakuError('Shoukaku will only work at Discord.JS v12. Versions below Discord.JS v12 is not supported.');
         }
         if (!nodes || !nodes.length)
