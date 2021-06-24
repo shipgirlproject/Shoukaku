@@ -1,6 +1,6 @@
 declare module 'shoukaku' {
   import { EventEmitter } from 'events';
-  import { Client as DiscordClient, Base64String, Guild } from 'discord.js';
+  import { Client as DiscordClient, Base64String, Guild, Snowflake } from 'discord.js';
 
   export const version: string;
 
@@ -52,39 +52,39 @@ declare module 'shoukaku' {
 
   export interface PlayerStartEvent {
     track: string;
-    guildId: string;
+    guildId: Snowflake;
   }
 
   export interface PlayerEndEvent {
     reason: 'FINISHED' | 'LOAD_FAILED' | 'STOPPED' | 'REPLACED' | 'CLEANUP';
     track: string;
-    guildId: string;
+    guildId: Snowflake;
   }
 
   export interface PlayerExceptionEvent {
     track: string;
     exception: {
       message: string;
-      severity: 'COMMON' | 'SUSPICIOUS' | 'FAULT';
+      severity: "COMMON" | "SUSPICIOUS" | "FAULT";
       cause: string;
     };
-    guildId: string;
+    guildId: Snowflake;
   }
 
   export interface PlayerClosedEvent {
     reason: string;
     code: number;
     byRemote: boolean;
-    guildId: string;
+    guildId: Snowflake;
   }
 
   export interface PlayerUpdateEvent {
-    guildId: string;
+    guildId: Snowflake;
     state: {
       time: number;
       position: number;
       connected: boolean;
-    }
+    };
   }
 
   export interface ShoukakuNodeStats {
@@ -111,8 +111,8 @@ declare module 'shoukaku' {
   }
 
   export interface ShoukakuJoinOptions {
-    guildID: string;
-    voiceChannelID: string;
+    guildID: Snowflake;
+    voiceChannelID: Snowflake;
     mute?: boolean;
     deaf?: boolean;
   }
@@ -316,11 +316,11 @@ declare module 'shoukaku' {
     constructor(player: ShoukakuPlayer, node: ShoukakuSocket, guild: Guild);
     public player: ShoukakuPlayer;
     public node: ShoukakuSocket;
-    public guildID: string;
+    public guildID: Snowflake;
     public shardID: number;
     public sessionID: string | null;
-    public voiceChannelID: string | null;
-    public lastVoiceChannelID: string | null;
+    public voiceChannelID: Snowflake | null;
+    public lastVoiceChannelID: Snowflake | null;
     public region: string | null;
     public selfMute: boolean;
     public selfDeaf: boolean;
@@ -333,7 +333,9 @@ declare module 'shoukaku' {
     private serverUpdate: object | null;
     private connectTimeout: NodeJS.Timeout | null;
 
-    public attemptReconnect(options: AttemptReconnectOptions): Promise<ShoukakuPlayer>;
+    public attemptReconnect(
+      options: AttemptReconnectOptions,
+    ): Promise<ShoukakuPlayer>;
 
     private setStateUpdate(data: object);
     private setServerUpdate(data: object);
@@ -369,7 +371,7 @@ declare module 'shoukaku' {
 
     public connect(id: string, resumable: boolean): void;
     public joinVoiceChannel(options: ShoukakuJoinOptions): Promise<ShoukakuPlayer>;
-    public leaveVoiceChannel(guildID: string): void;
+    public leaveVoiceChannel(guildID: Snowflake): void;
 
     private send(data: unknown): Promise<void>;
     private configureResuming(): Promise<void>;
@@ -403,20 +405,24 @@ declare module 'shoukaku' {
   }
 
   export class Shoukaku extends EventEmitter {
-    constructor(client: DiscordClient, nodes: ShoukakuNodeOptions[], options: ShoukakuOptions);
+    constructor(
+      client: DiscordClient,
+      nodes: ShoukakuNodeOptions[],
+      options: ShoukakuOptions,
+    );
     public client: DiscordClient;
-    public id: string | null;
+    public id: Snowflake | null;
     public nodes: Map<string, ShoukakuSocket>;
 
     public players: Map<string, ShoukakuPlayer>;
     public totalPlayers: number;
 
     private options: ShoukakuOptions;
-    
+
     public addNode(nodeOptions: ShoukakuNodeOptions): void;
     public removeNode(name: string, reason?: string): void;
     public getNode(name?: string | string[]): ShoukakuSocket;
-    public getPlayer(guildId: string): ShoukakuPlayer | null;
+    public getPlayer(guildId: Snowflake): ShoukakuPlayer | null;
 
     private _ready(name: string, resumed: boolean): void;
     private _close(name: string, code: number, reason: string): void;
