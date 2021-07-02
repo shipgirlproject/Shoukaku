@@ -129,6 +129,7 @@ class ShoukakuSocket extends EventEmitter {
             'Client-Name': this.userAgent,
             'User-Agent': this.userAgent,
             'Authorization': this.auth,
+            'Num-Shards': 1,
             'User-Id': id
         };
         if (resumable) headers['Resume-Key'] = (!!resumable).toString(); 
