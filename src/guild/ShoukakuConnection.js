@@ -131,23 +131,6 @@ class ShoukakuConnection extends EventEmitter {
         return this.send({ guild_id: this.guildID, channel_id: this.channelID, self_deaf: this.deafened, self_mute: this.muted }, true);
     }
     /**
-     * Deafens the client
-     * @memberOf ShoukakuConnection
-     * @param {string} [channel=null] channel id of the channel to move to, null if you want to disconnect the client
-     * @param {string} [reason] The reason for this action
-     * @returns {Promise<void>}
-     */
-    moveChannel(channel = null, reason) {
-        return this
-            .node
-            .shoukaku
-            .client
-            .api
-            .guilds(this.guildID)
-            .members(this.node.shoukaku.id)
-            .patch({ data: { channel }, reason });
-    }
-    /**
      * Disconnects this connection
      * @memberOf ShoukakuConnection
      * @returns {void}
@@ -184,6 +167,7 @@ class ShoukakuConnection extends EventEmitter {
         const timeout = setTimeout(() => signal.abort(), 15000);
         try {
             await once(this, 'serverUpdate', { signal });
+            this.state = state.CONNECTED;
         } catch (error) {
             this.node.emit('debug', this.node.name, '[Voice] </- [Discord] : Request Connection Failed');
             if (error.name === 'AbortError') 
