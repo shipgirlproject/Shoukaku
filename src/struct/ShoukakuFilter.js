@@ -35,6 +35,11 @@ class ShoukakuFilter {
      * @param {number} [settings.distortion.tanScale] Tan scale of the distortion effect
      * @param {number} [settings.distortion.offset] Offset of the distortion effect
      * @param {number} [settings.distortion.scale] Scale of the distortion effect
+     * @param {number} [settings.channelMix.leftToLeft] Sets the channel mix value of left to left
+     * @param {number} [settings.channelMix.leftToRight] Sets the channel mix value of left to right
+     * @param {number} [settings.channelMix.rightToLeft] Sets the channel mix value of right to left
+     * @param {number} [settings.channelMix.rightToRight] Sets the channel mix value of right to right
+     * @param {number} [settings.lowPass.smoothing] Sets the smoothing of low pass filter
      */
     constructor(settings = {}) {
         /**
@@ -50,7 +55,7 @@ class ShoukakuFilter {
          */
         this.equalizer = settings.equalizer || [];
         /**
-         * The karaoke settings set for this filter
+         * Uses equalization to eliminate part of a band, usually targeting vocals
          * @type {Object|null}
          * @property {number} [level] Karaoke effect level
          * @property {number} [monoLevel] Karaoke effect monoLevel
@@ -59,7 +64,7 @@ class ShoukakuFilter {
          */
         this.karaoke = settings.karaoke || null;
         /**
-         * The timescale settings set for this filter
+         * Changes the speed, pitch, and rate
          * @type {Object|null}
          * @property {number} [speed] Timescale effect speed
          * @property {number} [pitch] Timescale effect pitch
@@ -67,27 +72,27 @@ class ShoukakuFilter {
          */
         this.timescale = settings.timescale || null;
         /**
-         * The tremolo settings set for this filter
+         * Uses amplification to create a shuddering effect, where the volume quickly oscillates
          * @type {Object|null}
          * @property {number} [frequency] Tremolo effect frequency
          * @property {number} [depth] Tremolo effect depth
          */
         this.tremolo = settings.tremolo || null;
         /**
-         * The vibrato settings set for this filter
+         * Similar to tremolo. While tremolo oscillates the volume, vibrato oscillates the pitch 
          * @type {Object|null}
          * @property {number} [frequency] Vibrato effect frequency
          * @property {number} [depth] Vibrato effect depth
          */
         this.vibrato = settings.vibrato || null;
         /**
-         * The rotation settings set for this filter
+         * Rotates the sound around the stereo channels/user headphones aka Audio Panning
          * @type {Object|null}
          * @property {number} [rotationHz] Rotation effect rotation
          */
         this.rotation = settings.rotation || null;
         /**
-         * The distortion settings set for this filter
+         * Distortion effect. It can generate some pretty unique audio effects
          * @type {Object|null}
          * @property {number} [sinOffset] Sin offset of the distortion effect
          * @property {number} [sinScale] Sin scale of the distortion effect
@@ -99,6 +104,21 @@ class ShoukakuFilter {
          * @property {number} [scale] Scale of the distortion effect
          */
         this.distortion = settings.distortion || null;
+        /**
+         * Mixes both channels (left and right), with a configurable factor on how much each channel affects the other
+         * @param {Object|null} 
+         * @param {number} [leftToLeft] Sets the channel mix value of left to left
+         * @param {number} [leftToRight] Sets the channel mix value of left to right
+         * @param {number} [rightToLeft] Sets the channel mix value of right to left
+         * @param {number} [rightToRight] Sets the channel mix value of right to right
+         */
+        this.channelMix = settings.channelMix || null;
+        /**
+         * Higher frequencies get suppressed, while lower frequencies pass through this filter, thus the name low pass
+         * @param {Object|null} 
+         * @param {number} [smoothing] Sets the smoothing of low pass filter
+         */
+        this.lowPass = settings.lowPass || null;
     }
 }
 
