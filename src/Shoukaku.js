@@ -48,6 +48,7 @@ class Shoukaku extends EventEmitter {
      */
     constructor(client, nodes, options) {
         super();
+        /*
         const { variant, version } = getVersion();
         if (variant === 'light') {
             if (!version.startsWith('4'))
@@ -55,7 +56,7 @@ class Shoukaku extends EventEmitter {
         } else {
             if (!version.startsWith('13'))
                 throw new Error('Shoukaku will only work at Discord.JS v13.x.x');
-        }
+        }*/
         if (!nodes?.length) 
             throw new Error('No nodes supplied');
         /**

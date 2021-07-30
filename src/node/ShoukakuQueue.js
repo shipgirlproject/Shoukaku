@@ -38,7 +38,7 @@ class ShoukakuQueue {
         this.socket.ws.send(message, error => {
             if (error) this.socket.emit('error', this.socket.name, error);
         });
-        setImmediate(() => this.process());
+        setImmediate(() => this.processAsync());
     }
     /**
      * Process the websocket queue sync
