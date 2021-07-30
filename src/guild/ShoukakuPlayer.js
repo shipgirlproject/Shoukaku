@@ -192,7 +192,7 @@ class ShoukakuPlayer extends EventEmitter {
     }
     /**
      * Sets the playback volume of your lavalink player
-     * @param {number} volume The new volume you want to set on the player
+     * @param {number} volume Float value where 1.0 is 100%. Values >1.0 may cause clipping
      * @memberOf ShoukakuPlayer
      * @returns {ShoukakuPlayer}
      */
@@ -218,7 +218,7 @@ class ShoukakuPlayer extends EventEmitter {
         return this;
     }
     /**
-     * Sets the karaoke effect of your lavalink player
+     * Uses equalization to eliminate part of a band, usually targeting vocals
      * @param {Object|null} values
      * @param {number} [values.level] Karaoke effect level
      * @param {number} [values.monoLevel] Karaoke effect monoLevel
@@ -233,7 +233,7 @@ class ShoukakuPlayer extends EventEmitter {
         return this;
     }
     /**
-     * Sets the timescale effect of your lavalink player
+     * Changes the speed, pitch, and rate
      * @param {Object|null} values
      * @param {number} [values.speed] Timescale effect speed
      * @param {number} [values.pitch] Timescale effect pitch
@@ -247,7 +247,7 @@ class ShoukakuPlayer extends EventEmitter {
         return this;
     }
     /**
-     * Sets the tremolo effect of your lavalink player
+     * Uses amplification to create a shuddering effect, where the volume quickly oscillates
      * @param {Object|null} values
      * @param {number} [values.frequency] Tremolo effect frequency
      * @param {number} [values.depth] Tremolo effect depth
@@ -260,7 +260,7 @@ class ShoukakuPlayer extends EventEmitter {
         return this;
     }
     /**
-     * Sets the vibrato effect of your lavalink player
+     * Similar to tremolo. While tremolo oscillates the volume, vibrato oscillates the pitch
      * @param {Object|null} values
      * @param {number} [values.frequency] Vibrato effect frequency
      * @param {number} [values.depth] Vibrato effect depth
@@ -273,7 +273,7 @@ class ShoukakuPlayer extends EventEmitter {
         return this;
     }
     /**
-     * Sets the rotation effect of your lavalink player
+     * Rotates the sound around the stereo channels/user headphones aka Audio Panning
      * @param {Object|null} values
      * @param {number} [values.rotationHz] Rotation effect rotation
      * @param ShoukakuPlayer
@@ -285,7 +285,7 @@ class ShoukakuPlayer extends EventEmitter {
         return this;
     }
     /**
-     * Sets the distortion effect of your lavalink player
+     * Distortion effect. It can generate some pretty unique audio effects
      * @param {Object|null} values
      * @param {number} [values.sinOffset] Sin offset of the distortion effect
      * @param {number} [values.sinScale] Sin scale of the distortion effect
@@ -300,6 +300,33 @@ class ShoukakuPlayer extends EventEmitter {
      */
     setDistortion(values) {
         this.filters.distortion = values || null;
+        this.updateFilters();
+        return this;
+    }
+    /**
+     * Mixes both channels (left and right), with a configurable factor on how much each channel affects the other
+     * @param {Object|null} values
+     * @param {number} [values.leftToLeft] Sets the channel mix value of left to left
+     * @param {number} [values.leftToRight] Sets the channel mix value of left to right
+     * @param {number} [values.rightToLeft] Sets the channel mix value of right to left
+     * @param {number} [values.rightToRight] Sets the channel mix value of right to right
+     * @memberOf ShoukakuPlayer
+     * @returns {ShoukakuPlayer}
+     */
+    setChannelMix(values) {
+        this.filters.channelMix = values || null;
+        this.updateFilters();
+        return this;
+    }
+    /**
+     * Higher frequencies get suppressed, while lower frequencies pass through this filter, thus the name low pass
+     * @param {Object|null} values
+     * @param {number} [values.smoothing] Sets the smoothing of low pass filter
+     * @memberOf ShoukakuPlayer
+     * @returns {ShoukakuPlayer}
+     */
+    setLowPass(values) {
+        this.filters.lowPass = values || null;
         this.updateFilters();
         return this;
     }
