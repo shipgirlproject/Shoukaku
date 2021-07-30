@@ -33,6 +33,6 @@
   "devDependencies": {
     "discord.js": "^12.5.1",
     "discord.js-light": "^3.5.4",
-    "docma": "^3.2.2"
+    "docma": "github:Deivu/docma#cd93f9c20453127e2eae928ddd7e30a1f927fad9"
   }
 }

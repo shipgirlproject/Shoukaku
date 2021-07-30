@@ -9,24 +9,24 @@ class ShoukakuFilter {
      * @param {Object[]} [settings.equalizer=[]] Equalizer of this filter
      * @param {number} settings.equalizer.band Band of the equalizer, can be 0 - 13
      * @param {number} settings.equalizer.gain Gain for this band of the equalizer
-     * @param {Object} [settings.karaoke=null] Karaoke configuration of this filter
+     * @param {Object} [settings.karaoke=null] Uses equalization to eliminate part of a band, usually targeting vocals
      * @param {number} [settings.karaoke.level] Level of the karaoke effect
      * @param {number} [settings.karaoke.monoLevel] Monolevel of the karaoke effect
      * @param {number} [settings.karaoke.filterBand] Filterband of the karaoke effect
      * @param {number} [settings.karaoke.filterWidth] Filterwidth of the karaoke effect
-     * @param {Object} [settings.timescale=null] Timescale configuration of this filter
+     * @param {Object} [settings.timescale=null] Changes the speed, pitch, and rate
      * @param {number} [settings.timescale.speed] Speed of the timescale effect
      * @param {number} [settings.timescale.pitch] Pitch of the timescale effect
      * @param {number} [settings.timescale.rate] Rate of the timescale effect
-     * @param {Object} [settings.tremolo=null] Tremolo configuration of this filter
+     * @param {Object} [settings.tremolo=null] Uses amplification to create a shuddering effect, where the volume quickly oscillates
      * @param {number} [settings.tremolo.frequency] Frequency of the tremolo effect
      * @param {number} [settings.tremolo.depth] Depth of the tremolo effect
-     * @param {Object} [settings.vibrato=null] Vibrato configuration of this filter
+     * @param {Object} [settings.vibrato=null] Similar to tremolo. While tremolo oscillates the volume, vibrato oscillates the pitch 
      * @param {number} [settings.vibrato.frequency] Frequency of the vibrato effect
      * @param {number} [settings.vibrato.depth] Depth of the vibrato effect
-     * @param {Object} [settings.rotation=null] Rotation configuration of this filter
+     * @param {Object} [settings.rotation=null] Rotates the sound around the stereo channels/user headphones aka Audio Panning
      * @param {number} [settings.rotation.rotationHz] Frequency of the rotation effect
-     * @param {Object} [settings.distortion=null] Distortion configuration of this filter
+     * @param {Object} [settings.distortion=null] Distortion effect. It can generate some pretty unique audio effects
      * @param {number} [settings.distortion.sinOffset] Sin offset of the distortion effect
      * @param {number} [settings.distortion.sinScale] Sin scale of the distortion effect
      * @param {number} [settings.distortion.cosOffset] Cos offset of the distortion effect
@@ -35,10 +35,12 @@ class ShoukakuFilter {
      * @param {number} [settings.distortion.tanScale] Tan scale of the distortion effect
      * @param {number} [settings.distortion.offset] Offset of the distortion effect
      * @param {number} [settings.distortion.scale] Scale of the distortion effect
+     * @param {number} [settings.channelMix=null] Mixes both channels (left and right), with a configurable factor on how much each channel affects the other
      * @param {number} [settings.channelMix.leftToLeft] Sets the channel mix value of left to left
      * @param {number} [settings.channelMix.leftToRight] Sets the channel mix value of left to right
      * @param {number} [settings.channelMix.rightToLeft] Sets the channel mix value of right to left
      * @param {number} [settings.channelMix.rightToRight] Sets the channel mix value of right to right
+     * @param {number} [settings.lowPass=null] Higher frequencies get suppressed, while lower frequencies pass through this filter, thus the name low pass
      * @param {number} [settings.lowPass.smoothing] Sets the smoothing of low pass filter
      */
     constructor(settings = {}) {
