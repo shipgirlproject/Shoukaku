@@ -15,7 +15,7 @@ class DiscordJS {
      */
     constructor(client) {
         /**
-         * @type {Client} Discord.JS client
+         * @type {Client} 
          */
         this.client = client;
     }
