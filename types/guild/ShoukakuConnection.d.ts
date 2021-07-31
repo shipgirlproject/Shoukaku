@@ -1,3 +1,4 @@
+import { Base64String, Snowflake } from 'discord.js';
 import { EventEmitter } from 'events';
 import { state } from '../Constants';
 import { ShoukakuPlayer } from './ShoukakuPlayer';
@@ -12,8 +13,8 @@ export class ShoukakuConnection extends EventEmitter {
 
     public player: ShoukakuPlayer;
     public node: ShoukakuSocket;
-    public guildID: string;
-    public channelID?: string;
+    public guildID: Snowflake;
+    public channelID?: Snowflake;
     public shardID: number;
     public sessionID?: string;
     public region?: string;
@@ -24,12 +25,26 @@ export class ShoukakuConnection extends EventEmitter {
     public reconnecting: boolean;
     private serverUpdate: boolean;
 
-    public attemptReconnect(options: { channelID: string, forceReconnect: boolean }): Promise<void>;
+    public attemptReconnect(options: { channelID: Snowflake, forceReconnect: boolean }): Promise<void>;
     public setDeaf(deaf: boolean): void;
     public setMute(mute: boolean): void;
     public disconnect(): void;
-    public connect(options: { guildID: string, channelID: string, deaf: boolean, mute: boolean }): Promise<void>;
-    protected setStateUpdate(options: { session_id: string, channel_id: string, self_deaf: boolean, self_mute: boolean }): void;
+    public connect(options: ConnectOptions): Promise<void>;
+    protected setStateUpdate(options: StateUpdate): void;
     protected setServerUpdate(data: Object): void;
     protected send(d: object, important: boolean): void;
+}
+
+export interface ConnectOptions {
+  guildID: Snowflake, 
+  channelID: Snowflake,
+  deaf: boolean, 
+  mute: boolean
+}
+
+export interface StateUpdate {
+  session_id: string,
+  channel_id: Snowflake, 
+  self_deaf: boolean, 
+  self_mute: boolean
 }

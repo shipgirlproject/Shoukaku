@@ -1,3 +1,5 @@
+import { Base64String } from 'discord.js';
+
 export enum state {
     CONNECTING = 0,
     CONNECTED = 1,
@@ -32,7 +34,7 @@ export class ShoukakuTrackList {
 }
 
 export class ShoukakuTrack {
-    track: string;
+    track: Base64String;
     info: {
         identifier?: string;
         isSeekable?: boolean;

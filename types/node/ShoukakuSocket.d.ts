@@ -1,3 +1,4 @@
+import { Base64String, Snowflake } from 'discord.js';
 import { EventEmitter } from 'events';
 import { ShoukakuPlayer } from '../guild/ShoukakuPlayer';
 import { Shoukaku } from '../Shoukaku';
@@ -6,6 +7,7 @@ import { ShoukakuRest } from './ShoukakuRest';
 import { state } from '../Constants';
 import { ShoukakuStats } from '../struct/ShoukakuStats';
 
+
 export class ShoukakuSocket extends EventEmitter {
     constructor(
         shoukaku: Shoukaku,
@@ -13,7 +15,7 @@ export class ShoukakuSocket extends EventEmitter {
     );
 
     public shoukaku: Shoukaku;
-    public players: Map<string, ShoukakuPlayer>;
+    public players: Map<Snowflake, ShoukakuPlayer>;
     public rest: ShoukakuRest;
     public queue: ShoukakuQueue;
     public state: state.CONNECTED | state.CONNECTING | state.DISCONNECTED | state.DISCONNECTING;
@@ -34,7 +36,7 @@ export class ShoukakuSocket extends EventEmitter {
     private get penalties(): number;
     protected connect(reconnect: boolean): void;
     protected disconnect(code: number, reason: string): void;
-    public joinChannel(options: { guildID: string, shardID: string, channelID: string, mute?: boolean, deaf?: boolean }): Promise<ShoukakuPlayer>;
+    public joinChannel(options: JoinOptions): Promise<ShoukakuPlayer>;
     public leaveChannel(guildID: string): void;
     public send(data: Object, important: boolean): void;
     private _open(response: Object): void;
@@ -44,4 +46,12 @@ export class ShoukakuSocket extends EventEmitter {
     private _clean(): void;
     private reconnect(): void;
     // private disconnect(code: number, reason: string): void; <- YO SAYA WTF DID U ADD IN UR CODE
+}
+
+export interface JoinOptions {
+  guildID: Snowflake, 
+  shardID: string, 
+  channelID: Snowflake, 
+  mute?: boolean, 
+  deaf?: boolean
 }
