@@ -18,7 +18,6 @@ export class Shoukaku extends EventEmitter {
 
     public get players(): Map<string, ShoukakuPlayer>;
 
-    public setInitializedLibrary(library: Object): void;
     public addNode(options: NodeOptions): void;
     public removeNode(name: string, reason: string): void;
     public getNode(query: string | Array<string>): ShoukakuSocket;
