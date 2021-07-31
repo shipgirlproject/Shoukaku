@@ -14,15 +14,15 @@ class ShoukakuPlayer extends EventEmitter {
     /**
      * @extends {EventEmitter}
      * @param {ShoukakuSocket} node The node where this class is initialized
-     * @param {Guild} guild A Discord.JS guild structure
+     * @param {Object} options JoinVoiceChannel options
      */
-    constructor(node, guild) {
+    constructor(node, options) {
         super();
         /**
          * The voice connection manager of this player
          * @type {ShoukakuConnection}
          */
-        this.connection = new ShoukakuConnection(this, node, guild);
+        this.connection = new ShoukakuConnection(this, node, options);
         /**
          * The track that is currently being played by this player
          * @type {?string}

@@ -12,9 +12,9 @@ class ShoukakuConnection extends EventEmitter {
     /**
      * @param {ShoukakuPlayer} player The player that initialized this manager
      * @param {ShoukakuSocket} node The node where this manager is connected to
-     * @param {Guild} guild A Discord.JS guild structure
+     * @param {Object} options JoinVoiceChannel options
      */
-    constructor(player, node, guild) {
+    constructor(player, node, options) {
         super();
         /**
          * The player that initialized this manager
@@ -30,7 +30,7 @@ class ShoukakuConnection extends EventEmitter {
          * The ID of the guild where this connection is
          * @type {string}
          */
-        this.guildID = guild.id;
+        this.guildID = options.guildID;
         /**
          * The ID of the channel where this connection is
          * @type {?string}
@@ -40,7 +40,7 @@ class ShoukakuConnection extends EventEmitter {
          * The ID of the shard where this connection is
          * @type {number}
          */
-        this.shardID = guild.shardID;
+        this.shardID = options.shardID;
         /**
          * The ID of the current connection session
          * @type {?string}
@@ -213,7 +213,8 @@ class ShoukakuConnection extends EventEmitter {
      * @protected
      */
     send(d, important = false) {
-        this.node.shoukaku.client.guilds.cache.get(this.guildID)?.shard.send({ op: 4, d }, important);
+        if (!this.node.shoukaku.library.guilds.has(this.guildID)) return;
+        this.node.shoukaku.library.ws(this.shardID, { op: 4, d }, important);
     }
 }
 
