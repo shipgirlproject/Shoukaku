@@ -188,6 +188,7 @@ class ShoukakuSocket extends EventEmitter {
      * Creates a player and connects your bot to the specified guild's voice channel
      * @param {Object} options Join channel options
      * @param {string} options.guildID GuildID where the voice channel you want to join is in
+     * @param {string} options.shardID ShardID where this guild is in
      * @param {string} options.channelID ChannelID of the voice channel where you want to join in
      * @param {boolean} [options.mute=false] If you want to join this channel muted already
      * @param {boolean} [options.deaf=false] If you want to join this channel deafened already
@@ -208,18 +209,16 @@ class ShoukakuSocket extends EventEmitter {
         if (this.state !== state.CONNECTED)
             throw new Error('This node is not yet ready');
 
-        const guild = this.shoukaku.client.guilds.cache.get(options.guildID);
-        if (!guild)
-            throw new Error('Guild not found, cannot continue creating this connection');
+        if (!this.shoukaku.library.guilds.has(options.guildID)) throw new Error('Guild not found, cannot continue creating this connection');
 
-        const player = this.players.get(guild.id) || new ShoukakuPlayer(this, guild);
+        const player = this.players.get(options.guildID) || new ShoukakuPlayer(this, options);
 
         try {
-            if (!this.players.has(guild.id)) this.players.set(guild.id, player);
+            if (!this.players.has(options.guildID)) this.players.set(options.guildID, player);
             await player.connection.connect(options);
             return player;
         } catch (error) {
-            this.players.delete(guild.id);
+            this.players.delete(options.guildID);
             throw error;
         }
     }

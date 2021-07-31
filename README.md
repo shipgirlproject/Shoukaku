@@ -1,6 +1,6 @@
 ## Shoukaku
 
-> A Lavalink wrapper for Discord.JS v12.x.x
+> A featureful lavalink wrapper for Lavalink
 
 <center>
 
@@ -28,28 +28,19 @@ The ShipGirl Project, feat Shoukaku; ⓒ Kancolle
 
 ✅ Very cute shipgirl ❤ (Very Important)
 
+### Supported Libraries
+
+Refer to `/src/libraries` for list of supported libraries + how to support other libraries
+
 ### Installation
 
-For Lavalink `Master` branch with commits no newer than https://github.com/freyacodes/Lavalink/commit/45f8de045fdd75034b75c63c410121d8315e6b75
 ```
-npm i shoukaku@1.5.2
-```
-For Lavalink `Dev` branch, or anything that doesn't fall into the scope of commits above
-```
-npm i shoukaku@1.6.x // Replace x with the latest semver patch available
-```
-If you live on the edge, and want any update available on Shoukaku
-```
-npm i Deivu/Shoukaku
+npm install git://github.com/Deivu/Shoukaku.git#v1 --save
 ```
 
-### Documentation
+### Documentation 
 
-> https://deivu.github.io/Shoukaku/?api
-
-### Changelogs
-
-> https://github.com/Deivu/Shoukaku/blob/master/CHANGELOGS.MD
+> Clone this repo, then install dev-dependencies, then run `docma serve`
 
 ### Getting Lavalink
 
@@ -65,7 +56,7 @@ Docker images are available on the [Docker](https://hub.docker.com/r/fredboat/la
 
 [Support](https://discord.gg/FVqbtGu) (#Development) | [Lavalink](https://github.com/freyacodes/Lavalink)
 
-### Example
+### Example (Discord.JS)
 
 > Bot Implementation: https://github.com/Deivu/Kongou
 
@@ -73,7 +64,7 @@ Docker images are available on the [Docker](https://hub.docker.com/r/fredboat/la
 
 ```js
 const { Client } = require('discord.js');
-const { Shoukaku } = require('shoukaku');
+const { Shoukaku, Libraries } = require('shoukaku');
 
 const LavalinkServer = [{ name: 'Localhost', host: 'localhost', port: 6969, auth: 'big_weeb' }];
 const ShoukakuOptions = { moveOnDisconnect: false, resumable: false, resumableTimeout: 30, reconnectTries: 2, restTimeout: 10000 };
@@ -81,7 +72,7 @@ const ShoukakuOptions = { moveOnDisconnect: false, resumable: false, resumableTi
 class ExampleBot extends Client {
     constructor(opts) {
         super(opts);
-        this.shoukaku = new Shoukaku(this, LavalinkServer, ShoukakuOptions);
+        this.shoukaku = new Shoukaku(new Libraries.DiscordJS(client), LavalinkServer, ShoukakuOptions);
     }
 
     login(token) {

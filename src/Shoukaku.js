@@ -2,19 +2,7 @@ const EventEmitter = require('events');
 const ShoukakuSocket = require('./node/ShoukakuSocket.js');
 
 const { shoukakuOptions, nodeOptions, state } = require('./Constants.js');
-const { mergeDefault, getVersion } = require('./Utils.js');
-
-/**
- * Discord.JS Client
- * @external Client
- * @see {@link https://discord.js.org/#/docs/main/master/class/Client}
- */
-
-/**
- * Discord.JS Guild
- * @external Guild
- * @see {@link https://discord.js.org/#/docs/main/master/class/Guild}
- */
+const { mergeDefault } = require('./Utils.js');
 
 /**
  * Node.js Event Emitter
@@ -29,7 +17,7 @@ const { mergeDefault, getVersion } = require('./Utils.js');
  */
 class Shoukaku extends EventEmitter {
     /**
-     * @param {Client} client Your Discord.JS initalized client
+     * @param {Object} library Initalized Library that shoukaku will use, refer to libraries folder to see what are the available libraries to use
      * @param {Object[]} nodes Array of Lavalink nodes to initially connect to
      * @param {string} nodes.name Lavalink node name
      * @param {string} nodes.url Lavalink node url without prefix like, ex: http://
@@ -46,26 +34,15 @@ class Shoukaku extends EventEmitter {
      * @param {number} [options.closedWebsocketEventDelay=500] Timeout before shoukaku processes a websocket closed event, measured in milliseconds
      * @param {string} [options.userAgent="name/version(url)"] User-Agent to use on connecting to WS and REST requests
      */
-    constructor(client, nodes, options) {
+    constructor(library, nodes, options) {
         super();
-        /*
-        const { variant, version } = getVersion();
-        if (variant === 'light') {
-            if (!version.startsWith('4'))
-                throw new Error('Shoukaku will only work at Discord.JS-light v4.x.x');
-        } else {
-            if (!version.startsWith('13'))
-                throw new Error('Shoukaku will only work at Discord.JS v13.x.x');
-        }*/
-        if (!nodes?.length) 
-            throw new Error('No nodes supplied');
         /**
-        * The instance of Discord.JS client
-        * @type {Client}
+        * The library methods shoukaku currently is using
+        * @type {Object}
         */
-        this.client = client;
+        this.library = library.build(this, nodes);
         /**
-        * The user id of the bot that is being governed
+        * The user id of the bot
         * @type {?string}
         */
         this.id = null;
@@ -76,10 +53,7 @@ class Shoukaku extends EventEmitter {
         this.nodes = new Map();
 
         Object.defineProperty(this, 'options', { value: mergeDefault(shoukakuOptions, options) });
-
-        this.client.once('ready', () => this._clientReady(nodes));
-        this.client.on('raw', event => this._clientRaw(event));
-    } 
+    }
 
     /**
      * Gets all the Players that is currently active on all nodes in this instance.
@@ -134,6 +108,16 @@ class Shoukaku extends EventEmitter {
      * @memberof Shoukaku
      */
 
+    /**
+    * Sets the Initalized Library what shoukaku will use
+    * @param {Object} library The library what shoukaku will use
+    * @memberof Shoukaku
+    * @returns {void}
+    */
+    setInitializedLibrary(library) {
+        if (this.library) throw new Error('You can\'t set a library again once it\'s set');
+        this.library = library;
+    }
     /**
     * Adds a new node to this manager
     * @param {Object} options The node options to connect
@@ -213,10 +197,10 @@ class Shoukaku extends EventEmitter {
      * @memberOf Shoukaku
      * @param {Array<Object>} nodes
      * @returns {void}
-     * @private
+     * @protected
      */
     _clientReady(nodes) {
-        this.id = this.client.user.id;
+        this.id = this.library.id();
         this.emit('debug', 'Manager',`[Manager] : Connecting ${nodes.length} nodes`);
         for (const node of nodes) this.addNode(mergeDefault(nodeOptions, node));
     }
@@ -224,7 +208,7 @@ class Shoukaku extends EventEmitter {
      * @memberOf Shoukaku
      * @param {Object} packet
      * @returns {void}
-     * @private
+     * @protected
      */
     _clientRaw(packet) {
         if (!['VOICE_STATE_UPDATE', 'VOICE_SERVER_UPDATE'].includes(packet.t)) return;
