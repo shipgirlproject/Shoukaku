@@ -249,14 +249,14 @@ class ShoukakuSocket extends EventEmitter {
      * @private
      */
     _open(response) {
-        if (!this.resumable) 
-            this.queue.process();
-        else 
+        this.queue.processSync();
+        if (this.resumable) {
             this.send({
                 op: 'configureResuming',
                 key: (!!this.resumable).toString(),
                 timeout: this.resumableTimeout
             });
+        }
         this.reconnects = 0;
         this.state = state.CONNECTED;
         const resumed = response.headers['session-resumed'] === 'true';

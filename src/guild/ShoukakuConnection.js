@@ -213,8 +213,7 @@ class ShoukakuConnection extends EventEmitter {
      * @protected
      */
     send(d, important = false) {
-        if (!this.node.shoukaku.client.guilds.cache.has(this.guildID)) return;
-        this.node.shoukaku.client.ws.shards.get(this.shardID)?.send({ op: 4, d }, important);
+        this.node.shoukaku.client.guilds.cache.get(this.guildID)?.shard.send({ op: 4, d }, important);
     }
 }
 

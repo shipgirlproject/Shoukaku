@@ -26,19 +26,32 @@ class ShoukakuQueue {
      */
     send(data, important = false) {
         this.pending[important ? 'unshift' : 'push'](JSON.stringify(data));
-        if (this.socket.ws?.readyState === 1) this.process();
+        if (this.socket.ws?.readyState === 1) this.processAsync();
     }
     /**
-     * Process the websocket queue
+     * Process the websocket queue async
      * @return {void}
      */
-    process() {
+    processAsync() {
         if (!this.pending.length) return;
         const message = this.pending.shift();
-        this.socket.ws?.send(message, error => {
+        this.socket.ws.send(message, error => {
             if (error) this.socket.emit('error', this.socket.name, error);
         });
-        setImmediate(() => this.process());
+        setImmediate(() => this.processAsync());
+    }
+    /**
+     * Process the websocket queue sync
+     * @return {void}
+     */
+    processSync() {
+        if (!this.pending.length) return;
+        while(this.pending.length) {
+            const message = this.pending.shift();
+            this.socket.ws.send(message, error => {
+                if (error) this.socket.emit('error', this.socket.name, error);
+            });
+        }
     }
     /**
      * Clears the pending messages to be sent
