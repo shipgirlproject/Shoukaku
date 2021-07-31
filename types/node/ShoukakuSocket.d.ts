@@ -45,13 +45,13 @@ export class ShoukakuSocket extends EventEmitter {
     protected _clientRaw(packet: Object): void;
     private _clean(): void;
     private reconnect(): void;
-    // private disconnect(code: number, reason: string): void; <- YO SAYA WTF DID U ADD IN UR CODE
+    // private disconnect(code: number, reason: string): void; <- SAYA WTF DID IS THIS
 }
 
 export interface JoinOptions {
-  guildID: Snowflake, 
-  shardID: string, 
-  channelID: Snowflake, 
-  mute?: boolean, 
-  deaf?: boolean
+    guildID: Snowflake, 
+    shardID: string, 
+    channelID: Snowflake, 
+    mute?: boolean, 
+    deaf?: boolean
 }
