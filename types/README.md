@@ -16,6 +16,8 @@ Updated typings to reflect changes from upstream commit `E976088` (`e976088ab160
 ### 24/07/2021
 Initial commit for upstream commit `AE3D1DD` (`ae3d1ddf98c24f2ad84fca4cca1aa6adec16611f`)
 
-> Types are made with ❤ by `@Rattley`
 P.S: Need help? Join the [`ShipgGirls Community`](https://discord.gg/FVqbtGu) Discord server and ask for help in the `#development` channel.
+
 P.P.S: SAYA PAT ME
+
+> Types are made with ❤ by `@Rattley`
