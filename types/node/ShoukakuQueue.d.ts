@@ -9,6 +9,7 @@ export class ShoukakuQueue {
     public pending: string[];
 
     public send(data: Object, important: boolean): void;
+    public processAsync(): void;
     public process(): void;
     public clear(): void;
 }

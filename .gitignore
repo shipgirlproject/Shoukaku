@@ -3,3 +3,4 @@ node_modules
 example/config.json
 .idea
 .gitattributes
+typedoc/minami

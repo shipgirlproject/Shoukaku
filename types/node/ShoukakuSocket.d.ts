@@ -34,7 +34,7 @@ export class ShoukakuSocket extends EventEmitter {
     private get penalties(): number;
     protected connect(reconnect: boolean): void;
     protected disconnect(code: number, reason: string): void;
-    public async joinChannel(options: { guildID: string, channelID: string, mute?: boolean, deaf?: boolean }): Promise<ShoukakuPlayer>;
+    public joinChannel(options: { guildID: string, shardID: string, channelID: string, mute?: boolean, deaf?: boolean }): Promise<ShoukakuPlayer>;
     public leaveChannel(guildID: string): void;
     public send(data: Object, important: boolean): void;
     private _open(response: Object): void;
@@ -43,5 +43,5 @@ export class ShoukakuSocket extends EventEmitter {
     protected _clientRaw(packet: Object): void;
     private _clean(): void;
     private reconnect(): void;
-    private disconnect(code: number, reason: string): void;
+    // private disconnect(code: number, reason: string): void; <- YO SAYA WTF DID U ADD IN UR CODE
 }

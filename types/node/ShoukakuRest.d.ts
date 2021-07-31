@@ -12,10 +12,10 @@ export class ShoukakuRest {
     private userAgent: string;
 
     private get router(): number;
-    public async resolve(identifier: string, search: string | null): Promise<void | ShoukakuTrackList>;
+    public resolve(identifier: string, search: string | null): Promise<void | ShoukakuTrackList>;
     public decode(track: string): Promise<Object>;
     public getRoutePlannerStatus(): Promise<Object>;
     public unmarkFailedAddress(address: string): Promise<void>;
     public unmarkAllFailedAddress(): Promise<void>;
-    protected async fetch(url: string, options?: { method: string, options?: Object }): Object;
+    protected fetch(url: string, options?: { method: string, options?: Object }): Promise<Object>;
 }

@@ -1,9 +1,10 @@
 // idfk what this is lmao
 
 import { Shoukaku } from './types/Shoukaku';
-import { Constants } from './types/Constants';
+import * as Constants from './types/Constants';
+import { Libraries } from './types/libraries/Libraries';
 import { version } from './package.json'
 
-export declare module 'shoukaku' {
-  export { Shoukaku, Constants, version };
+declare module 'shoukaku' {
+  export { Shoukaku, Constants, Libraries, version };
 }

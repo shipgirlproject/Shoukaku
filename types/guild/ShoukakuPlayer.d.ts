@@ -8,7 +8,7 @@ import { ShoukakuTrack } from '../Constants';
 export class ShoukakuPlayer extends EventEmitter {
     constructor(
         node: ShoukakuSocket,
-        guild: Guild
+        options: { guildID: string, shardID: number }
     );
 
     public connection: ShoukakuConnection;

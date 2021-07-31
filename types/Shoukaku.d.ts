@@ -1,30 +1,31 @@
-import { shoukakuOptions, nodeOptions } from './Constants';
+import { ShoukakuOptions, NodeOptions } from './Constants';
+import { GetterObj } from './libraries/Constants';
 import { ShoukakuPlayer } from './guild/ShoukakuPlayer';
 import { ShoukakuSocket } from './node/ShoukakuSocket'
 import { EventEmitter } from 'events';
-import { Client as DiscordClient } from 'discord.js';
 
 export class Shoukaku extends EventEmitter {
     constructor(
-        client: DiscordClient,
-        nodes: nodeOptions,
-        options: shoukakuOptions
+        library: any,
+        nodes: NodeOptions,
+        options: ShoukakuOptions
     );
 
-    public client: DiscordClient;
+    public library: GetterObj;
     public id?: string | null;
     public nodes: Map<string, ShoukakuSocket>;
-    private options: Object ;
+    private options: Object;
 
     public get players(): Map<string, ShoukakuPlayer>;
 
-    public addNode(options: nodeOptions): void;
+    public setInitializedLibrary(library: Object): void;
+    public addNode(options: NodeOptions): void;
     public removeNode(name: string, reason: string): void;
     public getNode(query: string | Array<string>): ShoukakuSocket;
     
     protected _getIdeal(group: string): ShoukakuSocket;
-    private _clientReady(nodes: Array<Object>): void;
-    private _clientRaw(packet: Object): void;
+    protected _clientReady(nodes: Array<Object>): void;
+    protected _clientRaw(packet: Object): void;
     private _clean(name: string, players: ShoukakuPlayer[], moved: boolean): void;
 }
 

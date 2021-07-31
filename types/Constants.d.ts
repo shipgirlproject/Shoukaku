@@ -5,7 +5,7 @@ export enum state {
     DISCONNECTED = 3
 }
 
-export interface shoukakuOptions {
+export interface ShoukakuOptions {
     resumable: boolean,
     resumableTimeout: number,
     reconnectTries: number,
@@ -16,7 +16,7 @@ export interface shoukakuOptions {
     userAgent: string
 }
 
-export interface nodeOptions {
+export interface NodeOptions {
     name: string,
     url: string,
     auth: string,
