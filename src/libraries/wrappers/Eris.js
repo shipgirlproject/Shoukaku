@@ -1,14 +1,14 @@
 /**
- * Discord.JS Client
+ * Eris Client
  * @external Client
- * @see {@link https://discord.js.org/#/docs/main/master/class/Client}
+ * @see {@link https://abal.moe/Eris/docs/Client}
  */
 
 /**
- * Shoukaku's Library Plugin for Discord.JS
- * @class DiscordJS
+ * Shoukaku's Library Plugin for Eris
+ * @class Eris
  */
-class DiscordJS {
+ class Eris {
     /**
      * @param {Client} client Library client
      */
@@ -25,11 +25,11 @@ class DiscordJS {
     getters() {
         return {
             // guild cache, must be a map or anything that extends from map
-            guilds: this.client.guilds.cache,
+            guilds: this.client.guilds,
             // getter for user id
             id: () => this.client.user.id,
             // websocket shard payload sender
-            ws: (shardID, payload, important = false) => this.client.ws.shards.get(shardID)?.send(payload, important),
+            ws: (shardID, payload, important = false) => this.client.shards.get(shardID)?.sendWS(payload.op, payload.d, important),
         };
     }
     /**
@@ -48,10 +48,10 @@ class DiscordJS {
         // attach to ready event "once"
         this.client.once('ready', () => shoukaku._clientReady(nodes));
         // attach to raw event
-        this.client.on('raw', packet => shoukaku._clientRaw(packet));
+        this.client.on('rawWS', (packet, id) => shoukaku._clientRaw(packet));
         // return the getters for Shoukaku's usage
         return this.getters();
     }
 }
 
-module.exports = DiscordJS;
+module.exports = Eris;

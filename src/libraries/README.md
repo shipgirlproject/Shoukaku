@@ -2,6 +2,8 @@
 
 * [Discord.JS](https://discord.js.org/#/) (v13.0.0-dev)
 
+* [Eris](https://abal.moe/Eris/) (0.15.x / 0.15.x-dev)
+
 * Implement your own 
 
 ## Implementing your own

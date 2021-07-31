@@ -33,6 +33,7 @@
   "devDependencies": {
     "discord.js": ">=13.0.0",
     "discord.js-light": ">=4.0.0",
-    "docma": "github:Deivu/docma#cd93f9c20453127e2eae928ddd7e30a1f927fad9"
+    "docma": "github:Deivu/docma#cd93f9c20453127e2eae928ddd7e30a1f927fad9",
+    "eris": ">=0.15.0"
   }
 }
