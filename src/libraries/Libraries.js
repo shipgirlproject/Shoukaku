@@ -1,3 +1,3 @@
 module.exports = {
-    DiscordJS: require('./DiscordJS.js')
+    DiscordJS: require('./wrappers/DiscordJS.js')
 };

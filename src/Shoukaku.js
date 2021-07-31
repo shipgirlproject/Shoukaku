@@ -107,17 +107,7 @@ class Shoukaku extends EventEmitter {
      * @param {boolean} moved Whether the players in this disconnect event has been moved to another node
      * @memberof Shoukaku
      */
-
-    /**
-    * Sets the Initalized Library what shoukaku will use
-    * @param {Object} library The library what shoukaku will use
-    * @memberof Shoukaku
-    * @returns {void}
-    */
-    setInitializedLibrary(library) {
-        if (this.library) throw new Error('You can\'t set a library again once it\'s set');
-        this.library = library;
-    }
+    
     /**
     * Adds a new node to this manager
     * @param {Object} options The node options to connect

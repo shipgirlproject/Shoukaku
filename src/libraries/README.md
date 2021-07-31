@@ -6,16 +6,15 @@
 
 ## Implementing your own
 
-* Refer to `DiscordJS.js` for my original implementation of the library plugins
+* Refer to `DiscordJS.js` inside the `wrappers` folder for my original implementation of the library plugins
 
-* Then require the js file on `Libraries.JS`
+* Then require the js file on `Libraries.js`
 
-* Then call it by calling `Libraries` on your Shoukaku require
+* Then call it by calling `Libraries.WrapperName(InitializedClient)` on your Shoukaku require
 
 Example
 ```js
 const { Shoukaku, Libraries } = require('shoukaku');
-new Shoukaku(new Libraries.NameOfYourRequiredFileOnLibrariesJS(client), servers, options);
 // example if you made it for eris, then you required it on Libraries.JS with it's key being Eris
 new Shoukaku(new Libraries.Eris(client), servers, options);
 // where in the client is your eris client
