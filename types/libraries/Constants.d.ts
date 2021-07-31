@@ -1,5 +1,7 @@
+import { Guild, Snowflake, Collection } from 'discord.js';
+
 export interface GetterObj {
-    guilds: Map<any, any>,
+    guilds: Collection<Snowflake, Guild>,
     id: () => number,
     ws: (shardID: number, payload: string, important: boolean) => any
 }
