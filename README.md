@@ -35,7 +35,7 @@ Refer to [/src/libraries](https://github.com/Deivu/Shoukaku/tree/next/src/librar
 ### Installation
 
 ```
-npm install git://github.com/Deivu/Shoukaku.git#v1 --save
+npm install git://github.com/Deivu/Shoukaku.git#next --save
 ```
 
 ### Documentation 
