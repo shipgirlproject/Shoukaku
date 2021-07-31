@@ -30,7 +30,7 @@ The ShipGirl Project, feat Shoukaku; ⓒ Kancolle
 
 ### Supported Libraries
 
-Refer to `/src/libraries` for list of supported libraries + how to support other libraries
+Refer to [/src/libraries](https://github.com/Deivu/Shoukaku/tree/next/src/libraries) for list of supported libraries + how to support other libraries
 
 ### Installation
 
