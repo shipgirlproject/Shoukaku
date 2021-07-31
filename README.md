@@ -100,6 +100,7 @@ class ExampleBot extends Client {
             if (!data) return;
             const player = await node.joinVoiceChannel({
                 guildID: msg.guild.id,
+                shardID: msg.guild.shard.id,
                 voiceChannelID: msg.member.voice.channelID
             }); 
             player.on('error', (error) => {
