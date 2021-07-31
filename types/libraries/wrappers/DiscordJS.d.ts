@@ -1,7 +1,7 @@
-import { Client as DiscordClient } from 'discord.js';
-import { Shoukaku } from '../Shoukaku';
-import { NodeOptions } from '../Constants';
-import { GetterObj } from './Constants';
+import { Client as DiscordClient, Guild, Snowflake, Collection } from 'discord.js';
+import { Shoukaku } from '../../Shoukaku';
+import { NodeOptions } from '../../Constants';
+import { GetterObj } from '../Constants';
 
 export class DiscordJS {
     constructor(
@@ -9,6 +9,6 @@ export class DiscordJS {
     );
     public client: DiscordClient;
 
-    public getters(): GetterObj;
-    public build(shoukaku: Shoukaku, nodes: NodeOptions): GetterObj;
+    public getters(): GetterObj<Snowflake, Guild, Collection<Snowflake, Guild>>;
+    public build(shoukaku: Shoukaku, nodes: NodeOptions): GetterObj<Snowflake, Guild, Collection<Snowflake, Guild>>;
 }

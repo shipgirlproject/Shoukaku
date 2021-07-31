@@ -12,7 +12,7 @@ export class Shoukaku extends EventEmitter {
         options: ShoukakuOptions
     );
 
-    public library: GetterObj;
+    public library: GetterObj<any, any, any>;
     public id?: Snowflake | null;
     public nodes: Map<string, ShoukakuSocket>;
     private options: Object;
