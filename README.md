@@ -89,7 +89,7 @@ class ExampleBot extends Client {
     }
 
     _setupClientEvents() {
-        this.on('message', async (msg) => {
+        this.on('messageCreate', async (msg) => {
             if (msg.author.bot || !msg.guild) return;
             if (!msg.content.startsWith('$play')) return;
             if (this.shoukaku.getPlayer(msg.guild.id)) return;
