@@ -109,7 +109,7 @@ class ExampleBot extends Client {
             });
             for (const event of ['end', 'closed', 'nodeDisconnect']) player.on(event, () => player.disconnect());
             data = data.tracks.shift();
-            await player.playTrack(data); 
+            player.playTrack(data); 
             await msg.channel.send("Now Playing: " + data.info.title);
         });
         this.on('ready', () => console.log('Bot is now ready'));

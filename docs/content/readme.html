@@ -67,7 +67,7 @@ class ExampleBot extends Client {
     }
 
     _setupClientEvents() {
-        this.on('message', async (msg) =&gt; {
+        this.on('messageCreate', async (msg) =&gt; {
             if (msg.author.bot || !msg.guild) return;
             if (!msg.content.startsWith('$play')) return;
             if (this.shoukaku.getPlayer(msg.guild.id)) return;
@@ -87,7 +87,7 @@ class ExampleBot extends Client {
             });
             for (const event of ['end', 'closed', 'nodeDisconnect']) player.on(event, () =&gt; player.disconnect());
             data = data.tracks.shift();
-            await player.playTrack(data); 
+            player.playTrack(data); 
             await msg.channel.send("Now Playing: " + data.info.title);
         });
         this.on('ready', () =&gt; console.log('Bot is now ready'));

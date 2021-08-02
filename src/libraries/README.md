@@ -2,7 +2,17 @@
 
 * [Discord.JS](https://discord.js.org/#/) (v13.0.0-dev)
 
+```js
+const { Shoukaku, Libraries } = require('shoukaku');
+new Shoukaku(new Libraries.DiscordJS(client), servers, options);
+```
+
 * [Eris](https://abal.moe/Eris/) (0.15.x / 0.15.x-dev)
+
+```js
+const { Shoukaku, Libraries } = require('shoukaku');
+new Shoukaku(new Libraries.Eris(client), servers, options)
+```
 
 * Implement your own 
 
