@@ -8,8 +8,7 @@ export class ShoukakuQueue {
     public socket: ShoukakuSocket;
     public pending: string[];
 
-    public send(data: Object, important: boolean): void;
-    public processAsync(): void;
+    public enqueue(data: Object, important: boolean): void;
     public process(): void;
     public clear(): void;
 }

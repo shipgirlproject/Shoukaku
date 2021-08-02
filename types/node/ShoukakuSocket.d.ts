@@ -44,8 +44,8 @@ export class ShoukakuSocket extends EventEmitter {
     private _close(code: number, reason: string): void;
     protected _clientRaw(packet: Object): void;
     private _clean(): void;
-    private reconnect(): void;
-    // private disconnect(code: number, reason: string): void; <- SAYA WTF DID IS THIS
+    private _reconnect(): void;
+    private _disconnect(code: number, reason: string): void;
 }
 
 export interface JoinOptions {

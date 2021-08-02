@@ -1,3 +1,5 @@
+const Websocket = require('ws');
+
 /**
  * ShoukakuRouter, a queue for websocket messages
  * @class ShoukakuQueue
@@ -24,30 +26,19 @@ class ShoukakuQueue {
      * @param {boolean} [important=false] If the the message is on top of this queue
      * @return {void}
      */
-    send(data, important = false) {
+    enqueue(data, important = false) {
         this.pending[important ? 'unshift' : 'push'](JSON.stringify(data));
-        if (this.socket.ws?.readyState === 1) this.processAsync();
+        if (this.socket.ws?.readyState === Websocket.OPEN) this.process();
     }
     /**
-     * Process the websocket queue async
+     * Process the queue
      * @return {void}
      */
-    processAsync() {
-        if (!this.pending.length) return;
-        const message = this.pending.shift();
-        this.socket.ws.send(message, error => {
-            if (error) this.socket.emit('error', this.socket.name, error);
-        });
-        setImmediate(() => this.processAsync());
-    }
-    /**
-     * Process the websocket queue sync
-     * @return {void}
-     */
-    processSync() {
+    process() {
         if (!this.pending.length) return;
         while(this.pending.length) {
             const message = this.pending.shift();
+            if (!message) return;
             this.socket.ws.send(message, error => {
                 if (error) this.socket.emit('error', this.socket.name, error);
             });

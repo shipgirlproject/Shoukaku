@@ -232,14 +232,14 @@ class ShoukakuSocket extends EventEmitter {
         return this.players.get(guildID)?.connection.disconnect();
     }
     /**
-     * Shortcut to send a message to this websocket
+     * Enqueues a message to be sent on this websocket
      * @param {Object} data Message to be sent
      * @param {imporant} [data=false] If the message should be on top of queue
      * @memberOf ShoukakuSocket
      * @returns {void}
      */
     send(data, important = false) {
-        return this.queue.send(data, important);
+        return this.queue.enqueue(data, important);
     }
     /**
      * @memberOf ShoukakuSocket
@@ -248,7 +248,7 @@ class ShoukakuSocket extends EventEmitter {
      * @private
      */
     _open(response) {
-        this.queue.processSync();
+        this.queue.process();
         if (this.resumable) {
             this.send({
                 op: 'configureResuming',
@@ -291,8 +291,10 @@ class ShoukakuSocket extends EventEmitter {
         this.ws?.removeAllListeners();
         this.ws = null;
         this.emit('close', this.name, code, reason);
-        if (this.destroyed || this.reconnects >= this.reconnectTries) return this._clean();
-        this._reconnect();
+        if (this.destroyed || this.reconnects >= this.reconnectTries) 
+            this._clean();
+        else 
+            this._reconnect();
     }
     /**
      * @memberOf ShoukakuSocket
@@ -322,6 +324,7 @@ class ShoukakuSocket extends EventEmitter {
             for (const player of players) player.moveNode(this.shoukaku._getIdeal(this.group));
         else 
             for (const player of players) player.connection.disconnect();
+        this.queue.clear();
         this.emit('disconnect', this.name, players, moved);
     }
     /**
