@@ -13,6 +13,8 @@ class ShoukakuFilter {
      * @param {ShoukakuConstants#VibratoValue} [settings.vibrato] vibrato settings of this filter
      * @param {ShoukakuConstants#RotationValue} [settings.rotation] rotation settings of this filter
      * @param {ShoukakuConstants#DistortionValue} [settings.distortion] distortion settings of this filter
+     * @param {ShoukakuConstants#RotationValue} [settings.channelMix] channel mix settings of this filter
+     * @param {ShoukakuConstants#DistortionValue} [settings.lowPass]  low pass settings of this filter
      */
     constructor(settings = {}) {
         /**
@@ -55,6 +57,16 @@ class ShoukakuFilter {
          * @type {?ShoukakuConstants#DistortionValue}
          */
         this.distortion = settings.distortion || null;
+        /**
+         * The distortion settings set for this filter
+         * @type {?ShoukakuConstants#ChannelMixValue}
+         */
+        this.channelMix = settings.channelMix || null;
+        /**
+         * The distortion settings set for this filter
+         * @type {?ShoukakuConstants#LowPassValue}
+         */
+        this.lowPass = settings.lowPass || null;
     }
 }
 

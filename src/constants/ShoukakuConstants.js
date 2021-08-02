@@ -238,5 +238,33 @@ class ShoukakuConstants {
             scale: 1
         };
     }
+    /**
+     * Available settings for ChannelMix
+     * @typedef {ChannelMixValue} ChannelMixValue
+     * @property {number} [leftToLeft] Sets the channel mix value of left to left
+     * @property {number} [leftToRight] Sets the channel mix value of left to right
+     * @property {number} [rightToLeft] Sets the channel mix value of right to left
+     * @property {number} [rightToRight] Sets the channel mix value of right to right
+     * @memberof ShoukakuConstants#
+     */
+    static get ChannelMixValue() {
+        return {
+            leftToLeft: 0,
+            leftToRight: 1,
+            rightToLeft: 0,
+            rightToRight: 1
+        };
+    }
+    /**
+     * Available settings for LowPass
+     * @typedef {LowPassValue} LowPassValue
+     * @property {number} [smoothing] Sets the smoothing of low pass filter
+     * @memberof ShoukakuConstants#
+     */
+    static get LowPassValue() {
+        return {
+            smoothing: 0
+        };
+    }
 }
 module.exports = ShoukakuConstants;

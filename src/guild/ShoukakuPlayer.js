@@ -1,5 +1,14 @@
 const EventEmitter = require('events');
-const { ShoukakuPlayOptions, ShoukakuStatus, KaraokeValue, TimescaleValue, TremoloValue, VibratoValue, RotationValue, DistortionValue } = require('../constants/ShoukakuConstants.js');
+const { ShoukakuPlayOptions, 
+    ShoukakuStatus, 
+    KaraokeValue, 
+    TimescaleValue, 
+    TremoloValue, 
+    VibratoValue, 
+    RotationValue, 
+    DistortionValue, 
+    ChannelMixValue,
+    LowPassValue } = require('../constants/ShoukakuConstants.js');
 const { CONNECTED } = ShoukakuStatus;
 const { mergeDefault, wait } = require('../util/ShoukakuUtil.js');
 const ShoukakuLink = require('./ShoukakuLink.js');
@@ -357,6 +366,46 @@ class ShoukakuPlayer extends EventEmitter {
         return this;
     }
     /**
+     * Sets the channel mix effect of your lavalink player
+     * @param {ShoukakuConstants#ChannelMixValue} [channelMixValue] Distortion settings for this playback
+     * @memberOf ShoukakuPlayer
+     * @returns {Promise<ShoukakuPlayer>}
+     */
+    async setChannelMix(channelMixValue) {
+        if (!channelMixValue) {
+            this.filters.channelMix = null;
+        } else {
+            // input sanitation, to ensure no additional keys is being introduced
+            const values = {};
+            for (const key of Object.keys(channelMixValue)) {
+                if (key in ChannelMixValue) values[key] = channelMixValue[key];
+            }
+            this.filters.channelMix = values;
+        }
+        await this.updateFilters();
+        return this;
+    }
+    /**
+     * Sets the low pass effect of your lavalink player
+     * @param {ShoukakuConstants#LowPassValue} [lowPassValue] Distortion settings for this playback
+     * @memberOf ShoukakuPlayer
+     * @returns {Promise<ShoukakuPlayer>}
+     */
+    async setLowPass(lowPassValue) {
+        if (!lowPassValue) {
+            this.filters.lowPass = null;
+        } else {
+            // input sanitation, to ensure no additional keys is being introduced
+            const values = {};
+            for (const key of Object.keys(lowPassValue)) {
+                if (key in LowPassValue) values[key] = lowPassValue[key];
+            }
+            this.filters.lowPass = values;
+        }
+        await this.updateFilters();
+        return this;
+    }
+    /**
      * Ability to set filters by group instead of 1 by 1
      * @param {Object} [settings] object containing filter settings
      * @param {Number} [settings.volume=1.0] volume of this filter
@@ -367,6 +416,8 @@ class ShoukakuPlayer extends EventEmitter {
      * @param {ShoukakuConstants#VibratoValue} [settings.vibrato] vibrato settings of this filter
      * @param {ShoukakuConstants#RotationValue} [settings.rotation] rotation settings of this filter
      * @param {ShoukakuConstants#DistortionValue} [settings.distortion] distortion settings of this filter
+     * @param {ShoukakuConstants#ChannelMixValue} [settings.channelMix] channel mix of this filter
+     * @param {ShoukakuConstants#LowPassValue} [settings.lowPass] low pass of this filter
      * @memberOf ShoukakuPlayer
      * @returns {Promise<ShoukakuPlayer>}
      */
