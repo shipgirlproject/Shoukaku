@@ -102,12 +102,14 @@ class ExampleBot extends Client {
                 guildID: msg.guild.id,
                 shardID: msg.guild.shard.id,
                 voiceChannelID: msg.member.voice.channelID
-            }); 
-            player.on('error', (error) => {
-                console.error(error);
-                player.disconnect();
             });
-            for (const event of ['end', 'closed', 'nodeDisconnect']) player.on(event, () => player.disconnect());
+            const events = ['end', 'error', 'closed', 'disconnect'];
+            for (const event of events) {
+                player.on(event, info => {
+                    console.log(info);
+                    player.disconnect();
+                });
+            }
             data = data.tracks.shift();
             player.playTrack(data); 
             await msg.channel.send("Now Playing: " + data.info.title);

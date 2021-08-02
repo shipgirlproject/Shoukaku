@@ -90,7 +90,13 @@ class ShoukakuPlayer extends EventEmitter {
      * @param {Object} data
      * @memberOf ShoukakuPlayer
      */
-
+    /**
+     * Emitted when the node where this player is have been disconnected
+     * @event ShoukakuPlayer#disconnect
+     * @param {Object} data
+     * @memberOf ShoukakuPlayer
+     */
+    
     /**
      * Moves this player and connection to another node
      * @param {string} name Name of the Node you want to move to
