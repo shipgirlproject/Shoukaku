@@ -1,6 +1,6 @@
 import { Client as DiscordClient } from 'eris';
 import { Shoukaku } from '../../Shoukaku';
-import { NodeOptions } from '../../Constants';
+import { NodeOptions, Snowflake } from '../../Constants';
 import { GetterObj } from '../Constants';
 
 export class Eris {
@@ -9,6 +9,6 @@ export class Eris {
     );
     public client: DiscordClient;
 
-    public getters(): GetterObj<string, object, Map<string, object>>;
-    public build(shoukaku: Shoukaku, nodes: NodeOptions): GetterObj<string, object, Map<string, object>>;
+    public getters(): GetterObj<Snowflake, object, Map<Snowflake, object>>;
+    public build(shoukaku: Shoukaku, nodes: NodeOptions[]): GetterObj<Snowflake, object, Map<Snowflake, object>>;
 }
