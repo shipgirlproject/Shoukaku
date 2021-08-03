@@ -56,7 +56,7 @@ export interface FilterDistortionSettings {
     sinScale?: number,
     cosOffset?: number,
     cosScale?: number,
-    cosScale?: number,
+    tanOffset?: number,
     tanScale?: number,
     offset?: number,
     scale?: number
