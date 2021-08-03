@@ -13,9 +13,21 @@ export class ShoukakuRest {
 
     private get router(): number;
     public resolve(identifier: string, search: string | undefined): Promise<void | ShoukakuTrackList>;
-    public decode(track: string): Promise<Object>;
+    public decode(track: string): Promise<DecodedTrack>;
     public getRoutePlannerStatus(): Promise<Object>;
     public unmarkFailedAddress(address: string): Promise<void>;
     public unmarkAllFailedAddress(): Promise<void>;
     protected fetch(url: string, options?: { method: string, options?: Object }): Promise<Object>;
+}
+
+export interface DecodedTrack {
+  identifier: string;
+  isSeekable: boolean;
+  author: string;
+  length: number;
+  isStream: boolean;
+  position: number;
+  title: string;
+  uri: string;
+  sourceName: string;
 }
