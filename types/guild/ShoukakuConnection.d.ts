@@ -25,8 +25,8 @@ export class ShoukakuConnection extends EventEmitter {
     private serverUpdate: boolean;
 
     public attemptReconnect(options: { channelID: Snowflake, forceReconnect: boolean }): Promise<void>;
-    public setDeaf(deaf: boolean): void;
-    public setMute(mute: boolean): void;
+    public setDeaf(deaf?: boolean): void;
+    public setMute(mute?: boolean): void;
     public disconnect(): void;
     public connect(options: ConnectOptions): Promise<void>;
     protected setStateUpdate(options: StateUpdate): void;
