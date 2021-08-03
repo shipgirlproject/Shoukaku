@@ -5,7 +5,6 @@
 class ShoukakuFilter {
     /** 
      * @param {Object} [settings={}] Settings to initialize this filter with
-     * @param {Number} [settings.volume=1.0] Volume of this filter 
      * @param {Object[]} [settings.equalizer=[]] Equalizer of this filter
      * @param {number} settings.equalizer.band Band of the equalizer, can be 0 - 13
      * @param {number} settings.equalizer.gain Gain for this band of the equalizer
@@ -44,11 +43,6 @@ class ShoukakuFilter {
      * @param {number} [settings.lowPass.smoothing] Sets the smoothing of low pass filter
      */
     constructor(settings = {}) {
-        /**
-         * The volume of this filter
-         * @type {Number}
-         */
-        this.volume = settings.volume || 1.0;
         /**
          * The equalizer bands set for this filter
          * @type {Object[]}
