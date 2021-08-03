@@ -7,15 +7,21 @@ export enum state {
     DISCONNECTED = 3
 }
 
+export enum voiceState {
+    SESSION_READY = 0,
+    SESSION_ID_MISSING = 1,
+    SESSION_ENDPOINT_MISSING = 2
+}
+
 export interface ShoukakuOptions {
-    resumable: boolean,
-    resumableTimeout: number,
-    reconnectTries: number,
-    moveOnDisconnect: boolean,
-    restTimeout: number,
-    reconnectInterval: number,
-    closeEventDelay: number,
-    userAgent: string
+    resumable?: boolean,
+    resumableTimeout?: number,
+    reconnectTries?: number,
+    moveOnDisconnect?: boolean,
+    restTimeout?: number,
+    reconnectInterval?: number,
+    closeEventDelay?: number,
+    userAgent?: string
 }
 
 export interface NodeOptions {

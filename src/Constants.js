@@ -6,7 +6,7 @@ const { name, version, repository } = require('../package.json');
  */
 module.exports = {
     /**
-    * State of nodes or links
+    * State of the ws connections to Lavalink or Discord Voice
     * @enum {number}
     * @memberof Constants
     */
@@ -15,6 +15,16 @@ module.exports = {
         CONNECTED: 1,
         DISCONNECTING: 2,
         DISCONNECTED: 3
+    },
+    /**
+    * Voice connection state, Used to read the status of the voice connection internally
+    * @enum {number}
+    * @memberof Constants
+    */
+    voiceState: {
+        SESSION_READY: 0,
+        SESSION_ID_MISSING: 1,
+        SESSION_ENDPOINT_MISSING: 2
     },
     /**
     * Options that Shoukaku accepts upon initialization

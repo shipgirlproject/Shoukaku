@@ -270,9 +270,9 @@ class ShoukakuSocket extends EventEmitter {
      */
     _message(message) {
         const json = JSON.parse(message);
-        this.emit('debug', this.name, `[Socket] <- [${this.name}] : Websocket Message, OP: ${json?.op || 'Unknown'}`);
         if (!json) return;
         if (json.op === 'stats') {
+            this.emit('debug', this.name, `[Socket] <- [${this.name}] : Node Status Update | Server Load: ${this.penalties}`);
             this.stats = new ShoukakuStats(json);
             return;
         }

@@ -1,6 +1,6 @@
 const AbortController = require('abort-controller');
 const { EventEmitter, once } = require('events');
-const { state } = require('../Constants.js');
+const { state, voiceState } = require('../Constants.js');
 const { wait } = require('../Utils.js');
 
 /**
@@ -145,7 +145,7 @@ class ShoukakuConnection extends EventEmitter {
         this.player.removeAllListeners();
         this.player.reset();
         this.state = state.DISCONNECTED;
-        this.node.emit('debug', this.node.name, '[Voice] -> [Node] [Discord] : Link & Player Destroyed');
+        this.node.emit('debug', this.node.name, `[Voice] -> [Node] & [Discord] : Link & Player Destroyed | Guild: ${this.guildID}`);
     }
     /**
      * Connects this connection
@@ -162,14 +162,20 @@ class ShoukakuConnection extends EventEmitter {
         this.state = state.CONNECTING;
         const { guildID, channelID, deaf, mute } = options;
         this.send({ guild_id: guildID, channel_id: channelID, self_deaf: deaf, self_mute: mute }, true);
-        this.node.emit('debug', this.node.name, '[Voice] -> [Discord] : Requesting Connection');
+        this.node.emit('debug', this.node.name, `[Voice] -> [Discord] : Requesting Connection | Guild: ${this.guildID}`);
         const controller = new AbortController();
         const timeout = setTimeout(() => controller.abort(), 15000);
         try {
-            await once(this, 'serverUpdate', { signal: controller.signal });
+            const [ status ] = await once(this, 'connectionUpdate', { signal: controller.signal });
+            if (status !== voiceState.SESSION_READY) {
+                if (status === voiceState.SESSION_ID_MISSING) 
+                    throw new Error('The voice connection is not established due to missing session id');
+                else 
+                    throw new Error('The voice connection is not established due to missing connection endpoint');
+            }
             this.state = state.CONNECTED;
         } catch (error) {
-            this.node.emit('debug', this.node.name, '[Voice] </- [Discord] : Request Connection Failed');
+            this.node.emit('debug', this.node.name, `[Voice] </- [Discord] : Request Connection Failed | Guild: ${this.guildID}`);
             if (error.name === 'AbortError') 
                 throw new Error('The voice connection is not established in 15 seconds');
             throw error;
@@ -183,14 +189,23 @@ class ShoukakuConnection extends EventEmitter {
      * @protected
      */
     setStateUpdate({ session_id, channel_id, self_deaf, self_mute }) {
-        this.moved = this.channelID && this.channelID !== channel_id;
+        if (this.channelID && this.channelID !== channel_id) {
+            this.node.emit('debug', this.node.name, `[Voice] <- [Discord] : Channel Moved | Guild: ${this.guildID}`);
+            this.moved = true;
+        }
+        this.channelID = channel_id || this.channelID;
+        if (!channel_id) {
+            this.state = state.DISCONNECTED;
+            this.node.emit('debug', this.node.name, `[Voice] <- [Discord] : Channel Disconnected | Guild: ${this.guildID}`);
+        }
         this.deafened = self_deaf;
         this.muted = self_mute;
+        if (!session_id) {
+            this.emit('connectionUpdate', voiceState.SESSION_ID_MISSING);
+            return;
+        }
         this.sessionID = session_id;
-        this.channelID = channel_id || this.channelID;
-        if (!channel_id) this.state = state.DISCONNECTED;
-        this.node.emit('debug', this.node.name, '[Voice] <- [Discord] : State Update');
-        this.emit('stateUpdate');
+        this.node.emit('debug', this.node.name, `[Voice] <- [Discord] : State Update Received, Session ID: ${session_id} | Guild: ${this.guildID}`);
     }
     /**
      * @memberOf ShoukakuConnection
@@ -198,13 +213,16 @@ class ShoukakuConnection extends EventEmitter {
      * @protected
      */
     setServerUpdate(data) {
-        if (!data.endpoint) return;
+        if (!data.endpoint) {
+            this.emit('connectionUpdate', voiceState.SESSION_ENDPOINT_MISSING);
+            return;
+        }
         this.moved = this.serverUpdate && !data.endpoint.startsWith(this.region);
         this.region = data.endpoint.split('.').shift().replace(/[0-9]/g, '');
         this.serverUpdate = data;
         this.node.send({ op: 'voiceUpdate', guildId: this.guildID, sessionId: this.sessionID, event: this.serverUpdate });
-        this.node.emit('debug', this.node.name, '[Voice] <- [Discord] : Server Update');
-        this.emit('serverUpdate');
+        this.node.emit('debug', this.node.name, `[Voice] <- [Discord] : Server Update, Voice Update Sent, Server: ${this.region} | Guild: ${this.guildID}`);
+        this.emit('connectionUpdate', voiceState.SESSION_READY);
     }
     /**
      * @memberOf ShoukakuConnection

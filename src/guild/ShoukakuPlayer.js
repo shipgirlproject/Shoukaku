@@ -418,7 +418,7 @@ class ShoukakuPlayer extends EventEmitter {
             this._onPlayerEvent(json);
         } 
         else {
-            this.connection.node.emit('debug', this.connection.node.name, `[Node] -> [${this.connection.node.name}] : Unknown Message OP ${json.op}`);
+            this.connection.node.emit('debug', this.connection.node.name, `[Player] -> [Node] : Unknown Message OP ${json.op} | Guild: ${this.connection.guildID}`);
         }
     }
     /**
@@ -447,7 +447,7 @@ class ShoukakuPlayer extends EventEmitter {
                 this.connection.node.emit(
                     'debug', 
                     this.connection.node.name, 
-                    `[Node] -> [${this.connection.node.name}] : Unknown Player Event Type ${json.type}`
+                    `[Player] -> [Node] : Unknown Player Event Type ${json.type} | Guild: ${this.connection.guildID}`
                 );
         }
         return;
@@ -468,7 +468,7 @@ class ShoukakuPlayer extends EventEmitter {
             this.connection.node.emit(
                 'debug', 
                 this.connection.node.name, 
-                `[Node] -> [${this.connection.node.name}] : Voice channel or server move detected`
+                `[Player] -> [Node] : Voice channel or server move detected | Guild: ${this.connection.guildID}`
             );
             this.connection.moved = false;  
         }, delay);
