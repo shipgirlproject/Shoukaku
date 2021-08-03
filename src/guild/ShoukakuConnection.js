@@ -190,8 +190,8 @@ class ShoukakuConnection extends EventEmitter {
      */
     setStateUpdate({ session_id, channel_id, self_deaf, self_mute }) {
         if (this.channelID && this.channelID !== channel_id) {
-            this.node.emit('debug', this.node.name, `[Voice] <- [Discord] : Channel Moved | Guild: ${this.guildID}`);
             this.moved = true;
+            this.node.emit('debug', this.node.name, `[Voice] <- [Discord] : Channel Moved | Guild: ${this.guildID}`);
         }
         this.channelID = channel_id || this.channelID;
         if (!channel_id) {

@@ -8,7 +8,7 @@
  * Shoukaku's Library Plugin for Eris
  * @class Eris
  */
- class Eris {
+class Eris {
     /**
      * @param {Client} client Library client
      */
@@ -48,7 +48,7 @@
         // attach to ready event "once"
         this.client.once('ready', () => shoukaku._clientReady(nodes));
         // attach to raw event
-        this.client.on('rawWS', (packet, id) => shoukaku._clientRaw(packet));
+        this.client.on('rawWS', packet => shoukaku._clientRaw(packet));
         // return the getters for Shoukaku's usage
         return this.getters();
     }
