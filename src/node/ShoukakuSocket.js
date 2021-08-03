@@ -173,8 +173,8 @@ class ShoukakuSocket extends EventEmitter {
     /**
     * Disconnects this socket
     * @memberof ShoukakuSocket
-    * @param {?number} [code=1000]
     * @param {string} [reason]
+    * @param {?number} [code=1000]
     * @returns {void}
     * @protected
     */
