@@ -113,7 +113,7 @@ class ShoukakuConnection extends EventEmitter {
     /**
      * Deafens the client
      * @memberOf ShoukakuConnection
-     * @param {boolean} [deaf=false]
+     * @param {?boolean} [deaf=false]
      * @returns {void}
      */
     setDeaf(deaf = false) {
@@ -123,7 +123,7 @@ class ShoukakuConnection extends EventEmitter {
     /**
      * Mutes the client
      * @memberOf ShoukakuConnection
-     * @param {boolean} [mute=false]
+     * @param {?boolean} [mute=false]
      * @returns {void}
      */
     setMute(mute = false) {
