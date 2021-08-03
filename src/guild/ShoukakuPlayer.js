@@ -24,6 +24,11 @@ class ShoukakuPlayer extends EventEmitter {
          */
         this.connection = new ShoukakuConnection(this, node, options);
         /**
+          * The volume of this filter
+          * @type {?Number}
+          */
+        this.volume = 100;
+        /**
          * The track that is currently being played by this player
          * @type {?string}
          */
@@ -144,7 +149,7 @@ class ShoukakuPlayer extends EventEmitter {
             guildId: this.connection.guildID,
             track: input,
             noReplace: options.noReplace,
-            volume: options.volume ?? 100,
+            volume: options.volume ?? this.volume,
             pause: options.pause
         };
         if (options.startTime) payload.startTime = options.startTime;
@@ -207,7 +212,7 @@ class ShoukakuPlayer extends EventEmitter {
     setVolume(volume) {
         if (Number.isNaN(volume)) throw new Error('Please input a valid number for volume');
         volume = Math.min(5, Math.max(0, volume));
-        this.filters.volume = volume;
+        this.volume = volume;
         this.updateFilters();
         return this;
     }
@@ -383,11 +388,10 @@ class ShoukakuPlayer extends EventEmitter {
      * @private
      */
     updateFilters() {
-        const { volume, equalizer, karaoke, timescale, tremolo, vibrato, rotation, distortion } = this.filters;
+        const { equalizer, karaoke, timescale, tremolo, vibrato, rotation, distortion } = this.filters;
         this.connection.node.send({
             op: 'filters',
             guildId: this.connection.guildID,
-            volume,
             equalizer,
             karaoke,
             timescale,
