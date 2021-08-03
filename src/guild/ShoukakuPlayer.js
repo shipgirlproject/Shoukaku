@@ -213,7 +213,11 @@ class ShoukakuPlayer extends EventEmitter {
         if (Number.isNaN(volume)) throw new Error('Please input a valid number for volume');
         volume = Math.min(5, Math.max(0, volume));
         this.volume = volume;
-        this.updateFilters();
+        this.connection.node.send({
+            op: "volume",
+            guildId: this.connection.guildID,
+            volume: volume
+        });
         return this;
     }
     /**
