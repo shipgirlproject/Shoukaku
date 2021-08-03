@@ -24,12 +24,12 @@ export class ShoukakuPlayer extends EventEmitter {
     public seekTo(position: number): ShoukakuPlayer;
     public setVolume(volume: number): ShoukakuPlayer;
     public setEqualizer(bands: { band: number, gain: number }[]): ShoukakuPlayer;
-    public setKaraoke(values: { level: number, monoLevel: number, filterBand: number, filterWidth: number } | null): ShoukakuPlayer;
-    public setTimescale(values: { speed: number, pitch: number, rate: number } | null): ShoukakuPlayer;
-    public setTremolo(values: { frequency: number, depth: number } | null): ShoukakuPlayer;
-    public setVibrato(values: { frequency: number, depth: number } | null): ShoukakuPlayer;
-    public setRotation(values: { rotationHz: number } | null): ShoukakuPlayer;
-    public setDistortion(values: { sinOffset: number, sinScale: number, cosOffset: number, cosScale: number, tanOffset: number, tanScale: number, offset: number, scale: number } | null): ShoukakuPlayer;
+    public setKaraoke(values: { level?: number, monoLevel?: number, filterBand?: number, filterWidth?: number } | null): ShoukakuPlayer;
+    public setTimescale(values: { speed?: number, pitch?: number, rate?: number } | null): ShoukakuPlayer;
+    public setTremolo(values: { frequency?: number, depth?: number } | null): ShoukakuPlayer;
+    public setVibrato(values: { frequency?: number, depth?: number } | null): ShoukakuPlayer;
+    public setRotation(values: { rotationHz?: number } | null): ShoukakuPlayer;
+    public setDistortion(values: { sinOffset?: number, sinScale?: number, cosOffset?: number, cosScale?: number, tanOffset?: number, tanScale?: number, offset?: number, scale?: number } | null): ShoukakuPlayer;
     public setFilters(settings: ShoukakuFilter): ShoukakuPlayer;
     public cleanFilters(): ShoukakuPlayer;
     public resume(): ShoukakuPlayer;
