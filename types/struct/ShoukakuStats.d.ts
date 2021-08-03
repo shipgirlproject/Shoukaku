@@ -12,29 +12,29 @@ export class ShoukakuStats {
 }
 
 export interface OPStats {
-    players: number,
-    playingPlayers: number,
-    memory: OPMemStats,
-    frameStats: OPFrameStats,
-    cpu: OPCPUStats,
-    uptime: number
+    players: number;
+    playingPlayers: number;
+    memory: OPMemStats;
+    frameStats: OPFrameStats;
+    cpu: OPCPUStats;
+    uptime: number;
 }
 
 export interface OPMemStats {
-    reservable: number,
-    used: number,
-    free: number,
-    allocated: number
+    reservable: number;
+    used: number;
+    free: number;
+    allocated: number;
 }
 
 export interface OPFrameStats {
-    sent: number,
-    deficit: number,
-    nulled: number
+    sent: number;
+    deficit: number;
+    nulled: number;
 }
 
 export interface OPCPUStats {
-    cores: number,
-    systemLoad: number,
-    lavalinkLoad: number
+    cores: number;
+    systemLoad: number;
+    lavalinkLoad: number;
 }

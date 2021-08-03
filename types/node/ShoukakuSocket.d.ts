@@ -1,10 +1,9 @@
-import { Base64String, Snowflake } from 'discord.js';
 import { EventEmitter } from 'events';
 import { ShoukakuPlayer } from '../guild/ShoukakuPlayer';
 import { Shoukaku } from '../Shoukaku';
 import { ShoukakuQueue } from './ShoukakuQueue';
 import { ShoukakuRest } from './ShoukakuRest';
-import { state } from '../Constants';
+import { state, Base64String, Snowflake } from '../Constants';
 import { ShoukakuStats } from '../struct/ShoukakuStats';
 
 
@@ -37,7 +36,7 @@ export class ShoukakuSocket extends EventEmitter {
     protected connect(reconnect: boolean): void;
     protected disconnect(code: number, reason: string): void;
     public joinChannel(options: JoinOptions): Promise<ShoukakuPlayer>;
-    public leaveChannel(guildID: string): void;
+    public leaveChannel(guildID: Snowflake): void;
     public send(data: Object, important: boolean): void;
     private _open(response: Object): void;
     private _message(message: string): void;
@@ -50,7 +49,7 @@ export class ShoukakuSocket extends EventEmitter {
 
 export interface JoinOptions {
     guildID: Snowflake, 
-    shardID: string, 
+    shardID: number, 
     channelID: Snowflake, 
     mute?: boolean, 
     deaf?: boolean

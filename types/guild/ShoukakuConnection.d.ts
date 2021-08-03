@@ -1,6 +1,5 @@
-import { Base64String, Snowflake } from 'discord.js';
 import { EventEmitter } from 'events';
-import { state } from '../Constants';
+import { state, Base64String, Snowflake } from '../Constants';
 import { ShoukakuPlayer } from './ShoukakuPlayer';
 import { ShoukakuSocket } from '../node/ShoukakuSocket';
 
@@ -8,7 +7,7 @@ export class ShoukakuConnection extends EventEmitter {
     constructor(
         player: ShoukakuPlayer,
         node: ShoukakuSocket,
-        options: { guildID: string, shardID: number }
+        options: { guildID: Snowflake, shardID: number }
     );
 
     public player: ShoukakuPlayer;
