@@ -163,10 +163,10 @@ class ShoukakuConnection extends EventEmitter {
         const { guildID, channelID, deaf, mute } = options;
         this.send({ guild_id: guildID, channel_id: channelID, self_deaf: deaf, self_mute: mute }, true);
         this.node.emit('debug', this.node.name, '[Voice] -> [Discord] : Requesting Connection');
-        const signal = new AbortController();
-        const timeout = setTimeout(() => signal.abort(), 15000);
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 15000);
         try {
-            await once(this, 'serverUpdate', { signal });
+            await once(this, 'serverUpdate', { signal: controller.signal });
             this.state = state.CONNECTED;
         } catch (error) {
             this.node.emit('debug', this.node.name, '[Voice] </- [Discord] : Request Connection Failed');

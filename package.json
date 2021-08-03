@@ -19,6 +19,10 @@
     "lavalink-api",
     "weeb-library"
   ],
+  "engines": {
+    "node": ">=14.6.0",
+    "npm": ">=7.0.0"
+  },
   "author": "Saya",
   "license": "MIT",
   "repository": {
