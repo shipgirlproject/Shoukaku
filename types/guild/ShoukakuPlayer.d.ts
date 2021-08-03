@@ -18,6 +18,7 @@ export class ShoukakuPlayer extends EventEmitter {
 
   public moveNode(name: string): ShoukakuPlayer;
   public playTrack(input: Base64String | ShoukakuTrack, options?: { noReplace?: boolean, pause?: boolean, startTime?: number, endTime?: number }): ShoukakuPlayer;
+  public stopTrack(): ShoukakuPlayer;
   public setPaused(pause: boolean): ShoukakuPlayer;
   public seekTo(position: number): ShoukakuPlayer;
   public setVolume(volume: number): ShoukakuPlayer;
@@ -27,9 +28,9 @@ export class ShoukakuPlayer extends EventEmitter {
   public setTremolo(values: { frequency?: number, depth?: number } | null): ShoukakuPlayer;
   public setVibrato(values: { frequency?: number, depth?: number } | null): ShoukakuPlayer;
   public setRotation(values: { rotationHz: number } | null): ShoukakuPlayer;
+  public setDistortion(values: { sinOffset?: number, sinScale?: number, cosOffset?: number, cosScale?: number, tanOffset?: number, tanScale?: number, offset?: number, scale?: number } | null): ShoukakuPlayer;
   public setChannelMix(values: { leftToLeft?: number, leftToRight?: number, rightToLeft?: number, rightToRight?: number } | null): ShoukakuPlayer;
   public setLowPass(values: { smoothing: number } | null): ShoukakuPlayer;
-  public setDistortion(values: { sinOffset?: number, sinScale?: number, cosOffset?: number, cosScale?: number, tanOffset?: number, tanScale?: number, offset?: number, scale?: number } | null): ShoukakuPlayer;
   public setFilters(settings: ShoukakuFilter): ShoukakuPlayer;
   public cleanFilters(): ShoukakuPlayer;
   public resume(): ShoukakuPlayer;
