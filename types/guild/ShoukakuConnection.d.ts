@@ -35,15 +35,15 @@ export class ShoukakuConnection extends EventEmitter {
 }
 
 export interface ConnectOptions {
-  guildID: Snowflake, 
-  channelID: Snowflake,
-  deaf: boolean, 
-  mute: boolean
+  guildID: Snowflake;
+  channelID: Snowflake;
+  deaf: boolean;
+  mute: boolean;
 }
 
 export interface StateUpdate {
-  session_id: string,
-  channel_id: Snowflake, 
-  self_deaf: boolean, 
-  self_mute: boolean
+  session_id: string;
+  channel_id: Snowflake;
+  self_deaf: boolean;
+  self_mute: boolean;
 }
