@@ -11,6 +11,8 @@ export class ShoukakuFilter {
     public vibrato: FilterFreqSettings | null;
     public rotation: FilterRotationSettings | null;
     public distortion: FilterDistortionSettings | null;
+    public channelMix: FilterChannelMixSettings | null;
+    public lowPass: FilterLowPassSettings | null;
 }
 
 export interface FilterSettings {
@@ -22,6 +24,19 @@ export interface FilterSettings {
     vibrato?: FilterFreqSettings;
     rotation?: FilterRotationSettings;
     distortion?: FilterDistortionSettings;
+    channelMix?: FilterChannelMixSettings;
+    lowPass?: FilterLowPassSettings
+}
+
+export interface FilterChannelMixSettings {
+  leftToLeft?: number;
+  leftToRight?: number;
+  rightToLeft?: number;
+  rightToRight?: number;
+}
+
+export interface FilterLowPassSettings {
+  smoothing: number
 }
 
 export interface FilterEqSettings {
