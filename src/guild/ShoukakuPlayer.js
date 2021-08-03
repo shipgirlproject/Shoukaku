@@ -126,9 +126,9 @@ class ShoukakuPlayer extends EventEmitter {
     /**
      * Plays a track
      * @param {string|ShoukakuTrack} track The Base64 track from the Lavalink Rest API or a ShoukakuTrack
-     * @param {Object} [options={}] Used if you want to put a custom track start or end time
-     * @param {boolean} [options.noReplace=true] Specifies if the player will not replace the current track when executing this action
-     * @param {boolean} [options.pause=false] If `true`, the player will pause when the track starts playing
+     * @param {?Object} [options={}] Used if you want to put a custom track start or end time
+     * @param {?boolean} [options.noReplace=true] Specifies if the player will not replace the current track when executing this action
+     * @param {?boolean} [options.pause=false] If `true`, the player will pause when the track starts playing
      * @param {?number} [options.startTime=undefined] In milliseconds on when to start
      * @param {?number} [options.endTime=undefined] In milliseconds on when to end
      * @memberOf ShoukakuPlayer
@@ -168,7 +168,7 @@ class ShoukakuPlayer extends EventEmitter {
     }
     /**
      * Pauses or unpauses the player from playing
-     * @param {boolean} [pause=true] true to pause, false to unpause
+     * @param {?boolean} [pause=true] true to pause, false to unpause
      * @memberOf ShoukakuPlayer
      * @returns {ShoukakuPlayer}
      */
