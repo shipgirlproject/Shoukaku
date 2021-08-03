@@ -12,7 +12,7 @@ export class ShoukakuRest {
     private userAgent: string;
 
     private get router(): number;
-    public resolve(identifier: string, search: string | null): Promise<void | ShoukakuTrackList>;
+    public resolve(identifier: string, search: string | undefined): Promise<void | ShoukakuTrackList>;
     public decode(track: string): Promise<Object>;
     public getRoutePlannerStatus(): Promise<Object>;
     public unmarkFailedAddress(address: string): Promise<void>;

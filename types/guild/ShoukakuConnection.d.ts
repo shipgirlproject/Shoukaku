@@ -8,7 +8,7 @@ export class ShoukakuConnection extends EventEmitter {
     constructor(
         player: ShoukakuPlayer,
         node: ShoukakuSocket,
-        options: { guildID: string, shardID: number }
+        options: { guildID: Snowflake, shardID: number }
     );
 
     public player: ShoukakuPlayer;

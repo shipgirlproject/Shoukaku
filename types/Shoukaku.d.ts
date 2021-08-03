@@ -8,7 +8,7 @@ import { EventEmitter } from 'events';
 export class Shoukaku extends EventEmitter {
     constructor(
         library: any,
-        nodes: NodeOptions,
+        nodes: NodeOptions[],
         options: ShoukakuOptions
     );
 
@@ -20,7 +20,7 @@ export class Shoukaku extends EventEmitter {
     public get players(): Map<Snowflake, ShoukakuPlayer>;
 
     public addNode(options: NodeOptions): void;
-    public removeNode(name: string, reason: string): void;
+    public removeNode(name: string, reason?: string): void;
     public getNode(query: string | Array<string>): ShoukakuSocket;
     
     protected _getIdeal(group: string): ShoukakuSocket;
