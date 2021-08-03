@@ -24,7 +24,7 @@ export class Shoukaku extends EventEmitter {
     public getNode(query: string | Array<string>): ShoukakuSocket;
     
     protected _getIdeal(group: string): ShoukakuSocket;
-    protected _clientReady(nodes: Array<Object>): void;
+    protected _clientReady(nodes: NodeOptions[]): void;
     protected _clientRaw(packet: Object): void;
     private _clean(name: string, players: ShoukakuPlayer[], moved: boolean): void;
 }

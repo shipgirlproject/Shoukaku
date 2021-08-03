@@ -14,50 +14,50 @@ export class ShoukakuFilter {
 }
 
 export interface FilterSettings {
-    volume?: number,
-    equalizer?: FilterEqSettings[],
-    karaoke?: FilterKaraokeSettings,
-    timescale: FilterTimescaleSettings,
-    tremolo?: FilterFreqSettings,
-    vibrato?: FilterFreqSettings,
-    vibrato?: FilterRotationSettings,
-    distortion?: FilterDistortionSettings
+    volume: number;
+    equalizer?: FilterEqSettings[];
+    karaoke?: FilterKaraokeSettings;
+    timescale?: FilterTimescaleSettings;
+    tremolo?: FilterFreqSettings;
+    vibrato?: FilterFreqSettings;
+    rotation?: FilterRotationSettings;
+    distortion?: FilterDistortionSettings;
 }
 
 export interface FilterEqSettings {
-    band: number,
-    gain: number
+    band: number;
+    gain: number;
 }
 
 export interface FilterKaraokeSettings {
-    level?: number,
-    monoLevel?: number,
-    filterBand?: number,
-    filterWidth?: number
+    level?: number;
+    monoLevel?: number;
+    filterBand?: number;
+    filterWidth?: number;
 }
 
 export interface FilterTimescaleSettings {
-    speed?: number,
-    speed?: number,
-    rate?: number
+    speed?: number;
+    pitch?: number;
+    rate?: number;
 }
 
 export interface FilterFreqSettings {
-    frequency?: number,
-    depth?: number
+    frequency?: number;
+    depth?: number;
 }
 
 export interface FilterRotationSettings {
-    rotationHz?: number
+    rotationHz: number;
 }
 
 export interface FilterDistortionSettings {
-    sinOffset?: number,
-    sinScale?: number,
-    cosOffset?: number,
-    cosScale?: number,
-    tanOffset?: number,
-    tanScale?: number,
-    offset?: number,
-    scale?: number
+    sinOffset?: number;
+    sinScale?: number;
+    cosOffset?: number;
+    cosScale?: number;
+    tanOffset?: number;
+    tanScale?: number;
+    offset?: number;
+    scale?: number;
 }

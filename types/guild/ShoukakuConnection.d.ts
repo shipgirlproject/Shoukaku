@@ -1,6 +1,5 @@
-import { Base64String, Snowflake } from 'discord.js';
 import { EventEmitter } from 'events';
-import { state } from '../Constants';
+import { state, Base64String, Snowflake } from '../Constants';
 import { ShoukakuPlayer } from './ShoukakuPlayer';
 import { ShoukakuSocket } from '../node/ShoukakuSocket';
 
