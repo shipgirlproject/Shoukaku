@@ -23,7 +23,7 @@ class ShoukakuQueue {
     /**
      * Enqueues a message to be sent on websocket
      * @param {Object} data Data to be sent to the websocket
-     * @param {boolean} [important=false] If the the message is on top of this queue
+     * @param {?boolean} [important=false] If the the message is on top of this queue
      * @return {void}
      */
     enqueue(data, important = false) {
