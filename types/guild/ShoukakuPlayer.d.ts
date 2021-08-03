@@ -15,6 +15,7 @@ export class ShoukakuPlayer extends EventEmitter {
     public track?: Base64String | null;
     public paused: boolean;
     public position: number;
+    public volume: number;
     public filters: ShoukakuFilter;
 
     public moveNode(name: string): ShoukakuPlayer;
