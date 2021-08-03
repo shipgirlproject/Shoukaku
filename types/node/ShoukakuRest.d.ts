@@ -1,4 +1,4 @@
-import { ShoukakuTrackList } from '../Constants';
+import { ShoukakuTrackList, DecodedTrack } from '../Constants';
 
 export class ShoukakuRest {
     constructor (
@@ -18,16 +18,4 @@ export class ShoukakuRest {
     public unmarkFailedAddress(address: string): Promise<void>;
     public unmarkAllFailedAddress(): Promise<void>;
     protected fetch(url: string, options?: { method: string, options?: Object }): Promise<Object>;
-}
-
-export interface DecodedTrack {
-  identifier: string;
-  isSeekable: boolean;
-  author: string;
-  length: number;
-  isStream: boolean;
-  position: number;
-  title: string;
-  uri: string;
-  sourceName: string;
 }
