@@ -3,7 +3,6 @@ export class ShoukakuFilter {
         settings: FilterSettings
     )
 
-    public volume: number;
     public equalizer: FilterEqSettings[];
     public karaoke: FilterKaraokeSettings | null;
     public timescale: FilterTimescaleSettings | null;
@@ -14,7 +13,6 @@ export class ShoukakuFilter {
 }
 
 export interface FilterSettings {
-    volume: number,
     equalizer: FilterEqSettings[],
     karaoke: FilterKaraokeSettings,
     timescale: FilterTimescaleSettings,
