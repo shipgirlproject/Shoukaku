@@ -34,7 +34,7 @@ export class ShoukakuSocket extends EventEmitter {
     private get reconnectInterval(): number;
     private get penalties(): number;
     protected connect(reconnect?: boolean): void;
-    protected disconnect(reason: string, code?: number): void;
+    protected disconnect(code?: number, reason?: string): void;
     public joinChannel(options: JoinOptions): Promise<ShoukakuPlayer>;
     public leaveChannel(guildID: Snowflake): void;
     public send(data: Object, important: boolean): void;
