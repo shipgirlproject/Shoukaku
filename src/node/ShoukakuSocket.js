@@ -149,7 +149,7 @@ class ShoukakuSocket extends EventEmitter {
     /**
     * Connects this socket
     * @memberof ShoukakuSocket
-    * @param {?boolean} [reconnect=false]
+    * @param {boolean} [reconnect=false]
     * @returns {void}
     * @protected
     */
@@ -173,8 +173,8 @@ class ShoukakuSocket extends EventEmitter {
     /**
     * Disconnects this socket
     * @memberof ShoukakuSocket
-    * @param {string} [reason]
-    * @param {?number} [code=1000]
+    * @param {string} reason
+    * @param {number} [code=1000]
     * @returns {void}
     * @protected
     */
@@ -190,8 +190,8 @@ class ShoukakuSocket extends EventEmitter {
      * @param {string} options.guildID GuildID where the voice channel you want to join is in
      * @param {string} options.shardID ShardID where this guild is in
      * @param {string} options.channelID ChannelID of the voice channel where you want to join in
-     * @param {?boolean} [options.mute=false] If you want to join this channel muted already
-     * @param {?boolean} [options.deaf=false] If you want to join this channel deafened already
+     * @param {boolean} [options.mute=false] If you want to join this channel muted already
+     * @param {boolean} [options.deaf=false] If you want to join this channel deafened already
      * @memberof ShoukakuSocket
      * @returns {Promise<ShoukakuPlayer>}
      * @example
@@ -234,7 +234,7 @@ class ShoukakuSocket extends EventEmitter {
     /**
      * Enqueues a message to be sent on this websocket
      * @param {Object} data Message to be sent
-     * @param {?imporant} [data=false] If the message should be on top of queue
+     * @param {boolean} [important=false] If the message should be on top of queue
      * @memberOf ShoukakuSocket
      * @returns {void}
      */
