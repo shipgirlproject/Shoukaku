@@ -53,8 +53,8 @@ module.exports = {
     * @property {string} name Your Node Name, anything you want to name your node
     * @property {string} url Your node host:port combined, do not put any prefix in this property, ex: 'localhost:2048'
     * @property {string} auth The authentication key you set on your lavalink config
-    * @property {?boolean} [secure=false] If you want to use https and wss instead of http and ws
-    * @property {?string} [group=undefined] Group of this node, used for grouping specific nodes
+    * @property {boolean} [secure=false] If you want to use https and wss instead of http and ws
+    * @property {string} [group=undefined] Group of this node, used for grouping specific nodes
     * @memberof Constants
     */
     nodeOptions: {

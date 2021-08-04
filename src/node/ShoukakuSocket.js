@@ -20,7 +20,7 @@ class ShoukakuSocket extends EventEmitter {
      * @param {string} options.url Lavalink node url without prefix like, ex: http://
      * @param {string} options.auth Lavalink node password
      * @param {boolean} [options.secure=false] Whether this node should be in secure wss or https mode
-     * @param {string} [options.group=undefined] Lavalink node group
+     * @param {?string} [options.group=undefined] Lavalink node group
      */
     constructor(shoukaku, options) {
         super();
@@ -173,8 +173,8 @@ class ShoukakuSocket extends EventEmitter {
     /**
     * Disconnects this socket
     * @memberof ShoukakuSocket
-    * @param {number} [code=1000]
     * @param {string} [reason]
+    * @param {number} [code=1000]
     * @returns {void}
     * @protected
     */
@@ -234,7 +234,7 @@ class ShoukakuSocket extends EventEmitter {
     /**
      * Enqueues a message to be sent on this websocket
      * @param {Object} data Message to be sent
-     * @param {imporant} [data=false] If the message should be on top of queue
+     * @param {boolean} [important=false] If the message should be on top of queue
      * @memberOf ShoukakuSocket
      * @returns {void}
      */

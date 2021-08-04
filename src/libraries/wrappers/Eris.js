@@ -40,7 +40,7 @@ class Eris {
      * @param {string} nodes.url Lavalink node url without prefix like, ex: http://
      * @param {string} nodes.auth Lavalink node password
      * @param {boolean} [nodes.secure=false] Whether this node should be in secure wss or https mode
-     * @param {string} [nodes.group=undefined] Lavalink node group
+     * @param {string} [nodes.group] Lavalink node group
      * @returns {Object}
      */
     build(shoukaku, nodes) {

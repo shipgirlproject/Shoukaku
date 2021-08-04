@@ -113,7 +113,7 @@ class ShoukakuConnection extends EventEmitter {
     /**
      * Deafens the client
      * @memberOf ShoukakuConnection
-     * @param {?boolean} [deaf=false]
+     * @param {boolean} [deaf=false]
      * @returns {void}
      */
     setDeaf(deaf = false) {
@@ -123,7 +123,7 @@ class ShoukakuConnection extends EventEmitter {
     /**
      * Mutes the client
      * @memberOf ShoukakuConnection
-     * @param {?boolean} [mute=false]
+     * @param {boolean} [mute=false]
      * @returns {void}
      */
     setMute(mute = false) {
@@ -151,6 +151,10 @@ class ShoukakuConnection extends EventEmitter {
      * Connects this connection
      * @memberOf ShoukakuConnection
      * @param {Object} options options to connect
+     * @param {String} options.guildID Id of the guild you want to connect
+     * @param {String} options.channelID Id of the channel you want to connect
+     * @param {Boolean} [options.self_deaf] Boolean for deafening
+     * @param {Boolean} [options.self_mute] Boolean for muting
      * @returns {Promise<void>}
      * @protected
      */

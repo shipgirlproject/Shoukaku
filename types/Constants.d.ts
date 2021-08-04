@@ -26,11 +26,11 @@ export interface ShoukakuOptions {
 }
 
 export interface NodeOptions {
-    name: string,
-    url: string,
-    auth: string,
-    secure?: boolean,
-    group?: string
+    name: string;
+    url: string;
+    auth: string;
+    secure?: boolean;
+    group?: string;
 }
 
 export class ShoukakuTrackList {
