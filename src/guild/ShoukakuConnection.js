@@ -33,7 +33,7 @@ class ShoukakuConnection extends EventEmitter {
         this.guildID = options.guildID;
         /**
          * The ID of the channel where this connection is
-         * @type {string}
+         * @type {?string}
          */
         this.channelID = null;
         /**
@@ -43,12 +43,12 @@ class ShoukakuConnection extends EventEmitter {
         this.shardID = options.shardID;
         /**
          * The ID of the current connection session
-         * @type {string}
+         * @type {?string}
          */
         this.sessionID = null;
         /**
          * The region where this connection is
-         * @type {string}
+         * @type {?string}
          */
         this.region = null;
         /**
