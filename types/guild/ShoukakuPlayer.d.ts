@@ -19,7 +19,7 @@ export class ShoukakuPlayer extends EventEmitter {
   public moveNode(name: string): ShoukakuPlayer;
   public playTrack(input: Base64String | ShoukakuTrack, options?: { noReplace?: boolean, pause?: boolean, startTime?: number, endTime?: number }): ShoukakuPlayer;
   public stopTrack(): ShoukakuPlayer;
-  public setPaused(pause: boolean): ShoukakuPlayer;
+  public setPaused(pause?: boolean): ShoukakuPlayer;
   public seekTo(position: number): ShoukakuPlayer;
   public setVolume(volume: number): ShoukakuPlayer;
   public setEqualizer(bands: { band: number, gain: number }[]): ShoukakuPlayer;

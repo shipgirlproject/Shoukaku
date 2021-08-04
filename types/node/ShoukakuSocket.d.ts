@@ -10,7 +10,7 @@ import { ShoukakuStats } from '../struct/ShoukakuStats';
 export class ShoukakuSocket extends EventEmitter {
     constructor(
         shoukaku: Shoukaku,
-        options: { name: string, url: string, auth: string, secure: boolean, group: string }
+        options: { name: string, url: string, auth: string, secure: boolean, group?: string }
     );
 
     public shoukaku: Shoukaku;
@@ -33,8 +33,8 @@ export class ShoukakuSocket extends EventEmitter {
     private get reconnectTries(): number;
     private get reconnectInterval(): number;
     private get penalties(): number;
-    protected connect(reconnect: boolean): void;
-    protected disconnect(code: number, reason: string): void;
+    protected connect(reconnect?: boolean): void;
+    protected disconnect(code?: number, reason?: string): void;
     public joinChannel(options: JoinOptions): Promise<ShoukakuPlayer>;
     public leaveChannel(guildID: Snowflake): void;
     public send(data: Object, important: boolean): void;

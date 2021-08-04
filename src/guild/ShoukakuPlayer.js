@@ -129,8 +129,8 @@ class ShoukakuPlayer extends EventEmitter {
      * @param {Object} [options={}] Used if you want to put a custom track start or end time
      * @param {boolean} [options.noReplace=true] Specifies if the player will not replace the current track when executing this action
      * @param {boolean} [options.pause=false] If `true`, the player will pause when the track starts playing
-     * @param {?number} [options.startTime=undefined] In milliseconds on when to start
-     * @param {?number} [options.endTime=undefined] In milliseconds on when to end
+     * @param {number} [options.startTime] In milliseconds on when to start
+     * @param {number} [options.endTime] In milliseconds on when to end
      * @memberOf ShoukakuPlayer
      * @returns {ShoukakuPlayer}
      */ 
