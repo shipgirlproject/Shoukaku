@@ -173,12 +173,12 @@ class ShoukakuSocket extends EventEmitter {
     /**
     * Disconnects this socket
     * @memberof ShoukakuSocket
-    * @param {string} reason
+    * @param {string} [reason]
     * @param {number} [code=1000]
     * @returns {void}
     * @protected
     */
-    disconnect(reason, code = 1000) {
+    disconnect(code = 1000, reason) {
         this.destroyed = true;
         this.state = state.DISCONNECTING;
         this._clean();
