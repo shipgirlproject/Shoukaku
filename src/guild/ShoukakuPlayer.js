@@ -25,7 +25,7 @@ class ShoukakuPlayer extends EventEmitter {
         this.connection = new ShoukakuConnection(this, node, options);
         /**
          * The track that is currently being played by this player
-         * @type {string}
+         * @type {?string}
          */
         this.track = null;
         /**
