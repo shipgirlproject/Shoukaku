@@ -197,7 +197,7 @@ class ShoukakuConnection extends EventEmitter {
             this.moved = true;
             this.node.emit('debug', this.node.name, `[Voice] <- [Discord] : Channel Moved | Guild: ${this.guildId}`);
         }
-        this.channelID = channel_id || this.channelId;
+        this.channelId = channel_id || this.channelId;
         if (!channel_id) {
             this.state = state.DISCONNECTED;
             this.node.emit('debug', this.node.name, `[Voice] <- [Discord] : Channel Disconnected | Guild: ${this.guildId}`);
@@ -208,7 +208,7 @@ class ShoukakuConnection extends EventEmitter {
             this.emit('connectionUpdate', voiceState.SESSION_ID_MISSING);
             return;
         }
-        this.sessionID = session_id;
+        this.sessionId = session_id;
         this.node.emit('debug', this.node.name, `[Voice] <- [Discord] : State Update Received, Session ID: ${session_id} | Guild: ${this.guildId}`);
     }
     /**
