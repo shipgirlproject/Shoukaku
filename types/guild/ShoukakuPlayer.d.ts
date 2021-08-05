@@ -7,7 +7,7 @@ import { ShoukakuTrack, Base64String, Snowflake } from '../Constants';
 export class ShoukakuPlayer extends EventEmitter {
   constructor(
     node: ShoukakuSocket,
-    options: { guildID: Snowflake, shardID: number }
+    options: { guildId: Snowflake, shardId: number }
   );
 
   public connection: ShoukakuConnection;

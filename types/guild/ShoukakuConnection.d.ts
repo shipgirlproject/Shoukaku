@@ -7,15 +7,15 @@ export class ShoukakuConnection extends EventEmitter {
     constructor(
         player: ShoukakuPlayer,
         node: ShoukakuSocket,
-        options: { guildID: Snowflake, shardID: number }
+        options: { guildId: Snowflake, shardId: number }
     );
 
     public player: ShoukakuPlayer;
     public node: ShoukakuSocket;
-    public guildID: Snowflake;
-    public channelID?: Snowflake;
-    public shardID: number;
-    public sessionID?: string;
+    public guildId: Snowflake;
+    public channelId?: Snowflake;
+    public shardId: number;
+    public sessionId?: string;
     public region?: string;
     public muted: boolean;
     public deafened: boolean;
@@ -24,7 +24,7 @@ export class ShoukakuConnection extends EventEmitter {
     public reconnecting: boolean;
     private serverUpdate: boolean;
 
-    public attemptReconnect(options: { channelID: Snowflake, forceReconnect: boolean }): Promise<void>;
+    public attemptReconnect(options: { channelId: Snowflake, forceReconnect: boolean }): Promise<void>;
     public setDeaf(deaf?: boolean): void;
     public setMute(mute?: boolean): void;
     public disconnect(): void;
@@ -35,8 +35,8 @@ export class ShoukakuConnection extends EventEmitter {
 }
 
 export interface ConnectOptions {
-  guildID: Snowflake;
-  channelID: Snowflake;
+  guildId: Snowflake;
+  channelId: Snowflake;
   deaf: boolean;
   mute: boolean;
 }
