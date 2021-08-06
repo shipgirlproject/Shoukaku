@@ -112,4 +112,4 @@ class ShoukakuRest {
         return JSON.parse(body);
     }
 }
-module.exports = ShoukakuRest; 
+module.exports = ShoukakuRest;

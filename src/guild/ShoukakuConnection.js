@@ -159,7 +159,7 @@ class ShoukakuConnection extends EventEmitter {
      * @protected
      */
     async connect(options) {
-        if (!options) 
+        if (!options)
             throw new Error('No options supplied');
         if (this.state === state.CONNECTING)
             throw Error('Can\'t connect while a connection is connecting. Wait for it to resolve first');
@@ -170,17 +170,17 @@ class ShoukakuConnection extends EventEmitter {
         const controller = new AbortController();
         const timeout = setTimeout(() => controller.abort(), 15000);
         try {
-            const [ status ] = await once(this, 'connectionUpdate', { signal: controller.signal });
+            const [status] = await once(this, 'connectionUpdate', { signal: controller.signal });
             if (status !== voiceState.SESSION_READY) {
-                if (status === voiceState.SESSION_ID_MISSING) 
+                if (status === voiceState.SESSION_ID_MISSING)
                     throw new Error('The voice connection is not established due to missing session id');
-                else 
+                else
                     throw new Error('The voice connection is not established due to missing connection endpoint');
             }
             this.state = state.CONNECTED;
         } catch (error) {
             this.node.emit('debug', this.node.name, `[Voice] </- [Discord] : Request Connection Failed | Guild: ${this.guildId}`);
-            if (error.name === 'AbortError') 
+            if (error.name === 'AbortError')
                 throw new Error('The voice connection is not established in 15 seconds');
             throw error;
         } finally {

@@ -48,9 +48,9 @@ export class ShoukakuSocket extends EventEmitter {
 }
 
 export interface JoinOptions {
-    guildId: Snowflake, 
-    shardId: number, 
-    channelId: Snowflake, 
-    mute?: boolean, 
+    guildId: Snowflake,
+    shardId: number,
+    channelId: Snowflake,
+    mute?: boolean,
     deaf?: boolean
 }

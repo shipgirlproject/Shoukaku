@@ -1,6 +1,6 @@
-  
+
 'use strict';
-const noop = () => {}; // eslint-disable-line no-empty-function
+const noop = () => { }; // eslint-disable-line no-empty-function
 const methods = ['get', 'post', 'delete', 'patch', 'put'];
 const reflectors = [
     'toString',
@@ -22,9 +22,9 @@ function ShoukakuRouter(rest) {
     const route = [''];
     const handler = {
         get(_, name) {
-            if (reflectors.includes(name)) 
+            if (reflectors.includes(name))
                 return () => route.join('/');
-            if (methods.includes(name)) 
+            if (methods.includes(name))
                 return options => rest.fetch(`${rest.url}${route.join('/')}${query ? `?${new URLSearchParams(query)}` : ''}`, { method: name, options });
             route.push(name);
             return new Proxy(noop, handler);

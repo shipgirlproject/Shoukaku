@@ -107,7 +107,7 @@ class Shoukaku extends EventEmitter {
      * @param {boolean} moved Whether the players in this disconnect event has been moved to another node
      * @memberof Shoukaku
      */
-    
+
     /**
     * Adds a new node to this manager
     * @param {Object} options The node options to connect
@@ -191,7 +191,7 @@ class Shoukaku extends EventEmitter {
      */
     _clientReady(nodes) {
         this.id = this.library.id();
-        this.emit('debug', 'Manager',`[Manager] : Connecting ${nodes.length} nodes`);
+        this.emit('debug', 'Manager', `[Manager] : Connecting ${nodes.length} nodes`);
         for (const node of nodes) this.addNode(mergeDefault(nodeOptions, node));
     }
     /**
@@ -213,7 +213,7 @@ class Shoukaku extends EventEmitter {
      * @private
      */
     _clean(name, players, moved) {
-        this.nodes.delete(name) ;
+        this.nodes.delete(name);
         this.emit('disconnect', name, players, moved);
     }
 }

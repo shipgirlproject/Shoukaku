@@ -145,7 +145,7 @@ class ShoukakuSocket extends EventEmitter {
         }
         return penalties;
     }
-    
+
     /**
     * Connects this socket
     * @memberof ShoukakuSocket
@@ -162,9 +162,9 @@ class ShoukakuSocket extends EventEmitter {
             'Authorization': this.auth,
             'User-Id': this.shoukaku.id
         };
-        if (reconnect) headers['Resume-Key'] = (!!this.resumable).toString(); 
+        if (reconnect) headers['Resume-Key'] = (!!this.resumable).toString();
         this.emit('debug', this.name, `[Socket] -> [${this.name}] : Connecting ${this.url}`);
-        this.ws = new Websocket(this.url, { headers }); 
+        this.ws = new Websocket(this.url, { headers });
         this.ws.once('upgrade', response => this.ws.once('open', () => this._open(response)));
         this.ws.once('close', (...args) => this._close(...args));
         this.ws.on('error', error => this.emit('error', this.name, error));
@@ -291,9 +291,9 @@ class ShoukakuSocket extends EventEmitter {
         this.ws?.removeAllListeners();
         this.ws = null;
         this.emit('close', this.name, code, reason);
-        if (this.destroyed || this.reconnects >= this.reconnectTries) 
+        if (this.destroyed || this.reconnects >= this.reconnectTries)
             this._clean();
-        else 
+        else
             this._reconnect();
     }
     /**
@@ -316,13 +316,13 @@ class ShoukakuSocket extends EventEmitter {
      * @memberOf ShoukakuSocket
      * @returns {void}
      * @private
-     */ 
+     */
     _clean() {
         const players = [...this.players.values()];
         const moved = this.moveOnDisconnect && this.shoukaku.nodes.size > 0;
         if (moved)
             for (const player of players) player.moveNode(this.shoukaku._getIdeal(this.group));
-        else 
+        else
             for (const player of players) player.connection.disconnect();
         this.queue.clear();
         this.emit('disconnect', this.name, players, moved);
@@ -331,7 +331,7 @@ class ShoukakuSocket extends EventEmitter {
      * @memberOf ShoukakuSocket
      * @returns {void}
      * @private
-     */ 
+     */
     _reconnect() {
         if (this.state !== state.DISCONNECTED) return;
         this.reconnects++;

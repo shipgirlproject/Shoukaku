@@ -36,7 +36,7 @@ class ShoukakuQueue {
      */
     process() {
         if (!this.pending.length) return;
-        while(this.pending.length) {
+        while (this.pending.length) {
             const message = this.pending.shift();
             if (!message) return;
             this.socket.ws.send(message, error => {
