@@ -111,14 +111,14 @@ class Shoukaku extends EventEmitter {
      * Emitted when a node created a player that is ready 
      * @event Shoukaku#playerReady
      * @param {string} name The node that sent the player ready event
-     * @param {ShoukakuPlayer} player The players that is in this disconnected node
+     * @param {ShoukakuPlayer} player The player that is ready
      * @memberof Shoukaku
      */
     /**
      * Emitted when a node destroyed a player, only emits when "player.connection.disconnect()" is called
      * @event Shoukaku#playerDestroy
      * @param {string} name The node that sent the player destroy event
-     * @param {ShoukakuPlayer} player The players that is in this disconnected node
+     * @param {ShoukakuPlayer} player The player that was destroyed
      * @memberof Shoukaku
      */
 
