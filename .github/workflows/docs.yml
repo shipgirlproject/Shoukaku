@@ -2,11 +2,9 @@ name: Build-Docs
 
 on:
   push:
-    branches:
-      - "*"
-  pull_request:
-    branches:
-      - "**"
+      paths:
+      - '**.js'
+      branches: [ master, dev, next ]
 
 jobs:
   Build-Docs:

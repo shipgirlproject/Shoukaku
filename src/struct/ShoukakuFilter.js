@@ -124,4 +124,5 @@ class ShoukakuFilter {
     }
 }
 
+
 module.exports = ShoukakuFilter;
