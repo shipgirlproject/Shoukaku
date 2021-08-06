@@ -33,5 +33,5 @@ jobs:
           git config --local user.name "github-actions[bot]"
           
           git add -A
-          git commit -m "Auto Build Docs"
+          git commit --allow-empty -m "Auto Build Docs"
           git push
