@@ -145,7 +145,7 @@ class ShoukakuSocket extends EventEmitter {
         }
         return penalties;
     }
-    
+
     /**
     * Connects this socket
     * @memberof ShoukakuSocket
@@ -162,9 +162,9 @@ class ShoukakuSocket extends EventEmitter {
             'Authorization': this.auth,
             'User-Id': this.shoukaku.id
         };
-        if (reconnect) headers['Resume-Key'] = (!!this.resumable).toString(); 
+        if (reconnect) headers['Resume-Key'] = (!!this.resumable).toString();
         this.emit('debug', this.name, `[Socket] -> [${this.name}] : Connecting ${this.url}`);
-        this.ws = new Websocket(this.url, { headers }); 
+        this.ws = new Websocket(this.url, { headers });
         this.ws.once('upgrade', response => this.ws.once('open', () => this._open(response)));
         this.ws.once('close', (...args) => this._close(...args));
         this.ws.on('error', error => this.emit('error', this.name, error));
@@ -173,8 +173,8 @@ class ShoukakuSocket extends EventEmitter {
     /**
     * Disconnects this socket
     * @memberof ShoukakuSocket
-    * @param {string} [reason]
-    * @param {number} [code=1000]
+    * @param {string} [code=1000]
+    * @param {number} [reason]
     * @returns {void}
     * @protected
     */
@@ -187,9 +187,9 @@ class ShoukakuSocket extends EventEmitter {
     /**
      * Creates a player and connects your bot to the specified guild's voice channel
      * @param {Object} options Join channel options
-     * @param {string} options.guildID GuildID where the voice channel you want to join is in
-     * @param {string} options.shardID ShardID where this guild is in
-     * @param {string} options.channelID ChannelID of the voice channel where you want to join in
+     * @param {string} options.guildId GuildId where the voice channel you want to join is in
+     * @param {string} options.shardId ShardId where this guild is in
+     * @param {string} options.channelId ChannelId of the voice channel where you want to join in
      * @param {boolean} [options.mute=false] If you want to join this channel muted already
      * @param {boolean} [options.deaf=false] If you want to join this channel deafened already
      * @memberof ShoukakuSocket
@@ -204,32 +204,32 @@ class ShoukakuSocket extends EventEmitter {
      * BurningLove();
      */
     async joinChannel(options = {}) {
-        if (!options.guildID || !options.channelID)
-            throw new Error('Supplied options needs to have "guildID" and "channelID" ids');
+        if (isNaN(options.shardId) || !options.guildId || !options.channelId)
+            throw new Error('Supplied options needs to have a valid Shard id and the "guildId", "channelId" ids');
         if (this.state !== state.CONNECTED)
             throw new Error('This node is not yet ready');
 
-        if (!this.shoukaku.library.guilds.has(options.guildID)) throw new Error('Guild not found, cannot continue creating this connection');
+        if (!this.shoukaku.library.guilds.has(options.guildId)) throw new Error('Guild could\'t be found, cannot continue creating this connection');
 
-        const player = this.players.get(options.guildID) || new ShoukakuPlayer(this, options);
+        const player = this.players.get(options.guildId) || new ShoukakuPlayer(this, options);
 
         try {
-            if (!this.players.has(options.guildID)) this.players.set(options.guildID, player);
+            if (!this.players.has(options.guildId)) this.players.set(options.guildId, player);
             await player.connection.connect(options);
             return player;
         } catch (error) {
-            this.players.delete(options.guildID);
+            this.players.delete(options.guildId);
             throw error;
         }
     }
     /**
      * Disconnects and cleans a player in this socket
-     * @param {string} guildID The guild id of the player you want to remove.
+     * @param {string} guildId The guild id of the player you want to remove.
      * @memberOf ShoukakuSocket
      * @returns {void}
      */
-    leaveChannel(guildID) {
-        return this.players.get(guildID)?.connection.disconnect();
+    leaveChannel(guildId) {
+        return this.players.get(guildId)?.connection.disconnect();
     }
     /**
      * Enqueues a message to be sent on this websocket
@@ -291,9 +291,9 @@ class ShoukakuSocket extends EventEmitter {
         this.ws?.removeAllListeners();
         this.ws = null;
         this.emit('close', this.name, code, reason);
-        if (this.destroyed || this.reconnects >= this.reconnectTries) 
+        if (this.destroyed || this.reconnects >= this.reconnectTries)
             this._clean();
-        else 
+        else
             this._reconnect();
     }
     /**
@@ -316,13 +316,13 @@ class ShoukakuSocket extends EventEmitter {
      * @memberOf ShoukakuSocket
      * @returns {void}
      * @private
-     */ 
+     */
     _clean() {
         const players = [...this.players.values()];
         const moved = this.moveOnDisconnect && this.shoukaku.nodes.size > 0;
         if (moved)
             for (const player of players) player.moveNode(this.shoukaku._getIdeal(this.group));
-        else 
+        else
             for (const player of players) player.connection.disconnect();
         this.queue.clear();
         this.emit('disconnect', this.name, players, moved);
@@ -331,7 +331,7 @@ class ShoukakuSocket extends EventEmitter {
      * @memberOf ShoukakuSocket
      * @returns {void}
      * @private
-     */ 
+     */
     _reconnect() {
         if (this.state !== state.DISCONNECTED) return;
         this.reconnects++;

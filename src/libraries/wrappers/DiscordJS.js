@@ -29,7 +29,7 @@ class DiscordJS {
             // getter for user id
             id: () => this.client.user.id,
             // websocket shard payload sender
-            ws: (shardID, payload, important = false) => this.client.ws.shards.get(shardID)?.send(payload, important),
+            ws: (shardId, payload, important = false) => this.client.ws.shards.get(shardId)?.send(payload, important),
         };
     }
     /**

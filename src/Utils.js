@@ -36,7 +36,7 @@ class Utils {
         if (!result) throw new Error('This search type is not supported');
         return result;
     }
-    
+
     static wait(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
     }

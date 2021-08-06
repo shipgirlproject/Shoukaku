@@ -29,14 +29,14 @@ export interface FilterSettings {
 }
 
 export interface FilterChannelMixSettings {
-  leftToLeft?: number;
-  leftToRight?: number;
-  rightToLeft?: number;
-  rightToRight?: number;
+    leftToLeft?: number;
+    leftToRight?: number;
+    rightToLeft?: number;
+    rightToRight?: number;
 }
 
 export interface FilterLowPassSettings {
-  smoothing: number
+    smoothing?: number
 }
 
 export interface FilterEqSettings {
@@ -63,7 +63,7 @@ export interface FilterFreqSettings {
 }
 
 export interface FilterRotationSettings {
-    rotationHz: number;
+    rotationHz?: number;
 }
 
 export interface FilterDistortionSettings {

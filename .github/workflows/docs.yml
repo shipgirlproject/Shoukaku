@@ -1,0 +1,37 @@
+name: Build-Docs
+
+on:
+  push:
+      paths:
+      - '**.js'
+      branches: [ master, dev, next ]
+
+jobs:
+  Build-Docs:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [14.x]
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2.3.4
+  
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v2.1.5
+      with:
+        node-version: ${{ matrix.node-version }}
+        check-latest: true
+        
+    - name: Install dependencies
+      run: npm i
+
+    - name: Auto Build Docs
+      run: |
+          npm run docs:build
+          
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          
+          git add -A
+          git commit --allow-empty -m "Auto Build Docs"
+          git push

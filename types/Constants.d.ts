@@ -55,13 +55,13 @@ export class ShoukakuTrack {
 }
 
 export interface DecodedTrack {
-  identifier: string;
-  isSeekable: boolean;
-  author: string;
-  length: number;
-  isStream: boolean;
-  position: number;
-  title: string;
-  uri: string;
-  sourceName: string;
+    identifier: string;
+    isSeekable: boolean;
+    author: string;
+    length: number;
+    isStream: boolean;
+    position: number;
+    title: string;
+    uri: string;
+    sourceName: string;
 }

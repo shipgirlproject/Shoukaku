@@ -1,7 +1,7 @@
 import { ShoukakuTrackList, DecodedTrack } from '../Constants';
 
 export class ShoukakuRest {
-    constructor (
+    constructor(
         node: { url: string, auth: string, secure: boolean },
         options: { userAgent: string, timeout: number }
     )
@@ -10,7 +10,7 @@ export class ShoukakuRest {
     public timeout: number;
     private auth: string;
     private userAgent: string;
-    
+
     private get router(): number;
 
     public resolve(identifier: string, search?: string): Promise<void | ShoukakuTrackList>;

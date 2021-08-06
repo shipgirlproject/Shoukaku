@@ -66,7 +66,7 @@ Docker images are available on the [Docker](https://hub.docker.com/r/fredboat/la
 const { Client } = require('discord.js');
 const { Shoukaku, Libraries } = require('shoukaku');
 
-const LavalinkServer = [{ name: 'Localhost', host: 'localhost', port: 6969, auth: 'big_weeb' }];
+const LavalinkServer = [{ name: 'Localhost', url: 'localhost:6969', auth: 'big_weeb' }];
 const ShoukakuOptions = { moveOnDisconnect: false, resumable: false, resumableTimeout: 30, reconnectTries: 2, restTimeout: 10000 };
 
 class ExampleBot extends Client {
@@ -92,16 +92,16 @@ class ExampleBot extends Client {
         this.on('messageCreate', async (msg) => {
             if (msg.author.bot || !msg.guild) return;
             if (!msg.content.startsWith('$play')) return;
-            if (this.shoukaku.getPlayer(msg.guild.id)) return;
+            if (this.shoukaku.players.get(msg.guild.id)) return;
             const args = msg.content.split(' ');
             if (!args[1]) return;
             const node = this.shoukaku.getNode();
             let data = await node.rest.resolve(args[1]);
             if (!data) return;
-            const player = await node.joinVoiceChannel({
-                guildID: msg.guild.id,
-                shardID: msg.guild.shard.id,
-                voiceChannelID: msg.member.voice.channelID
+            const player = await node.joinChannel({
+                guildId: msg.guild.id,
+                shardId: msg.guild.shardId,
+                channelId: msg.member.voice.channelId
             });
             const events = ['end', 'error', 'closed', 'disconnect'];
             for (const event of events) {

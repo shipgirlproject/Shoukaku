@@ -22,7 +22,7 @@ export class Shoukaku extends EventEmitter {
     public addNode(options: NodeOptions): void;
     public removeNode(name: string, reason?: string): void;
     public getNode(query: string | Array<string>): ShoukakuSocket;
-    
+
     protected _getIdeal(group: string): ShoukakuSocket;
     protected _clientReady(nodes: NodeOptions[]): void;
     protected _clientRaw(packet: Object): void;

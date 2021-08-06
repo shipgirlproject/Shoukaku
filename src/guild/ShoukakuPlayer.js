@@ -96,7 +96,7 @@ class ShoukakuPlayer extends EventEmitter {
      * @param {Object} data
      * @memberOf ShoukakuPlayer
      */
-    
+
     /**
      * Moves this player and connection to another node
      * @param {string} name Name of the Node you want to move to
@@ -107,18 +107,18 @@ class ShoukakuPlayer extends EventEmitter {
         const node = this.connection.node.shoukaku.nodes.get(name);
         if (!node || node.name === this.connection.node.name) return this;
         if (node.state !== state.CONNECTED) throw new Error('The node you specified is not ready');
-        this.connection.node.send({ 
-            op: 'destroy', 
-            guildId: this.connection.guildID 
+        this.connection.node.send({
+            op: 'destroy',
+            guildId: this.connection.guildId
         });
-        this.connection.node.players.delete(this.guildID);
+        this.connection.node.players.delete(this.connection.guildId);
         this.connection.node = node;
-        this.connection.node.players.set(this.guildID, this.player);
-        this.connection.node.send({ 
-            op: 'voiceUpdate', 
-            guildId: this.connection.guildID, 
-            sessionId: this.connection.sessionID, 
-            event: this.connection.serverUpdate 
+        this.connection.node.players.set(this.connection.guildId, this.player);
+        this.connection.node.send({
+            op: 'voiceUpdate',
+            guildId: this.connection.guildId,
+            sessionId: this.connection.sessionId,
+            event: this.connection.serverUpdate
         });
         this.resume();
         return this;
@@ -133,14 +133,14 @@ class ShoukakuPlayer extends EventEmitter {
      * @param {number} [options.endTime] In milliseconds on when to end
      * @memberOf ShoukakuPlayer
      * @returns {ShoukakuPlayer}
-     */ 
+     */
     playTrack(input, options = {}) {
         if (!input) throw new Error('No track given to play');
         if (input instanceof ShoukakuTrack) input = input.track;
         options = mergeDefault({ noReplace: true, pause: false }, options);
         const payload = {
             op: 'play',
-            guildId: this.connection.guildID,
+            guildId: this.connection.guildId,
             track: input,
             noReplace: options.noReplace,
             pause: options.pause
@@ -162,7 +162,7 @@ class ShoukakuPlayer extends EventEmitter {
         this.position = 0;
         this.connection.node.send({
             op: 'stop',
-            guildId: this.connection.guildID
+            guildId: this.connection.guildId
         });
         return this;
     }
@@ -175,7 +175,7 @@ class ShoukakuPlayer extends EventEmitter {
     setPaused(pause = true) {
         this.connection.node.send({
             op: 'pause',
-            guildId: this.connection.guildID,
+            guildId: this.connection.guildId,
             pause
         });
         this.paused = pause;
@@ -191,7 +191,7 @@ class ShoukakuPlayer extends EventEmitter {
         if (!Number.isInteger(position)) throw new Error('Please input a valid number for position');
         this.connection.node.send({
             op: 'seek',
-            guildId: this.connection.guildID,
+            guildId: this.connection.guildId,
             position
         });
         return this;
@@ -356,7 +356,7 @@ class ShoukakuPlayer extends EventEmitter {
         this.filters = new ShoukakuFilter();
         this.connection.node.send({
             op: 'filters',
-            guildId: this.connection.guildID
+            guildId: this.connection.guildId
         });
         return this;
     }
@@ -384,7 +384,7 @@ class ShoukakuPlayer extends EventEmitter {
         const { volume, equalizer, karaoke, timescale, tremolo, vibrato, rotation, distortion } = this.filters;
         this.connection.node.send({
             op: 'filters',
-            guildId: this.connection.guildID,
+            guildId: this.connection.guildId,
             volume,
             equalizer,
             karaoke,
@@ -416,9 +416,9 @@ class ShoukakuPlayer extends EventEmitter {
         }
         else if (json.op === 'event') {
             this._onPlayerEvent(json);
-        } 
+        }
         else {
-            this.connection.node.emit('debug', this.connection.node.name, `[Player] -> [Node] : Unknown Message OP ${json.op} | Guild: ${this.connection.guildID}`);
+            this.connection.node.emit('debug', this.connection.node.name, `[Player] -> [Node] : Unknown Message OP ${json.op} | Guild: ${this.connection.guildId}`);
         }
     }
     /**
@@ -445,9 +445,9 @@ class ShoukakuPlayer extends EventEmitter {
             }
             default:
                 this.connection.node.emit(
-                    'debug', 
-                    this.connection.node.name, 
-                    `[Player] -> [Node] : Unknown Player Event Type ${json.type} | Guild: ${this.connection.guildID}`
+                    'debug',
+                    this.connection.node.name,
+                    `[Player] -> [Node] : Unknown Player Event Type ${json.type} | Guild: ${this.connection.guildId}`
                 );
         }
         return;
@@ -466,11 +466,11 @@ class ShoukakuPlayer extends EventEmitter {
                 return;
             }
             this.connection.node.emit(
-                'debug', 
-                this.connection.node.name, 
-                `[Player] -> [Node] : Voice channel or server move detected | Guild: ${this.connection.guildID}`
+                'debug',
+                this.connection.node.name,
+                `[Player] -> [Node] : Voice channel or server move detected | Guild: ${this.connection.guildId}`
             );
-            this.connection.moved = false;  
+            this.connection.moved = false;
         }, delay);
     }
 }

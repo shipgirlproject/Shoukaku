@@ -29,7 +29,7 @@ class Eris {
             // getter for user id
             id: () => this.client.user.id,
             // websocket shard payload sender
-            ws: (shardID, payload, important = false) => this.client.shards.get(shardID)?.sendWS(payload.op, payload.d, important),
+            ws: (shardId, payload, important = false) => this.client.shards.get(shardId)?.sendWS(payload.op, payload.d, important),
         };
     }
     /**
