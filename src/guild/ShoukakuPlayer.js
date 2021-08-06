@@ -381,7 +381,7 @@ class ShoukakuPlayer extends EventEmitter {
      * @private
      */
     updateFilters() {
-        const { volume, equalizer, karaoke, timescale, tremolo, vibrato, rotation, distortion } = this.filters;
+        const { volume, equalizer, karaoke, timescale, tremolo, vibrato, rotation, distortion, channelMix, lowPass } = this.filters;
         this.connection.node.send({
             op: 'filters',
             guildId: this.connection.guildId,
@@ -392,7 +392,9 @@ class ShoukakuPlayer extends EventEmitter {
             tremolo,
             vibrato,
             rotation,
-            distortion
+            distortion,
+            channelMix,
+            lowPass
         });
     }
     /**
@@ -420,7 +422,7 @@ class ShoukakuPlayer extends EventEmitter {
     _onLavalinkMessage(json) {
         if (json.op === 'playerUpdate') {
             this.position = json.state.position;
-            this.emit('update', json.state);
+            this.emit('update', json);
         }
         else if (json.op === 'event') {
             this._onPlayerEvent(json);
@@ -447,10 +449,9 @@ class ShoukakuPlayer extends EventEmitter {
             case 'TrackExceptionEvent':
                 this.emit('exception', json);
                 break;
-            case 'WebSocketClosedEvent': {
+            case 'WebSocketClosedEvent':
                 this._onWebsocketClosedEvent(json);
                 break;
-            }
             default:
                 this.connection.node.emit(
                     'debug',

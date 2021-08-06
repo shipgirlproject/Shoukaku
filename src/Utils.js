@@ -1,20 +1,6 @@
 const SearchTypes = { 'soundcloud': 'scsearch', 'youtube': 'ytsearch', 'youtubemusic': 'ytmsearch' };
 
 class Utils {
-    static getVersion() {
-        try {
-            const { version } = require('discord.js-light');
-            return { variant: 'light', version };
-        } catch (error) {
-            try {
-                const { version } = require('discord.js');
-                return { variant: 'vanilla', version };
-            } catch (error) {
-                throw new Error('Cannot load discord.js / discord.js-light from your project, are you sure any of those are installed?');
-            }
-        }
-    }
-
     static mergeDefault(def, given) {
         if (!given) return def;
         const defaultKeys = Object.keys(def);
