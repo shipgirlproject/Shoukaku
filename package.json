@@ -1,6 +1,6 @@
 {
   "name": "shoukaku",
-  "version": "2.0.0-dev",
+  "version": "2.0.0",
   "description": "A lavalink wrapper that supports almost all libraries",
   "main": "index.js",
   "scripts": {
@@ -20,7 +20,7 @@
     "weeb-library"
   ],
   "engines": {
-    "node": ">=14.6.0",
+    "node": ">=16.6.0",
     "npm": ">=7.0.0"
   },
   "author": "Saya",
