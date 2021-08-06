@@ -107,6 +107,20 @@ class Shoukaku extends EventEmitter {
      * @param {boolean} moved Whether the players in this disconnect event has been moved to another node
      * @memberof Shoukaku
      */
+    /**
+     * Emitted when a node created a player that is ready 
+     * @event Shoukaku#playerReady
+     * @param {string} name The node that sent the player ready event
+     * @param {ShoukakuPlayer} player The players that is in this disconnected node
+     * @memberof Shoukaku
+     */
+    /**
+     * Emitted when a node destroyed a player, only emits when "player.connection.disconnect()" is called
+     * @event Shoukaku#playerDestroy
+     * @param {string} name The node that sent the player destroy event
+     * @param {ShoukakuPlayer} player The players that is in this disconnected node
+     * @memberof Shoukaku
+     */
 
     /**
     * Adds a new node to this manager
@@ -123,9 +137,11 @@ class Shoukaku extends EventEmitter {
         const node = new ShoukakuSocket(this, options);
         node.on('debug', (...args) => this.emit('debug', ...args));
         node.on('error', (...args) => this.emit('error', ...args));
-        node.on('disconnect', (...args) => this._clean(...args));
         node.on('close', (...args) => this.emit('close', ...args));
         node.on('ready', (...args) => this.emit('ready', ...args));
+        node.on('disconnect', (...args) => this._clean(...args));
+        node.on('playerReady', (...args) => this.emit('playerReady', ...args));
+        node.on('playerDestroy', (...args) => this.emit('playerDestroy', ...args));
         node.connect();
         this.nodes.set(node.name, node);
     }

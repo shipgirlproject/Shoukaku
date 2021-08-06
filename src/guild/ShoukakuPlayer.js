@@ -399,6 +399,14 @@ class ShoukakuPlayer extends EventEmitter {
      * @memberOf ShoukakuPlayer
      * @protected
      */
+    clean() {
+        this.removeAllListeners();
+        this.reset();
+    }
+    /**
+     * @memberOf ShoukakuPlayer
+     * @protected
+     */
     reset() {
         this.track = null;
         this.position = 0;

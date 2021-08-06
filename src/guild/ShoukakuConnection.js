@@ -141,10 +141,10 @@ class ShoukakuConnection extends EventEmitter {
             this.send({ guild_id: this.guildId, channel_id: null, self_mute: false, self_deaf: false }, true);
         }
         this.node.players.delete(this.guildId);
+        this.player.clean();
         this.node.send({ op: 'destroy', guildId: this.guildId });
-        this.player.removeAllListeners();
-        this.player.reset();
         this.state = state.DISCONNECTED;
+        this.node.emit('playerDestroy', this.node.name, this.player);
         this.node.emit('debug', this.node.name, `[Voice] -> [Node] & [Discord] : Link & Player Destroyed | Guild: ${this.guildId}`);
     }
     /**
@@ -158,13 +158,10 @@ class ShoukakuConnection extends EventEmitter {
      * @returns {Promise<void>}
      * @protected
      */
-    async connect(options) {
-        if (!options)
-            throw new Error('No options supplied');
+    async connect({ guildId, channelId, deaf, mute } = {}) {
         if (this.state === state.CONNECTING)
             throw Error('Can\'t connect while a connection is connecting. Wait for it to resolve first');
         this.state = state.CONNECTING;
-        const { guildId, channelId, deaf, mute } = options;
         this.send({ guild_id: guildId, channel_id: channelId, self_deaf: deaf, self_mute: mute }, true);
         this.node.emit('debug', this.node.name, `[Voice] -> [Discord] : Requesting Connection | Guild: ${this.guildId}`);
         const controller = new AbortController();
@@ -178,6 +175,7 @@ class ShoukakuConnection extends EventEmitter {
                     throw new Error('The voice connection is not established due to missing connection endpoint');
             }
             this.state = state.CONNECTED;
+            this.node.emit('playerReady', this.node.name, this.player);
         } catch (error) {
             this.node.emit('debug', this.node.name, `[Voice] </- [Discord] : Request Connection Failed | Guild: ${this.guildId}`);
             if (error.name === 'AbortError')

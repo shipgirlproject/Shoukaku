@@ -322,7 +322,7 @@ class ShoukakuSocket extends EventEmitter {
         const moved = this.moveOnDisconnect && this.shoukaku.nodes.size > 0;
         if (moved)
             for (const player of players) player.moveNode(this.shoukaku._getIdeal(this.group));
-        else
+        else 
             for (const player of players) player.connection.disconnect();
         this.queue.clear();
         this.emit('disconnect', this.name, players, moved);

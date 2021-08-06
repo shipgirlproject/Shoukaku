@@ -35,6 +35,7 @@ export class ShoukakuPlayer extends EventEmitter {
   public cleanFilters(): ShoukakuPlayer;
   public resume(): ShoukakuPlayer;
   private updateFilters(): void;
+  protected clean(): void;
   protected reset(): void;
   protected _onLavalinkMessage(json: Object): void;
   private _onPlayerEvent(json: Object): void;
