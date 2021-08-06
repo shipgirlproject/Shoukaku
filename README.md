@@ -14,9 +14,7 @@
 
 </center>
 
-```
-The ShipGirl Project, feat Shoukaku; ⓒ Kancolle
-```
+> The ShipGirl Project, feat Shoukaku; ⓒ Kancolle
 
 ### Features
 
