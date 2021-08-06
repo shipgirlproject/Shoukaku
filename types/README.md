@@ -2,7 +2,7 @@
 
 Types derived from code documentation and some guessing.
 
-Please note that these types have not been tested and are not production ready.
+Please note that these types need testing and are probably production ready.
 
 P.S: Need help? Join the [`ShipgGirls Community`](https://discord.gg/FVqbtGu) Discord server and ask for help in the `#development` channel.
 
