@@ -204,12 +204,12 @@ class ShoukakuSocket extends EventEmitter {
      * BurningLove();
      */
     async joinChannel(options = {}) {
-        if (!options.guildId || !options.channelId)
-            throw new Error('Supplied options needs to have "guildId" and "channelId" ids');
+        if (isNaN(options.shardId) || !options.guildId || !options.channelId)
+            throw new Error('Supplied options needs to have a valid Shard id and the "guildId", "channelId" ids');
         if (this.state !== state.CONNECTED)
             throw new Error('This node is not yet ready');
 
-        if (!this.shoukaku.library.guilds.has(options.guildId)) throw new Error('Guild not found, cannot continue creating this connection');
+        if (!this.shoukaku.library.guilds.has(options.guildId)) throw new Error('Guild could\'t be found, cannot continue creating this connection');
 
         const player = this.players.get(options.guildId) || new ShoukakuPlayer(this, options);
 

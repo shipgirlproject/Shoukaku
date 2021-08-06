@@ -153,8 +153,8 @@ class ShoukakuConnection extends EventEmitter {
      * @param {Object} options options to connect
      * @param {String} options.guildId Id of the guild you want to connect
      * @param {String} options.channelId Id of the channel you want to connect
-     * @param {Boolean} [options.self_deaf] Boolean for deafening
-     * @param {Boolean} [options.self_mute] Boolean for muting
+     * @param {Boolean} [options.deaf] Boolean for deafening
+     * @param {Boolean} [options.mute] Boolean for muting
      * @returns {Promise<void>}
      * @protected
      */

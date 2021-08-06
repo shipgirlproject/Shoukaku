@@ -36,7 +36,7 @@ export interface FilterChannelMixSettings {
 }
 
 export interface FilterLowPassSettings {
-    smoothing: number
+    smoothing?: number
 }
 
 export interface FilterEqSettings {
@@ -63,7 +63,7 @@ export interface FilterFreqSettings {
 }
 
 export interface FilterRotationSettings {
-    rotationHz: number;
+    rotationHz?: number;
 }
 
 export interface FilterDistortionSettings {
