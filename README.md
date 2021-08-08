@@ -13,8 +13,6 @@
 
 Japanese Navy Aircraft Carrier Shokaku type "Shokaku" immediately after completion photo `public domain`
 
-### A Lavalink wrapper for Discord.js v12.x.x
-
 ✅ Currently being used by: 
 
 [![DBL](https://discordbots.org/api/widget/424137718961012737.svg)](https://discordbots.org/bot/424137718961012737)
