@@ -6,6 +6,8 @@ extends: 'eslint:recommended'
 globals:
   Atomics: readonly
   SharedArrayBuffer: readonly
+  load: readonly
+  BigInt: readonly
 parserOptions:
   ecmaVersion: 2018
 rules:
@@ -32,4 +34,8 @@ rules:
     - warn
   no-console:
     - off
-
+  arrow-parens:
+    - error
+    - as-needed
+  no-multi-spaces:
+    - error

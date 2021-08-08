@@ -48,7 +48,7 @@
             },
             "navbar":{
                 "enabled":true,
-                "dark":false,
+                "dark":true,
                 "animations":true,
                 "menu":[
                     {

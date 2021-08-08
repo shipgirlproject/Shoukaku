@@ -1,10 +1,12 @@
 node_modules
 docs
+assets
+.gitattributes
 .idea
 .gitignore
 .eslintrc.yml
-.eslintrc.yml
-.docma.json
+.eslintignore
+docma.json
 package-lock.json
 README.md
 CHANGELOGS.MD
