@@ -1,6 +1,6 @@
 {
   "name": "shoukaku",
-  "version": "1.4.1",
+  "version": "1.6.5",
   "description": "A lavalink client for Discord.js v12 only",
   "main": "index.js",
   "scripts": {
@@ -26,11 +26,12 @@
   },
   "dependencies": {
     "abort-controller": "^3.0.0",
-    "node-fetch": "^2.6.0",
-    "ws": "^7.2.3"
+    "node-fetch": "^2.6.1",
+    "ws": "^8.0.0"
   },
   "devDependencies": {
-    "discord.js": ">=12.0.0 <13.0.0",
-    "typescript": "^3.8.3"
+    "discord.js": "^12.5.1",
+    "discord.js-light": "^3.5.4",
+    "typescript": "^4.2.3"
   }
 }

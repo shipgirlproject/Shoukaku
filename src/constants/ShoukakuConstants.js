@@ -1,3 +1,4 @@
+const { name, version, repository } = require('../../package.json');
 /**
  * Constants for Shoukaku.
  * @class ShoukakuConstants
@@ -67,25 +68,29 @@ class ShoukakuConstants {
     * Required Object in Shoukaku's join method.
     * @typedef {Object} ShoukakuPlayOptions
     * @property {boolean} [noReplace=true] Specifies if the player will not replace the current track when executing this action.
-    * @property {boolean|number} [startTime=false] In milliseconds on when to start.
-    * @property {boolean|number} [endTime=false] In milliseconds on when to end.
+    * @property {boolean} [pause=false] If `true`, the player will pause when the track starts playing.
+    * @property {?number} [startTime] In milliseconds on when to start.
+    * @property {?number} [endTime] In milliseconds on when to end.
     * @memberof ShoukakuConstants#
     */
     static get ShoukakuPlayOptions() {
         return {
             noReplace: true,
-            startTime: false,
-            endTime: false
+            pause: false,
+            startTime: undefined,
+            endTime: undefined
         };
     }
     /**
     * Options that Shoukaku accepts upon initialization.
     * @typedef {Object} ShoukakuOptions
-    * @property {boolean|string} [resumable=false] If you want your node to support resuming. Just replace the false with the resume-key you want to enable resuming.
-    * @property {number} [resumableTimeout=30] Timeout when Lavalink will decide a player isn't resumed and will destroy the connection to it.
+    * @property {boolean} [resumable=false] If you want your node to support resuming.
+    * @property {number} [resumableTimeout=30] Timeout when Lavalink will decide a player isn't resumed and will destroy the connection to it, measured in seconds.
     * @property {number} [reconnectTries=2] Amount of tries to connect to the lavalink Node before it decides that the node is unreconnectable.
-    * @property {number} [moveOnDisconnect=false] Specifies if the library will attempt to reconnect players on a disconnected node to another node.
-    * @property {number} [restTimeout=10000] Timeout on rest requests to your lavalink node.
+    * @property {boolean} [moveOnDisconnect=false] Specifies if the library will attempt to reconnect players on a disconnected node to another node.
+    * @property {number} [restTimeout=15000] Timeout on rest requests to your lavalink node, measured in milliseconds.
+    * @property {number} [reconnectInterval=5000] Timeout between reconnect attempts, measured in milliseconds.
+    * @property {string} [userAgent="{name}/{version} (+{url})"] User-Agent to use on connecting to WS and REST requests
     * @memberof ShoukakuConstants#
     */
     static get ShoukakuOptions() {
@@ -94,16 +99,20 @@ class ShoukakuConstants {
             resumableTimeout: 30,
             reconnectTries: 2,
             moveOnDisconnect: false,
-            restTimeout: 10000
+            restTimeout: 15000,
+            reconnectInterval: 5000,
+            userAgent: `${name}/${version} (${repository.url})`
         };
     }
     /**
     * Options that Shoukaku needs to initialize a lavalink node.
     * @typedef {Object} ShoukakuNodeOptions
-    * @property {string} [name] Your Node Name, anything you want to name your node.
-    * @property {string} [host] Your node host / ip address of where the lavalink is hosted.
-    * @property {number} [port] The Port Number of your lavalink instance.
-    * @property {string} [auth] The authentication key you set on your lavalink config.
+    * @property {string} name Your Node Name, anything you want to name your node.
+    * @property {string} host Your node host / ip address of where the lavalink is hosted.
+    * @property {number} port The Port Number of your lavalink instance.
+    * @property {string} auth The authentication key you set on your lavalink config.
+    * @property {?boolean} [secure] If you want to use https and wss instead of http and ws.
+    * @property {?string} [group] Group of this node, used for grouping specific nodes.
     * @memberof ShoukakuConstants#
     */
     static get ShoukakuNodeOptions() {
@@ -111,7 +120,9 @@ class ShoukakuConstants {
             name: null,
             host: null,
             port: null,
-            auth: null
+            auth: null,
+            secure: false,
+            group: undefined
         };
     }
     /**
@@ -122,18 +133,137 @@ class ShoukakuConstants {
     static get ShoukakuNodes() {
         return [].push(ShoukakuConstants.ShoukakuNodeOptions);
     }
-
     /**
-     * Equalizer Band Object for Shoukaku's setEqualizer() object.
+     * Available settings for an Equalizer Band
      * @typedef {EqualizerBand} EqualizerBand
-     * @property {number} [band] There are 15 bands (0-14) from lowest to highest frequency
-     * @property {number} [gain] Gain for this band, range can be -0.25 to 1.0 with -0.25 mutes the band, 0.25 doubles the band gain
+     * @property {number} band Equalizer Band Level
+     * @property {number} gain Equalizer Gain Level
      * @memberof ShoukakuConstants#
      */
     static get EqualizerBand() {
         return {
             band: 0,
             gain: 0
+        };
+    }
+    /**
+     * Available settings for Karaoke
+     * @typedef {KaraokeValue} KaraokeValue
+     * @property {?number} [level] Karaoke level
+     * @property {?number} [monoLevel] Karaoke MonoLevel
+     * @property {?number} [filterBand] Karaoke FilterBand
+     * @property {?number} [filterWidth] Karaoke FilterWidth
+     * @memberof ShoukakuConstants#
+     */
+    static get KaraokeValue() {
+        return {
+            level: 1.0,
+            monoLevel: 1.0,
+            filterBand: 220.0,
+            filterWidth: 100.0
+        };
+    }
+    /**
+     * Available settings for Timescale
+     * @typedef {TimescaleValue} TimescaleValue
+     * @property {?number} [speed] Timescale Speed
+     * @property {?number} [pitch] Timescale Pitch
+     * @property {?number} [rate] Timescale Rate
+     * @memberof ShoukakuConstants#
+     */
+    static get TimescaleValue() {
+        return {
+            speed: 1.0,
+            pitch: 1.0,
+            rate: 1.0
+        };
+    }
+    /**
+     * Available settings for Tremolo
+     * @typedef {TremoloValue} TremoloValue
+     * @property {?number} [frequency] Tremolo Frequency
+     * @property {?number} [depth] Tremolo Depth
+     * @memberof ShoukakuConstants#
+     */
+    static get TremoloValue() {
+        return {
+            frequency: 2.0,
+            depth: 0.5
+        };
+    }
+    /**
+     * Available settings for Vibrato
+     * @typedef {VibratoValue} VibratoValue
+     * @property {?number} [frequency] Vibrato Frequency
+     * @property {?number} [depth] Vibrato Depth
+     * @memberof ShoukakuConstants#
+     */
+    static get VibratoValue() {
+        return {
+            frequency: 2.0, 
+            depth: 0.5
+        };
+    }
+    /**
+     * Available settings for Rotation
+     * @typedef {RotationValue} RotationValue
+     * @property {?number} [rotationHz] Frequency of the audio rotating
+     * @memberof ShoukakuConstants#
+     */
+    static get RotationValue() {
+        return { rotationHz: 0 };
+    }
+    /**
+     * Available settings for Distortion
+     * @typedef {DistortionValue} DistortionValue
+     * @property {?number} [sinOffset] Sin Offset
+     * @property {?number} [sinScale] Sin Scale
+     * @property {?number} [cosOffset] Cos Offset
+     * @property {?number} [cosScale] Cos Scale
+     * @property {?number} [tanOffset] Tan Offset
+     * @property {?number} [tanScale] Tan Scale
+     * @property {?number} [offset] Offset
+     * @property {?number} [scale] Scale
+     * @memberof ShoukakuConstants#
+     */
+    static get DistortionValue() {
+        return {
+            sinOffset: 0,
+            sinScale: 1,
+            cosOffset: 0,
+            cosScale: 1,
+            tanOffset: 0,
+            tanScale: 1,
+            offset: 0,
+            scale: 1
+        };
+    }
+    /**
+     * Available settings for ChannelMix
+     * @typedef {ChannelMixValue} ChannelMixValue
+     * @property {number} [leftToLeft] Sets the channel mix value of left to left
+     * @property {number} [leftToRight] Sets the channel mix value of left to right
+     * @property {number} [rightToLeft] Sets the channel mix value of right to left
+     * @property {number} [rightToRight] Sets the channel mix value of right to right
+     * @memberof ShoukakuConstants#
+     */
+    static get ChannelMixValue() {
+        return {
+            leftToLeft: 0,
+            leftToRight: 1,
+            rightToLeft: 0,
+            rightToRight: 1
+        };
+    }
+    /**
+     * Available settings for LowPass
+     * @typedef {LowPassValue} LowPassValue
+     * @property {number} [smoothing] Sets the smoothing of low pass filter
+     * @memberof ShoukakuConstants#
+     */
+    static get LowPassValue() {
+        return {
+            smoothing: 0
         };
     }
 }

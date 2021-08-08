@@ -1,9 +1,29 @@
-### 1.3.x -> 1.4.x
+### 1.6.x 
+> Not compatible with older `Master` branch Lavalink until `Dev` branch gets merged into `Master`
+
+> Support for Lavalink Filters, Check out https://deivu.github.io/Shoukaku/?api#ShoukakuPlayer
+
+> ShoukakuPlayer#equalizer and ShoukakuPlayer#volume is removed in favor of ShoukakuPlayer#filters
+
+> The old 2 variables is now inside ShoukakuPlayer#filters, ShoukakuPlayer#filters.equalizer and ShoukakuPlayer#filters.volume
+
+> Added support for Youtube Music searching
+
+> Added User-Agent on ShoukakuOptions that is needed on next lavalink release
+
+> Added ReconnectInterval on ShoukakuOptions for reconnection "wait" interval between reconnections
+
+> Added secure on ShoukakuNodeOptions for secured wss or https connections
+
+> Fixed reconnection issues present in older versions
+
+
+### 1.3.x -> 1.5.x
 > New Classes: ShoukakuTrack & ShoukakuTrackList
 
 >ShoukakuRest's resolve method now returns ShoukakuTrackList instead of a random object. This should make things easier for developers. Example below
 ```js
-Shoukaku.getNode().resolve('https://www.youtube.com/watch?v=K7RdzkDX1vY')
+Shoukaku.getNode().rest.resolve('https://www.youtube.com/watch?v=K7RdzkDX1vY')
     .then(TrackList => { 
         if (!TrackList) return;
         const ShoukakuTrack = TrackList.tracks.shift();

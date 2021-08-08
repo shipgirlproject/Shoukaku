@@ -1,4 +1,5 @@
 ## Shoukaku
+### A Lavalink wrapper for Discord.JS v12.x.x
 [![Discord](https://img.shields.io/discord/423116740810244097?style=flat-square)](https://discordapp.com/invite/FVqbtGu)
 [![npm](https://img.shields.io/npm/v/shoukaku?style=flat-square)](https://www.npmjs.com/package/shoukaku)
 ![Github Stars](https://img.shields.io/github/stars/Deivu/Shoukaku?style=flat-square)
@@ -20,49 +21,62 @@ Japanese Navy Aircraft Carrier Shokaku type "Shokaku" immediately after completi
 
 ### Why Shoukaku?
 
-✅ Straightforward.
+✅ Straightforward
 
-✅ Maintained.
+✅ Stable
 
-✅ Reliable.
+✅ Feature-rich
 
-✅ Stable.
-
-✅ Feature-rich.
-
-✅ Very cute and reliable aircraft carrier ❤ (Very, very Important)
-
-### Documentation
-https://deivu.github.io/Shoukaku/?api
+✅ Very cute and reliable aircraft carrier ❤ (very, very important)
 
 ### Installation
-For Stable
+
 ```
-npm i shoukaku
+npm i shoukaku@1.6.x // Replace x with the latest semver patch available
 ```
-For Master
+
+If you live on the edge, and want any update available on Shoukaku
 ```
 npm i Deivu/Shoukaku
 ```
 
+
+### Some useful info
+
+> I don't plan to support Discord.JS v13 on 1.x.x versions of Shoukaku
+
+> Discord.JS v13, and other libraries will & can be supported by 2.x.x of Shoukaku
+
+> Shoukaku's 2.x.x is here: https://github.com/Deivu/Shoukaku/tree/next
+
+### Documentation
+
+> https://deivu.github.io/Shoukaku/?api
+
 ### Changelogs
-You can view it on [CHANGELOGS.MD](https://github.com/Deivu/Shoukaku/blob/master/CHANGELOGS.MD) file in this repository.
 
-### Support Server
-Join in [ShipGirls Community](https://discordapp.com/invite/FVqbtGu) and ask at `#support` channel. 
+> https://github.com/Deivu/Shoukaku/blob/master/CHANGELOGS.MD
 
-### Issues or Bugs
-Feel free to open an issue in the [Issues](https://github.com/Deivu/Shoukaku/issues) section of this repository.
+### Getting Lavalink
 
-### Starting a Lavalink Server
-[View Lavalink README here](https://github.com/Frederikam/Lavalink/blob/master/README.md)
+Download binaries from the [CI server](https://ci.fredboat.com/viewLog.html?buildId=lastSuccessful&buildTypeId=Lavalink_Build&tab=artifacts&guest=1) or the [GitHub](https://github.com/freyacodes/Lavalink/releases) releases.
 
-### Example on a fully functional Discord Bot
-> Serves as your guide on how I implement my own library
+Put an [application.yml](https://github.com/freyacodes/Lavalink/blob/master/LavalinkServer/application.yml.example) file in your working directory.
 
-[View Kongou's source code here](https://github.com/Deivu/Kongou)
+Run with `java -jar Lavalink.jar`
 
-### Really simple example of using this
+Docker images are available on the [Docker](https://hub.docker.com/r/fredboat/lavalink/) hub.
+
+### Other Links
+
+[Support](https://discord.gg/FVqbtGu) | [Lavalink](https://github.com/freyacodes/Lavalink)
+
+### Example
+
+> Bot Implementation: https://github.com/Deivu/Kongou
+
+> Basic Implementation:
+
 ```js
 const { Client } = require('discord.js');
 const { Shoukaku } = require('shoukaku');
@@ -83,11 +97,10 @@ class ExampleBot extends Client {
     }
 
     _setupShoukakuEvents() {
-        this.shoukaku.on('ready', (name) => console.log(`Lavalink Node: ${name} is now connected`));
-        // You must handle error event
-        this.shoukaku.on('error', (name, error) => console.log(`Lavalink Node: ${name} emitted an error.`, error));
-        this.shoukaku.on('close', (name, code, reason) => console.log(`Lavalink Node: ${name} closed with code ${code}. Reason: ${reason || 'No reason'}`));
-        this.shoukaku.on('disconnected', (name, reason) => console.log(`Lavalink Node: ${name} disconnected. Reason: ${reason || 'No reason'}`));
+        this.shoukaku.on('ready', (name) => console.log(`Lavalink ${name}: Ready!`));
+        this.shoukaku.on('error', (name, error) => console.error(`Lavalink ${name}: Error Caught,`, error));
+        this.shoukaku.on('close', (name, code, reason) => console.warn(`Lavalink ${name}: Closed, Code ${code}, Reason ${reason || 'No reason'}`));
+        this.shoukaku.on('disconnected', (name, reason) => console.warn(`Lavalink ${name}: Disconnected, Reason ${reason || 'No reason'}`));
     }
 
     _setupClientEvents() {
@@ -103,16 +116,14 @@ class ExampleBot extends Client {
             const player = await node.joinVoiceChannel({
                 guildID: msg.guild.id,
                 voiceChannelID: msg.member.voice.channelID
-            });
-            const cleanFunction = (param) => {
-                console.log(param);
+            }); 
+            player.on('error', (error) => {
+                console.error(error);
                 player.disconnect();
-            }
-            player.on('end', cleanFunction);
-            player.on('closed', cleanFunction);
-            player.on('error', cleanFunction);
-            player.on('nodeDisconnect', cleanFunction);
-            await player.playTrack(data.tracks.shift()); // can also be "data.tracks.shift().track but that looks meme here since playTrack also accepts an instance of ShoukakuTrack
+            });
+            for (const event of ['end', 'closed', 'nodeDisconnect']) player.on(event, () => player.disconnect());
+            data = data.tracks.shift();
+            await player.playTrack(data); 
             await msg.channel.send("Now Playing: " + data.info.title);
         });
         this.on('ready', () => console.log('Bot is now ready'));
@@ -123,3 +134,5 @@ new ExampleBot()
     .login('token')
     .catch(console.error);
 ```
+
+> Made with ❤ by @Sāya#0113
