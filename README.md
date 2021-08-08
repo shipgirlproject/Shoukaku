@@ -8,14 +8,16 @@
 ![NPM](https://img.shields.io/npm/l/shoukaku?style=flat-square)
 
 <p align="center">
-  <img width="497" height="768" alt="Shoukaku" src="https://raw.githubusercontent.com/Deivu/Shoukaku/master/assets/cover.png"></img>
+  <img src="https://upload.wikimedia.org/wikipedia/commons/0/00/Japanese_aircraft_carrier_shokaku_1941.jpg">
 </p>
 
-```
-The ShipGirl Project, feat Shoukaku; ⓒ Kancolle
-```
+Japanese Navy Aircraft Carrier Shokaku type "Shokaku" immediately after completion photo `public domain`
 
-### Features
+✅ Currently being used by: 
+
+[![DBL](https://discordbots.org/api/widget/424137718961012737.svg)](https://discordbots.org/bot/424137718961012737)
+
+### Why Shoukaku?
 
 ✅ Straightforward
 
@@ -23,8 +25,7 @@ The ShipGirl Project, feat Shoukaku; ⓒ Kancolle
 
 ✅ Feature-rich
 
-✅ Very cute shipgirl ❤ (Very Important)
-
+✅ Very cute and reliable aircraft carrier ❤ (very, very important)
 
 ### Installation
 
