@@ -48,7 +48,7 @@ class ShoukakuFilter {
          * The volume of this filter
          * @type {Number}
          */
-        this.volume = settings.volume || 1.0;
+        this.volume = settings.volume ?? 1.0;
         /**
          * The equalizer bands set for this filter
          * @type {Object[]}
