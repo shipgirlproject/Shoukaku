@@ -2,7 +2,7 @@
 
 import { Shoukaku } from './types/Shoukaku';
 import * as Constants from './types/Constants';
-import { Libraries } from './types/libraries/Libraries';
+import * as Libraries from './types/libraries/Libraries';
 import { version } from './package.json'
 
 declare module 'shoukaku' {
