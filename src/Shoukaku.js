@@ -23,8 +23,8 @@ class Shoukaku extends EventEmitter {
             if (!version.startsWith('3'))
                 throw new ShoukakuError('Shoukaku will only work at Discord.JS-light v3');
         } else {
-            if (!version.startsWith('12'))
-                throw new ShoukakuError('Shoukaku will only work at Discord.JS v12');
+            if (!version.startsWith('13'))
+                throw new ShoukakuError('Shoukaku will only work at Discord.JS v13');
         }
         if (!nodes || !nodes.length)
             throw new ShoukakuError('No nodes supplied');
