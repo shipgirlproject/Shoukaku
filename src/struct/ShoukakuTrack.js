@@ -18,6 +18,11 @@ class ShoukakuTrack {
          */
         this.info = {
             /**
+             * Source name of this track
+             * @type {?string}
+             */
+            sourceName: raw.info.sourceName,
+            /**
              * Identifier of this track
              * @type {?string}
              */
