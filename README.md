@@ -101,7 +101,7 @@ class ExampleBot extends Client {
                 shardId: msg.guild.shardId,
                 channelId: msg.member.voice.channelId
             });
-            const events = ['end', 'error', 'closed', 'disconnect'];
+            const events = ['end', 'error', 'closed'];
             for (const event of events) {
                 player.on(event, info => {
                     console.log(info);
