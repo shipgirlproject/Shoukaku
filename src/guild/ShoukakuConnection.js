@@ -191,9 +191,9 @@ class ShoukakuConnection extends EventEmitter {
      * @protected
      */
     setStateUpdate({ session_id, channel_id, self_deaf, self_mute }) {
-        if (this.channelId && this.channelId !== channel_id) {
+        if (this.channelId && (channel_id && this.channelId !== channel_id)) {
             this.moved = true;
-            this.node.emit('debug', this.node.name, `[Voice] <- [Discord] : Channel Moved | Guild: ${this.guildId}`);
+            this.node.emit('debug', this.node.name, `[Voice] <- [Discord] : Channel Moved | Old Channel: ${this.channelId} Guild: ${this.guildId}`);
         }
         this.channelId = channel_id || this.channelId;
         if (!channel_id) {
@@ -207,7 +207,7 @@ class ShoukakuConnection extends EventEmitter {
             return;
         }
         this.sessionId = session_id;
-        this.node.emit('debug', this.node.name, `[Voice] <- [Discord] : State Update Received, Session ID: ${session_id} | Guild: ${this.guildId}`);
+        this.node.emit('debug', this.node.name, `[Voice] <- [Discord] : State Update Received | Channel: ${this.channelId} Session ID: ${session_id} Guild: ${this.guildId}`);
     }
     /**
      * @memberOf ShoukakuConnection
@@ -219,11 +219,15 @@ class ShoukakuConnection extends EventEmitter {
             this.emit('connectionUpdate', voiceState.SESSION_ENDPOINT_MISSING);
             return;
         }
-        this.moved = this.serverUpdate && !data.endpoint.startsWith(this.region);
+        console.log(data.endpoint);
+        if (this.serverUpdate && !data.endpoint.startsWith(this.region)) {
+            this.moved = true;
+            this.node.emit('debug', this.node.name, `[Voice] <- [Discord] : Voice Region Moved | Old Region: ${this.region} Guild: ${this.guildId}`);
+        }
         this.region = data.endpoint.split('.').shift().replace(/[0-9]/g, '');
         this.serverUpdate = data;
         this.node.send({ op: 'voiceUpdate', guildId: this.guildId, sessionId: this.sessionId, event: this.serverUpdate });
-        this.node.emit('debug', this.node.name, `[Voice] <- [Discord] : Server Update, Voice Update Sent, Server: ${this.region} | Guild: ${this.guildId}`);
+        this.node.emit('debug', this.node.name, `[Voice] <- [Discord] : Server Update, Voice Update Sent | Server: ${this.region} Guild: ${this.guildId}`);
         this.emit('connectionUpdate', voiceState.SESSION_READY);
     }
     /**

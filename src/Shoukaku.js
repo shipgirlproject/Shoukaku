@@ -31,7 +31,6 @@ class Shoukaku extends EventEmitter {
      * @param {boolean} [options.moveOnDisconnect=false] Specifies if the library will attempt to reconnect players on a disconnected node to another node
      * @param {number} [options.restTimeout=15000] Timeout on rest requests to your lavalink node, measured in milliseconds
      * @param {number} [options.reconnectInterval=5000] Timeout between reconnect attempts, measured in milliseconds
-     * @param {number} [options.closedWebsocketEventDelay=500] Timeout before shoukaku processes a websocket closed event, measured in milliseconds
      * @param {string} [options.userAgent="name/version(url)"] User-Agent to use on connecting to WS and REST requests
      */
     constructor(library, nodes, options) {

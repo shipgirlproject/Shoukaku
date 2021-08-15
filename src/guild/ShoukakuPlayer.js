@@ -450,7 +450,11 @@ class ShoukakuPlayer extends EventEmitter {
                 this.emit('exception', json);
                 break;
             case 'WebSocketClosedEvent':
-                this._onWebsocketClosedEvent(json);
+                if (this.connection.reconnecting) break;
+                if (this.connection.moved) 
+                    this.connection.moved = !this.connection.moved;
+                else 
+                    this.emit('closed', json);
                 break;
             default:
                 this.connection.node.emit(
@@ -459,28 +463,6 @@ class ShoukakuPlayer extends EventEmitter {
                     `[Player] -> [Node] : Unknown Player Event Type ${json.type} | Guild: ${this.connection.guildId}`
                 );
         }
-        return;
-    }
-    /**
-     * @memberOf ShoukakuPlayer
-     * @param {Object} json
-     * @private
-     */
-    _onWebsocketClosedEvent(json) {
-        if (this.connection.reconnecting) return;
-        const delay = this.connection.node.shoukaku.options.closedEventDelay;
-        setTimeout(() => {
-            if (!this.connection.moved) {
-                this.emit('closed', json);
-                return;
-            }
-            this.connection.node.emit(
-                'debug',
-                this.connection.node.name,
-                `[Player] -> [Node] : Voice channel or server move detected | Guild: ${this.connection.guildId}`
-            );
-            this.connection.moved = false;
-        }, delay);
     }
 }
 module.exports = ShoukakuPlayer;

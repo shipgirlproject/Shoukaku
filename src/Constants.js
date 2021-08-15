@@ -34,7 +34,6 @@ module.exports = {
     * @property {boolean} [moveOnDisconnect=false] Specifies if the library will attempt to reconnect players on a disconnected node to another node
     * @property {number} [restTimeout=15000] Timeout on rest requests to your lavalink node, measured in milliseconds
     * @property {number} [reconnectInterval=5000] Timeout between reconnect attempts, measured in milliseconds
-    * @property {number} [closedEventDelay=750] Delay before a player of shoukaku emits a "closed" event
     * @property {string} [userAgent="name/ver(url)"] User-Agent to use on connecting to WS and REST request
     * @memberof Constants
     */
@@ -45,7 +44,6 @@ module.exports = {
         moveOnDisconnect: false,
         restTimeout: 15000,
         reconnectInterval: 5000,
-        closedEventDelay: 750,
         userAgent: `${name}/${version}(${repository.url})`
     },
     /**

@@ -21,7 +21,6 @@ export interface ShoukakuOptions {
     moveOnDisconnect?: boolean;
     restTimeout?: number;
     reconnectInterval?: number;
-    closeEventDelay?: number;
     userAgent?: string;
 }
 
