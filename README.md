@@ -32,9 +32,8 @@ Refer to [/src/libraries](https://github.com/Deivu/Shoukaku/tree/next/src/librar
 
 ### Installation
 
-```
-npm install git://github.com/Deivu/Shoukaku.git#next --save
-```
+> npm install git://github.com/Deivu/Shoukaku.git#next --save
+
 
 ### Documentation 
 
@@ -83,7 +82,7 @@ class ExampleBot extends Client {
         this.shoukaku.on('ready', (name) => console.log(`Lavalink ${name}: Ready!`));
         this.shoukaku.on('error', (name, error) => console.error(`Lavalink ${name}: Error Caught,`, error));
         this.shoukaku.on('close', (name, code, reason) => console.warn(`Lavalink ${name}: Closed, Code ${code}, Reason ${reason || 'No reason'}`));
-        this.shoukaku.on('disconnected', (name, reason) => console.warn(`Lavalink ${name}: Disconnected, Reason ${reason || 'No reason'}`));
+        this.shoukaku.on('disconnect', (name, reason) => console.warn(`Lavalink ${name}: Disconnected, Reason ${reason || 'No reason'}`));
     }
 
     _setupClientEvents() {
