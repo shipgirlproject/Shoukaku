@@ -2,17 +2,16 @@
 
 > A featureful lavalink wrapper for Lavalink
 
-<center>
-
 [![Discord](https://img.shields.io/discord/423116740810244097?style=flat-square)](https://discordapp.com/invite/FVqbtGu)
 [![npm](https://img.shields.io/npm/v/shoukaku?style=flat-square)](https://www.npmjs.com/package/shoukaku)
 ![Github Stars](https://img.shields.io/github/stars/Deivu/Shoukaku?style=flat-square)
 ![GitHub issues](https://img.shields.io/github/issues-raw/Deivu/Shoukaku?style=flat-square)
 ![Snyk Vulnerabilities for npm package](https://img.shields.io/snyk/vulnerabilities/npm/shoukaku?style=flat-square) 
 ![NPM](https://img.shields.io/npm/l/shoukaku?style=flat-square)
-<img width="497" height="768" alt="Shoukaku" src="https://raw.githubusercontent.com/Deivu/Shoukaku/master/assets/cover.png"></img>
 
-</center>
+<p align="center">
+    <img width="50%" src="https://raw.githubusercontent.com/Deivu/Shoukaku/master/assets/cover.png"> 
+</p>
 
 > The ShipGirl Project, feat Shoukaku; ⓒ Kancolle
 
