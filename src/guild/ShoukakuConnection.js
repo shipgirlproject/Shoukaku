@@ -219,7 +219,6 @@ class ShoukakuConnection extends EventEmitter {
             this.emit('connectionUpdate', voiceState.SESSION_ENDPOINT_MISSING);
             return;
         }
-        console.log(data.endpoint);
         if (this.serverUpdate && !data.endpoint.startsWith(this.region)) {
             this.moved = true;
             this.node.emit('debug', this.node.name, `[Voice] <- [Discord] : Voice Region Moved | Old Region: ${this.region} Guild: ${this.guildId}`);
