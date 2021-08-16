@@ -28,10 +28,10 @@ export class ShoukakuConnection extends EventEmitter {
   public setMute(mute?: boolean): void;
   public disconnect(): void;
   public connect(options: ConnectOptions): Promise<void>;
-  public attemptReconnect(channelId: Snowflake): Promise<void>;
+  public reconnect(channelId?: Snowflake): Promise<void>;
   protected setStateUpdate(options: StateUpdate): void;
   protected setServerUpdate(data: Object): void;
-  protected send(d: object, important: boolean): void;
+  protected send(d: object, important?: boolean): void;
 }
 
 export interface ConnectOptions {
