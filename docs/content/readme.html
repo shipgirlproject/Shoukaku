@@ -4,16 +4,15 @@
 <blockquote>
 <p>A featureful lavalink wrapper for Lavalink</p>
 </blockquote>
-<center>
-
 <p><a href="https://discordapp.com/invite/FVqbtGu"><img src="https://img.shields.io/discord/423116740810244097?style=flat-square" alt="Discord" style="max-width: 100%;"></a>
 <a href="https://www.npmjs.com/package/shoukaku"><img src="https://img.shields.io/npm/v/shoukaku?style=flat-square" alt="npm" style="max-width: 100%;"></a>
 <img src="https://img.shields.io/github/stars/Deivu/Shoukaku?style=flat-square" alt="Github Stars" style="max-width: 100%;">
 <img src="https://img.shields.io/github/issues-raw/Deivu/Shoukaku?style=flat-square" alt="GitHub issues" style="max-width: 100%;">
 <img src="https://img.shields.io/snyk/vulnerabilities/npm/shoukaku?style=flat-square" alt="Snyk Vulnerabilities for npm package" style="max-width: 100%;"> 
-<img src="https://img.shields.io/npm/l/shoukaku?style=flat-square" alt="NPM" style="max-width: 100%;">
-<img width="497" height="768" alt="Shoukaku" src="https://raw.githubusercontent.com/Deivu/Shoukaku/master/assets/cover.png" style="max-width: 100%;"></p>
-</center>
+<img src="https://img.shields.io/npm/l/shoukaku?style=flat-square" alt="NPM" style="max-width: 100%;"></p>
+<p align="center">
+    <img width="50%" src="https://raw.githubusercontent.com/Deivu/Shoukaku/master/assets/cover.png" style="max-width: 100%;"> 
+</p>
 
 <blockquote>
 <p>The ShipGirl Project, feat Shoukaku; ⓒ Kancolle</p>
@@ -26,7 +25,10 @@
 <h3 id="supported-libraries">Supported Libraries</h3>
 <p>Refer to <a href="https://github.com/Deivu/Shoukaku/tree/next/src/libraries">/src/libraries</a> for list of supported libraries + how to support other libraries</p>
 <h3 id="installation">Installation</h3>
-<pre><code>npm install git://github.com/Deivu/Shoukaku.git#next --save</code></pre><h3 id="documentation">Documentation</h3>
+<blockquote>
+<p>npm install git://github.com/Deivu/Shoukaku.git#next --save</p>
+</blockquote>
+<h3 id="documentation">Documentation</h3>
 <blockquote>
 <p>Clone this repo, then install dev-dependencies, then run <code>docma serve</code></p>
 </blockquote>
@@ -66,7 +68,7 @@ class ExampleBot extends Client {
         this.shoukaku.on('ready', (name) =&gt; console.log(`Lavalink ${name}: Ready!`));
         this.shoukaku.on('error', (name, error) =&gt; console.error(`Lavalink ${name}: Error Caught,`, error));
         this.shoukaku.on('close', (name, code, reason) =&gt; console.warn(`Lavalink ${name}: Closed, Code ${code}, Reason ${reason || 'No reason'}`));
-        this.shoukaku.on('disconnected', (name, reason) =&gt; console.warn(`Lavalink ${name}: Disconnected, Reason ${reason || 'No reason'}`));
+        this.shoukaku.on('disconnect', (name, reason) =&gt; console.warn(`Lavalink ${name}: Disconnected, Reason ${reason || 'No reason'}`));
     }
 
     _setupClientEvents() {
@@ -84,7 +86,7 @@ class ExampleBot extends Client {
                 shardId: msg.guild.shardId,
                 channelId: msg.member.voice.channelId
             });
-            const events = ['end', 'error', 'closed', 'disconnect'];
+            const events = ['end', 'error', 'closed'];
             for (const event of events) {
                 player.on(event, info =&gt; {
                     console.log(info);
