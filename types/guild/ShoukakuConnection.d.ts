@@ -24,11 +24,11 @@ export class ShoukakuConnection extends EventEmitter {
   public reconnecting: boolean;
   private serverUpdate: boolean;
 
-  public attemptReconnect(options: { channelId: Snowflake, forceReconnect: boolean }): Promise<void>;
   public setDeaf(deaf?: boolean): void;
   public setMute(mute?: boolean): void;
   public disconnect(): void;
   public connect(options: ConnectOptions): Promise<void>;
+  public attemptReconnect(channelId: Snowflake): Promise<void>;
   protected setStateUpdate(options: StateUpdate): void;
   protected setServerUpdate(data: Object): void;
   protected send(d: object, important: boolean): void;

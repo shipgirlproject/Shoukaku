@@ -79,37 +79,6 @@ class ShoukakuConnection extends EventEmitter {
 
         Object.defineProperty(this, 'serverUpdate', { value: null, writable: true });
     }
-
-    /**
-     * Attempts to reconnect this connection
-     * @memberOf ShoukakuConnection
-     * @param {Object} [options] 
-     * @param {String} [options.channelId] Will throw an error if not specified, when the state of this link is disconnected, no cached serverUpdate or when forceReconnect is true
-     * @param {Boolean} [options.forceReconnect] Forces a reconnection by re-requesting a connection to Discord, also resets your player
-     * @returns {Promise<void>}
-     */
-    async attemptReconnect({ channelId, forceReconnect } = {}) {
-        if (!forceReconnect && this.state === state.CONNECTED) {
-            this.node.send({ op: 'voiceUpdate', guildId: this.guildId, sessionId: this.sessionId, event: this.serverUpdate });
-            return;
-        }
-        else if (this.state === state.DISCONNECTED || !this.serverUpdate || forceReconnect) {
-            try {
-                this.reconnecting = true;
-                if (!channelId) throw new Error('Please specify the channel you want this node to connect on');
-                this.node.send({ op: 'destroy', guildId: this.guildId });
-                await wait(4000);
-                if (this.state !== state.DISCONNECTED) {
-                    this.send({ guild_id: this.guildId, channel_id: null, self_mute: false, self_deaf: false }, true);
-                    await wait(4000);
-                }
-                this.serverUpdate = null;
-                await this.connect({ guildId: this.guildId, channelId, mute: this.selfMute, deaf: this.selfDeaf });
-            } finally {
-                this.reconnecting = false;
-            }
-        }
-    }
     /**
      * Deafens the client
      * @memberOf ShoukakuConnection
@@ -183,6 +152,25 @@ class ShoukakuConnection extends EventEmitter {
             throw error;
         } finally {
             clearTimeout(timeout);
+        }
+    }
+    /**
+     * Attempts to reconnect this connection
+     * @memberOf ShoukakuConnection
+     * @param {String} [channelId] Defaults to the last channel id where this connection is connected to
+     * @returns {Promise<void>}
+     */
+    async reconnect(channelId = this.channelId) {
+        if (!channelId) throw new Error('Please specify the channel you want this node to connect on');
+        if (this.state !== state.DISCONNECTED) return;
+        try {
+            this.reconnecting = true;
+            this.node.send({ op: 'destroy', guildId: this.guildId });
+            await wait(5000);
+            this.serverUpdate = null;
+            await this.connect({ guildId: this.guildId, channelId, mute: this.selfMute, deaf: this.selfDeaf });
+        } finally {
+            this.reconnecting = false;
         }
     }
     /**
