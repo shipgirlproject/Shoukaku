@@ -10,7 +10,7 @@
 ![NPM](https://img.shields.io/npm/l/shoukaku?style=flat-square)
 
 <p align="center">
-    <img width="50%" src="https://raw.githubusercontent.com/Deivu/Shoukaku/master/assets/cover.png"> 
+    <img src="https://raw.githubusercontent.com/Deivu/Shoukaku/master/assets/cover.png"> 
 </p>
 
 > The ShipGirl Project, feat Shoukaku; ⓒ Kancolle
@@ -31,8 +31,7 @@ Refer to [/src/libraries](https://github.com/Deivu/Shoukaku/tree/next/src/librar
 
 ### Installation
 
-> npm install git://github.com/Deivu/Shoukaku.git#next --save
-
+> npm i shoukaku
 
 ### Documentation 
 
