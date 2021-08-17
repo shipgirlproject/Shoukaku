@@ -129,9 +129,9 @@ class ShoukakuConnection extends EventEmitter {
      */
     async connect({ guildId, channelId, deaf, mute } = {}) {
         if (this.state === state.CONNECTING)
-            throw Error('Can\'t connect while a connection is connecting. Wait for it to resolve first');
+            throw new Error('Can\'t connect while a connection is connecting. Wait for it to resolve first');
         if (this.state === state.CONNECTED)
-            throw Error('Can\'t connect if this connection is already connected');
+            throw new Error('Can\'t connect if this connection is already connected');
         this.state = state.CONNECTING;
         this.send({ guild_id: guildId, channel_id: channelId, self_deaf: deaf, self_mute: mute }, true);
         this.node.emit('debug', this.node.name, `[Voice] -> [Discord] : Requesting Connection | Guild: ${this.guildId}`);
