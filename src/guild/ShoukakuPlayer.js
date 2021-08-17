@@ -367,7 +367,7 @@ class ShoukakuPlayer extends EventEmitter {
      * @example
      * ShoukakuPlayer
      *   .connection
-     *   .attemptReconnect()
+     *   .reconnect()
      *   .then(() => ShoukakuPlayer.resume());
      */
     resume() {
