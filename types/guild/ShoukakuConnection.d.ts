@@ -36,6 +36,7 @@ export class ShoukakuConnection extends EventEmitter {
 
 export interface ConnectOptions {
   guildId: Snowflake;
+  shardId: number;
   channelId: Snowflake;
   deaf?: boolean;
   mute?: boolean;

@@ -198,23 +198,24 @@ class ShoukakuSocket extends EventEmitter {
      * async function BurningLove() {
      *   const node = Shoukaku.getNode();
      *   const list = await node.rest.resolve('Kongou Burning Love', 'youtube');
-     *   const player = await node.joinChannel({ guildID: 'guild_id', voiceChannelID: 'voice_channel_id' });
+     *   const player = await node.joinChannel({ guildID: 'guild_id', channelID: 'voice_channel_id' });
      *   player.playTrack(list.tracks.shift());
      * }
      * BurningLove();
      */
     async joinChannel(options = {}) {
         if (isNaN(options.shardId) || !options.guildId || !options.channelId)
-            throw new Error('Supplied options needs to have a valid Shard id and the "guildId", "channelId" ids');
+            throw new Error('Supplied options needs to have a "guildId", "shardId", and "channelId" properties');
         if (this.state !== state.CONNECTED)
             throw new Error('This node is not yet ready');
-
-        if (!this.shoukaku.library.guilds.has(options.guildId)) throw new Error('Guild could\'t be found, cannot continue creating this connection');
-
-        const player = this.players.get(options.guildId) || new ShoukakuPlayer(this, options);
-
+        if (!this.shoukaku.library.guilds.has(options.guildId)) 
+            throw new Error('Guild could\'t be found, cannot continue creating this connection');
         try {
-            if (!this.players.has(options.guildId)) this.players.set(options.guildId, player);
+            let player = this.players.get(options.guildId);
+            if (!player) {
+                player = new ShoukakuPlayer(this, options);
+                this.players.set(options.guildId, player);
+            }
             await player.connection.connect(options);
             return player;
         } catch (error) {
