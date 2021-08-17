@@ -36,11 +36,11 @@ Refer to [/src/libraries](https://github.com/Deivu/Shoukaku/tree/next/src/librar
 
 ### Documentation 
 
-> Clone this repo, then install dev-dependencies, then run `docma serve`
+> https://deivu.github.io/Shoukaku/
 
 ### Getting Lavalink
 
-Download binaries from the [CI server](https://ci.fredboat.com/viewLog.html?buildId=lastSuccessful&buildTypeId=Lavalink_Build&tab=artifacts&guest=1) or the [GitHub](https://github.com/freyacodes/Lavalink/releases) releases.
+Download the latest binaries from the [CI server (DEV BRANCH)](https://ci.fredboat.com/viewType.html?buildTypeId=Lavalink_Build&branch_Lavalink=refs%2Fheads%2Fdev&tab=buildTypeStatusDiv)
 
 Put an [application.yml](https://github.com/freyacodes/Lavalink/blob/master/LavalinkServer/application.yml.example) file in your working directory.
 
@@ -81,7 +81,11 @@ class ExampleBot extends Client {
         this.shoukaku.on('ready', (name) => console.log(`Lavalink ${name}: Ready!`));
         this.shoukaku.on('error', (name, error) => console.error(`Lavalink ${name}: Error Caught,`, error));
         this.shoukaku.on('close', (name, code, reason) => console.warn(`Lavalink ${name}: Closed, Code ${code}, Reason ${reason || 'No reason'}`));
-        this.shoukaku.on('disconnect', (name, reason) => console.warn(`Lavalink ${name}: Disconnected, Reason ${reason || 'No reason'}`));
+        this.shoukaku.on('disconnect', (name, players, moved) => {
+            if (moved) return;
+            players.map(player => player.connection.disconnect())
+            console.warn(`Lavalink ${name}: Disconnected`);
+        });
     }
 
     _setupClientEvents() {
