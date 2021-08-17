@@ -83,7 +83,7 @@ class ExampleBot extends Client {
         this.shoukaku.on('close', (name, code, reason) => console.warn(`Lavalink ${name}: Closed, Code ${code}, Reason ${reason || 'No reason'}`));
         this.shoukaku.on('disconnect', (name, players, moved) => {
             if (moved) return;
-            players.map(player => player.connection.disconnect())
+            // handle your queues, ex delete the players from your own queue
             console.warn(`Lavalink ${name}: Disconnected`);
         });
     }
