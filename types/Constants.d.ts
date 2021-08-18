@@ -33,9 +33,12 @@ export interface NodeOptions {
 }
 
 export class ShoukakuTrackList {
-    type: 'PLAYLIST' | 'TRACK' | 'SEARCH';
+    type: 'PLAYLIST' | 'TRACK' | 'SEARCH' | 'NO_MATCHES' | 'LOAD_FAILED';
+    playlistInfo?: {
+      playlistName?: string;
+      selectedTrack?: number
+    }
     playlistName?: string;
-    selectedTrack: number;
     tracks: ShoukakuTrack[];
 }
 

@@ -21,47 +21,47 @@ class ShoukakuTrack {
              * Source name of this track
              * @type {?string}
              */
-            sourceName: raw.info.sourceName,
+            sourceName: raw?.info?.sourceName,
             /**
              * Identifier of this track
              * @type {?string}
              */
-            identifier: raw.info.identifier,
+            identifier: raw?.info?.identifier,
             /**
              * If this track is seekable
              * @type {?boolean}
              */
-            isSeekable: raw.info.isSeekable,
+            isSeekable: raw?.info?.isSeekable,
             /**
              * The uploader or author of this track
              * @type {?string}
              */
-            author: raw.info.author,
+            author: raw?.info?.author,
             /**
              * The length of this track in milliseconds
              * @type {?number}
              */
-            length: raw.info.length,
+            length: raw?.info?.length,
             /**
              * If this track is a livestream
              * @type {?boolean}
              */
-            isStream: raw.info.isStream,
+            isStream: raw?.info?.isStream,
             /**
              * Start position of this track when played
              * @type {?number}
              */
-            position: raw.info.position,
+            position: raw?.info?.position,
             /**
              * Title of this track
              * @type {?string}
              */
-            title: raw.info.title,
+            title: raw?.info?.title,
             /**
              * URL to this track
              * @type {?string}
              */
-            uri: raw.info.uri
+            uri: raw?.info?.uri
         };
     }
 }
