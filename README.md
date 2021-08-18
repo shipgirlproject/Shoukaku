@@ -30,11 +30,10 @@
 Refer to [/src/libraries](https://github.com/Deivu/Shoukaku/tree/next/src/libraries) for list of supported libraries + how to support other libraries
 
 ### Installation
-## NPM (Stable)
-> npm install shoukaku --save
+ 
+> NPM (Stable) => npm install shoukaku --save
 
-## Github (Dev)
-> npm install Deivu/Shoukaku#next
+> Github (Dev) => npm install Deivu/Shoukaku#next
 
 ### Documentation 
 
