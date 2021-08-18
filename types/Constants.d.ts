@@ -36,7 +36,7 @@ export class ShoukakuTrackList {
     type: 'PLAYLIST' | 'TRACK' | 'SEARCH';
     playlistName?: string;
     selectedTrack: number;
-    tracks: Array<ShoukakuTrack>;
+    tracks: ShoukakuTrack[];
 }
 
 export class ShoukakuTrack {
@@ -50,17 +50,18 @@ export class ShoukakuTrack {
         position?: number;
         title?: string;
         uri?: string;
+        sourceName?: string;
     };
 }
 
 export interface DecodedTrack {
-    identifier: string;
-    isSeekable: boolean;
-    author: string;
-    length: number;
-    isStream: boolean;
-    position: number;
-    title: string;
-    uri: string;
-    sourceName: string;
+    identifier?: string;
+    isSeekable?: boolean;
+    author?: string;
+    length?: number;
+    isStream?: boolean;
+    position?: number;
+    title?: string;
+    uri?: string;
+    sourceName?: string;
 }

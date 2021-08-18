@@ -32,7 +32,7 @@ export class ShoukakuPlayer extends EventEmitter {
   public setChannelMix(values: { leftToLeft?: number, leftToRight?: number, rightToLeft?: number, rightToRight?: number } | null): ShoukakuPlayer;
   public setLowPass(values: { smoothing?: number } | null): ShoukakuPlayer;
   public setFilters(settings: ShoukakuFilter): ShoukakuPlayer;
-  public cleanFilters(): ShoukakuPlayer;
+  public clearFilters(): ShoukakuPlayer;
   public resume(): ShoukakuPlayer;
   private updateFilters(): void;
   protected clean(): void;
