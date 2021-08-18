@@ -1,6 +1,6 @@
 ## Shoukaku's Supported Libraries
 
-> [Discord.JS](https://discord.js.org/#/) (v13.0.1 or newer)
+> [Discord.JS](https://discord.js.org/#/) (v13.0.0)
 
 ```js
 const { Shoukaku, Libraries } = require('shoukaku');
