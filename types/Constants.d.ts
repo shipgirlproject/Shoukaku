@@ -33,10 +33,10 @@ export interface NodeOptions {
 }
 
 export class ShoukakuTrackList {
-    type: 'PLAYLIST' | 'TRACK' | 'SEARCH';
-    playlistName?: string;
+    type: 'PLAYLIST' | 'TRACK' | 'SEARCH' | 'NO_MATCHES' | 'LOAD_FAILED';
     selectedTrack: number;
-    tracks: Array<ShoukakuTrack>;
+    playlistName?: string;
+    tracks: ShoukakuTrack[];
 }
 
 export class ShoukakuTrack {
@@ -54,13 +54,13 @@ export class ShoukakuTrack {
 }
 
 export interface DecodedTrack {
-    identifier: string;
-    isSeekable: boolean;
-    author: string;
-    length: number;
-    isStream: boolean;
-    position: number;
-    title: string;
-    uri: string;
-    sourceName: string;
+    identifier?: string;
+    isSeekable?: boolean;
+    author?: string;
+    length?: number;
+    isStream?: boolean;
+    position?: number;
+    title?: string;
+    uri?: string;
+    sourceName?: string;
 }

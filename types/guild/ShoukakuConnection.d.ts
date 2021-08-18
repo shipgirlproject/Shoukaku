@@ -29,8 +29,8 @@ export class ShoukakuConnection extends EventEmitter {
   public disconnect(): void;
   public connect(options: ConnectOptions): Promise<void>;
   public reconnect(channelId?: Snowflake): Promise<void>;
-  protected setStateUpdate(options: StateUpdate): void;
-  protected setServerUpdate(data: Object): void;
+  protected setStateUpdate(options: VoiceStateUpdate): void;
+  protected setServerUpdate(data: VoiceServerUpdate): void;
   protected send(d: object, important?: boolean): void;
 }
 
@@ -42,7 +42,13 @@ export interface ConnectOptions {
   mute?: boolean;
 }
 
-export interface StateUpdate {
+export interface VoiceServerUpdate {
+  token: string;
+  guild_id: Snowflake;
+  endpoint: string | null;
+}
+
+export interface VoiceStateUpdate {
   session_id: string;
   channel_id: Snowflake;
   self_deaf: boolean;
