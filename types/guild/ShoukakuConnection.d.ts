@@ -1,5 +1,5 @@
 import { EventEmitter } from 'events';
-import { state, Base64String, Snowflake } from '../Constants';
+import { state, Snowflake } from '../Constants';
 import { ShoukakuPlayer } from './ShoukakuPlayer';
 import { ShoukakuSocket } from '../node/ShoukakuSocket';
 

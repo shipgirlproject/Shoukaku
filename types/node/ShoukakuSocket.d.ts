@@ -3,7 +3,7 @@ import { ShoukakuPlayer } from '../guild/ShoukakuPlayer';
 import { Shoukaku } from '../Shoukaku';
 import { ShoukakuQueue } from './ShoukakuQueue';
 import { ShoukakuRest } from './ShoukakuRest';
-import { state, Base64String, Snowflake } from '../Constants';
+import { state, Snowflake } from '../Constants';
 import { ShoukakuStats } from '../struct/ShoukakuStats';
 
 

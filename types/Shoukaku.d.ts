@@ -1,9 +1,9 @@
-import { Snowflake } from 'discord.js';
 import { ShoukakuOptions, NodeOptions } from './Constants';
 import { GetterObj } from './libraries/Constants';
 import { ShoukakuPlayer } from './guild/ShoukakuPlayer';
 import { ShoukakuSocket } from './node/ShoukakuSocket'
 import { EventEmitter } from 'events';
+import { Snowflake } from './Constants';
 
 export class Shoukaku extends EventEmitter {
     constructor(
@@ -14,7 +14,7 @@ export class Shoukaku extends EventEmitter {
 
     public library: GetterObj<any, any, any>;
     public id?: Snowflake | null;
-    public nodes: Map<string, ShoukakuSocket>;
+    public nodes: Map<Snowflake, ShoukakuSocket>;
     private options: Object;
 
     public get players(): Map<Snowflake, ShoukakuPlayer>;
@@ -28,6 +28,7 @@ export class Shoukaku extends EventEmitter {
     protected _clientRaw(packet: Object): void;
     private _clean(name: string, players: ShoukakuPlayer[], moved: boolean): void;
 }
+
 
 export interface Shoukaku {
     on(event: 'debug', listener: (name: string, info: string) => void): this;
