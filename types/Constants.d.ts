@@ -11,7 +11,7 @@ export enum voiceState {
     SESSION_ENDPOINT_MISSING = 2
 }
 
-export type Snowflake = string;
+export type Snowflake = `${bigint}` | string;
 export type Base64String = string;
 
 export interface ShoukakuOptions {
