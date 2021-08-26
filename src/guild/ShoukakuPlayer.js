@@ -113,7 +113,7 @@ class ShoukakuPlayer extends EventEmitter {
         });
         this.connection.node.players.delete(this.connection.guildId);
         this.connection.node = node;
-        this.connection.node.players.set(this.connection.guildId, this.player);
+        this.connection.node.players.set(this.connection.guildId, this);
         this.connection.node.send({
             op: 'voiceUpdate',
             guildId: this.connection.guildId,

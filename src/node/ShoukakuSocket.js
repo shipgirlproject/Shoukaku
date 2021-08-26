@@ -337,7 +337,7 @@ class ShoukakuSocket extends EventEmitter {
         if (this.state !== state.DISCONNECTED) return;
         this.reconnects++;
         this.emit('debug', this.name, `[Socket] -> [${this.name}] : Reconnecting. ${this.reconnectTries - this.reconnects} tries left`);
-        setTimeout(() => this.connect(), this.reconnectInterval);
+        setTimeout(() => this.connect(true), this.reconnectInterval);
     }
     /**
      * @memberOf ShoukakuSocket
