@@ -38,7 +38,7 @@ export class ShoukakuSocket extends EventEmitter {
     public joinChannel(options: JoinOptions): Promise<ShoukakuPlayer>;
     public leaveChannel(guildId: Snowflake): void;
     public send(data: Object, important: boolean): void;
-    private _open(response: Object): void;
+    private _open(response: Object, reconnect?: boolean): void;
     private _message(message: string): void;
     private _close(code: number, reason: string): void;
     protected _clientRaw(packet: Object): void;
