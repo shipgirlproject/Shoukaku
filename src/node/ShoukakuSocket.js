@@ -245,6 +245,7 @@ class ShoukakuSocket extends EventEmitter {
     /**
      * @memberOf ShoukakuSocket
      * @param {Object} response
+     * @param {boolean} [reconnect=false]
      * @returns {void}
      * @private
      */
