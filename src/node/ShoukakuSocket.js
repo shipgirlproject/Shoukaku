@@ -272,8 +272,8 @@ class ShoukakuSocket extends EventEmitter {
         }
         this.reconnects = 0;
         this.state = state.CONNECTED;
-        this.emit('debug', this.name, `[Socket] <-> [${this.name}] : Connection Open ${this.url} | Resumed: ${!resumed && reconnect}`);
-        this.emit('ready', this.name, !resumed && reconnect);
+        this.emit('debug', this.name, `[Socket] <-> [${this.name}] : Connection Open ${this.url} | Resumed: ${!resumed && reconnect ? reconnect : resumed}`);
+        this.emit('ready', this.name, !resumed && reconnect ? reconnect : resumed);
     }
     /**
      * @memberOf ShoukakuSocket
