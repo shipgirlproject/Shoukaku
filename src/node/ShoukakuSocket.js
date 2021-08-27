@@ -258,16 +258,16 @@ class ShoukakuSocket extends EventEmitter {
                 key: (!!this.resumable).toString(),
                 timeout: this.resumableTimeout
             });
-        }
-        if (!resumed && reconnect) {
-            for (const player of [...this.players.values()]) {
-                player.connection.node.send({
-                    op: 'voiceUpdate',
-                    guildId: player.connection.guildId,
-                    sessionId: player.connection.sessionId,
-                    event: player.connection.serverUpdate
-                });
-                player.resume();
+            if (!resumed && reconnect) {
+                for (const player of [...this.players.values()]) {
+                    player.connection.node.send({
+                        op: 'voiceUpdate',
+                        guildId: player.connection.guildId,
+                        sessionId: player.connection.sessionId,
+                        event: player.connection.serverUpdate
+                    });
+                    player.resume();
+                }
             }
         }
         this.reconnects = 0;
@@ -334,10 +334,7 @@ class ShoukakuSocket extends EventEmitter {
         const players = [...this.players.values()];
         const moved = this.moveOnDisconnect && this.shoukaku.nodes.size > 0;
         for (const player of players) {
-            if (moved)
-                player.moveNode(this.shoukaku._getIdeal(this.group).name);
-            else
-                player.connection.disconnect();
+            moved ? player.moveNode(this.shoukaku._getIdeal(this.group).name) : player.connection.disconnect();
         }
         this.queue.clear();
         this.emit('disconnect', this.name, players, moved);
