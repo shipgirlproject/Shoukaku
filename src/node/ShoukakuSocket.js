@@ -165,7 +165,7 @@ class ShoukakuSocket extends EventEmitter {
         if (reconnect) headers['Resume-Key'] = (!!this.resumable).toString();
         this.emit('debug', this.name, `[Socket] -> [${this.name}] : Connecting ${this.url}`);
         this.ws = new Websocket(this.url, { headers });
-        this.ws.once('upgrade', response => this.ws.once('open', () => this._open(response)));
+        this.ws.once('upgrade', response => this.ws.once('open', () => this._open(response, reconnect)));
         this.ws.once('close', (...args) => this._close(...args));
         this.ws.on('error', error => this.emit('error', this.name, error));
         this.ws.on('message', (...args) => this._message(...args));
@@ -248,7 +248,7 @@ class ShoukakuSocket extends EventEmitter {
      * @returns {void}
      * @private
      */
-    _open(response) {
+    _open(response, reconnect = false) {
         this.queue.process();
         if (this.resumable) {
             this.send({
@@ -256,6 +256,17 @@ class ShoukakuSocket extends EventEmitter {
                 key: (!!this.resumable).toString(),
                 timeout: this.resumableTimeout
             });
+        }
+        if (reconnect) {
+            for (const player of [...this.players.values()]) {
+                player.connection.node.send({
+                    op: 'voiceUpdate',
+                    guildId: player.connection.guildId,
+                    sessionId: player.connection.sessionId,
+                    event: player.connection.serverUpdate
+                });
+                player.resume();
+            }
         }
         this.reconnects = 0;
         this.state = state.CONNECTED;
@@ -321,10 +332,12 @@ class ShoukakuSocket extends EventEmitter {
     _clean() {
         const players = [...this.players.values()];
         const moved = this.moveOnDisconnect && this.shoukaku.nodes.size > 0;
-        if (moved)
-            for (const player of players) player.moveNode(this.shoukaku._getIdeal(this.group));
-        else 
-            for (const player of players) player.connection.disconnect();
+        for (const player of players) {
+            if (moved)
+                player.moveNode(this.shoukaku._getIdeal(this.group).name);
+            else
+                player.connection.disconnect();
+        }
         this.queue.clear();
         this.emit('disconnect', this.name, players, moved);
     }
