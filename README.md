@@ -27,7 +27,7 @@
 
 ### Supported Libraries
 
-Refer to [/src/libraries](https://github.com/Deivu/Shoukaku/tree/next/src/libraries) for list of supported libraries + how to support other libraries
+Refer to [/src/libraries](https://github.com/Deivu/Shoukaku/tree/master/src/libraries) for list of supported libraries + how to support other libraries
 
 ### Installation
  
