@@ -250,6 +250,7 @@ class ShoukakuSocket extends EventEmitter {
      * @private
      */
     _open(response, reconnect = false) {
+        const resumed = response.headers['session-resumed'] === 'true';
         this.queue.process();
         if (this.resumable) {
             this.send({
@@ -258,7 +259,7 @@ class ShoukakuSocket extends EventEmitter {
                 timeout: this.resumableTimeout
             });
         }
-        if (reconnect) {
+        if (!resumed && reconnect) {
             for (const player of [...this.players.values()]) {
                 player.connection.node.send({
                     op: 'voiceUpdate',
@@ -271,9 +272,8 @@ class ShoukakuSocket extends EventEmitter {
         }
         this.reconnects = 0;
         this.state = state.CONNECTED;
-        const resumed = response.headers['session-resumed'] === 'true';
-        this.emit('debug', this.name, `[Socket] <-> [${this.name}] : Connection Open ${this.url} | Resumed: ${resumed}`);
-        this.emit('ready', this.name, resumed);
+        this.emit('debug', this.name, `[Socket] <-> [${this.name}] : Connection Open ${this.url} | Resumed: ${!resumed && reconnect}`);
+        this.emit('ready', this.name, !resumed && reconnect);
     }
     /**
      * @memberOf ShoukakuSocket
