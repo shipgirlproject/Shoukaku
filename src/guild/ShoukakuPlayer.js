@@ -134,7 +134,7 @@ class ShoukakuPlayer extends EventEmitter {
      * @memberOf ShoukakuPlayer
      * @returns {ShoukakuPlayer}
      */
-    playTrack(input, options = {}) {
+    playTrack(input, options = { }) {
         if (!input) throw new Error('No track given to play');
         if (input instanceof ShoukakuTrack) input = input.track;
         options = mergeDefault({ noReplace: true, pause: false }, options);
@@ -439,6 +439,7 @@ class ShoukakuPlayer extends EventEmitter {
     _onPlayerEvent(json) {
         switch (json.type) {
             case 'TrackStartEvent':
+                this.position = 0;
                 this.emit('start', json);
                 break;
             case 'TrackEndEvent':
@@ -450,9 +451,9 @@ class ShoukakuPlayer extends EventEmitter {
                 break;
             case 'WebSocketClosedEvent':
                 if (this.connection.reconnecting) break;
-                if (this.connection.moved) 
+                if (this.connection.moved)
                     this.connection.moved = !this.connection.moved;
-                else 
+                else
                     this.emit('closed', json);
                 break;
             default:
@@ -461,6 +462,7 @@ class ShoukakuPlayer extends EventEmitter {
                     this.connection.node.name,
                     `[Player] -> [Node] : Unknown Player Event Type ${json.type} | Guild: ${this.connection.guildId}`
                 );
+                break;
         }
     }
 }
