@@ -437,7 +437,6 @@ class ShoukakuPlayer extends EventEmitter {
      * @private
      */
     _onPlayerEvent(json) {
-        this.position = 0;
         switch (json.type) {
             case 'TrackStartEvent':
                 this.emit('start', json);
