@@ -165,7 +165,7 @@ class ShoukakuSocket extends EventEmitter {
         if (reconnect) headers['Resume-Key'] = (!!this.resumable).toString();
         this.emit('debug', this.name, `[Socket] -> [${this.name}] : Connecting ${this.url}`);
         this.ws = new Websocket(this.url, { headers });
-        this.ws.once('upgrade', response => this.ws.once('open', () => this._open(response)));
+        this.ws.once('upgrade', response => this.ws.once('open', () => this._open(response, reconnect)));
         this.ws.once('close', (...args) => this._close(...args));
         this.ws.on('error', error => this.emit('error', this.name, error));
         this.ws.on('message', (...args) => this._message(...args));
@@ -203,12 +203,12 @@ class ShoukakuSocket extends EventEmitter {
      * }
      * BurningLove();
      */
-    async joinChannel(options = {}) {
+    async joinChannel(options = { }) {
         if (isNaN(options.shardId) || !options.guildId || !options.channelId)
             throw new Error('Supplied options needs to have a "guildId", "shardId", and "channelId" properties');
         if (this.state !== state.CONNECTED)
             throw new Error('This node is not yet ready');
-        if (!this.shoukaku.library.guilds.has(options.guildId)) 
+        if (!this.shoukaku.library.guilds.has(options.guildId))
             throw new Error('Guild could\'t be found, cannot continue creating this connection');
         try {
             let player = this.players.get(options.guildId);
@@ -245,10 +245,12 @@ class ShoukakuSocket extends EventEmitter {
     /**
      * @memberOf ShoukakuSocket
      * @param {Object} response
+     * @param {boolean} [reconnect=false]
      * @returns {void}
      * @private
      */
-    _open(response) {
+    _open(response, reconnect = false) {
+        const resumed = response.headers['session-resumed'] === 'true';
         this.queue.process();
         if (this.resumable) {
             this.send({
@@ -257,11 +259,21 @@ class ShoukakuSocket extends EventEmitter {
                 timeout: this.resumableTimeout
             });
         }
+        if (!resumed && reconnect) {
+            for (const player of [...this.players.values()]) {
+                player.connection.node.send({
+                    op: 'voiceUpdate',
+                    guildId: player.connection.guildId,
+                    sessionId: player.connection.sessionId,
+                    event: player.connection.serverUpdate
+                });
+                player.resume();
+            }
+        }
         this.reconnects = 0;
         this.state = state.CONNECTED;
-        const resumed = response.headers['session-resumed'] === 'true';
-        this.emit('debug', this.name, `[Socket] <-> [${this.name}] : Connection Open ${this.url} | Resumed: ${resumed}`);
-        this.emit('ready', this.name, resumed);
+        this.emit('debug', this.name, `[Socket] <-> [${this.name}] : Connection Open ${this.url} | Resumed: ${!resumed && reconnect ? reconnect : resumed}`);
+        this.emit('ready', this.name, !resumed && reconnect ? reconnect : resumed);
     }
     /**
      * @memberOf ShoukakuSocket
@@ -320,13 +332,12 @@ class ShoukakuSocket extends EventEmitter {
      */
     _clean() {
         const players = [...this.players.values()];
-        const moved = this.moveOnDisconnect && this.shoukaku.nodes.size > 0;
-        if (moved)
-            for (const player of players) player.moveNode(this.shoukaku._getIdeal(this.group));
-        else 
-            for (const player of players) player.connection.disconnect();
+        const moved = this.moveOnDisconnect && this.shoukaku.nodes.size > 1;
+        for (const player of players) {
+            moved ? player.moveNode(this.shoukaku._getIdeal(this.group).name) : player.connection.disconnect();
+        }
         this.queue.clear();
-        this.emit('disconnect', this.name, players, moved);
+        this.emit('disconnect', this.name, players, players.length > 0 && moved);
     }
     /**
      * @memberOf ShoukakuSocket
