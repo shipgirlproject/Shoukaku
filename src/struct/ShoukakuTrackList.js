@@ -1,5 +1,5 @@
 const ShoukakuTrack = require('./ShoukakuTrack.js');
-const Types = { PLAYLIST_LOADED: 'PLAYLIST', TRACK_LOADED: 'TRACK', SEARCH_RESULT: 'SEARCH', NO_MATCHES: "NO_MATCHES", LOAD_FAILED: "LOAD_FAILED" };
+const Types = { PLAYLIST_LOADED: 'PLAYLIST', TRACK_LOADED: 'TRACK', SEARCH_RESULT: 'SEARCH', NO_MATCHES: 'NO_MATCHES', LOAD_FAILED: 'LOAD_FAILED' };
 /**
  * Represents a list track resolved from lavalink's rest
  * @class ShoukakuTrackList
