@@ -363,7 +363,7 @@ class ShoukakuPlayer extends EventEmitter {
     /**
      * Tries to resume your player, a use case for this is when you do ShoukakuPlayer.connection.attemptReconnect()
      * @memberOf ShoukakuPlayer
-     * @param {Object} [options={}] Override any options that are passed to playTrack when resuming playback.
+     * @param {Object} [options={}] Used if you want to change noReplace, pause, put a custom track start or end time
      * @returns {ShoukakuPlayer}
      * @example
      * ShoukakuPlayer
