@@ -363,6 +363,7 @@ class ShoukakuPlayer extends EventEmitter {
     /**
      * Tries to resume your player, a use case for this is when you do ShoukakuPlayer.connection.attemptReconnect()
      * @memberOf ShoukakuPlayer
+     * @param {Object} [options={}] Used if you want to change noReplace, pause, put a custom track start or end time
      * @returns {ShoukakuPlayer}
      * @example
      * ShoukakuPlayer
@@ -370,9 +371,13 @@ class ShoukakuPlayer extends EventEmitter {
      *   .reconnect()
      *   .then(() => ShoukakuPlayer.resume());
      */
-    resume() {
+    resume(options = {}) {
         this.updateFilters();
-        if (this.track) this.playTrack(this.track, { startTime: this.position, pause: this.paused });
+        if (this.track) {
+            options = mergeDefault({ startTime: this.position, pause: this.paused }, options);
+
+            this.playTrack(this.track, options);
+        }
         this.emit('resumed');
         return this;
     }
