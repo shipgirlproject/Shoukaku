@@ -33,7 +33,7 @@ export class ShoukakuPlayer extends EventEmitter {
   public setLowPass(values: { smoothing?: number } | null): ShoukakuPlayer;
   public setFilters(settings: ShoukakuFilter): ShoukakuPlayer;
   public clearFilters(): ShoukakuPlayer;
-  public resume(): ShoukakuPlayer;
+  public resume(options?: { noReplace?: boolean, pause?: boolean, startTime?: number, endTime?: number }): ShoukakuPlayer;
   private updateFilters(): void;
   protected clean(): void;
   protected reset(): void;
