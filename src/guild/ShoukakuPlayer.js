@@ -126,7 +126,7 @@ class ShoukakuPlayer extends EventEmitter {
     /**
      * Plays a track
      * @param {string|ShoukakuTrack} track The Base64 track from the Lavalink Rest API or a ShoukakuTrack
-     * @param {Object} [options={}] Used if you want to put a custom track start or end time
+     * @param {Object} [options={}] Optional arguments to pass
      * @param {boolean} [options.noReplace=true] Specifies if the player will not replace the current track when executing this action
      * @param {boolean} [options.pause=false] If `true`, the player will pause when the track starts playing
      * @param {number} [options.startTime] In milliseconds on when to start
@@ -134,7 +134,7 @@ class ShoukakuPlayer extends EventEmitter {
      * @memberOf ShoukakuPlayer
      * @returns {ShoukakuPlayer}
      */
-    playTrack(input, options = { }) {
+    playTrack(input, options = {}) {
         if (!input) throw new Error('No track given to play');
         if (input instanceof ShoukakuTrack) input = input.track;
         options = mergeDefault({ noReplace: true, pause: false }, options);
@@ -363,7 +363,11 @@ class ShoukakuPlayer extends EventEmitter {
     /**
      * Tries to resume your player, a use case for this is when you do ShoukakuPlayer.connection.attemptReconnect()
      * @memberOf ShoukakuPlayer
-     * @param {Object} [options={}] Used if you want to change noReplace, pause, put a custom track start or end time
+     * @param {Object} [options={}] Optional arguments for playTrack to process
+     * @param {boolean} [options.noReplace=true] Specifies if the player will not replace the current track when executing this action
+     * @param {boolean} [options.pause] If `true`, the player will pause when the track starts playing
+     * @param {number} [options.startTime] In milliseconds on when to start
+     * @param {number} [options.endTime] In milliseconds on when to end
      * @returns {ShoukakuPlayer}
      * @example
      * ShoukakuPlayer
