@@ -1,7 +1,2 @@
-import { DiscordJS } from './wrappers/DiscordJS';
-import { Eris } from './wrappers/Eris';
-
-export {
-    DiscordJS,
-    Eris,
-}
+export { DiscordJS } from './wrappers/DiscordJS';
+export { Eris } from './wrappers/Eris';

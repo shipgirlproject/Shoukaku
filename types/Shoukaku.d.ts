@@ -7,7 +7,7 @@ import { Snowflake } from './Constants';
 
 export class Shoukaku extends EventEmitter {
     constructor(
-        library: any,
+        library: unknown,
         nodes: NodeOptions[],
         options: ShoukakuOptions
     );
