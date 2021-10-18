@@ -11,6 +11,12 @@ export enum voiceState {
     SESSION_ENDPOINT_MISSING = 2
 }
 
+export enum SearchTypes {
+    soundcloud = 'scsearch',
+    youtube = 'ytsearch',
+    youtubemusic = 'ytmsearch'
+}
+
 export type Snowflake = `${bigint}` | string;
 export type Base64String = string;
 
@@ -30,27 +36,6 @@ export interface NodeOptions {
     auth: string;
     secure?: boolean;
     group?: string;
-}
-
-export class ShoukakuTrackList {
-    type: 'PLAYLIST' | 'TRACK' | 'SEARCH' | 'NO_MATCHES' | 'LOAD_FAILED';
-    selectedTrack: number;
-    playlistName?: string;
-    tracks: ShoukakuTrack[];
-}
-
-export class ShoukakuTrack {
-    track: Base64String;
-    info: {
-        identifier?: string;
-        isSeekable?: boolean;
-        author?: string;
-        length?: number;
-        isStream?: boolean;
-        position?: number;
-        title?: string;
-        uri?: string;
-    };
 }
 
 export interface DecodedTrack {

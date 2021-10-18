@@ -27,6 +27,16 @@ module.exports = {
         SESSION_ENDPOINT_MISSING: 2
     },
     /**
+     * Lavaplayer Search Prefix
+     * @enum {string}
+     * @memberof Constants
+     */
+    SearchTypes: {
+        soundcloud = 'scsearch',
+        youtube = 'ytsearch',
+        youtubemusic = 'ytmsearch'
+    },
+    /**
     * Options that Shoukaku accepts upon initialization
     * @property {boolean} [resumable=false] If you want your node to support resuming
     * @property {number} [resumableTimeout=30] Timeout when Lavalink will decide a player isn't resumed and will destroy the connection to it, measured in seconds
