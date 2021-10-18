@@ -17,6 +17,7 @@ export enum SearchTypes {
     youtubemusic = 'ytmsearch'
 }
 
+export type LavalinkSource = "youtube" | "youtubemusic" | "soundcloud";
 export type Snowflake = `${bigint}` | string;
 export type Base64String = string;
 

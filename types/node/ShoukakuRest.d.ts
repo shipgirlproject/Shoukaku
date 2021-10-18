@@ -1,4 +1,4 @@
-import { DecodedTrack } from '../Constants';
+import { DecodedTrack, LavalinkSource } from '../Constants';
 import { ShoukakuTrackList } from '../struct/ShoukakuTrackList';
 
 export class ShoukakuRest {
@@ -14,7 +14,7 @@ export class ShoukakuRest {
 
     private get router(): number;
 
-    public resolve(identifier: string, search?: "youtube" | "youtubemusic" | "soundcloud"): Promise<void | ShoukakuTrackList>;
+    public resolve(identifier: string, search?: LavalinkSource): Promise<void | ShoukakuTrackList>;
     public decode(track: string): Promise<DecodedTrack>;
     public getRoutePlannerStatus(): Promise<Object>;
     public unmarkFailedAddress(address: string): Promise<void>;
