@@ -285,10 +285,13 @@ class ShoukakuSocket extends EventEmitter {
         const json = JSON.parse(message);
         if (!json) return;
         if (json.op === 'stats') {
-            this.emit('debug', this.name, `[Socket] <- [${this.name}] : Node Status Update | Server Load: ${this.penalties}`);
-            this.stats = new ShoukakuStats(json);
-            return;
+          this.emit('debug', this.name, `[Socket] <- [${this.name}] : Node Status Update | Server Load: ${this.penalties}`);
+          this.stats = new ShoukakuStats(json);
+          return;
+        } else if (json.op === 'event' && (json.type === 'TrackEndEvent' || json.type === 'TrackStuckEvent')) {
+          this.emit('playerEnd', this.name, this.players.get(json.guildId));
         }
+
         this.players.get(json.guildId)?._onLavalinkMessage(json);
     }
     /** 

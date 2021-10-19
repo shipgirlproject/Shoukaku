@@ -38,6 +38,7 @@ export interface Shoukaku {
     on(event: 'disconnect', listener: (name: string, players: ShoukakuPlayer[], moved: boolean) => void): this;
     on(event: 'playerReady', listener: (name: string, player: ShoukakuPlayer) => void): this;
     on(event: 'playerDestroy', listener: (name: string, player: ShoukakuPlayer) => void): this;
+    on(event: 'playerEnd', listener: (name: string, player: ShoukakuPlayer) => void): this;
     once(event: 'debug', listener: (name: string, info: string) => void): this;
     once(event: 'error', listener: (name: string, error: Error) => void): this;
     once(event: 'ready', listener: (name: string, reconnect: boolean) => void): this;
@@ -45,6 +46,7 @@ export interface Shoukaku {
     once(event: 'disconnect', listener: (name: string, players: ShoukakuPlayer[], moved: boolean) => void): this;
     once(event: 'playerReady', listener: (name: string, player: ShoukakuPlayer) => void): this;
     once(event: 'playerDestroy', listener: (name: string, player: ShoukakuPlayer) => void): this;
+    once(event: 'playerEnd', listener: (name: string, player: ShoukakuPlayer) => void): this;
     off(event: 'debug', listener: (name: string, info: string) => void): this;
     off(event: 'error', listener: (name: string, error: Error) => void): this;
     off(event: 'ready', listener: (name: string, reconnect: boolean) => void): this;
@@ -52,4 +54,6 @@ export interface Shoukaku {
     off(event: 'disconnect', listener: (name: string, players: ShoukakuPlayer[], moved: boolean) => void): this;
     off(event: 'playerReady', listener: (name: string, player: ShoukakuPlayer) => void): this;
     off(event: 'playerDestroy', listener: (name: string, player: ShoukakuPlayer) => void): this;
+    off(event: 'playerEnd', listener: (name: string, player: ShoukakuPlayer) => void): this;
+
 }
