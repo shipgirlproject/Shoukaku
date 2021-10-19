@@ -10,7 +10,7 @@ class ShoukakuTrackList {
      */
     constructor(raw) {
         /**
-         * Type of this list, can be PLAYLIST, TRACK or SEARCH. PLAYLIST and SEARCH can contain more than one tracks in tracks array while TRACK will contain a single track in the tracks array
+         * Type of ShoukakuTrackList, can be PLAYLIST, TRACK, SEARCH, NO_MATCHES or LOAD_FAILED.
          * @type {string}
          */
         this.type = Types[raw.loadType];

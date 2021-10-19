@@ -1,4 +1,4 @@
-import { Base64String } from '../Constants';
+import { Base64String } from '..';
 
 export class ShoukakuTrack {
     track: Base64String;

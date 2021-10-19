@@ -1,4 +1,4 @@
-import { SearchTypes } from "./Constants";
+import { SearchTypes } from './Constants';
 
 export class Utils {
     public static getVersion(): { variant: 'light' | 'vanilla', version: string } | never;

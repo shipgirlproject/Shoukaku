@@ -1,7 +1,7 @@
+import { OPCPUStats, OPFrameStats, OPMemStats, OPStats } from '..';
+
 export class ShoukakuStats {
-    constructor(
-        status: OPStats
-    )
+    constructor(status: OPStats);
 
     public players: number;
     public playingPlayers: number;
@@ -9,32 +9,4 @@ export class ShoukakuStats {
     public frameStats: OPFrameStats;
     public cpu: OPCPUStats;
     public uptime: number;
-}
-
-export interface OPStats {
-    players: number;
-    playingPlayers: number;
-    memory: OPMemStats;
-    frameStats: OPFrameStats;
-    cpu: OPCPUStats;
-    uptime: number;
-}
-
-export interface OPMemStats {
-    reservable: number;
-    used: number;
-    free: number;
-    allocated: number;
-}
-
-export interface OPFrameStats {
-    sent: number;
-    deficit: number;
-    nulled: number;
-}
-
-export interface OPCPUStats {
-    cores: number;
-    systemLoad: number;
-    lavalinkLoad: number;
 }
