@@ -1,7 +1,6 @@
-import { GetterObj, NodeOptions } from '../..';
-import { Shoukaku } from '../../Shoukaku';
+import { GetterObj, NodeOptions, Shoukaku } from "..";
 
-export class DiscordJS {
+export class Eris {
     constructor(
         client: unknown
     );

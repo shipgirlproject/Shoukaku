@@ -12,7 +12,7 @@ export enum voiceState {
 }
 
 export enum SearchTypes {
-    soundcloud = 'scsearch',
-    youtube = 'ytsearch',
-    youtubemusic = 'ytmsearch'
+    soundcloud = "scsearch",
+    youtube = "ytsearch",
+    youtubemusic = "ytmsearch"
 }
