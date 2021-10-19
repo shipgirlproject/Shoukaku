@@ -29,9 +29,9 @@ export interface VoiceStateUpdate {
 
 // Libraries
 export interface GetterObj {
-    guilds: Map<any, any>;
+    guilds: Map<unknown, unknown>;
     id: () => Snowflake;
-    ws: (shardId: number, payload: string, important: boolean) => any;
+    ws: (shardId: number, payload: string, important: boolean) => void;
 }
 
 // Shoukaku Player
