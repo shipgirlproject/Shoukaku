@@ -12,22 +12,20 @@ import { ShoukakuTrackList } from './types/struct/ShoukakuTrackList';
 import * as Constants from './types/Constants';
 import * as Libraries from './types/libraries/Libraries';
 
-import { version } from './package.json'
+import { version } from './package.json';
 
-declare module 'shoukaku' {
-  export {
-    Shoukaku,
-    Utils,
-    ShoukakuConnection,
-    ShoukakuPlayer,
-    ShoukakuRest,
-    ShoukakuSocket,
-    ShoukakuFilter,
-    ShoukakuStats,
-    ShoukakuTrack,
-    ShoukakuTrackList,
-    Constants,
-    Libraries,
-    version
-  };
-}
+export {
+  Shoukaku,
+  Utils,
+  ShoukakuConnection,
+  ShoukakuPlayer,
+  ShoukakuRest,
+  ShoukakuSocket,
+  ShoukakuFilter,
+  ShoukakuStats,
+  ShoukakuTrack,
+  ShoukakuTrackList,
+  Constants,
+  Libraries,
+  version
+};

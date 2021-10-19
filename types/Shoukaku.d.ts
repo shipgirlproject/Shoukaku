@@ -4,7 +4,7 @@ import { ShoukakuPlayer } from './guild/ShoukakuPlayer';
 import { ShoukakuSocket } from './node/ShoukakuSocket';
 
 export class Shoukaku extends EventEmitter {
-    constructor(library: any, nodes: NodeOptions[], options: ShoukakuOptions);
+    constructor(library: unknown, nodes: NodeOptions[], options: ShoukakuOptions);
 
     public library: GetterObj;
     public id?: Snowflake | null;
