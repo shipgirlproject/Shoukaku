@@ -3,7 +3,6 @@ const ShoukakuRouter = require('./ShoukakuRouter.js');
 const ShoukakuTrackList = require('../struct/ShoukakuTrackList.js');
 const { searchType } = require('../Utils.js');
 
-const Success = ['TRACK_LOADED', 'PLAYLIST_LOADED', 'SEARCH_RESULT'];
 /**
  * ShoukakuRest, provides access to Lavalink REST API
  * @class ShoukakuRest
@@ -42,13 +41,12 @@ class ShoukakuRest {
     * @param {string} identifier Anything you want for lavalink to search for
     * @param {string} [search=null] Either `youtube` or `soundcloud` or `youtubemusic`. If specified, resolve will return search results
     * @memberof ShoukakuRest
-    * @returns {Promise<void|ShoukakuTrackList>}
+    * @returns {Promise<ShoukakuTrackList>}
     */
     async resolve(identifier, search = null) {
         if (!identifier) throw new Error('Identifier cannot be null');
         if (search) identifier = `${searchType(search)}:${identifier}`;
         const data = await this.router.loadtracks({ identifier }).get();
-        if (!Success.includes(data.loadType)) return;
         return new ShoukakuTrackList(data);
     }
     /**
