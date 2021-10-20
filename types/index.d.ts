@@ -25,27 +25,30 @@ export class Shoukaku extends EventEmitter {
   private options: Object;
   private _clean(name: string, players: ShoukakuPlayer[], moved: boolean): void;
 
-  public on(event: "debug", listener: (name: string, info: string) => void): this;
-  public on(event: "error", listener: (name: string, error: Error) => void): this;
-  public on(event: "ready", listener: (name: string, reconnect: boolean) => void): this;
-  public on(event: "close", listener: (name: string, code: number, reason: string) => void): this;
-  public on(event: "disconnect", listener: (name: string, players: ShoukakuPlayer[], moved: boolean) => void): this;
-  public on(event: "playerReady", listener: (name: string, player: ShoukakuPlayer) => void): this;
-  public on(event: "playerDestroy", listener: (name: string, player: ShoukakuPlayer) => void): this;
-  public once(event: "debug", listener: (name: string, info: string) => void): this;
-  public once(event: "error", listener: (name: string, error: Error) => void): this;
-  public once(event: "ready", listener: (name: string, reconnect: boolean) => void): this;
-  public once(event: "close", listener: (name: string, code: number, reason: string) => void): this;
-  public once(event: "disconnect", listener: (name: string, players: ShoukakuPlayer[], moved: boolean) => void): this;
-  public once(event: "playerReady", listener: (name: string, player: ShoukakuPlayer) => void): this;
-  public once(event: "playerDestroy", listener: (name: string, player: ShoukakuPlayer) => void): this;
-  public off(event: "debug", listener: (name: string, info: string) => void): this;
-  public off(event: "error", listener: (name: string, error: Error) => void): this;
-  public off(event: "ready", listener: (name: string, reconnect: boolean) => void): this;
-  public off(event: "close", listener: (name: string, code: number, reason: string) => void): this;
-  public off(event: "disconnect", listener: (name: string, players: ShoukakuPlayer[], moved: boolean) => void): this;
-  public off(event: "playerReady", listener: (name: string, player: ShoukakuPlayer) => void): this;
-  public off(event: "playerDestroy", listener: (name: string, player: ShoukakuPlayer) => void): this;
+  public on(event: 'debug', listener: (name: string, info: string) => void): this;
+  public on(event: 'error', listener: (name: string, error: Error) => void): this;
+  public on(event: 'ready', listener: (name: string, reconnect: boolean) => void): this;
+  public on(event: 'close', listener: (name: string, code: number, reason: string) => void): this;
+  public on(event: 'disconnect', listener: (name: string, players: ShoukakuPlayer[], moved: boolean) => void): this;
+  public on(event: 'playerReady', listener: (name: string, player: ShoukakuPlayer) => void): this;
+  public on(event: 'playerDestroy', listener: (name: string, player: ShoukakuPlayer) => void): this;
+  public on(event: 'playerEnd', listener: (name: string, player: ShoukakuPlayer) => void): this;
+  public once(event: 'debug', listener: (name: string, info: string) => void): this;
+  public once(event: 'error', listener: (name: string, error: Error) => void): this;
+  public once(event: 'ready', listener: (name: string, reconnect: boolean) => void): this;
+  public once(event: 'close', listener: (name: string, code: number, reason: string) => void): this;
+  public once(event: 'disconnect', listener: (name: string, players: ShoukakuPlayer[], moved: boolean) => void): this;
+  public once(event: 'playerReady', listener: (name: string, player: ShoukakuPlayer) => void): this;
+  public once(event: 'playerDestroy', listener: (name: string, player: ShoukakuPlayer) => void): this;
+  public once(event: 'playerEnd', listener: (name: string, player: ShoukakuPlayer) => void): this;
+  public off(event: 'debug', listener: (name: string, info: string) => void): this;
+  public off(event: 'error', listener: (name: string, error: Error) => void): this;
+  public off(event: 'ready', listener: (name: string, reconnect: boolean) => void): this;
+  public off(event: 'close', listener: (name: string, code: number, reason: string) => void): this;
+  public off(event: 'disconnect', listener: (name: string, players: ShoukakuPlayer[], moved: boolean) => void): this;
+  public off(event: 'playerReady', listener: (name: string, player: ShoukakuPlayer) => void): this;
+  public off(event: 'playerDestroy', listener: (name: string, player: ShoukakuPlayer) => void): this;
+  public off(event: 'playerEnd', listener: (name: string, player: ShoukakuPlayer) => void): this;
 }
 
 export class Utils {
