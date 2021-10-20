@@ -46,7 +46,7 @@ class ShoukakuSocket extends EventEmitter {
         this.queue = new ShoukakuQueue(this);
         /**
         * The state of this socket
-        * @type {Constants.state}
+        * @type {state}
         */
         this.state = state.DISCONNECTED;
         /**
@@ -203,7 +203,7 @@ class ShoukakuSocket extends EventEmitter {
      * }
      * BurningLove();
      */
-    async joinChannel(options = { }) {
+    async joinChannel(options = {}) {
         if (isNaN(options.shardId) || !options.guildId || !options.channelId)
             throw new Error('Supplied options needs to have a "guildId", "shardId", and "channelId" properties');
         if (this.state !== state.CONNECTED)

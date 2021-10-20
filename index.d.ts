@@ -1,29 +1,21 @@
-import { Shoukaku } from './types/Shoukaku';
-import { Utils } from './types/Utils'; 
-import { ShoukakuConnection } from './types/guild/ShoukakuConnection';
-import { ShoukakuPlayer } from './types/guild/ShoukakuPlayer';
-import { ShoukakuRest } from './types/node/ShoukakuRest';
-import { ShoukakuSocket } from './types/node/ShoukakuSocket';
-import { ShoukakuFilter } from './types/struct/ShoukakuFilter';
-import { ShoukakuStats } from './types/struct/ShoukakuStats';
+import { version } from './package.json';
+import * as Constants from './types/enums';
+import * as Libraries from './types/libraries';
+import { Shoukaku, ShoukakuConnection, ShoukakuFilter, ShoukakuPlayer, ShoukakuRest, ShoukakuSocket, ShoukakuStats, ShoukakuTrack, ShoukakuTrackList, Utils } from "./types";
 
-import * as Constants from './types/Constants';
-import * as Libraries from './types/libraries/Libraries';
+export {
+    Shoukaku,
+    Utils,
+    ShoukakuConnection,
+    ShoukakuPlayer,
+    ShoukakuRest,
+    ShoukakuSocket,
+    ShoukakuFilter,
+    ShoukakuStats,
+    ShoukakuTrack,
+    ShoukakuTrackList,
+    Constants,
+    Libraries,
+    version
+};
 
-import { version } from './package.json'
-
-declare module 'shoukaku' {
-  export { 
-    Shoukaku, 
-    Utils, 
-    ShoukakuConnection, 
-    ShoukakuPlayer, 
-    ShoukakuRest, 
-    ShoukakuSocket, 
-    ShoukakuFilter, 
-    ShoukakuStats, 
-    Constants, 
-    Libraries, 
-    version 
-  };
-}

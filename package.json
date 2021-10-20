@@ -3,11 +3,11 @@
   "version": "2.0.4",
   "description": "A lavalink wrapper that supports almost all libraries",
   "main": "index.js",
+  "types": "index.d.ts",
   "scripts": {
     "docs:build": "docma build",
     "docs:dev": "docma serve"
   },
-  "types": "index.d.ts",
   "keywords": [
     "bot",
     "music",

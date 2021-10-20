@@ -63,7 +63,7 @@ class ShoukakuConnection extends EventEmitter {
         this.deafened = false;
         /**
          * The state of this connection
-         * @type {Constants.state}
+         * @type {state}
          */
         this.state = state.DISCONNECTED;
         /**

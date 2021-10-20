@@ -1,6 +1,4 @@
-import { Shoukaku } from '../../Shoukaku';
-import { NodeOptions } from '../../Constants';
-import { GetterObj } from '../Constants';
+import { GetterObj, NodeOptions, Shoukaku } from "..";
 
 export class Eris {
     constructor(
