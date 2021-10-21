@@ -2,6 +2,7 @@ import * as Constants from "./enums";
 import { EventEmitter } from "events";
 
 export * as Libraries from './libraries';
+export * as Constants from './enums';
 export { version } from '../package.json';
 
 export type TrackEndReason = "FINISHED" | "LOAD_FAILED" | "STOPPED" | "REPLACED" | "CLEANUP";
@@ -106,7 +107,7 @@ export class ShoukakuSocket extends EventEmitter {
   public group: string;
   public url: string;
   public destroyed: boolean;
-  public joinChannel(options: JoinOptions, metadata?: PlayerMetadata): Promise<ShoukakuPlayer>;
+  public joinChannel(options: JoinOptions, metadata?: ShoukakuPlayerMetadata): Promise<ShoukakuPlayer>;
   public leaveChannel(guildId: Snowflake): void;
   public send(data: Object, important: boolean): void;
   protected connect(reconnect?: boolean): void;
@@ -162,7 +163,7 @@ export class ShoukakuPlayer extends EventEmitter {
   public paused: boolean;
   public position: number;
   public filters: ShoukakuFilter;
-  public metadata?: PlayerMetadata;
+  public metadata?: ShoukakuPlayerMetadata;
   public moveNode(name: string): ShoukakuPlayer;
   public playTrack(input: Base64String | ShoukakuTrack, options?: { noReplace?: boolean, pause?: boolean, startTime?: number, endTime?: number }): ShoukakuPlayer;
   public stopTrack(): ShoukakuPlayer;
@@ -465,4 +466,4 @@ export interface NodeOptions {
   group?: string;
 }
 
-export interface PlayerMetadata {}
+export interface ShoukakuPlayerMetadata {}
