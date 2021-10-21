@@ -43,6 +43,11 @@ class ShoukakuPlayer extends EventEmitter {
          * @type {ShoukakuFilter}
          */
         this.filters = new ShoukakuFilter();
+        /**
+         * Text channel where the player was started.
+         * @type {ShoukakuFilter}
+         */
+        this.textChannelId = options.textChannelId;
     }
 
     /**

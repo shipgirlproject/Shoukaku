@@ -156,6 +156,7 @@ export class ShoukakuPlayer extends EventEmitter {
   public paused: boolean;
   public position: number;
   public filters: ShoukakuFilter;
+  public textChannelId?: Snowflake;
   public moveNode(name: string): ShoukakuPlayer;
   public playTrack(input: Base64String | ShoukakuTrack, options?: { noReplace?: boolean, pause?: boolean, startTime?: number, endTime?: number }): ShoukakuPlayer;
   public stopTrack(): ShoukakuPlayer;
@@ -343,11 +344,12 @@ export interface DecodedTrack {
 }
 
 export interface JoinOptions {
-  guildId: Snowflake,
-  shardId: number,
-  channelId: Snowflake,
-  mute?: boolean,
-  deaf?: boolean
+  guildId: Snowflake;
+  shardId: number;
+  channelId: Snowflake;
+  textChannelId?: Snowflake;
+  mute?: boolean;
+  deaf?: boolean;
 }
 
 export interface FilterSettings {
