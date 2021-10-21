@@ -304,6 +304,8 @@ class ShoukakuSocket extends EventEmitter {
      */
     _onPlayerEvent(json) {
         const player = this.players.get(json.guildId);
+        if (!player) return;
+
         switch (json.type) {
             case 'TrackStartEvent':
                 if (player) player.position = 0;
@@ -317,9 +319,9 @@ class ShoukakuSocket extends EventEmitter {
                 this.emit('playerException', this.name, player, json);
                 break;
             case 'WebSocketClosedEvent':
-                if (this.connection.reconnecting) break;
-                if (this.connection.moved)
-                    this.connection.moved = !this.connection.moved;
+                if (player.connection.reconnecting) break;
+                if (player.connection.moved)
+                    player.connection.moved = !player.connection.moved;
                 else
                     this.emit('playerClosed', this.name, player, json);
                 break;
