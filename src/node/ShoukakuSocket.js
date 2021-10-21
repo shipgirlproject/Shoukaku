@@ -288,12 +288,51 @@ class ShoukakuSocket extends EventEmitter {
           this.emit('debug', this.name, `[Socket] <- [${this.name}] : Node Status Update | Server Load: ${this.penalties}`);
           this.stats = new ShoukakuStats(json);
           return;
-        } else if (json.op === 'event' && (json.type === 'TrackEndEvent' || json.type === 'TrackStuckEvent')) {
-          this.emit('playerEnd', this.name, this.players.get(json.guildId));
+        }
+        
+        if (json.op === 'event') {
+          this._onPlayerEvent(json)
         }
 
         this.players.get(json.guildId)?._onLavalinkMessage(json);
     }
+
+        /**
+     * @memberOf ShoukakuPlayer
+     * @param {Object} json
+     * @private
+     */
+    _onPlayerEvent(json) {
+        const player = this.players.get(json.guildId);
+        switch (json.type) {
+            case 'TrackStartEvent':
+                if (player) player.position = 0;
+                this.emit('playerTrackStart', this.name, player);
+                break;
+            case 'TrackEndEvent':
+            case 'TrackStuckEvent':
+                this.emit('playerTrackEnd', this.name, player);
+                break;
+            case 'TrackExceptionEvent':
+                this.emit('playerException', this.name, player, json);
+                break;
+            case 'WebSocketClosedEvent':
+                if (this.connection.reconnecting) break;
+                if (this.connection.moved)
+                    this.connection.moved = !this.connection.moved;
+                else
+                    this.emit('playerClosed', this.name, player, json);
+                break;
+            default:
+                this.emit(
+                    'debug',
+                    this.name,
+                    `[Player] -> [Node] : Unknown Player Event Type ${json.type} | Guild: ${this.connection.guildId}`
+                );
+                break;
+        }
+    }
+
     /** 
      * @memberOf ShoukakuSocket
      * @param {number} code
