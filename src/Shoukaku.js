@@ -141,6 +141,10 @@ class Shoukaku extends EventEmitter {
         node.on('disconnect', (...args) => this._clean(...args));
         node.on('playerReady', (...args) => this.emit('playerReady', ...args));
         node.on('playerDestroy', (...args) => this.emit('playerDestroy', ...args));
+        node.on('playerTrackStart', (...args) => this.emit('playerTrackStart', ...args));
+        node.on('playerTrackEnd', (...args) => this.emit('playerTrackEnd', ...args));
+        node.on('playerException', (...args) => this.emit('playerException', ...args));
+        node.on('playerClosed', (...args) => this.emit('playerClosed', ...args));
         node.connect();
         this.nodes.set(node.name, node);
     }
