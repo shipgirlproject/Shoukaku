@@ -90,7 +90,7 @@ export class ShoukakuRest {
 export function ShoukakuRouter(rest: ShoukakuRest): typeof Proxy | Object | string | void;
 
 export class ShoukakuSocket extends EventEmitter {
-  constructor(shoukaku: Shoukaku, options: { name: string, url: string, auth: string, secure: boolean, group?: string });
+  constructor(shoukaku: Shoukaku, options: { name: string; url: string; auth: string; secure: boolean; group?: string });
 
   public shoukaku: Shoukaku;
   public players: Map<Snowflake, ShoukakuPlayer>;
@@ -103,7 +103,7 @@ export class ShoukakuSocket extends EventEmitter {
   public group: string;
   public url: string;
   public destroyed: boolean;
-  public joinChannel(options: JoinOptions): Promise<ShoukakuPlayer>;
+  public joinChannel(options: JoinOptions, metadata?: PlayerMetadata): Promise<ShoukakuPlayer>;
   public leaveChannel(guildId: Snowflake): void;
   public send(data: Object, important: boolean): void;
   protected connect(reconnect?: boolean): void;
@@ -159,7 +159,7 @@ export class ShoukakuPlayer extends EventEmitter {
   public paused: boolean;
   public position: number;
   public filters: ShoukakuFilter;
-  public textChannelId?: Snowflake;
+  public metadata?: PlayerMetadata;
   public moveNode(name: string): ShoukakuPlayer;
   public playTrack(input: Base64String | ShoukakuTrack, options?: { noReplace?: boolean, pause?: boolean, startTime?: number, endTime?: number }): ShoukakuPlayer;
   public stopTrack(): ShoukakuPlayer;
@@ -350,7 +350,6 @@ export interface JoinOptions {
   guildId: Snowflake;
   shardId: number;
   channelId: Snowflake;
-  textChannelId?: Snowflake;
   mute?: boolean;
   deaf?: boolean;
 }
@@ -462,3 +461,5 @@ export interface NodeOptions {
   secure?: boolean;
   group?: string;
 }
+
+export interface PlayerMetadata {}
