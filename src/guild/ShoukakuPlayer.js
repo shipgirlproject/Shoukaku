@@ -474,7 +474,7 @@ class ShoukakuPlayer extends EventEmitter {
                     this.connection.moved = !this.connection.moved;
                 else
                     this.emit('closed', json);
-                    socket.emit('playerClosed', this.connection.node.name, this, json);
+                socket.emit('playerClosed', this.connection.node.name, this, json);
                 break;
             default:
                 this.connection.node.emit(
