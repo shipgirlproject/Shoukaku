@@ -145,6 +145,7 @@ class Shoukaku extends EventEmitter {
         node.on('playerTrackEnd', (...args) => this.emit('playerTrackEnd', ...args));
         node.on('playerException', (...args) => this.emit('playerException', ...args));
         node.on('playerClosed', (...args) => this.emit('playerClosed', ...args));
+        node.on('playerUpdate', (...args) => this.emit('playerUpdate', ...args));
         node.connect();
         this.nodes.set(node.name, node);
     }

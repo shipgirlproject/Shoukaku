@@ -289,50 +289,8 @@ class ShoukakuSocket extends EventEmitter {
           this.stats = new ShoukakuStats(json);
           return;
         }
-        
-        if (json.op === 'event') {
-          this._onPlayerEvent(json)
-        }
 
-        this.players.get(json.guildId)?._onLavalinkMessage(json);
-    }
-
-        /**
-     * @memberOf ShoukakuPlayer
-     * @param {Object} json
-     * @private
-     */
-    _onPlayerEvent(json) {
-        const player = this.players.get(json.guildId);
-        if (!player) return;
-
-        switch (json.type) {
-            case 'TrackStartEvent':
-                if (player) player.position = 0;
-                this.emit('playerTrackStart', this.name, player);
-                break;
-            case 'TrackEndEvent':
-            case 'TrackStuckEvent':
-                this.emit('playerTrackEnd', this.name, player);
-                break;
-            case 'TrackExceptionEvent':
-                this.emit('playerException', this.name, player, json);
-                break;
-            case 'WebSocketClosedEvent':
-                if (player.connection.reconnecting) break;
-                if (player.connection.moved)
-                    player.connection.moved = !player.connection.moved;
-                else
-                    this.emit('playerClosed', this.name, player, json);
-                break;
-            default:
-                this.emit(
-                    'debug',
-                    this.name,
-                    `[Player] -> [Node] : Unknown Player Event Type ${json.type} | Guild: ${this.connection.guildId}`
-                );
-                break;
-        }
+        this.players.get(json.guildId)?._onLavalinkMessage(json, this);
     }
 
     /** 
