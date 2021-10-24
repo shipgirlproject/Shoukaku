@@ -289,8 +289,10 @@ class ShoukakuSocket extends EventEmitter {
             this.stats = new ShoukakuStats(json);
             return;
         }
-        this.players.get(json.guildId)?._onLavalinkMessage(json);
+
+        this.players.get(json.guildId)?._onLavalinkMessage(json, this);
     }
+
     /** 
      * @memberOf ShoukakuSocket
      * @param {number} code
