@@ -457,24 +457,25 @@ class ShoukakuPlayer extends EventEmitter {
             case 'TrackStartEvent':
                 this.position = 0;
                 this.emit('start', json);
-                socket.emit('playerTrackStart', this.connection.node.name, this, json);
+                socket.emit('playerTrackStart', this, json);
                 break;
             case 'TrackEndEvent':
             case 'TrackStuckEvent':
                 this.emit('end', json);
-                socket.emit('playerTrackEnd', this.connection.node.name, this, json);
+                socket.emit('playerTrackEnd', this, json);
                 break;
             case 'TrackExceptionEvent':
                 this.emit('exception', json);
-                socket.emit('playerException', this.connection.node.name, this, json);
+                socket.emit('playerException', this, json);
                 break;
             case 'WebSocketClosedEvent':
                 if (this.connection.reconnecting) break;
-                if (this.connection.moved)
+                if (this.connection.moved) {
                     this.connection.moved = !this.connection.moved;
-                else
+                } else {
                     this.emit('closed', json);
-                socket.emit('playerClosed', this.connection.node.name, this, json);
+                    socket.emit('playerClosed', this, json);
+                }
                 break;
             default:
                 this.connection.node.emit(

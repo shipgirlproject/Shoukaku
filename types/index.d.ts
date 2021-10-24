@@ -36,23 +36,23 @@ export class Shoukaku extends EventEmitter {
   public on(event: 'disconnect', listener: (name: string, players: ShoukakuPlayer[], moved: boolean) => void): this;
   public on(event: 'playerReady', listener: (name: string, player: ShoukakuPlayer) => void): this;
   public on(event: 'playerDestroy', listener: (name: string, player: ShoukakuPlayer) => void): this;
-  public on(event: 'playerTrackStart', listener: (name: string, player: ShoukakuPlayer, data: TrackStartEvent) => void): this;
-  public on(event: 'playerTrackEnd', listener: (name: string, player: ShoukakuPlayer, data: TrackEndEvent) => void): this;
-  public on(event: 'playerException', listener: (name: string, player: ShoukakuPlayer, reason: TrackExceptionEvent) => void): this;
-  public on(event: 'playerClosed', listener: (name: string, player: ShoukakuPlayer, reason: WebSocketClosedEvent) => void): this;
-  public on(event: 'playerUpdate', listener: (name: string, player: ShoukakuPlayer, data: PlayerUpdate) => void): this;
+  public on(event: 'playerTrackStart', listener: (player: ShoukakuPlayer, data: TrackStartEvent) => void): this;
+  public on(event: 'playerTrackEnd', listener: (player: ShoukakuPlayer, data: TrackEndEvent) => void): this;
+  public on(event: 'playerException', listener: (player: ShoukakuPlayer, reason: TrackExceptionEvent) => void): this;
+  public on(event: 'playerClosed', listener: (player: ShoukakuPlayer, reason: WebSocketClosedEvent) => void): this;
+  public on(event: 'playerUpdate', listener: (player: ShoukakuPlayer, data: PlayerUpdate) => void): this;
   public once(event: 'debug', listener: (name: string, info: string) => void): this;
   public once(event: 'error', listener: (name: string, error: Error) => void): this;
   public once(event: 'ready', listener: (name: string, reconnect: boolean) => void): this;
   public once(event: 'close', listener: (name: string, code: number, reason: string) => void): this;
   public once(event: 'disconnect', listener: (name: string, players: ShoukakuPlayer[], moved: boolean) => void): this;
   public once(event: 'playerReady', listener: (name: string, player: ShoukakuPlayer) => void): this;
-  public once(event: 'playerDestroy', listener: (name: string, player: ShoukakuPlayer) => void): this;
-  public once(event: 'playerTrackStart', listener: (name: string, player: ShoukakuPlayer, data: TrackStartEvent) => void): this;
-  public once(event: 'playerTrackEnd', listener: (name: string, player: ShoukakuPlayer, data: TrackEndEvent) => void): this;
-  public once(event: 'playerException', listener: (name: string, player: ShoukakuPlayer, reason: TrackExceptionEvent) => void): this;
-  public once(event: 'playerClosed', listener: (name: string, player: ShoukakuPlayer, reason: WebSocketClosedEvent) => void): this;
-  public once(event: 'playerUpdate', listener: (name: string, player: ShoukakuPlayer, data: PlayerUpdate) => void): this;
+  public once(event: 'playerDestroy', listener: (player: ShoukakuPlayer) => void): this;
+  public once(event: 'playerTrackStart', listener: (player: ShoukakuPlayer, data: TrackStartEvent) => void): this;
+  public once(event: 'playerTrackEnd', listener: (player: ShoukakuPlayer, data: TrackEndEvent) => void): this;
+  public once(event: 'playerException', listener: (player: ShoukakuPlayer, reason: TrackExceptionEvent) => void): this;
+  public once(event: 'playerClosed', listener: (player: ShoukakuPlayer, reason: WebSocketClosedEvent) => void): this;
+  public once(event: 'playerUpdate', listener: (player: ShoukakuPlayer, data: PlayerUpdate) => void): this;
   public off(event: 'debug', listener: (name: string, info: string) => void): this;
   public off(event: 'error', listener: (name: string, error: Error) => void): this;
   public off(event: 'ready', listener: (name: string, reconnect: boolean) => void): this;
@@ -60,11 +60,11 @@ export class Shoukaku extends EventEmitter {
   public off(event: 'disconnect', listener: (name: string, players: ShoukakuPlayer[], moved: boolean) => void): this;
   public off(event: 'playerReady', listener: (name: string, player: ShoukakuPlayer) => void): this;
   public off(event: 'playerDestroy', listener: (name: string, player: ShoukakuPlayer) => void): this;
-  public off(event: 'playerTrackStart', listener: (name: string, player: ShoukakuPlayer, data: TrackStartEvent) => void): this;
-  public off(event: 'playerTrackEnd', listener: (name: string, player: ShoukakuPlayer, data: TrackEndEvent) => void): this;
-  public off(event: 'playerException', listener: (name: string, player: ShoukakuPlayer, reason: TrackExceptionEvent) => void): this;
-  public off(event: 'playerClosed', listener: (name: string, player: ShoukakuPlayer, reason: WebSocketClosedEvent) => void): this;
-  public off(event: 'playerUpdate', listener: (name: string, player: ShoukakuPlayer, data: PlayerUpdate) => void): this;
+  public off(event: 'playerTrackStart', listener: (player: ShoukakuPlayer, data: TrackStartEvent) => void): this;
+  public off(event: 'playerTrackEnd', listener: (player: ShoukakuPlayer, data: TrackEndEvent) => void): this;
+  public off(event: 'playerException', listener: (player: ShoukakuPlayer, reason: TrackExceptionEvent) => void): this;
+  public off(event: 'playerClosed', listener: (player: ShoukakuPlayer, reason: WebSocketClosedEvent) => void): this;
+  public off(event: 'playerUpdate', listener: (player: ShoukakuPlayer, data: PlayerUpdate) => void): this;
 }
 
 export class Utils {
