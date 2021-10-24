@@ -16,7 +16,7 @@ class ShoukakuPlayer extends EventEmitter {
      * @param {ShoukakuSocket} node The node where this class is initialized
      * @param {Object} options JoinVoiceChannel options
      */
-    constructor(node, options, metadata) {
+    constructor(node, options) {
         super();
         /**
          * The voice connection manager of this player
@@ -43,11 +43,6 @@ class ShoukakuPlayer extends EventEmitter {
          * @type {ShoukakuFilter}
          */
         this.filters = new ShoukakuFilter();
-        /**
-         * Customizable data saved in each instance of the player.
-         * @type {Object}
-         */
-        this.metadata = metadata;
     }
 
     /**

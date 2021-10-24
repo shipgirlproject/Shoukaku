@@ -203,7 +203,7 @@ class ShoukakuSocket extends EventEmitter {
      * }
      * BurningLove();
      */
-    async joinChannel(options = {}, metadata = {}) {
+    async joinChannel(options = {}) {
         if (isNaN(options.shardId) || !options.guildId || !options.channelId)
             throw new Error('Supplied options needs to have a "guildId", "shardId", and "channelId" properties');
         if (this.state !== state.CONNECTED)
@@ -213,7 +213,7 @@ class ShoukakuSocket extends EventEmitter {
         try {
             let player = this.players.get(options.guildId);
             if (!player) {
-                player = new ShoukakuPlayer(this, options, metadata);
+                player = new ShoukakuPlayer(this, options);
                 this.players.set(options.guildId, player);
             }
             await player.connection.connect(options);

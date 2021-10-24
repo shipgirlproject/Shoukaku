@@ -116,7 +116,7 @@ export class ShoukakuSocket extends EventEmitter {
   public group: string;
   public url: string;
   public destroyed: boolean;
-  public joinChannel(options: JoinOptions, metadata?: ShoukakuPlayerMetadata): Promise<ShoukakuPlayer>;
+  public joinChannel(options: JoinOptions): Promise<ShoukakuPlayer>;
   public leaveChannel(guildId: Snowflake): void;
   public send(data: Object, important: boolean): void;
   protected connect(reconnect?: boolean): void;
@@ -172,7 +172,6 @@ export class ShoukakuPlayer extends EventEmitter {
   public paused: boolean;
   public position: number;
   public filters: ShoukakuFilter;
-  public metadata?: ShoukakuPlayerMetadata;
   public moveNode(name: string): ShoukakuPlayer;
   public playTrack(input: Base64String | ShoukakuTrack, options?: { noReplace?: boolean, pause?: boolean, startTime?: number, endTime?: number }): ShoukakuPlayer;
   public stopTrack(): ShoukakuPlayer;
@@ -474,5 +473,3 @@ export interface NodeOptions {
   secure?: boolean;
   group?: string;
 }
-
-export interface ShoukakuPlayerMetadata {}
