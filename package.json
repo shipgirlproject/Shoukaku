@@ -3,7 +3,7 @@
   "version": "2.1.0",
   "description": "A lavalink wrapper that supports almost all libraries",
   "main": "index.js",
-  "types": "index.d.ts",
+  "types": "types/index.d.ts",
   "scripts": {
     "docs:build": "docma build",
     "docs:dev": "docma serve"

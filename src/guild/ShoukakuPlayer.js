@@ -426,15 +426,17 @@ class ShoukakuPlayer extends EventEmitter {
     /**
      * @memberOf ShoukakuPlayer
      * @param {Object} json
+     * @param {ShoukakuSocket} socket
      * @protected
      */
-    _onLavalinkMessage(json) {
+    _onLavalinkMessage(json, socket) {
         if (json.op === 'playerUpdate') {
             this.position = json.state.position;
             this.emit('update', json);
+            socket.emit('playerUpdate', this, json);
         }
         else if (json.op === 'event') {
-            this._onPlayerEvent(json);
+            this._onPlayerEvent(json, socket);
         }
         else {
             this.connection.node.emit('debug', this.connection.node.name, `[Player] -> [Node] : Unknown Message OP ${json.op} | Guild: ${this.connection.guildId}`);
@@ -445,25 +447,30 @@ class ShoukakuPlayer extends EventEmitter {
      * @param {Object} json
      * @private
      */
-    _onPlayerEvent(json) {
+    _onPlayerEvent(json, socket) {
         switch (json.type) {
             case 'TrackStartEvent':
                 this.position = 0;
                 this.emit('start', json);
+                socket.emit('playerTrackStart', this, json);
                 break;
             case 'TrackEndEvent':
             case 'TrackStuckEvent':
                 this.emit('end', json);
+                socket.emit('playerTrackEnd', this, json);
                 break;
             case 'TrackExceptionEvent':
                 this.emit('exception', json);
+                socket.emit('playerException', this, json);
                 break;
             case 'WebSocketClosedEvent':
                 if (this.connection.reconnecting) break;
-                if (this.connection.moved)
+                if (this.connection.moved) {
                     this.connection.moved = !this.connection.moved;
-                else
+                } else {
                     this.emit('closed', json);
+                    socket.emit('playerClosed', this, json);
+                }
                 break;
             default:
                 this.connection.node.emit(
