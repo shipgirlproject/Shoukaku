@@ -199,21 +199,18 @@ export class ShoukakuPlayer extends EventEmitter {
 
   public on(event: 'end', listener: (reason: TrackEndEvent) => void): this;
   public on(event: 'closed', listener: (reason: WebSocketClosedEvent) => void): this;
-  public on(event: 'error', listener: (error: Error) => void): this;
   public on(event: 'start', listener: (data: TrackStartEvent) => void): this;
   public on(event: 'exception', listener: (reason: TrackExceptionEvent) => void): this;
   public on(event: 'resumed', listener: () => void): this;
   public on(event: 'update', listener: (data: PlayerUpdate) => void): this;
   public once(event: 'end', listener: (reason: TrackEndEvent) => void): this;
   public once(event: 'closed', listener: (reason: WebSocketClosedEvent) => void): this;
-  public once(event: 'error', listener: (error: Error) => void): this;
   public once(event: 'start', listener: (data: TrackStartEvent) => void): this;
   public once(event: 'exception', listener: (reason: TrackExceptionEvent) => void): this;
   public once(event: 'resumed', listener: () => void): this;
   public once(event: 'update', listener: (data: PlayerUpdate) => void): this;
   public off(event: 'end', listener: (reason: TrackEndEvent) => void): this;
   public off(event: 'closed', listener: (reason: WebSocketClosedEvent) => void): this;
-  public off(event: 'error', listener: (error: Error) => void): this;
   public off(event: 'start', listener: (data: TrackStartEvent) => void): this;
   public off(event: 'exception', listener: (reason: TrackExceptionEvent) => void): this;
   public off(event: 'resumed', listener: () => void): this;

@@ -60,14 +60,6 @@ class ShoukakuPlayer extends EventEmitter {
      * Player.on('closed', reason => console.log(reason) && Player.disconnect());
      */
     /**
-     * Emitted when this library encounters an internal error
-     * @event ShoukakuPlayer#error
-     * @param {Error} error The error encountered.
-     * @memberOf ShoukakuPlayer
-     * @example
-     * Player.on('error', error => console.error(error) && Player.disconnect());
-     */
-    /**
      * Emitted when the lavalink player emits a TrackStartEvent
      * @event ShoukakuPlayer#start
      * @param {Object} data
