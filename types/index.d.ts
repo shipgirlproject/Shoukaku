@@ -247,6 +247,7 @@ export class ShoukakuTrack {
   constructor(raw: object);
   public track: Base64String;
   public info: {
+    sourceName?: string;
     identifier?: string;
     isSeekable?: boolean;
     author?: string;
