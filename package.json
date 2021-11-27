@@ -1,6 +1,6 @@
 {
   "name": "shoukaku",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "A lavalink wrapper that supports almost all libraries",
   "main": "index.js",
   "types": "types/index.d.ts",
@@ -32,7 +32,7 @@
   "dependencies": {
     "abort-controller": "^3.0.0",
     "petitio": "^1.4.0",
-    "ws": "^8.2.3"
+    "ws": "^8.3.0"
   },
   "devDependencies": {
     "docma": "github:Deivu/docma#cd93f9c20453127e2eae928ddd7e30a1f927fad9"
