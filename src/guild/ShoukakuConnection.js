@@ -128,10 +128,6 @@ class ShoukakuConnection extends EventEmitter {
      * @protected
      */
     async connect({ guildId, channelId, deaf, mute } = {}) {
-        if (this.state === state.CONNECTING)
-            throw new Error('Can\'t connect while a connection is connecting. Wait for it to resolve first');
-        if (this.state === state.CONNECTED)
-            throw new Error('Can\'t connect if this connection is already connected');
         this.state = state.CONNECTING;
         this.send({ guild_id: guildId, channel_id: channelId, self_deaf: deaf, self_mute: mute }, true);
         this.node.emit('debug', this.node.name, `[Voice] -> [Discord] : Requesting Connection | Guild: ${this.guildId}`);
@@ -163,7 +159,7 @@ class ShoukakuConnection extends EventEmitter {
      * @returns {Promise<void>}
      */
     async reconnect(channelId = this.channelId) {
-        if (this.state !== state.DISCONNECTED) return;
+        if (this.reconnecting || this.state !== state.DISCONNECTED) return;
         try {
             this.reconnecting = true;
             this.node.send({ op: 'destroy', guildId: this.guildId });

@@ -210,8 +210,14 @@ class ShoukakuSocket extends EventEmitter {
             throw new Error('This node is not yet ready');
         if (!this.shoukaku.library.guilds.has(options.guildId))
             throw new Error('Guild could\'t be found, cannot continue creating this connection');
+        let player = this.players.get(options.guildId);
+        if (player?.connection.state === state.CONNECTING)
+            throw new Error('Can\'t join this channel. This connection is connecting');
+        if (player?.connection.state === state.CONNECTED)
+            throw new Error('Can\'t join this channel. This connection is already connected');
+        if (player?.connection.reconnecting) 
+            throw new Error('Can\'t join this channel. This connection is currently force-reconnecting');
         try {
-            let player = this.players.get(options.guildId);
             if (!player) {
                 player = new ShoukakuPlayer(this, options);
                 this.players.set(options.guildId, player);
