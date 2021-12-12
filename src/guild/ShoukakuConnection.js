@@ -128,10 +128,6 @@ class ShoukakuConnection extends EventEmitter {
      * @protected
      */
     async connect({ guildId, channelId, deaf, mute } = {}) {
-        if (this.state === state.CONNECTING)
-            throw new Error('Can\'t connect while a connection is connecting. Wait for it to resolve first');
-        if (this.state === state.CONNECTED)
-            throw new Error('Can\'t connect if this connection is already connected');
         this.state = state.CONNECTING;
         this.send({ guild_id: guildId, channel_id: channelId, self_deaf: deaf, self_mute: mute }, true);
         this.node.emit('debug', this.node.name, `[Voice] -> [Discord] : Requesting Connection | Guild: ${this.guildId}`);
@@ -163,7 +159,7 @@ class ShoukakuConnection extends EventEmitter {
      * @returns {Promise<void>}
      */
     async reconnect(channelId = this.channelId) {
-        if (this.state !== state.DISCONNECTED) return;
+        if (this.reconnecting || this.state !== state.DISCONNECTED) return;
         try {
             this.reconnecting = true;
             this.node.send({ op: 'destroy', guildId: this.guildId });
@@ -191,10 +187,6 @@ class ShoukakuConnection extends EventEmitter {
         }
         this.deafened = self_deaf;
         this.muted = self_mute;
-        if (!session_id) {
-            this.emit('connectionUpdate', voiceState.SESSION_ID_MISSING);
-            return;
-        }
         this.sessionId = session_id;
         this.node.emit('debug', this.node.name, `[Voice] <- [Discord] : State Update Received | Channel: ${this.channelId} Session ID: ${session_id} Guild: ${this.guildId}`);
     }
@@ -208,7 +200,11 @@ class ShoukakuConnection extends EventEmitter {
             this.emit('connectionUpdate', voiceState.SESSION_ENDPOINT_MISSING);
             return;
         }
-        if (this.serverUpdate && !data.endpoint.startsWith(this.region)) {
+        if (!this.sessionId) {
+            this.emit('connectionUpdate', voiceState.SESSION_ID_MISSING);
+            return;
+        }
+        if (this.region && !data.endpoint.startsWith(this.region)) {
             this.moved = true;
             this.node.emit('debug', this.node.name, `[Voice] <- [Discord] : Voice Region Moved | Old Region: ${this.region} Guild: ${this.guildId}`);
         }

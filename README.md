@@ -41,7 +41,7 @@ Refer to [/src/libraries](https://github.com/Deivu/Shoukaku/tree/master/src/libr
 
 ### Getting Lavalink
 
-Download the latest binaries from the [CI server (DEV BRANCH)](https://ci.fredboat.com/viewType.html?buildTypeId=Lavalink_Build&branch_Lavalink=refs%2Fheads%2Fdev&tab=buildTypeStatusDiv)
+Download the latest binaries from the [Lavalink's README](https://github.com/freyacodes/Lavalink#server-configuration)
 
 Put an [application.yml](https://github.com/freyacodes/Lavalink/blob/master/LavalinkServer/application.yml.example) file in your working directory.
 
