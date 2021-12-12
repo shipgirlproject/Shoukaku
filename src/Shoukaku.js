@@ -83,7 +83,7 @@ class Shoukaku extends EventEmitter {
      * @example
      * Shoukaku.on('error', console.error);
      */
-    /** 
+    /**
      * Emitted when a node becomes ready
      * @event Shoukaku#ready
      * @param {string} name The node that sent the ready event
@@ -118,6 +118,41 @@ class Shoukaku extends EventEmitter {
      * @event Shoukaku#playerDestroy
      * @param {string} name The node that sent the player destroy event
      * @param {ShoukakuPlayer} player The player that was destroyed
+     * @memberof Shoukaku
+     */
+    /**
+     * Emitted when a track from the player has been started
+     * @event Shoukaku#playerTrackStart
+     * @param {ShoukakuPlayer} player The player that sent the track start event
+     * @param {Object} payload The payload from lavalink
+     * @memberof Shoukaku
+     */
+    /**
+     * Emitted when a track from the player has been ended
+     * @event Shoukaku#playerTrackEnd
+     * @param {ShoukakuPlayer} player The player that sent the track end event
+     * @param {Object} payload The payload from lavalink
+     * @memberof Shoukaku
+     */
+    /**
+     * Emitted when a player get exception
+     * @event Shoukaku#playerException
+     * @param {ShoukakuPlayer} player The player that get the exception
+     * @param {Object} payload The payload from lavalink
+     * @memberof Shoukaku
+     */
+    /**
+     * Emitted when a player was closed
+     * @event Shoukaku#playerClosed
+     * @param {ShoukakuPlayer} player The player that get closed
+     * @param {Object} payload The payload from lavalink
+     * @memberof Shoukaku
+     */
+    /**
+     * Emitted when a player get payload update from lavalink
+     * @event Shoukaku#playerUpdate
+     * @param {ShoukakuPlayer} player The player that get the payload
+     * @param {Object} payload The payload from lavalink
      * @memberof Shoukaku
      */
 

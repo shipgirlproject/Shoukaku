@@ -2,7 +2,7 @@ import * as Constants from "./enums";
 import { EventEmitter } from "events";
 
 export * as Libraries from './libraries';
-export * from './enums';
+export * as Constants from './enums';
 export { version } from '../package.json';
 
 export type TrackEndReason = "FINISHED" | "LOAD_FAILED" | "STOPPED" | "REPLACED" | "CLEANUP";

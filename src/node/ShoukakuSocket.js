@@ -215,7 +215,7 @@ class ShoukakuSocket extends EventEmitter {
             throw new Error('Can\'t join this channel. This connection is connecting');
         if (player?.connection.state === state.CONNECTED)
             throw new Error('Can\'t join this channel. This connection is already connected');
-        if (player?.connection.reconnecting) 
+        if (player?.connection.reconnecting)
             throw new Error('Can\'t join this channel. This connection is currently force-reconnecting');
         try {
             if (!player) {
@@ -340,7 +340,7 @@ class ShoukakuSocket extends EventEmitter {
      */
     _clean() {
         const players = [...this.players.values()];
-        const moved = this.moveOnDisconnect && this.shoukaku.nodes.size > 1;
+        const moved = this.moveOnDisconnect && [...this.shoukaku.nodes.values()].filter(node => node.group === this.group).length > 1;
         for (const player of players) {
             moved ? player.moveNode(this.shoukaku._getIdeal(this.group).name) : player.connection.disconnect();
         }
