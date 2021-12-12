@@ -187,10 +187,6 @@ class ShoukakuConnection extends EventEmitter {
         }
         this.deafened = self_deaf;
         this.muted = self_mute;
-        if (!session_id) {
-            this.emit('connectionUpdate', voiceState.SESSION_ID_MISSING);
-            return;
-        }
         this.sessionId = session_id;
         this.node.emit('debug', this.node.name, `[Voice] <- [Discord] : State Update Received | Channel: ${this.channelId} Session ID: ${session_id} Guild: ${this.guildId}`);
     }
@@ -204,7 +200,11 @@ class ShoukakuConnection extends EventEmitter {
             this.emit('connectionUpdate', voiceState.SESSION_ENDPOINT_MISSING);
             return;
         }
-        if (this.serverUpdate && !data.endpoint.startsWith(this.region)) {
+        if (!this.sessionId) {
+            this.emit('connectionUpdate', voiceState.SESSION_ID_MISSING);
+            return;
+        }
+        if (this.region && !data.endpoint.startsWith(this.region)) {
             this.moved = true;
             this.node.emit('debug', this.node.name, `[Voice] <- [Discord] : Voice Region Moved | Old Region: ${this.region} Guild: ${this.guildId}`);
         }

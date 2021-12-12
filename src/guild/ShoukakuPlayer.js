@@ -427,12 +427,10 @@ class ShoukakuPlayer extends EventEmitter {
             this.emit('update', json);
             socket.emit('playerUpdate', this, json);
         }
-        else if (json.op === 'event') {
+        else if (json.op === 'event') 
             this._onPlayerEvent(json, socket);
-        }
-        else {
+        else 
             this.connection.node.emit('debug', this.connection.node.name, `[Player] -> [Node] : Unknown Message OP ${json.op} | Guild: ${this.connection.guildId}`);
-        }
     }
     /**
      * @memberOf ShoukakuPlayer
@@ -456,12 +454,12 @@ class ShoukakuPlayer extends EventEmitter {
                 socket.emit('playerException', this, json);
                 break;
             case 'WebSocketClosedEvent':
-                if (this.connection.reconnecting) break;
-                if (this.connection.moved) {
-                    this.connection.moved = !this.connection.moved;
-                } else {
-                    this.emit('closed', json);
-                    socket.emit('playerClosed', this, json);
+                if (!this.connection.reconnecting) {
+                    if (!this.connection.moved) {
+                        this.emit('closed', json);
+                        socket.emit('playerClosed', this, json);
+                    } else 
+                        this.connection.moved = false;
                 }
                 break;
             default:
@@ -470,7 +468,6 @@ class ShoukakuPlayer extends EventEmitter {
                     this.connection.node.name,
                     `[Player] -> [Node] : Unknown Player Event Type ${json.type} | Guild: ${this.connection.guildId}`
                 );
-                break;
         }
     }
 }
