@@ -338,6 +338,7 @@ export interface WebSocketClosedEvent extends PlayerEvent {
 export interface PlayerUpdate {
   op: "playerUpdate";
   state: {
+    connected: boolean;
     position: number;
     time: number;
   };
