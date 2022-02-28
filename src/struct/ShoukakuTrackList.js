@@ -30,7 +30,7 @@ class ShoukakuTrackList {
          */
         this.tracks = raw.tracks?.map(d => new ShoukakuTrack(d)) || [];
         /**
-         * Exception from lavalink when the ShoukakuTrackList type is LOAD_FAILED
+         * Exception from lavalink, defaults to null if type not LOAD_FAILED
          * @type {?ShoukakuException}
          */
         this.exception = raw.loadType === Types.LOAD_FAILED ? new ShoukakuException(raw.exception) : null;
