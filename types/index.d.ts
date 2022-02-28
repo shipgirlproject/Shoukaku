@@ -9,6 +9,7 @@ export type TrackEndReason = "FINISHED" | "LOAD_FAILED" | "STOPPED" | "REPLACED"
 export type Severity = "COMMON" | "SUSPICIOUS" | "FAULT";
 export type PlayerEventType = "TrackStartEvent" | "TrackEndEvent" | "TrackExceptionEvent" | "TrackStuckEvent" | "WebSocketClosedEvent";
 export type ShoukakuTrackListType = "PLAYLIST" | "TRACK" | "SEARCH" | "NO_MATCHES" | "LOAD_FAILED";
+export type ShoukakuTrackListExceptionSeverity = "COMMON" | "SUSPICIOUS" | "FAULT";
 export type LavalinkSource = "youtube" | "youtubemusic" | "soundcloud";
 export type Snowflake = `${bigint}` | string;
 export type Base64String = string;
@@ -262,9 +263,16 @@ export class ShoukakuTrack {
 export class ShoukakuTrackList {
   constructor(raw: object);
   public type: ShoukakuTrackListType;
-  public selectedTrack: number;
+  public selectedTrack?: number;
   public playlistName?: string;
   public tracks: ShoukakuTrack[];
+  public exception?: ShoukakuTrackListException;
+}
+
+export class ShoukakuTrackListException {
+  constructor(exception: object);
+  public message: string;
+  public severity: ShoukakuTrackListExceptionSeverity;
 }
 
 export interface ConnectOptions {
