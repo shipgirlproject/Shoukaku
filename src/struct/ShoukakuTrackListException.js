@@ -14,6 +14,7 @@ class ShoukakuTrackListException {
         this.message = exception.message;
         /**
          * Exception severity from lavalink
+         * Can be one of: COMMON, SUSPICIOUS, FAULT (lavalplayer's FriendlyException#severity)
          * @type {string}
          */
         this.severity = exception.severity;
