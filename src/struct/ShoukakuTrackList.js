@@ -1,4 +1,5 @@
 const ShoukakuTrack = require('./ShoukakuTrack.js');
+const ShoukakuTrackListException = require('./ShoukakuTrackListException');
 const Types = { PLAYLIST_LOADED: 'PLAYLIST', TRACK_LOADED: 'TRACK', SEARCH_RESULT: 'SEARCH', NO_MATCHES: 'NO_MATCHES', LOAD_FAILED: 'LOAD_FAILED' };
 /**
  * Represents a list track resolved from lavalink's rest
@@ -23,7 +24,7 @@ class ShoukakuTrackList {
          * Selected track in this playlist, defaults to 0 if not a playlist, or if the raw result is equal to -1
          * @type {number}
          */
-        this.selectedTrack = this.type === Types.PLAYLIST_LOADED && raw.playlistInfo.selectedTrack !== -1 ? raw.playlistInfo.selectedTrack : 0;
+         this.selectedTrack = this.type === Types.PLAYLIST_LOADED && raw.playlistInfo.selectedTrack !== -1 ? raw.playlistInfo.selectedTrack : 0;
         /**
          * An array of tracks from this trackList
          * @type {ShoukakuTrack[]}
@@ -31,9 +32,9 @@ class ShoukakuTrackList {
         this.tracks = raw.tracks?.map(d => new ShoukakuTrack(d)) || [];
         /**
          * Exception from lavalink, defaults to null if type not LOAD_FAILED
-         * @type {?ShoukakuException}
+         * @type {?ShoukakuTrackListException}
          */
-        this.exception = raw.loadType === Types.LOAD_FAILED ? new ShoukakuException(raw.exception) : null;
+        this.exception = this.type === Types.LOAD_FAILED ? new ShoukakuTrackListException(raw.exception) : null;
     }
 }
 
