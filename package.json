@@ -1,6 +1,6 @@
 {
   "name": "shoukaku",
-  "version": "2.1.4",
+  "version": "2.1.5",
   "description": "A lavalink wrapper that supports almost all libraries",
   "main": "index.js",
   "types": "types/index.d.ts",
