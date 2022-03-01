@@ -32,7 +32,7 @@
   "dependencies": {
     "abort-controller": "^3.0.0",
     "petitio": "^1.4.0",
-    "ws": "^8.3.0"
+    "ws": "^8.5.0"
   },
   "devDependencies": {
     "docma": "github:Deivu/docma#cd93f9c20453127e2eae928ddd7e30a1f927fad9"
