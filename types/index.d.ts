@@ -347,7 +347,7 @@ export interface PlayerUpdate {
   op: "playerUpdate";
   state: {
     connected: boolean;
-    position: number;
+    position?: number;
     time: number;
   };
   guildId: Snowflake;
