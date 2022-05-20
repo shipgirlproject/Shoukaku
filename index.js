@@ -1,6 +1,6 @@
 module.exports = {
     Shoukaku: require('./src/Shoukaku.js'),
-    Utils: require('./src/Utils.js'),
+    Utils: require('./src/Utils.ts'),
     ShoukakuConnection: require('./src/guild/ShoukakuConnection.js'),
     ShoukakuPlayer: require('./src/guild/ShoukakuPlayer.js'),
     ShoukakuRest: require('./src/node/ShoukakuRest.js'),
