@@ -13,8 +13,8 @@ export class DiscordJS extends Connector {
     // Listen attaches the event listener to the library you are using
     public listen(nodes: NodeOption[]): void {
         // Only attach to ready event once, refer to your library for its ready event
-        this.client.once('ready', () => this.manager.clientReady(nodes));
+        this.client.once('ready', () => this.ready(nodes));
         // Attach to the raw websocket event, this event must be 1:1 on spec with dapi (most libs implement this)
-        this.client.on('raw', (packet: any) => this.manager.clientRaw(packet));
+        this.client.on('raw', (packet: any) => this.raw(packet));
     }
 }

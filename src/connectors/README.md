@@ -1,6 +1,6 @@
-## Shoukaku's Supported Libraries
+## Shoukaku's Supported Libs
 
-> [Discord.JS](https://discord.js.org/#/) (v13.x.x)
+> [Discord.JS](https://discord.js.org/#/) (v13.x.x & 14.0.0-dev.1652573522-7ce641d)
 
 ```js
 const { Shoukaku, Libraries } = require('shoukaku');
@@ -18,23 +18,9 @@ new Shoukaku(new Libraries.Eris(client), servers, options)
 
 ## Implementing your own
 
-> Refer to `DiscordJS.js` inside the `wrappers` folder for my original implementation of the library plugins
-
-> Then require the js file on `Libraries.js`
-
-> Then call it by calling `Libraries.WrapperName(InitializedClient)` on your Shoukaku require
-
-Example
-```js
-const { Shoukaku, Libraries } = require('shoukaku');
-// example if you made it for eris, then you required it on Libraries.JS with it's key being Eris
-new Shoukaku(new Libraries.Eris(client), servers, options);
-// where in the client is your eris client
-```
+> Check **DiscordJS.js** or **Eris.js** inside libs folder for a detailed explanation on how to support a library
 
 > And Submit a PR so other people don't need to do it themselves, yay!
-
-> This enables Shoukaku to be used on another library without the hassle of doing so
 
 ## Support
 

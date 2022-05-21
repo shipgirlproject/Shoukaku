@@ -55,8 +55,8 @@ export interface RoutePlanner {
 
 export class Rest {
     private readonly node: Node;
-    private readonly url: String;
-    private readonly auth: String;
+    private readonly url: string;
+    private readonly auth: string;
     constructor(node: Node, options: NodeOption) {
         this.node = node;
         this.url = `${options.secure ? 'https' : 'http'}://${options.url}`;
@@ -64,23 +64,23 @@ export class Rest {
     }
 
     public resolve(identifier: string): Promise<LavalinkResponse|void> {
-        const options = { 
-            endpoint: '/loadtracks', 
-            options: { params: { identifier } } 
+        const options = {
+            endpoint: '/loadtracks',
+            options: { params: { identifier }}
         };
         return this.fetch(options);
     }
 
     public decode(track: string): Promise<Track|void> {
-        const options = { 
-            endpoint: '/decodetrack', 
-            options: { params: { track } } 
+        const options = {
+            endpoint: '/decodetrack',
+            options: { params: { track }}
         };
         return this.fetch(options);
     }
 
     public getRoutePlannerStatus(): Promise<RoutePlanner|void> {
-        const options = { 
+        const options = {
             endpoint: '/routeplanner/status',
             options: {}
         };
@@ -88,7 +88,7 @@ export class Rest {
     }
 
     public unmarkFailedAddress(address: string): Promise<void> {
-        const options = { 
+        const options = {
             endpoint: '/routeplanner/free/address',
             options: {
                 method: 'POST',
@@ -103,7 +103,7 @@ export class Rest {
         let headers: Record<string, any> = {
             'Authorization': this.auth,
             'User-Agent': this.node.manager.options.userAgent
-        }
+        };
         if (options.headers) headers = { ...headers, ...options.headers };
         const url = new URL(`${this.url}${endpoint}`);
         if (options.params) url.search = new URLSearchParams(options.params).toString();
@@ -113,7 +113,7 @@ export class Rest {
             .body(options.body ?? null)
             .timeout(this.node.manager.options.restTimeout || 15000)
             .send();
-        if (request.statusCode && (request.statusCode >= 200 && request.statusCode < 300)) 
+        if (request.statusCode && (request.statusCode >= 200 && request.statusCode < 300))
             throw new Error(`Rest request failed with response code: ${request.statusCode}`);
         const body = request.body.toString('utf8');
         if (!body?.length) return;

@@ -1,6 +1,6 @@
 ## Shoukaku
 
-> A featureful lavalink wrapper for Lavalink
+> A stable and updated wrapper around Lavalink
 
 [![Discord](https://img.shields.io/discord/423116740810244097?style=flat-square)](https://discordapp.com/invite/FVqbtGu)
 [![npm](https://img.shields.io/npm/v/shoukaku?style=flat-square)](https://www.npmjs.com/package/shoukaku)
@@ -10,44 +10,25 @@
 ![NPM](https://img.shields.io/npm/l/shoukaku?style=flat-square)
 
 <p align="center">
-    <img src="https://raw.githubusercontent.com/Deivu/Shoukaku/master/assets/cover.png"> 
+    <img src="https://cdn.donmai.us/original/e0/a8/__shoukaku_kantai_collection_drawn_by_kanmiya_shinobu__e0a8cd09c15bf89a58de82e00b6a2ead.jpg" height="600"> 
 </p>
 
-> The ShipGirl Project, feat Shoukaku; ⓒ Kancolle
-
+> The ShipGirl Project, feat Shoukaku; ⓒ Kancoll
 ### Features
-
-✅ Straightforward
 
 ✅ Stable
 
-✅ Feature-rich
+✅ Documented
 
-✅ Very cute shipgirl ❤ (Very Important)
+✅ Updated
+
+✅ Very cute (Very Important)
+
+> This branch is WIP
 
 ### Supported Libraries
 
 Refer to [/src/libraries](https://github.com/Deivu/Shoukaku/tree/master/src/libraries) for list of supported libraries + how to support other libraries
-
-### Installation
- 
-> NPM (Stable) => npm install shoukaku --save
-
-> Github (Dev) => npm install Deivu/Shoukaku#next
-
-### Documentation 
-
-> https://deivu.github.io/Shoukaku/
-
-### Getting Lavalink
-
-Download the latest binaries from the [Lavalink's README](https://github.com/freyacodes/Lavalink#server-configuration)
-
-Put an [application.yml](https://github.com/freyacodes/Lavalink/blob/master/LavalinkServer/application.yml.example) file in your working directory.
-
-Run with `java -jar Lavalink.jar`
-
-Docker images are available on the [Docker](https://hub.docker.com/r/fredboat/lavalink/) hub.
 
 ### Other Links
 

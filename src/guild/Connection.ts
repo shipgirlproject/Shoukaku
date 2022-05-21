@@ -17,6 +17,9 @@ export interface ServerUpdate {
     endpoint: string;
 }
 
+/**
+ * Represents a connection to a Discord voice channel
+ */
 export class Connection extends EventEmitter {
     public readonly player: Player;
     public guildId: string;
@@ -27,9 +30,17 @@ export class Connection extends EventEmitter {
     public muted: boolean;
     public deafened: boolean;
     public state: State;
-    public moved: Boolean;
-    public reconnecting: Boolean;
+    public moved: boolean;
+    public reconnecting: boolean;
     private serverUpdate: ServerUpdate|null;
+    /**
+     * @param player Shoukaku Player class
+     * @param options.guildId Guild ID in which voice channel to connect to is located
+     * @param options.shardId Shard ID in which the guild exists
+     * @param options.channelId Channel ID of voice channel to connect to
+     * @param options.deaf Optional boolean value to specify whether to deafen the current bot user
+     * @param options.mute Optional boolean value to specify whether to mute the current bot user
+     */
     constructor(player: Player, options: VoiceChannelOptions) {
         super();
         this.player = player;
@@ -46,16 +57,29 @@ export class Connection extends EventEmitter {
         this.serverUpdate = null;
     }
 
+    /**
+     * Set the deafen status for the current bot user
+     * @param deaf Boolean value to indicate whether to deafen or undeafen
+     * @defaultValue false
+     */
     public setDeaf(deaf = false): void {
         this.deafened = deaf;
         this.send({ guild_id: this.guildId, channel_id: this.channelId, self_deaf: this.deafened, self_mute: this.muted }, true);
     }
 
+    /**
+     * Set the mute status for the current bot user
+     * @param mute Boolean value to indicate whether to mute or unmute
+     * @defaultValue false
+     */
     public setMute(mute = false): void {
         this.muted = mute;
         this.send({ guild_id: this.guildId, channel_id: this.channelId, self_deaf: this.deafened, self_mute: this.muted }, true);
     }
 
+    /**
+     * Disconnect the current bot user from the connected voice channel
+     */
     public disconnect(): void {
         if (this.state !== State.DISCONNECTED) {
             this.state = State.DISCONNECTING;
@@ -68,7 +92,19 @@ export class Connection extends EventEmitter {
         this.player.node.emit('debug', this.player.node.name, `[Voice] -> [Node] & [Discord] : Link & Player Destroyed | Guild: ${this.guildId}`);
     }
 
-    public async connect({ guildId, channelId, deaf, mute }: VoiceChannelOptions): Promise<void> {
+    /**
+     * Connect the current bot user to a voice channel
+     *
+     * @param options.guildId Guild ID in which voice channel to connect to is located
+     * @param options.shardId Unused parameter
+     * @param options.channelId Channel ID of voice channel to connect to
+     * @param options.deaf Optional boolean value to specify whether to deafen the current bot user
+     * @param options.mute Optional boolean value to specify whether to mute the current bot user
+     */
+    public async connect(options: VoiceChannelOptions): Promise<void> {
+        let { guildId, channelId, deaf, mute } = options;
+        if (typeof deaf === undefined) deaf = true;
+        if (typeof mute === undefined) mute = false;
         this.state = State.CONNECTING;
         this.send({ guild_id: guildId, channel_id: channelId, self_deaf: deaf, self_mute: mute }, true);
         this.player.node.emit('debug', this.player.node.name, `[Voice] -> [Discord] : Requesting Connection | Guild: ${this.guildId}`);
@@ -93,6 +129,15 @@ export class Connection extends EventEmitter {
         }
     }
 
+    /**
+     * Connect the current bot user to a voice channel
+     *
+     * @param options.guildId Guild ID in which voice channel to connect to is located
+     * @param options.shardId Unused parameter
+     * @param options.channelId Channel ID of voice channel to connect to
+     * @param options.deaf Optional boolean value to specify whether to deafen the current bot user
+     * @param options.mute Optional boolean value to specify whether to mute the current bot user
+     */
     public setStateUpdate({ session_id, channel_id, self_deaf, self_mute }: StateUpdatePartial): void {
         if (this.channelId && (channel_id && this.channelId !== channel_id)) {
             this.moved = true;
@@ -109,6 +154,10 @@ export class Connection extends EventEmitter {
         this.player.node.emit('debug', this.player.node.name, `[Voice] <- [Discord] : State Update Received | Channel: ${this.channelId} Session ID: ${session_id} Guild: ${this.guildId}`);
     }
 
+    /**
+     * Send voiceUpdate event to Lavalink and also cache the serverUpdate event from Discord
+     * @internal
+     */
     public setServerUpdate(data: ServerUpdate): void {
         if (!data.endpoint) {
             this.emit('connectionUpdate', VoiceState.SESSION_ENDPOINT_MISSING);
@@ -129,17 +178,30 @@ export class Connection extends EventEmitter {
         this.emit('connectionUpdate', VoiceState.SESSION_READY);
     }
 
+    /**
+     * Send voiceUpdate to Lavalink again
+     * @internal
+     */
     public resendServerUpdate(): void {
         if (!this.serverUpdate) return;
         this.player.node.queue.add({ op: 'voiceUpdate', guildId: this.guildId, sessionId: this.sessionId, event: this.serverUpdate });
         this.player.node.emit('debug', this.player.node.name, `[Voice] <- [Discord] : Server Update, voice Update Resent! | Server: ${this.region} Guild: ${this.guildId}`);
     }
 
+    /**
+     * Destroy the curernt Lavalink player
+     */
     public destroyLavalinkPlayer(): void {
         this.player.node.queue.add({ op: 'destroy', guildId: this.guildId });
         this.player.node.emit('debug', this.player.node.name, `[Voice] -> [Discord] : Destroyed the player on Lavalink | Server: ${this.region} Guild: ${this.guildId}`);
     }
 
+    /**
+     * Send data to Discord
+     * @param data The data to send
+     * @param important Whether to prioritize sending this packet in the queue
+     * @private @internal
+     */
     private send(data: any, important = false): void {
         this.player.node.manager.connector.sendPacket(this.shardId, { op: 4, d: data }, important);
     }

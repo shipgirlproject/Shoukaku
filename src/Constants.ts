@@ -32,7 +32,7 @@ export const ShoukakuDefaults: ShoukakuOptions = {
     restTimeout: 60000,
     moveOnDisconnect: false,
     userAgent: `${info.name}/${info.version}(${info.repository.url})`
-}
+};
 
 export const NodeDefaults: NodeOption = {
     name: 'Default',
@@ -40,4 +40,4 @@ export const NodeDefaults: NodeOption = {
     auth: '',
     secure: false,
     group: undefined
-}
+};

@@ -1,0 +1,9 @@
+export * as Connection from './src/guild/Connection';
+export * as Player from './src/guild/Player';
+export * as Node from './src/node/Node';
+export * as Queue from './src/node/Queue';
+export * as Rest from './src/node/Rest';
+export * as Connectors from './src/connectors/libs';
+export * as Constants from './src/Constants';
+export * as Shoukaku from './src/Shoukaku';
+export * as Utils from './src/Utils';
