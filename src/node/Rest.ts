@@ -53,16 +53,44 @@ export interface RoutePlanner {
     currentAddressIndex?: string;
 }
 
+/**
+ * Wrapper around Lavalink REST API
+ * @internal
+ */
 export class Rest {
+    /**
+     * Node that initialized this instance
+     * @readonly
+     */
     private readonly node: Node;
+    /**
+     * URL of Lavalink
+     */
     private readonly url: string;
+    /**
+     * Credentials to access Lavalink
+     */
     private readonly auth: string;
+    /**
+     * @param node An instance of Node
+     * @param options.name Name of this node
+     * @param options.url URL of Lavalink
+     * @param options.auth Credentials to access Lavalnk
+     * @param options.secure Weather to use secure protocols or not
+     * @param options.group Group of this node
+     */
     constructor(node: Node, options: NodeOption) {
         this.node = node;
         this.url = `${options.secure ? 'https' : 'http'}://${options.url}`;
         this.auth = options.auth;
     }
 
+    /**
+     * Resolve a track
+     * @param identifier Track ID
+     * @returns A promise that resolves to a Lavalink response or void
+     * @internal
+     */
     public resolve(identifier: string): Promise<LavalinkResponse|void> {
         const options = {
             endpoint: '/loadtracks',
@@ -71,6 +99,12 @@ export class Rest {
         return this.fetch(options);
     }
 
+    /**
+     * Decode a track
+     * @param track Encoded track
+     * @returns Promise that resolves to a track or void
+     * @internal
+     */
     public decode(track: string): Promise<Track|void> {
         const options = {
             endpoint: '/decodetrack',
@@ -79,6 +113,11 @@ export class Rest {
         return this.fetch(options);
     }
 
+    /**
+     * Get routplanner status from Lavalink
+     * @returns Promise that resolves to a routeplanner response or void
+     * @internal
+     */
     public getRoutePlannerStatus(): Promise<RoutePlanner|void> {
         const options = {
             endpoint: '/routeplanner/status',
@@ -87,6 +126,10 @@ export class Rest {
         return this.fetch(options);
     }
 
+    /**
+     * Release blacklisted IP address into pool of IPs
+     * @param address IP address
+     */
     public unmarkFailedAddress(address: string): Promise<void> {
         const options = {
             endpoint: '/routeplanner/free/address',
@@ -99,7 +142,13 @@ export class Rest {
         return this.fetch(options);
     }
 
-    private async fetch({ endpoint, options }: FetchOptions): Promise<any|void> {
+    /**
+     * Make a request to Lavalink
+     * @param fetchOptions.endpoint Lavalink endpoint
+     * @param fetchOptions.options Options passed to petitio
+     */
+    private async fetch(fetchOptions: FetchOptions): Promise<any|void> {
+        const { endpoint, options } = fetchOptions;
         let headers: Record<string, any> = {
             'Authorization': this.auth,
             'User-Agent': this.node.manager.options.userAgent

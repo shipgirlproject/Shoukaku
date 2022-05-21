@@ -22,6 +22,22 @@ export enum VoiceState {
     SESSION_ENDPOINT_MISSING
 }
 
+export enum OPCodes {
+    // From Lavalink
+    VOICE_UPDATE = 'voiceUpdate',
+    PLAY = 'play',
+    STOP = 'stop',
+    PAUSE = 'pause',
+    SEEK = 'seek',
+    VOLUME = 'volume',
+    FILTERS = 'filters',
+    DESTROY = 'destroy',
+    // To Lavalink
+    PLAYER_UPDATE = 'playerUpdate',
+    STATS = 'stats',
+    EVENT = 'event'
+}
+
 
 export const ShoukakuDefaults: ShoukakuOptions = {
     resume: false,

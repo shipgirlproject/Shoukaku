@@ -2,7 +2,7 @@ import { EventEmitter } from 'events';
 import { IncomingMessage } from 'http';
 import { NodeOption, Shoukaku } from '../Shoukaku';
 import { Player } from '../guild/Player';
-import { State } from '../Constants';
+import { OPCodes, State } from '../Constants';
 import { Queue } from './Queue';
 import { Rest } from './Rest';
 import Websocket from 'ws';
@@ -54,20 +54,73 @@ export interface NonResumableHeaders {
     'User-Id': string;
 }
 
+/**
+ * Represents a Lavalink node
+ */
 export class Node extends EventEmitter {
+    /**
+     * Shoukaku class
+     * @readonly
+     */
     public readonly manager: Shoukaku;
+    /**
+     * A map of guild ID to players
+     */
     public readonly players: Map<string, Player>;
+    /**
+     * Lavalink rest API
+     */
     public readonly rest: Rest;
+    /**
+     * Lavalink API message queue
+     */
     public readonly queue: Queue;
+    /**
+     * Name of this node
+     */
     public readonly name: string;
+    /**
+     * Group in which this node is contained
+     */
     public readonly group?: string;
+    /**
+     * URL of Lavalink
+     * @readonly
+     */
     private readonly url: string;
+    /**
+     * Credentials to access Lavalink
+     * @readonly
+     */
     private readonly auth: string;
+    /**
+     * The number of reconnects to Lavalink
+     */
     public reconnects: number;
+    /**
+     * Boolean that represents if this connection is destroyed
+     */
     public destroyed: boolean;
+    /**
+     * The state of this connection
+     */
     public state: State;
+    /**
+     * Statistics from Lavalink
+     */
     public stats: NodeStats|null;
+    /**
+     * Websocket instance
+     */
     public ws: Websocket|null;
+    /**
+     * @param manager Shoukaku instance
+     * @param options.name Name of this node
+     * @param options.url URL of Lavalink
+     * @param options.auth Credentials to access Lavalnk
+     * @param options.secure Whether to use secure protocols or not
+     * @param options.group Group of this node
+     */
     constructor(manager: Shoukaku, options: NodeOption) {
         super();
         this.manager = manager;
@@ -85,6 +138,11 @@ export class Node extends EventEmitter {
         this.ws = null;
     }
 
+    /**
+     * Penalties for load balancing
+     * @returns Penalty score
+     * @static @internal @readonly
+     */
     get penalties(): number {
         let penalties = 0;
         if (!this.stats) return penalties;
@@ -97,6 +155,10 @@ export class Node extends EventEmitter {
         return penalties;
     }
 
+    /**
+     * Connect to Lavalink
+     * @param reconnect Whether to reconnect on failure or not
+     */
     public connect(reconnect = false): void {
         if (!this.manager.id) throw new Error('Do not connect a node when the library is not yet ready');
         this.destroyed = false;
@@ -126,6 +188,11 @@ export class Node extends EventEmitter {
         this.ws.on('message', data => this.message(data));
     }
 
+    /**
+     * Disconnect from lavalink
+     * @param code Status code
+     * @param reason Reason for disconnect
+     */
     public disconnect(code: number, reason?:string): void {
         if (this.destroyed) return;
         this.destroyed = true;
@@ -134,6 +201,15 @@ export class Node extends EventEmitter {
         this.queue.flush(code, reason);
     }
 
+    /**
+     * Join a voice channel in a guild
+     * @param options.guildId Guild ID in which voice channel to connect to is located
+     * @param options.shardId Shard ID in which the guild exists
+     * @param options.channelId Channel ID of voice channel to connect to
+     * @param options.deaf Optional boolean value to specify whether to deafen the current bot user
+     * @param options.mute Optional boolean value to specify whether to mute the current bot user
+     * @returns A promise that resolves to a player class
+     */
     public async joinChannel(options: VoiceChannelOptions): Promise<Player> {
         if (this.state !== State.CONNECTED)
             throw new Error('This node is not yet ready');
@@ -157,10 +233,20 @@ export class Node extends EventEmitter {
         }
     }
 
+    /**
+     * Disconnect from connected voice channel
+     * @param guildId ID of guild that contains voice channel
+     */
     public leaveChannel(guildId: string): void {
         this.players.get(guildId)?.connection.disconnect();
     }
 
+    /**
+     * Handle connection open event from Lavalink
+     * @param response Response from Lavalink
+     * @param reconnect Whether to reconnect on failure
+     * @internal
+     */
     private open(response: IncomingMessage, reconnect = false): void {
         const resumed = response.headers['session-resumed'] === 'true';
         this.queue.add();
@@ -183,10 +269,15 @@ export class Node extends EventEmitter {
         this.emit('ready', this.name, !resumed && reconnect ? reconnect : resumed);
     }
 
+    /**
+     * Handle message from Lavalink
+     * @param message JSON message
+     * @internal
+     */
     private message(message: any): void {
         const json = JSON.parse(message);
         if (!json) return;
-        if (json.op === 'stats') {
+        if (json.op === OPCodes.STATS) {
             this.emit('debug', this.name, `[Socket] <- [${this.name}] : Node Status Update | Server Load: ${this.penalties}`);
             this.stats = json;
             return;
@@ -194,6 +285,11 @@ export class Node extends EventEmitter {
         this.players.get(json.guildId)?.onLavalinkMessage(json);
     }
 
+    /**
+     * Handle closed event from laavlink
+     * @param code Status close
+     * @param reason Reason for connection close
+     */
     private close(code: number, reason: Buffer): void {
         this.state = State.DISCONNECTED;
         this.emit('debug', this.name, `[Socket] <-/-> [${this.name}] : Connection Closed, Code: ${code || 'Unknown Code'}`);
@@ -206,6 +302,10 @@ export class Node extends EventEmitter {
             this.reconnect();
     }
 
+    /**
+     * Clear message queue and move players to other nodes if possible
+     * @internal
+     */
     private clean(): void {
         const players = [...this.players.values()];
         const move = this.manager.options.moveOnDisconnect && [...this.manager.nodes.values()].filter(node => node.group === this.group).length > 1;
@@ -227,6 +327,10 @@ export class Node extends EventEmitter {
         this.emit('disconnect', this.name, players, players.length > 0 && move);
     }
 
+    /**
+     * Reconnect to Lavalink
+     * @internal
+     */
     private reconnect(): void {
         if (this.state !== State.DISCONNECTED) return;
         this.reconnects++;
@@ -234,6 +338,11 @@ export class Node extends EventEmitter {
         setTimeout(() => this.connect(true), this.manager.options.reconnectInterval);
     }
 
+    /**
+     * Handle raw message from Discord
+     * @param packet Packet data
+     * @internal
+     */
     public discordRaw(packet: any): void {
         const player = this.players.get(packet.d.guild_id);
         if (!player) return;

@@ -36,10 +36,30 @@ export interface MergedShoukakuOptions {
 }
 
 export declare interface Shoukaku {
+    /**
+     * Emitted when data useful for debugging is produced
+     * @eventProperty
+     */
     on(event: 'debug', listener: (name: string, info: string) => void): this;
+    /**
+     * Emitted when an error occurs
+     * @eventProperty
+     */
     on(event: 'error', listener: (name: string, error: Error) => void): this;
+    /**
+     * Emitted when Shoukaku is ready to recieve operations
+     * @eventProperty
+     */
     on(event: 'ready', listener: (name: string, reconnected: boolean) => void): this;
+    /**
+     * Emitted when a websocket connection to Lavalink closes
+     * @eventProperty
+     */
     on(event: 'close', listener: (name: string, code: number, reason: string) => void): this;
+    /**
+     * Emitted when a websocket connection to Lavalink disconnects
+     * @eventProperty
+     */
     on(event: 'disconnect', listener: (name: string, players: Player[], moved: boolean) => void): this;
     once(event: 'debug', listener: (name: string, info: string) => void): this;
     once(event: 'error', listener: (name: string, error: Error) => void): this;
@@ -53,11 +73,41 @@ export declare interface Shoukaku {
     off(event: 'disconnect', listener: (name: string, players: Player[], moved: boolean) => void): this;
 }
 
+/**
+ * Main Shoukaku class
+ */
 export class Shoukaku extends EventEmitter {
+    /**
+     * Discord library connector
+     * @readonly
+     */
     public readonly connector: Connector;
+    /**
+     * Shoukaku options
+     * @readonly
+     */
     public readonly options: MergedShoukakuOptions;
+    /**
+     * Connected Lavalink nodes
+     * @readonly
+     */
     public readonly nodes: Map<string, Node>;
+    /**
+     * Shoukaku instance identifier
+     */
     public id: string|null;
+    /**
+     * @param connector A Discord library connector
+     * @param nodes An array that conforms to the NodeOption type that specifies nodes to connect to
+     * @param options.resume Whether to resume a connection on disconnect to Lavalink
+     * @param options.resumeKey Resume key for Lavalink
+     * @param options.resumeTimeout Timeout before resuming a connection
+     * @param options.reconnectTries Number of times to try and reconnect to Lavalink before giving up
+     * @param options.reconnectInterval Timeout before trying to reconnect
+     * @param options.restTimeout Time to wait for a response from the Lavalink REST API before giving up
+     * @param options.moveOnDisconnect Whether to move players to a different Lavalink node when a node disconnects
+     * @param options.userAgent User Agent to use when making requests to Lavalink
+     */
     constructor(connector: any, nodes: NodeOption[], options: ShoukakuOptions) {
         super();
         this.connector = connector;
@@ -67,6 +117,11 @@ export class Shoukaku extends EventEmitter {
         this.connector.listen(nodes);
     }
 
+    /**
+     * Get a list of players
+     * @returns A map of guild IDs and players
+     * @static
+     */
     get players(): Map<string, Player> {
         const players = new Map();
         for (const node of this.nodes.values()) {
@@ -75,6 +130,14 @@ export class Shoukaku extends EventEmitter {
         return players;
     }
 
+    /**
+     * Add a Lavalink node to the pool of available nodes
+     * @param options.name Name of this node
+     * @param options.url URL of Lavalink
+     * @param options.auth Credentials to access Lavalnk
+     * @param options.secure Whether to use secure protocols or not
+     * @param options.group Group of this node
+     */
     public addNode(options: NodeOption): void {
         const node = new Node(this, options);
         node.on('debug', (...args) => this.emit('debug', ...args));
@@ -86,6 +149,11 @@ export class Shoukaku extends EventEmitter {
         this.nodes.set(node.name, node);
     }
 
+    /**
+     * Remove a Lavalink node from the pool of available nodes
+     * @param name Name of the node
+     * @param reason Reason of removing the node
+     */
     public removeNode(name: string, reason = 'Remove node executed'): void {
         const node = this.nodes.get(name);
         if (!node) throw new Error('The node name you specified doesn\'t exist');
@@ -93,6 +161,11 @@ export class Shoukaku extends EventEmitter {
         node.removeAllListeners();
     }
 
+    /**
+     * Select a Lavalink node from the pool of nodes
+     * @param name A specific node, an array of nodes, or the string `auto`
+     * @returns A Lavalink node or undefined
+     */
     public getNode(name: string|string[] = 'auto'): Node|undefined {
         if (!this.nodes.size) throw new Error('No nodes available, please add a node first');
         if (Array.isArray(name)) return this.getIdeal(name);
@@ -102,6 +175,12 @@ export class Shoukaku extends EventEmitter {
         return node;
     }
 
+    /**
+     * Get the Lavalink node the least penalty score
+     * @param group A group, an array of groups, or the string `auto`
+     * @returns A Lavalink node or undefined
+     * @internal
+     */
     private getIdeal(group: string|string[]): Node|undefined {
         const nodes = [...this.nodes.values()]
             .filter(node => node.state === State.CONNECTED);

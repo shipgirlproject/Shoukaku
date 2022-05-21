@@ -5,8 +5,9 @@
   "main": "index.js",
   "types": "types/index.d.ts",
   "scripts": {
-    "docs:build": "docma build",
-    "docs:dev": "docma serve"
+    "compile": "tsc",
+    "build": "npm run compile && npm run build:docs",
+    "build:docs": "typedoc --theme default --readme README.md --out docs/ --entryPointStrategy expand src/."
   },
   "keywords": [
     "bot",
@@ -42,6 +43,7 @@
     "@typescript-eslint/parser": "^5.25.0",
     "eslint": "^8.16.0",
     "ts-node": "^10.7.0",
+    "typedoc": "^0.22.15",
     "typescript": "^4.6.4"
   }
 }

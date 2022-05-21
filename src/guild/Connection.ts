@@ -1,9 +1,12 @@
 import { EventEmitter, once } from 'events';
-import { State, VoiceState } from '../Constants';
+import { OPCodes, State, VoiceState } from '../Constants';
 import { VoiceChannelOptions } from '../node/Node';
 import { Player } from './Player';
 import AbortController from 'abort-controller';
 
+/**
+ * Represents the partial payload from a stateUpdate event
+ */
 export interface StateUpdatePartial {
     channel_id?: string;
     session_id?: string;
@@ -11,6 +14,9 @@ export interface StateUpdatePartial {
     self_mute: boolean;
 }
 
+/**
+ * Represents the payload from a serverUpdate event
+ */
 export interface ServerUpdate {
     token: string;
     guild_id: string;
@@ -21,17 +27,55 @@ export interface ServerUpdate {
  * Represents a connection to a Discord voice channel
  */
 export class Connection extends EventEmitter {
+    /**
+     * An instance of the Player class
+     * @readonly
+     */
     public readonly player: Player;
+    /**
+     * ID of Guild that contains the connected voice channel
+     */
     public guildId: string;
+    /**
+     * ID of the connected voice channel
+     */
     public channelId: string|null;
+    /**
+     * ID of the Shard that contains the guild that contains the connected voice channel
+     */
     public shardId: number;
+    /**
+     * ID of current session
+     */
     public sessionId: string|null;
+    /**
+     * Region of connected voice channel
+     */
     public region: string|null;
+    /**
+     * Mute status in connected voice channel
+     */
     public muted: boolean;
+    /**
+     * Deafen status in connected voice channel
+     */
     public deafened: boolean;
+    /**
+     * Connection state
+     */
     public state: State;
+    /**
+     * Boolean that indicates if voice channel changed since initial connection
+     */
     public moved: boolean;
+    /**
+     * Boolean that indicates if this instance is reconnecting
+     */
     public reconnecting: boolean;
+    /**
+     * Cached serverUpdate event from Lavalink
+     * @private
+     */
     private serverUpdate: ServerUpdate|null;
     /**
      * @param player Shoukaku Player class
@@ -98,8 +142,8 @@ export class Connection extends EventEmitter {
      * @param options.guildId Guild ID in which voice channel to connect to is located
      * @param options.shardId Unused parameter
      * @param options.channelId Channel ID of voice channel to connect to
-     * @param options.deaf Optional boolean value to specify whether to deafen the current bot user
-     * @param options.mute Optional boolean value to specify whether to mute the current bot user
+     * @param options.deaf Optional boolean value to specify whether to deafen or undeafen the current bot user
+     * @param options.mute Optional boolean value to specify whether to mute or unmute the current bot user
      */
     public async connect(options: VoiceChannelOptions): Promise<void> {
         let { guildId, channelId, deaf, mute } = options;
@@ -130,15 +174,16 @@ export class Connection extends EventEmitter {
     }
 
     /**
-     * Connect the current bot user to a voice channel
+     * Update Session ID, Channel ID, Deafen status and Mute status of this instance
      *
-     * @param options.guildId Guild ID in which voice channel to connect to is located
-     * @param options.shardId Unused parameter
-     * @param options.channelId Channel ID of voice channel to connect to
-     * @param options.deaf Optional boolean value to specify whether to deafen the current bot user
-     * @param options.mute Optional boolean value to specify whether to mute the current bot user
+     * @param options.session_id ID of this session
+     * @param options.channel_id ID of currently connected voice channel
+     * @param options.self_deaf Boolean that indicates if the current bot user is deafened or not
+     * @param options.self_mute Boolean that indicates if the current bot user is muted or not
+     * @internal
      */
-    public setStateUpdate({ session_id, channel_id, self_deaf, self_mute }: StateUpdatePartial): void {
+    public setStateUpdate(options: StateUpdatePartial): void {
+        const { session_id, channel_id, self_deaf, self_mute } = options;
         if (this.channelId && (channel_id && this.channelId !== channel_id)) {
             this.moved = true;
             this.player.node.emit('debug', this.player.node.name, `[Voice] <- [Discord] : Channel Moved | Old Channel: ${this.channelId} Guild: ${this.guildId}`);
@@ -173,7 +218,7 @@ export class Connection extends EventEmitter {
         }
         this.region = data.endpoint.split('.').shift()?.replace(/[0-9]/g, '') || null;
         this.serverUpdate = data;
-        this.player.node.queue.add({ op: 'voiceUpdate', guildId: this.guildId, sessionId: this.sessionId, event: this.serverUpdate });
+        this.player.node.queue.add({ op: OPCodes.VOICE_UPDATE, guildId: this.guildId, sessionId: this.sessionId, event: this.serverUpdate });
         this.player.node.emit('debug', this.player.node.name, `[Voice] <- [Discord] : Server Update, Voice Update Sent | Server: ${this.region} Guild: ${this.guildId}`);
         this.emit('connectionUpdate', VoiceState.SESSION_READY);
     }
@@ -184,7 +229,7 @@ export class Connection extends EventEmitter {
      */
     public resendServerUpdate(): void {
         if (!this.serverUpdate) return;
-        this.player.node.queue.add({ op: 'voiceUpdate', guildId: this.guildId, sessionId: this.sessionId, event: this.serverUpdate });
+        this.player.node.queue.add({ op: OPCodes.VOICE_UPDATE, guildId: this.guildId, sessionId: this.sessionId, event: this.serverUpdate });
         this.player.node.emit('debug', this.player.node.name, `[Voice] <- [Discord] : Server Update, voice Update Resent! | Server: ${this.region} Guild: ${this.guildId}`);
     }
 
@@ -192,7 +237,7 @@ export class Connection extends EventEmitter {
      * Destroy the curernt Lavalink player
      */
     public destroyLavalinkPlayer(): void {
-        this.player.node.queue.add({ op: 'destroy', guildId: this.guildId });
+        this.player.node.queue.add({ op: OPCodes.DESTROY, guildId: this.guildId });
         this.player.node.emit('debug', this.player.node.name, `[Voice] -> [Discord] : Destroyed the player on Lavalink | Server: ${this.region} Guild: ${this.guildId}`);
     }
 
