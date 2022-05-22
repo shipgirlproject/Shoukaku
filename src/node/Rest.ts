@@ -162,7 +162,7 @@ export class Rest {
             .body(options.body ?? null)
             .timeout(this.node.manager.options.restTimeout || 15000)
             .send();
-        if (request.statusCode && (request.statusCode > 400))
+        if (request.statusCode && (request.statusCode >= 400))
             throw new Error(`Rest request failed with response code: ${request.statusCode}`);
         const body = request.body.toString('utf8');
         if (!body?.length) return;
