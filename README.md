@@ -90,7 +90,7 @@ const Nodes = [{
     url: 'localhost:6969',
     auth: 'marin_kitagawa'
 }];
-const ShoukakuOptions = { structures: { rest: CustomRest } } // pass the custom structure at your rest parameter
+const ShoukakuOptions = { structures: { rest: CustomRest } } // pass the custom structure to Shoukaku
 const client = new Client();
 const shoukaku = new Shoukaku(new Connectors.DiscordJS(client), Nodes, ShoukakuOptions);
 ```
