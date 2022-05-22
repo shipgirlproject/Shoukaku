@@ -230,7 +230,7 @@ export class Connection extends EventEmitter {
     public resendServerUpdate(): void {
         if (!this.serverUpdate) return;
         this.player.node.queue.add({ op: OPCodes.VOICE_UPDATE, guildId: this.guildId, sessionId: this.sessionId, event: this.serverUpdate });
-        this.player.node.emit('debug', this.player.node.name, `[Voice] <- [Discord] : Server Update, voice Update Resent! | Server: ${this.region} Guild: ${this.guildId}`);
+        this.player.node.emit('debug', this.player.node.name, `[Voice] <- [Discord] : Server Update, Voice Update Resent! | Server: ${this.region} Guild: ${this.guildId}`);
     }
 
     /**
