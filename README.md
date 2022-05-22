@@ -22,6 +22,8 @@
 
 ✅ Updated
 
+✅ Extendable
+
 ✅ Very cute (Very Important)
 
 ### Supported Libraries
@@ -63,6 +65,34 @@ const player = await node.joinVoiceChannel({
 player
     .playTrack(metadata.track)
     .setVolume(0.5);
+```
+### Plugins list
+
+> Open a pr to add your plugin here
+
+Name   | Link     | Description
+-------|----------|------------
+ ..... | ........ | ..........
+
+### Creating Plugins
+> Shoukaku has now official supports for plugins. However, implementing this is up to the developers that is interested on doing it
+
+> Shoukaku support modification on Rest.ts and Player.ts
+
+> To apply your plugin, put the extended classes on **ShoukakuOptions.structures**. Example below
+
+```js
+const { Client } = require('discord.js');
+const { Shoukaku, Rest, Connector } = require('shoukaku');
+class CustomRest extends Rest { }; // extended structure of your choice
+const Nodes = [{
+    name: 'Localhost',
+    url: 'localhost:6969',
+    auth: 'marin_kitagawa'
+}];
+const ShoukakuOptions = { structures: { rest: CustomRest } } // pass the custom structure at your rest parameter
+const client = new Client();
+const shoukaku = new Shoukaku(new Connectors.DiscordJS(client), Nodes, ShoukakuOptions);
 ```
 ### Other Links
 
