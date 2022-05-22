@@ -66,6 +66,20 @@ player
     .playTrack(metadata.track)
     .setVolume(0.5);
 ```
+
+### Shoukaku's options
+ Option | Type | Description
+--------|------|------------
+resume | boolean | Whether to resume a connection on disconnect to Lavalink |
+resumeKey | string | Resume key for Lavalink |
+resumeTimeout | number | Timeout before resuming a connection **in seconds** |
+reconnectTries | number | Number of times to try and reconnect to Lavalink before giving up |
+reconnectInterval | number | Timeout before trying to reconnect **in milliseconds** |
+restTimeout | number | Time to wait for a response from the Lavalink REST API before giving up **in milliseconds** |
+moveOnDisconnect | boolean | Whether to move players to a different Lavalink node when a node disconnects |
+userAgent | string | User Agent to use when making requests to Lavalink |
+structures | Object{rest?, player?} | Custom structures for shoukaku to use |
+
 ### Plugins list
 
 > Open a pr to add your plugin here

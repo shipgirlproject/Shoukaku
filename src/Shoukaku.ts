@@ -115,6 +115,7 @@ export class Shoukaku extends EventEmitter {
      * @param options.restTimeout Time to wait for a response from the Lavalink REST API before giving up
      * @param options.moveOnDisconnect Whether to move players to a different Lavalink node when a node disconnects
      * @param options.userAgent User Agent to use when making requests to Lavalink
+     * @param options.structures Custom structures for shoukaku to use
      */
     constructor(connector: Connector, nodes: NodeOption[], options: ShoukakuOptions = {}) {
         super();
