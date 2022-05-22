@@ -28,13 +28,13 @@
 
 ### Supported Libraries
 
-Refer to [/src/libraries](https://github.com/Deivu/Shoukaku/tree/master/src/libraries) for list of supported libraries + how to support other libraries
+Refer to [/src/connectors](https://github.com/Deivu/Shoukaku/tree/master/src/connectors) for list of supported libraries + how to support other libraries
 
 ### Small code snippet examples
 > Initializing the library (Using Connector Discord.JS)
 ```js
 const { Client } = require('discord.js');
-const { Shoukaku, Connector } = require('shoukaku');
+const { Shoukaku, Connectors } = require('shoukaku');
 const Nodes = [{
     name: 'Localhost',
     url: 'localhost:6969',
@@ -97,7 +97,7 @@ Name   | Link     | Description
 
 ```js
 const { Client } = require('discord.js');
-const { Shoukaku, Rest, Connector } = require('shoukaku');
+const { Shoukaku, Rest, Connectors } = require('shoukaku');
 class CustomRest extends Rest { }; // extended structure of your choice
 const Nodes = [{
     name: 'Localhost',
