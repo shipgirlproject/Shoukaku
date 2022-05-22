@@ -12,11 +12,11 @@
 <img src="https://img.shields.io/snyk/vulnerabilities/npm/shoukaku?style=flat-square" alt="Snyk Vulnerabilities for npm package"> 
 <img src="https://img.shields.io/npm/l/shoukaku?style=flat-square" alt="NPM"></p>
 <p align="center">
-    <img src="https://cdn.donmai.us/original/e0/a8/__shoukaku_kantai_collection_drawn_by_kanmiya_shinobu__e0a8cd09c15bf89a58de82e00b6a2ead.jpg" height="600"> 
+    <img src="https://cdn.donmai.us/original/0e/a4/0ea4a25416f850823d62d61ce51fc659.png" height="600"> 
 </p>
 
 <blockquote>
-<p>The ShipGirl Project, feat Shoukaku; ⓒ Kancoll</p>
+<p>The ShipGirl Project, feat Shoukaku; ⓒ Kancolle</p>
 </blockquote>
 
 <a href="#features" id="features" style="color: inherit; text-decoration: none;">
@@ -26,27 +26,47 @@
 <p>✅ Documented</p>
 <p>✅ Updated</p>
 <p>✅ Very cute (Very Important)</p>
-<blockquote>
-<p>This branch is WIP</p>
-</blockquote>
 
 <a href="#supported-libraries" id="supported-libraries" style="color: inherit; text-decoration: none;">
   <h3>Supported Libraries</h3>
 </a>
 <p>Refer to <a href="https://github.com/Deivu/Shoukaku/tree/master/src/libraries">/src/libraries</a> for list of supported libraries + how to support other libraries</p>
 
+<a href="#small-code-snippet-examples" id="small-code-snippet-examples" style="color: inherit; text-decoration: none;">
+  <h3>Small code snippet examples</h3>
+</a>
+<blockquote>
+<p>Initializing the library (Using Connector Discord.JS)</p>
+</blockquote>
+<pre><code class="language-js"><span class="hl-0">const</span><span class="hl-1"> { </span><span class="hl-2">Client</span><span class="hl-1"> } = </span><span class="hl-3">require</span><span class="hl-1">(</span><span class="hl-4">&#39;discord.js&#39;</span><span class="hl-1">);</span><br/><span class="hl-0">const</span><span class="hl-1"> { </span><span class="hl-2">Shoukaku</span><span class="hl-1">, </span><span class="hl-2">Connector</span><span class="hl-1"> } = </span><span class="hl-3">require</span><span class="hl-1">(</span><span class="hl-4">&#39;shoukaku&#39;</span><span class="hl-1">);</span><br/><span class="hl-0">const</span><span class="hl-1"> </span><span class="hl-2">Nodes</span><span class="hl-1"> = [{</span><br/><span class="hl-1">    </span><span class="hl-5">name:</span><span class="hl-1"> </span><span class="hl-4">&#39;Localhost&#39;</span><span class="hl-1">,</span><br/><span class="hl-1">    </span><span class="hl-5">url:</span><span class="hl-1"> </span><span class="hl-4">&#39;localhost:6969&#39;</span><span class="hl-1">,</span><br/><span class="hl-1">    </span><span class="hl-5">auth:</span><span class="hl-1"> </span><span class="hl-4">&#39;marin_kitagawa&#39;</span><br/><span class="hl-1">}];</span><br/><span class="hl-0">const</span><span class="hl-1"> </span><span class="hl-2">client</span><span class="hl-1"> = </span><span class="hl-0">new</span><span class="hl-1"> </span><span class="hl-3">Client</span><span class="hl-1">();</span><br/><span class="hl-0">const</span><span class="hl-1"> </span><span class="hl-2">shoukaku</span><span class="hl-1"> = </span><span class="hl-0">new</span><span class="hl-1"> </span><span class="hl-3">Shoukaku</span><span class="hl-1">(</span><span class="hl-0">new</span><span class="hl-1"> </span><span class="hl-5">Connectors</span><span class="hl-1">.</span><span class="hl-3">DiscordJS</span><span class="hl-1">(</span><span class="hl-5">client</span><span class="hl-1">), </span><span class="hl-5">Nodes</span><span class="hl-1">);</span><br/><span class="hl-6">// ALWAYS handle error</span><br/><span class="hl-5">shoukaku</span><span class="hl-1">.</span><span class="hl-3">on</span><span class="hl-1">(</span><span class="hl-4">&#39;error&#39;</span><span class="hl-1">, (</span><span class="hl-5">_</span><span class="hl-1">, </span><span class="hl-5">error</span><span class="hl-1">) </span><span class="hl-0">=&gt;</span><span class="hl-1"> </span><span class="hl-5">console</span><span class="hl-1">.</span><span class="hl-3">error</span><span class="hl-1">(</span><span class="hl-5">error</span><span class="hl-1">));</span><br/><span class="hl-5">client</span><span class="hl-1">.</span><span class="hl-3">login</span><span class="hl-1">(</span><span class="hl-4">&#39;token&#39;</span><span class="hl-1">);</span>
+</code></pre>
+<blockquote>
+<p>Searching and joining a channel (Async Function Implementation)</p>
+</blockquote>
+<pre><code class="language-js"><span class="hl-0">const</span><span class="hl-1"> </span><span class="hl-2">node</span><span class="hl-1"> = </span><span class="hl-5">shoukaku</span><span class="hl-1">.</span><span class="hl-3">getNode</span><span class="hl-1">();</span><br/><span class="hl-7">if</span><span class="hl-1"> (!</span><span class="hl-5">node</span><span class="hl-1">) </span><span class="hl-7">return</span><span class="hl-1">;</span><br/><span class="hl-0">const</span><span class="hl-1"> </span><span class="hl-2">result</span><span class="hl-1"> = </span><span class="hl-7">await</span><span class="hl-1"> </span><span class="hl-5">node</span><span class="hl-1">.</span><span class="hl-5">rest</span><span class="hl-1">.</span><span class="hl-3">resolve</span><span class="hl-1">(</span><span class="hl-4">&#39;scsearch:snowhalation&#39;</span><span class="hl-1">);</span><br/><span class="hl-7">if</span><span class="hl-1"> (!</span><span class="hl-5">result</span><span class="hl-1">?.</span><span class="hl-5">tracks</span><span class="hl-1">.</span><span class="hl-5">length</span><span class="hl-1">) </span><span class="hl-7">return</span><span class="hl-1">;</span><br/><span class="hl-0">const</span><span class="hl-1"> </span><span class="hl-2">metadata</span><span class="hl-1"> = </span><span class="hl-5">result</span><span class="hl-1">.</span><span class="hl-5">tracks</span><span class="hl-1">.</span><span class="hl-3">shift</span><span class="hl-1">();</span><br/><span class="hl-0">const</span><span class="hl-1"> </span><span class="hl-2">player</span><span class="hl-1"> = </span><span class="hl-7">await</span><span class="hl-1"> </span><span class="hl-5">node</span><span class="hl-1">.</span><span class="hl-3">joinVoiceChannel</span><span class="hl-1">({</span><br/><span class="hl-1">    </span><span class="hl-5">guildId:</span><span class="hl-1"> </span><span class="hl-4">&#39;your_guild_id&#39;</span><span class="hl-1">,</span><br/><span class="hl-1">    </span><span class="hl-5">channelId:</span><span class="hl-1"> </span><span class="hl-4">&#39;your_channel_id&#39;</span><span class="hl-1">,</span><br/><span class="hl-1">    </span><span class="hl-5">shardId:</span><span class="hl-1"> </span><span class="hl-8">0</span><span class="hl-1"> </span><span class="hl-6">// if unsharded it will always be zero (depending on your library implementation)</span><br/><span class="hl-1">});</span><br/><span class="hl-6">// player is created and ready, do your thing</span>
+</code></pre>
+<blockquote>
+<p>Playing a track and changing a playback option (in this example, volume)</p>
+</blockquote>
+<pre><code class="language-js"><span class="hl-5">player</span><br/><span class="hl-1">    .</span><span class="hl-3">playTrack</span><span class="hl-1">(</span><span class="hl-5">metadata</span><span class="hl-1">.</span><span class="hl-5">track</span><span class="hl-1">)</span><br/><span class="hl-1">    .</span><span class="hl-3">setVolume</span><span class="hl-1">(</span><span class="hl-8">0.5</span><span class="hl-1">);</span>
+</code></pre>
+
 <a href="#other-links" id="other-links" style="color: inherit; text-decoration: none;">
   <h3>Other Links</h3>
 </a>
 <p><a href="https://discord.gg/FVqbtGu">Support</a> (#Development) | <a href="https://github.com/freyacodes/Lavalink">Lavalink</a></p>
 
-<a href="#example-discordjs" id="example-discordjs" style="color: inherit; text-decoration: none;">
-  <h3>Example (Discord.JS)</h3>
+<a href="#implementation-discordjs" id="implementation-discordjs" style="color: inherit; text-decoration: none;">
+  <h3>Implementation (Discord.JS)</h3>
 </a>
 <blockquote>
-<p>Bot Implementation: <a href="https://github.com/Deivu/Kongou">https://github.com/Deivu/Kongou</a></p>
+<p><a href="https://github.com/Deivu/Kongou">https://github.com/Deivu/Kongou</a></p>
 </blockquote>
+
+<a href="#made-with-❤-by" id="made-with-❤-by" style="color: inherit; text-decoration: none;">
+  <h3>Made with ❤ by:</h3>
+</a>
 <blockquote>
-<p>Made with ❤ by @Sāya#0113</p>
+<p>@Sāya#0113</p>
 </blockquote>
 </div></div><div class="col-4 col-menu menu-sticky-wrap menu-highlight"><nav class="tsd-navigation primary"><ul><li class="current"><a href="modules.html">Modules</a></li><li class=" tsd-kind-module"><a href="modules/Constants.html">Constants</a></li><li class=" tsd-kind-module"><a href="modules/Shoukaku.html">Shoukaku</a></li><li class=" tsd-kind-module"><a href="modules/Utils.html">Utils</a></li><li class=" tsd-kind-module"><a href="modules/connectors_Connector.html">connectors/<wbr/>Connector</a></li><li class=" tsd-kind-module"><a href="modules/connectors_libs.html">connectors/libs</a></li><li class=" tsd-kind-module"><a href="modules/connectors_libs_DiscordJS.html">connectors/libs/<wbr/>DiscordJS</a></li><li class=" tsd-kind-module"><a href="modules/connectors_libs_Eris.html">connectors/libs/<wbr/>Eris</a></li><li class=" tsd-kind-module"><a href="modules/guild_Connection.html">guild/<wbr/>Connection</a></li><li class=" tsd-kind-module"><a href="modules/guild_Player.html">guild/<wbr/>Player</a></li><li class=" tsd-kind-module"><a href="modules/node_Node.html">node/<wbr/>Node</a></li><li class=" tsd-kind-module"><a href="modules/node_Queue.html">node/<wbr/>Queue</a></li><li class=" tsd-kind-module"><a href="modules/node_Rest.html">node/<wbr/>Rest</a></li></ul></nav></div></div></div><footer class="with-border-bottom"><div class="container"><h2>Legend</h2><div class="tsd-legend-group"><ul class="tsd-legend"><li class="tsd-kind-variable"><span class="tsd-kind-icon">Variable</span></li><li class="tsd-kind-function"><span class="tsd-kind-icon">Function</span></li><li class="tsd-kind-type-alias"><span class="tsd-kind-icon">Type alias</span></li></ul><ul class="tsd-legend"><li class="tsd-kind-enum"><span class="tsd-kind-icon">Enumeration</span></li></ul><ul class="tsd-legend"><li class="tsd-kind-interface"><span class="tsd-kind-icon">Interface</span></li></ul><ul class="tsd-legend"><li class="tsd-kind-class"><span class="tsd-kind-icon">Class</span></li></ul></div><h2>Settings</h2><p>Theme <select id="theme"><option value="os">OS</option><option value="light">Light</option><option value="dark">Dark</option></select></p></div></footer><div class="container tsd-generator"><p>Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p></div><div class="overlay"></div><script src="assets/main.js"></script></body></html>
