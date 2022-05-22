@@ -1,13 +1,7 @@
 import { readFileSync } from 'fs';
+import { basename } from 'path';
 import { NodeOption, ShoukakuOptions } from './Shoukaku';
-
-interface PackagePartial {
-    name: string,
-    version: string,
-    repository: { url: string }
-}
-
-const info: PackagePartial = JSON.parse(readFileSync('./package.json').toString());
+import Info from '../package.json';
 
 export enum State {
     CONNECTING,
@@ -47,7 +41,7 @@ export const ShoukakuDefaults: ShoukakuOptions = {
     reconnectInterval: 5000,
     restTimeout: 60000,
     moveOnDisconnect: false,
-    userAgent: `${info.name}/${info.version}(${info.repository.url})`
+    userAgent: `${Info.name}bot/${Info.version} (${Info.repository.url})`
 };
 
 export const NodeDefaults: NodeOption = {
