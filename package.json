@@ -4,10 +4,10 @@
   "description": "A lavalink wrapper that supports almost all libraries",
   "main": "dist/index.js",
   "scripts": {
-    "prepare": "tsc --outDir ./dist",
     "compile": "tsc",
     "build": "npm run compile && npm run build:docs",
-    "build:docs": "typedoc --theme default --readme README.md --out docs/ --entryPointStrategy expand src/."
+    "build:docs": "typedoc --theme default --readme README.md --out docs/ --entryPointStrategy expand src/.",
+    "prepare": "tsc --outDir ./dist"
   },
   "keywords": [
     "bot",
