@@ -125,7 +125,7 @@ export class Node extends EventEmitter {
         super();
         this.manager = manager;
         this.players = new Map();
-        this.rest = new Rest(this, options);
+        this.rest = new (this.manager.options.structures.rest || Rest)(this, options);
         this.queue = new Queue(this);
         this.name = options.name;
         this.group = options.group;
@@ -222,11 +222,15 @@ export class Node extends EventEmitter {
             throw new Error('Can\'t join this channel. This connection is currently force-reconnecting');
         try {
             if (!player) {
-                player = new Player(this, options);
-                this.players.set(options.guildId, player);
+                if (this.manager.options.structures.player) {
+                    player = new this.manager.options.structures.player(this, options);
+                } else {
+                    player = new Player(this, options);
+                }
+                this.players.set(options.guildId, player!);
             }
-            await player.connection.connect(options);
-            return player;
+            await player!.connection.connect(options);
+            return player!;
         } catch (error) {
             this.players.delete(options.guildId);
             throw error;
@@ -252,7 +256,7 @@ export class Node extends EventEmitter {
         this.queue.add();
         if (this.manager.options.resume && this.manager.options.resumeKey) {
             this.queue.add({
-                op: 'configureResuming',
+                op: OPCodes.CONFIGURE_RESUMING,
                 key: this.manager.options.resumeKey,
                 timeout: this.manager.options.resumeTimeout
             });

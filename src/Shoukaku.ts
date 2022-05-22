@@ -2,8 +2,14 @@ import { EventEmitter } from 'events';
 import { State, ShoukakuDefaults } from './Constants';
 import { Node } from './node/Node';
 import { Connector } from './connectors/Connector';
-import { mergeDefault } from './Utils';
+import { Constructor, mergeDefault } from './Utils';
 import { Player } from './guild/Player';
+import { Rest } from './node/Rest';
+
+export interface Structures {
+    rest?:  Constructor<Rest>;
+    player?: Constructor<Player>;
+}
 
 export interface NodeOption {
     name: string;
@@ -22,6 +28,7 @@ export interface ShoukakuOptions {
     restTimeout?: number;
     moveOnDisconnect?: boolean;
     userAgent?: string;
+    structures?: Structures;
 }
 
 export interface MergedShoukakuOptions {
@@ -33,6 +40,7 @@ export interface MergedShoukakuOptions {
     restTimeout: number;
     moveOnDisconnect: boolean;
     userAgent: string;
+    structures: Structures;
 }
 
 export declare interface Shoukaku {
@@ -108,7 +116,7 @@ export class Shoukaku extends EventEmitter {
      * @param options.moveOnDisconnect Whether to move players to a different Lavalink node when a node disconnects
      * @param options.userAgent User Agent to use when making requests to Lavalink
      */
-    constructor(connector: Connector, nodes: NodeOption[], options: ShoukakuOptions) {
+    constructor(connector: Connector, nodes: NodeOption[], options: ShoukakuOptions = {}) {
         super();
         this.connector = connector.set(this);
         this.options = mergeDefault(ShoukakuDefaults, options);
