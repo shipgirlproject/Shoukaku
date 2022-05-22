@@ -1,0 +1,8 @@
+{
+    "parser": "@typescript-eslint/parser",
+    "extends": "@augu",
+    "rules": {
+        "indent": ["error", 4],
+        "camelcase": "off"
+    }
+}
