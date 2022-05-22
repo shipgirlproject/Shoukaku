@@ -30,6 +30,10 @@
 
 Refer to [/src/connectors](https://github.com/Deivu/Shoukaku/tree/master/src/connectors) for list of supported libraries + how to support other libraries
 
+### Documentation
+
+https://deivu.github.io/Shoukaku/
+
 ### Small code snippet examples
 > Initializing the library (Using Connector Discord.JS)
 ```js
