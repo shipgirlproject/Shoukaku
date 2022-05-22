@@ -2,6 +2,8 @@ import { Node } from './Node';
 import { NodeOption } from '../Shoukaku';
 import Petitio from 'petitio';
 
+export type LoadType = 'TRACK_LOADED' | 'PLAYLIST_LOADED' | 'SEARCH_RESULT' | 'NO_MATCHES' | 'LOAD_FAILED';
+
 interface FetchOptions {
     endpoint: string;
     options: any;
@@ -23,10 +25,10 @@ export interface Track {
 }
 
 export interface LavalinkResponse {
-    loadType: string;
+    loadType: LoadType;
     playlistInfo: {
         name?: string;
-        selectedTrack: number;
+        selectedTrack?: number;
     }
     tracks: Track[]
 }
