@@ -25,6 +25,7 @@
 <p>✅ Stable</p>
 <p>✅ Documented</p>
 <p>✅ Updated</p>
+<p>✅ Extendable</p>
 <p>✅ Very cute (Very Important)</p>
 
 <a href="#supported-libraries" id="supported-libraries" style="color: inherit; text-decoration: none;">
@@ -49,6 +50,100 @@
 <p>Playing a track and changing a playback option (in this example, volume)</p>
 </blockquote>
 <pre><code class="language-js"><span class="hl-5">player</span><br/><span class="hl-1">    .</span><span class="hl-3">playTrack</span><span class="hl-1">(</span><span class="hl-5">metadata</span><span class="hl-1">.</span><span class="hl-5">track</span><span class="hl-1">)</span><br/><span class="hl-1">    .</span><span class="hl-3">setVolume</span><span class="hl-1">(</span><span class="hl-8">0.5</span><span class="hl-1">);</span>
+</code></pre>
+
+<a href="#shoukaku39s-options" id="shoukaku39s-options" style="color: inherit; text-decoration: none;">
+  <h3>Shoukaku&#39;s options</h3>
+</a>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>resume</td>
+<td>boolean</td>
+<td>Whether to resume a connection on disconnect to Lavalink</td>
+</tr>
+<tr>
+<td>resumeKey</td>
+<td>string</td>
+<td>Resume key for Lavalink</td>
+</tr>
+<tr>
+<td>resumeTimeout</td>
+<td>number</td>
+<td>Timeout before resuming a connection <strong>in seconds</strong></td>
+</tr>
+<tr>
+<td>reconnectTries</td>
+<td>number</td>
+<td>Number of times to try and reconnect to Lavalink before giving up</td>
+</tr>
+<tr>
+<td>reconnectInterval</td>
+<td>number</td>
+<td>Timeout before trying to reconnect <strong>in milliseconds</strong></td>
+</tr>
+<tr>
+<td>restTimeout</td>
+<td>number</td>
+<td>Time to wait for a response from the Lavalink REST API before giving up <strong>in milliseconds</strong></td>
+</tr>
+<tr>
+<td>moveOnDisconnect</td>
+<td>boolean</td>
+<td>Whether to move players to a different Lavalink node when a node disconnects</td>
+</tr>
+<tr>
+<td>userAgent</td>
+<td>string</td>
+<td>User Agent to use when making requests to Lavalink</td>
+</tr>
+<tr>
+<td>structures</td>
+<td>Object{rest?, player?}</td>
+<td>Custom structures for shoukaku to use</td>
+</tr>
+</tbody></table>
+
+<a href="#plugins-list" id="plugins-list" style="color: inherit; text-decoration: none;">
+  <h3>Plugins list</h3>
+</a>
+<blockquote>
+<p>Open a pr to add your plugin here</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Link</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>.....</td>
+<td>........</td>
+<td>..........</td>
+</tr>
+</tbody></table>
+
+<a href="#creating-plugins" id="creating-plugins" style="color: inherit; text-decoration: none;">
+  <h3>Creating Plugins</h3>
+</a>
+<blockquote>
+<p>Shoukaku has now official supports for plugins. However, implementing this is up to the developers that is interested on doing it</p>
+</blockquote>
+<blockquote>
+<p>Shoukaku support modification on Rest.ts and Player.ts</p>
+</blockquote>
+<blockquote>
+<p>To apply your plugin, put the extended classes on <strong>ShoukakuOptions.structures</strong>. Example below</p>
+</blockquote>
+<pre><code class="language-js"><span class="hl-0">const</span><span class="hl-1"> { </span><span class="hl-2">Client</span><span class="hl-1"> } = </span><span class="hl-3">require</span><span class="hl-1">(</span><span class="hl-4">&#39;discord.js&#39;</span><span class="hl-1">);</span><br/><span class="hl-0">const</span><span class="hl-1"> { </span><span class="hl-2">Shoukaku</span><span class="hl-1">, </span><span class="hl-2">Rest</span><span class="hl-1">, </span><span class="hl-2">Connector</span><span class="hl-1"> } = </span><span class="hl-3">require</span><span class="hl-1">(</span><span class="hl-4">&#39;shoukaku&#39;</span><span class="hl-1">);</span><br/><span class="hl-0">class</span><span class="hl-1"> </span><span class="hl-9">CustomRest</span><span class="hl-1"> </span><span class="hl-0">extends</span><span class="hl-1"> </span><span class="hl-9">Rest</span><span class="hl-1"> { }; </span><span class="hl-6">// extended structure of your choice</span><br/><span class="hl-0">const</span><span class="hl-1"> </span><span class="hl-2">Nodes</span><span class="hl-1"> = [{</span><br/><span class="hl-1">    </span><span class="hl-5">name:</span><span class="hl-1"> </span><span class="hl-4">&#39;Localhost&#39;</span><span class="hl-1">,</span><br/><span class="hl-1">    </span><span class="hl-5">url:</span><span class="hl-1"> </span><span class="hl-4">&#39;localhost:6969&#39;</span><span class="hl-1">,</span><br/><span class="hl-1">    </span><span class="hl-5">auth:</span><span class="hl-1"> </span><span class="hl-4">&#39;marin_kitagawa&#39;</span><br/><span class="hl-1">}];</span><br/><span class="hl-0">const</span><span class="hl-1"> </span><span class="hl-2">ShoukakuOptions</span><span class="hl-1"> = { </span><span class="hl-5">structures:</span><span class="hl-1"> { </span><span class="hl-5">rest:</span><span class="hl-1"> </span><span class="hl-5">CustomRest</span><span class="hl-1"> } } </span><span class="hl-6">// pass the custom structure to Shoukaku</span><br/><span class="hl-0">const</span><span class="hl-1"> </span><span class="hl-2">client</span><span class="hl-1"> = </span><span class="hl-0">new</span><span class="hl-1"> </span><span class="hl-3">Client</span><span class="hl-1">();</span><br/><span class="hl-0">const</span><span class="hl-1"> </span><span class="hl-2">shoukaku</span><span class="hl-1"> = </span><span class="hl-0">new</span><span class="hl-1"> </span><span class="hl-3">Shoukaku</span><span class="hl-1">(</span><span class="hl-0">new</span><span class="hl-1"> </span><span class="hl-5">Connectors</span><span class="hl-1">.</span><span class="hl-3">DiscordJS</span><span class="hl-1">(</span><span class="hl-5">client</span><span class="hl-1">), </span><span class="hl-5">Nodes</span><span class="hl-1">, </span><span class="hl-5">ShoukakuOptions</span><span class="hl-1">);</span>
 </code></pre>
 
 <a href="#other-links" id="other-links" style="color: inherit; text-decoration: none;">
