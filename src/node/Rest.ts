@@ -57,12 +57,10 @@ export interface RoutePlanner {
 
 /**
  * Wrapper around Lavalink REST API
- * @internal
  */
 export class Rest {
     /**
      * Node that initialized this instance
-     * @readonly
      */
     private readonly node: Node;
     /**
@@ -91,7 +89,6 @@ export class Rest {
      * Resolve a track
      * @param identifier Track ID
      * @returns A promise that resolves to a Lavalink response or void
-     * @internal
      */
     public resolve(identifier: string): Promise<LavalinkResponse|void> {
         const options = {
@@ -105,7 +102,6 @@ export class Rest {
      * Decode a track
      * @param track Encoded track
      * @returns Promise that resolves to a track or void
-     * @internal
      */
     public decode(track: string): Promise<Track|void> {
         const options = {
@@ -131,6 +127,7 @@ export class Rest {
     /**
      * Release blacklisted IP address into pool of IPs
      * @param address IP address
+     * @internal
      */
     public unmarkFailedAddress(address: string): Promise<void> {
         const options = {
@@ -148,6 +145,7 @@ export class Rest {
      * Make a request to Lavalink
      * @param fetchOptions.endpoint Lavalink endpoint
      * @param fetchOptions.options Options passed to petitio
+     * @internal
      */
     private async fetch(fetchOptions: FetchOptions): Promise<any|void> {
         const { endpoint, options } = fetchOptions;

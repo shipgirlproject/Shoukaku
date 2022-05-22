@@ -8,12 +8,10 @@ import { Node } from './Node';
 export class Queue {
     /**
      * Node that initalized this message queue
-     * @readonly
      */
     private readonly node: Node;
     /**
      * Pending messages
-     * @readonly
      */
     public readonly pending: string[];
     /**

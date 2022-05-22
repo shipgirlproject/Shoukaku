@@ -29,7 +29,6 @@ export interface ServerUpdate {
 export class Connection extends EventEmitter {
     /**
      * An instance of the Player class
-     * @readonly
      */
     public readonly player: Player;
     /**
@@ -74,7 +73,6 @@ export class Connection extends EventEmitter {
     public reconnecting: boolean;
     /**
      * Cached serverUpdate event from Lavalink
-     * @private
      */
     private serverUpdate: ServerUpdate|null;
     /**
@@ -245,7 +243,7 @@ export class Connection extends EventEmitter {
      * Send data to Discord
      * @param data The data to send
      * @param important Whether to prioritize sending this packet in the queue
-     * @private @internal
+     * @internal
      */
     private send(data: any, important = false): void {
         this.player.node.manager.connector.sendPacket(this.shardId, { op: 4, d: data }, important);

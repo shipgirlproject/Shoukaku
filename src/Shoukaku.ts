@@ -7,27 +7,75 @@ import { Player } from './guild/Player';
 import { Rest } from './node/Rest';
 
 export interface Structures {
+    /**
+     * A custom structure that extends the Rest class
+     */
     rest?:  Constructor<Rest>;
+    /**
+     * A custom structure that extends the Player class
+     */
     player?: Constructor<Player>;
 }
 
 export interface NodeOption {
+    /**
+     * Name of this node
+     */
     name: string;
+    /**
+     * URL of Lavalink
+     */
     url: string;
+    /**
+     * Credentials to access Lavalnk
+     */
     auth: string;
+    /**
+     * Whether to use secure protocols or not
+     */
     secure?: boolean;
+    /**
+     * Group of this node
+     */
     group?: string;
 }
 
 export interface ShoukakuOptions {
+    /**
+     * Whether to resume a connection on disconnect to Lavalink
+     */
     resume?: boolean;
+    /**
+     * Resume key for Lavalink
+     */
     resumeKey?: string;
+    /**
+     * Timeout before resuming a connection
+     */
     resumeTimeout?: number;
+    /**
+     * Number of times to try and reconnect to Lavalink before giving up
+     */
     reconnectTries?: number;
+    /**
+     * Timeout before trying to reconnect
+     */
     reconnectInterval?: number;
+    /**
+     * Time to wait for a response from the Lavalink REST API before giving up
+     */
     restTimeout?: number;
+    /**
+     * Whether to move players to a different Lavalink node when a node disconnects
+     */
     moveOnDisconnect?: boolean;
+    /**
+     * User Agent to use when making requests to Lavalink
+     */
     userAgent?: string;
+    /**
+     * Custom structures for shoukaku to use
+     */
     structures?: Structures;
 }
 
@@ -87,17 +135,14 @@ export declare interface Shoukaku {
 export class Shoukaku extends EventEmitter {
     /**
      * Discord library connector
-     * @readonly
      */
     public readonly connector: Connector;
     /**
      * Shoukaku options
-     * @readonly
      */
     public readonly options: MergedShoukakuOptions;
     /**
      * Connected Lavalink nodes
-     * @readonly
      */
     public readonly nodes: Map<string, Node>;
     /**
@@ -129,7 +174,7 @@ export class Shoukaku extends EventEmitter {
     /**
      * Get a list of players
      * @returns A map of guild IDs and players
-     * @static
+     * @readonly
      */
     get players(): Map<string, Player> {
         const players = new Map();

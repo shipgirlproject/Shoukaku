@@ -260,7 +260,6 @@ export class Player extends EventEmitter {
     public node: Node;
     /**
      * Discort voice channel that this player is connected to
-     * @readonly
      */
     public readonly connection: Connection;
     /**
@@ -531,7 +530,7 @@ export class Player extends EventEmitter {
 
     /**
      * Update all filters via the filters operation
-     * @private
+     * @internal
      */
     private updateFilters(): void {
         const { volume, equalizer, karaoke, timescale, tremolo, vibrato, rotation, distortion, channelMix, lowPass } = this.filters;
@@ -553,6 +552,7 @@ export class Player extends EventEmitter {
 
     /**
      * Remove all event listeners on this instance
+     * @internal
      */
     public clean(): void {
         this.removeAllListeners();

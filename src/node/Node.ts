@@ -60,7 +60,6 @@ export interface NonResumableHeaders {
 export class Node extends EventEmitter {
     /**
      * Shoukaku class
-     * @readonly
      */
     public readonly manager: Shoukaku;
     /**
@@ -85,12 +84,10 @@ export class Node extends EventEmitter {
     public readonly group?: string;
     /**
      * URL of Lavalink
-     * @readonly
      */
     private readonly url: string;
     /**
      * Credentials to access Lavalink
-     * @readonly
      */
     private readonly auth: string;
     /**
@@ -141,7 +138,7 @@ export class Node extends EventEmitter {
     /**
      * Penalties for load balancing
      * @returns Penalty score
-     * @static @internal @readonly
+     * @internal @readonly
      */
     get penalties(): number {
         let penalties = 0;
