@@ -168,7 +168,7 @@ export class Shoukaku extends EventEmitter {
      */
     public getNode(name: string|string[] = 'auto'): Node|undefined {
         if (!this.nodes.size) throw new Error('No nodes available, please add a node first');
-        if (Array.isArray(name)) return this.getIdeal(name);
+        if (Array.isArray(name) || name === 'auto') return this.getIdeal(name);
         const node = this.nodes.get(name);
         if (!node) throw new Error('The node name you specified is not one of my nodes');
         if (node.state !== State.CONNECTED) throw new Error('This node is not yet ready');
