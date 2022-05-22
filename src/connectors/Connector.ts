@@ -8,22 +8,27 @@ export interface ConnectorMethods {
 }
 
 export abstract class Connector {
-    protected readonly manager: Shoukaku;
     protected readonly client: any;
-    constructor(manager: Shoukaku, client: any) {
-        this.manager = manager;
+    protected manager: Shoukaku|null;
+    constructor(client: any) {
         this.client = client;
+        this.manager = null;
+    }
+
+    public set(manager: Shoukaku): Connector {
+        this.manager = manager;
+        return this;
     }
 
     protected ready(nodes: NodeOption[]): void {
-        this.manager.id = this.getId();
-        this.manager.emit('debug', 'Manager', `[Manager] : Connecting ${nodes.length} nodes`);
-        for (const node of nodes) this.manager.addNode(mergeDefault(ShoukakuDefaults, node));
+        this.manager!.id = this.getId();
+        this.manager!.emit('debug', 'Manager', `[Manager] : Connecting ${nodes.length} nodes`);
+        for (const node of nodes) this.manager!.addNode(mergeDefault(ShoukakuDefaults, node));
     }
 
     protected raw(packet: any): void {
         if (!['VOICE_STATE_UPDATE', 'VOICE_SERVER_UPDATE'].includes(packet.t)) return;
-        for (const node of this.manager.nodes.values()) node.discordRaw(packet);
+        for (const node of this.manager!.nodes.values()) node.discordRaw(packet);
     }
 
     abstract getId(): string;

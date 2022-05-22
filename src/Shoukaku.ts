@@ -108,9 +108,9 @@ export class Shoukaku extends EventEmitter {
      * @param options.moveOnDisconnect Whether to move players to a different Lavalink node when a node disconnects
      * @param options.userAgent User Agent to use when making requests to Lavalink
      */
-    constructor(connector: any, nodes: NodeOption[], options: ShoukakuOptions) {
+    constructor(connector: Connector, nodes: NodeOption[], options: ShoukakuOptions) {
         super();
-        this.connector = connector;
+        this.connector = connector.set(this);
         this.options = mergeDefault(ShoukakuDefaults, options);
         this.nodes = new Map();
         this.id = null;
