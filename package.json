@@ -3,6 +3,7 @@
   "version": "3.0.0",
   "description": "A lavalink wrapper that supports almost all libraries",
   "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc && npm run build:docs",
     "build:docs": "typedoc --theme default --readme README.md --out docs/ --entryPointStrategy expand src/.",
