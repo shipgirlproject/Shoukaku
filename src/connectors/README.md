@@ -18,7 +18,7 @@ new Shoukaku(new Connectors.Eris(client), servers, options)
 
 ## Implementing your own
 
-> Check **DiscordJS.js** or **Eris.js** inside libs folder for a detailed explanation on how to support a library
+> Check **DiscordJS.ts** or **Eris.ts** inside libs folder for a detailed explanation on how to support a library
 
 > And Submit a PR so other people don't need to do it themselves, yay!
 
