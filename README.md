@@ -10,10 +10,10 @@
 ![NPM](https://img.shields.io/npm/l/shoukaku?style=flat-square)
 
 <p align="center">
-    <img src="https://cdn.donmai.us/original/e0/a8/__shoukaku_kantai_collection_drawn_by_kanmiya_shinobu__e0a8cd09c15bf89a58de82e00b6a2ead.jpg" height="600"> 
+    <img src="https://cdn.donmai.us/original/0e/a4/0ea4a25416f850823d62d61ce51fc659.png" height="600"> 
 </p>
 
-> The ShipGirl Project, feat Shoukaku; ⓒ Kancoll
+> The ShipGirl Project, feat Shoukaku; ⓒ Kancolle
 ### Features
 
 ✅ Stable

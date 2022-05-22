@@ -2,8 +2,7 @@
   "name": "shoukaku",
   "version": "3.0.0-dev",
   "description": "A lavalink wrapper that supports almost all libraries",
-  "main": "index.js",
-  "types": "types/index.d.ts",
+  "main": "dist/index.js",
   "scripts": {
     "compile": "tsc",
     "build": "npm run compile && npm run build:docs",
@@ -33,7 +32,7 @@
   "dependencies": {
     "abort-controller": "^3.0.0",
     "petitio": "^1.4.0",
-    "ws": "^8.5.0"
+    "ws": "^8.6.0"
   },
   "devDependencies": {
     "@augu/eslint-config": "^2.2.0",
@@ -42,7 +41,7 @@
     "@typescript-eslint/eslint-plugin": "^5.25.0",
     "@typescript-eslint/parser": "^5.25.0",
     "eslint": "^8.16.0",
-    "ts-node": "^10.7.0",
+    "ts-node": "^10.8.0",
     "typedoc": "^0.22.15",
     "typescript": "^4.6.4"
   }
