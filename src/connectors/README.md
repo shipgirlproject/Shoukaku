@@ -1,4 +1,4 @@
-## Shoukaku's Supported Libs
+## Supported Libs
 
 > [Discord.JS](https://discord.js.org/#/) (v13.x.x & 14.0.0-dev.1652573522-7ce641d)
 

@@ -24,11 +24,21 @@
 
 ✅ Extendable
 
+✅ ESM & CommonJS supported
+
 ✅ Very cute (Very Important)
 
 ### Supported Libraries
 
 Refer to [/src/connectors](https://github.com/Deivu/Shoukaku/tree/master/src/connectors) for list of supported libraries + how to support other libraries
+
+### Installation
+* Stable
+
+> npm install shoukaku
+
+* Dev
+> npm install https://github.com/Deivu/Shoukaku.git#master
 
 ### Documentation
 
