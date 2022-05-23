@@ -1,0 +1,52 @@
+name: Lint code & compile test
+
+on:
+  push:
+    branches:
+      - "**"
+  pull_request:
+    branches:
+      - "**"
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [">=16.6.0 <17.x"]
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # tag=v3
+  
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@56337c425554a6be30cdef71bf441f15be286854 # tag=v3
+      with:
+        node-version: ${{ matrix.node-version }}
+        check-latest: true
+        
+    - name: Install dependencies
+      run: npm install
+
+    - name: Lint code
+      run: npm run lint
+  compile:
+    needs: lint
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [">=16.6.0 <17.x"]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # tag=v3
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@56337c425554a6be30cdef71bf441f15be286854 # tag=v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          check-latest: true
+        
+      - name: Install dependencies
+        run: npm install
+      
+      - name: Test compile
+        run: npm run build
