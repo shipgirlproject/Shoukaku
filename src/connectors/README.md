@@ -7,7 +7,7 @@ const { Shoukaku, Connectors } = require('shoukaku');
 new Shoukaku(new Connectors.DiscordJS(client), servers, options);
 ```
 
-> [Eris](https://abal.moe/Eris/) (0.15.x / 0.15.x-dev)
+> [Eris](https://abal.moe/Eris/) (0.15.x / 0.16.x)
 
 ```js
 const { Shoukaku, Connectors } = require('shoukaku');
