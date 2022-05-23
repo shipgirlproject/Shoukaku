@@ -1,9 +1,9 @@
 .github
 .idea
 .vscode
-assets
-docs
-src
+assets/
+docs/
+src/
 .eslintignore
 .eslintrc.json
 .gitattributes
