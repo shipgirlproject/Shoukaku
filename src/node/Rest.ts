@@ -17,7 +17,7 @@ export interface Track {
         author: string;
         length: number;
         isStream: boolean;
-        position: boolean;
+        position: number;
         title: string;
         uri: string;
         sourceName: string;
