@@ -10,7 +10,7 @@
 ![NPM](https://img.shields.io/npm/l/shoukaku?style=flat-square)
 
 <p align="center">
-    <img src="https://cdn.donmai.us/original/0e/a4/0ea4a25416f850823d62d61ce51fc659.png" height="600"> 
+    <img src="https://cdn.donmai.us/original/0e/a4/0ea4a25416f850823d62d61ce51fc659.png"> 
 </p>
 
 > The ShipGirl Project, feat Shoukaku; ⓒ Kancolle
@@ -119,5 +119,5 @@ const shoukaku = new Shoukaku(new Connectors.DiscordJS(client), Nodes, ShoukakuO
 ### Implementation (Discord.JS)
 > https://github.com/Deivu/Kongou
 
-### Made with ❤ by:
+### Made with ❤ by
 > @Sāya#0113

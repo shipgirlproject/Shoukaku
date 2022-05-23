@@ -232,7 +232,7 @@ export class Connection extends EventEmitter {
     }
 
     /**
-     * Destroy the curernt Lavalink player
+     * Destroy the current Lavalink player
      */
     public destroyLavalinkPlayer(): void {
         this.player.node.queue.add({ op: OPCodes.DESTROY, guildId: this.guildId });
