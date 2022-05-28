@@ -77,7 +77,7 @@ const player = await node.joinVoiceChannel({
 > Playing a track and changing a playback option (in this example, volume)
 ```js
 player
-    .playTrack(metadata.track)
+    .playTrack({ track: metadata.track })
     .setVolume(0.5);
 ```
 
