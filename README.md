@@ -67,7 +67,7 @@ if (!node) return;
 const result = await node.rest.resolve('scsearch:snowhalation');
 if (!result?.tracks.length) return;
 const metadata = result.tracks.shift();
-const player = await node.joinVoiceChannel({
+const player = await node.joinChannel({
     guildId: 'your_guild_id',
     channelId: 'your_channel_id',
     shardId: 0 // if unsharded it will always be zero (depending on your library implementation)
@@ -127,7 +127,7 @@ const shoukaku = new Shoukaku(new Connectors.DiscordJS(client), Nodes, ShoukakuO
 [Support](https://discord.gg/FVqbtGu) (#Development) | [Lavalink](https://github.com/freyacodes/Lavalink)
 
 ### Implementation (Discord.JS)
-> https://github.com/Deivu/Kongou
+> [Kongou](https://github.com/Deivu/Kongou)
 
 ### Made with ❤ by
 > @Sāya#0113
