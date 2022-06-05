@@ -56,7 +56,7 @@ const Nodes = [{
 }];
 const client = new Client();
 const shoukaku = new Shoukaku(new Connectors.DiscordJS(client), Nodes);
-// ALWAYS handle error
+// ALWAYS handle error, logging it will do
 shoukaku.on('error', (_, error) => console.error(error));
 client.login('token');
 ```
@@ -84,8 +84,9 @@ player
 ### Shoukaku's options
  Option | Type | Description
 --------|------|------------
-resume | boolean | Whether to resume a connection on disconnect to Lavalink |
+resume | boolean | Whether to resume a connection on disconnect to Lavalink (Server Side) (Note: DOES NOT RESUME WHEN THE LAVALINK SERVER DIES) |
 resumeKey | string | Resume key for Lavalink |
+resumeByLibrary | boolean | Whether to resume the players by doing it in the library side (Client Side) (Note: TRIES TO RESUME REGARDLESS OF WHAT HAPPENED ON A LAVALINK SERVER) |
 resumeTimeout | number | Timeout before resuming a connection **in seconds** |
 reconnectTries | number | Number of times to try and reconnect to Lavalink before giving up |
 reconnectInterval | number | Timeout before trying to reconnect **in milliseconds** |

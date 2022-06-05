@@ -182,8 +182,8 @@ export class Node extends EventEmitter {
             };
         }
         this.emit('debug', this.name, `[Socket] -> [${this.name}] : Connecting ${this.url}`);
-        this.ws = new Websocket(this.url, { headers } as Websocket.ClientOptions);
         if (!this.initialized) this.initialized = true;
+        this.ws = new Websocket(this.url, { headers } as Websocket.ClientOptions);
         this.ws.once('upgrade', response => this.ws!.once('open', () => this.open(response)));
         this.ws.once('close', (...args) => this.close(...args));
         this.ws.on('error', error => this.emit('error', this.name, error));

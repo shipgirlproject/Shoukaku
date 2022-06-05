@@ -62,15 +62,15 @@ export class Rest {
     /**
      * Node that initialized this instance
      */
-    private readonly node: Node;
+    protected readonly node: Node;
     /**
      * URL of Lavalink
      */
-    private readonly url: string;
+    protected readonly url: string;
     /**
      * Credentials to access Lavalink
      */
-    private readonly auth: string;
+    protected readonly auth: string;
     /**
      * @param node An instance of Node
      * @param options.name Name of this node
