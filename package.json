@@ -39,7 +39,6 @@
     "url": "https://github.com/Deivu/Shoukaku"
   },
   "dependencies": {
-    "abort-controller": "^3.0.0",
     "petitio": "^1.4.0",
     "ws": "^8.6.0"
   },

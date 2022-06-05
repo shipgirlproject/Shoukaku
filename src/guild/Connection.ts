@@ -2,7 +2,6 @@ import { EventEmitter, once } from 'events';
 import { OPCodes, State, VoiceState } from '../Constants';
 import { VoiceChannelOptions } from '../node/Node';
 import { Player } from './Player';
-import AbortController from 'abort-controller';
 
 /**
  * Represents the partial payload from a stateUpdate event
