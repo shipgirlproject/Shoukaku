@@ -256,9 +256,7 @@ export class Node extends EventEmitter {
      */
     private open(response: IncomingMessage): void {
         const resumed = response.headers['session-resumed'] === 'true';
-        // flush queued ws messages;
         this.queue.add();
-        // configure resuming if possible
         if (this.manager.options.resume && this.manager.options.resumeKey) {
             this.queue.add({
                 op: OPCodes.CONFIGURE_RESUMING,
@@ -315,9 +313,10 @@ export class Node extends EventEmitter {
      * @internal
      */
     private destroy() {
-        this.state = State.DISCONNECTED;
         this.ws?.removeAllListeners();
+        this.ws?.close();
         this.ws = null;
+        this.state = State.DISCONNECTED;
     }
 
     /**
@@ -352,7 +351,7 @@ export class Node extends EventEmitter {
     private reconnect(): void {
         if (this.state !== State.DISCONNECTED) this.destroy();
         this.reconnects++;
-        this.emit('debug', this.name, `[Socket] -> [${this.name}] : Reconnecting. ${this.manager.options.reconnectTries - this.reconnects} tries left`);
+        this.emit('debug', this.name, `[Socket] -> [${this.name}] : Reconnecting in ${this.manager.options.reconnectInterval}ms. ${this.manager.options.reconnectTries - this.reconnects} tries left`);
         setTimeout(() => this.connect(), this.manager.options.reconnectInterval);
     }
 
