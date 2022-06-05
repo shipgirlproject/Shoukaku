@@ -107,13 +107,13 @@ export class Node extends EventEmitter {
      */
     public ws: Websocket|null;
     /**
-     * Boolean that represents if this connection is destroyed
+     * Boolean that represents if the node has initialized once (will always be true when alwaysSendResumeKey is true)
      */
-    private initialized: boolean;
+    protected initialized: boolean;
     /**
      * Boolean that represents if this connection is destroyed
      */
-    private destroyed: boolean;
+    protected destroyed: boolean;
     /**
      * @param manager Shoukaku instance
      * @param options.name Name of this node
@@ -136,7 +136,7 @@ export class Node extends EventEmitter {
         this.state = State.DISCONNECTED;
         this.stats = null;
         this.ws = null;
-        this.initialized = false;
+        this.initialized = this.manager.options.alwaysSendResumeKey ?? false;
         this.destroyed = false;
     }
 
@@ -163,9 +163,10 @@ export class Node extends EventEmitter {
     public connect(): void {
         if (!this.manager.id) throw new Error('Don\'t connect a node when the library is not yet ready');
         if (this.destroyed) throw new Error('You can\'t re-use the same instance of a node once disconnected, please re-add the node again');
+        const resume = this.initialized && (this.manager.options.resume && this.manager.options.resumeKey);
         this.state = State.CONNECTING;
         let headers: ResumableHeaders|NonResumableHeaders;
-        if (this.manager.options.resume && this.manager.options.resumeKey) {
+        if (resume) {
             headers = {
                 'Client-Name': this.manager.options.userAgent,
                 'User-Agent': this.manager.options.userAgent,
@@ -181,7 +182,7 @@ export class Node extends EventEmitter {
                 'User-Id': this.manager.id
             };
         }
-        this.emit('debug', this.name, `[Socket] -> [${this.name}] : Connecting ${this.url}`);
+        this.emit('debug', this.name, `[Socket] -> [${this.name}] : Connecting ${this.url}, Trying to resume? ${resume}`);
         if (!this.initialized) this.initialized = true;
         this.ws = new Websocket(this.url, { headers } as Websocket.ClientOptions);
         this.ws.once('upgrade', response => this.ws!.once('open', () => this.open(response)));
@@ -255,24 +256,27 @@ export class Node extends EventEmitter {
      */
     private open(response: IncomingMessage): void {
         const resumed = response.headers['session-resumed'] === 'true';
+        // flush queued ws messages;
         this.queue.add();
+        // configure resuming if possible
         if (this.manager.options.resume && this.manager.options.resumeKey) {
             this.queue.add({
                 op: OPCodes.CONFIGURE_RESUMING,
                 key: this.manager.options.resumeKey,
                 timeout: this.manager.options.resumeTimeout
             });
+            this.emit('debug', this.name, `[Socket] -> [${this.name}] : Resuming configured on Lavalink`);
         }
-        const resumeByLibrary = this.initialized && this.manager.options.resumeByLibrary;
+        const resumeByLibrary = this.initialized && (this.manager.options.resumeByLibrary && this.players.size);
         if (!resumed && resumeByLibrary) {
             for (const player of [...this.players.values()]) {
                 player.connection.resendServerUpdate();
                 player.resume();
             }
         }
+        this.emit('debug', this.name, `[Socket] <-> [${this.name}] : Connection ready ${this.url} | Lavalink Resumed: ${resumed} | Shoukaku Resumed: ${resumeByLibrary}`);
         this.reconnects = 0;
         this.state = State.CONNECTED;
-        this.emit('debug', this.name, `[Socket] <-> [${this.name}] : Connection Open ${this.url} | Resumed: ${resumed || resumeByLibrary}`);
         this.emit('ready', this.name,  resumed || resumeByLibrary);
     }
 

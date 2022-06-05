@@ -50,13 +50,17 @@ export interface ShoukakuOptions {
      */
     resumeKey?: string;
     /**
+     * Time to wait before lavalink starts to destroy the players of the disconnected client
+     */
+    resumeTimeout?: number;
+    /**
      * Whether to resume the players by doing it in the library side (Client Side) (Note: TRIES TO RESUME REGARDLESS OF WHAT HAPPENED ON A LAVALINK SERVER)
      */
     resumeByLibrary?: boolean;
     /**
-     * Timeout before resuming a connection
+     * Disables the first time initialization tracking of nodes, and just sends the resume key always (Note: Useful for people who save their players to redis and wants to resume sessions even at first boot)
      */
-    resumeTimeout?: number;
+    alwaysSendResumeKey?: boolean;
     /**
      * Number of times to try and reconnect to Lavalink before giving up
      */
@@ -86,8 +90,9 @@ export interface ShoukakuOptions {
 export interface MergedShoukakuOptions {
     resume: boolean;
     resumeKey: string;
-    resumeByLibrary: boolean;
     resumeTimeout: number;
+    resumeByLibrary: boolean;
+    alwaysSendResumeKey: boolean;
     reconnectTries: number;
     reconnectInterval: number;
     restTimeout: number;
@@ -159,8 +164,9 @@ export class Shoukaku extends EventEmitter {
      * @param nodes An array that conforms to the NodeOption type that specifies nodes to connect to
      * @param options.resume Whether to resume a connection on disconnect to Lavalink (Server Side) (Note: DOES NOT RESUME WHEN THE LAVALINK SERVER DIES)
      * @param options.resumeKey Resume key for Lavalink
+     * @param options.resumeTimeout Time to wait before lavalink starts to destroy the players of the disconnected client
      * @param options.resumeByLibrary Whether to resume the players by doing it in the library side (Client Side) (Note: TRIES TO RESUME REGARDLESS OF WHAT HAPPENED ON A LAVALINK SERVER)
-     * @param options.resumeTimeout Timeout before resuming a connection
+     * @param options.alwaysSendResumeKey Disables the first time initialization tracking of nodes, and just sends the resume key always (Note: Useful for people who save their players to redis and wants to resume sessions even at first boot)
      * @param options.reconnectTries Number of times to try and reconnect to Lavalink before giving up
      * @param options.reconnectInterval Timeout before trying to reconnect
      * @param options.restTimeout Time to wait for a response from the Lavalink REST API before giving up

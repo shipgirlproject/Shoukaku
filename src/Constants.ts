@@ -34,8 +34,9 @@ export enum OPCodes {
 export const ShoukakuDefaults: ShoukakuOptions = {
     resume: false,
     resumeKey: `Shoukaku@${Info.version}(${Info.repository.url})`,
-    resumeByLibrary: false,
     resumeTimeout: 30000,
+    resumeByLibrary: false,
+    alwaysSendResumeKey: false,
     reconnectTries: 3,
     reconnectInterval: 5000,
     restTimeout: 60000,
