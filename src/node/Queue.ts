@@ -72,10 +72,7 @@ export class Queue {
         while(this.pending.length) {
             const message = this.pending.shift();
             if (!message) return;
-            this.node.ws.send(message, error => {
-                if (!error) return;
-                this.node.emit('error', this.node.name, error);
-            });
+            this.node.ws.send(message);
         }
     }
 }
