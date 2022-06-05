@@ -42,13 +42,17 @@ export interface NodeOption {
 
 export interface ShoukakuOptions {
     /**
-     * Whether to resume a connection on disconnect to Lavalink
+     * Whether to resume a connection on disconnect to Lavalink (Server Side) (Note: DOES NOT RESUME WHEN THE LAVALINK SERVER DIES)
      */
     resume?: boolean;
     /**
      * Resume key for Lavalink
      */
     resumeKey?: string;
+    /**
+     * Whether to resume the players by doing it in the library side (Client Side) (Note: TRIES TO RESUME REGARDLESS OF WHAT HAPPENED ON A LAVALINK SERVER)
+     */
+    resumeByLibrary?: boolean;
     /**
      * Timeout before resuming a connection
      */
@@ -82,6 +86,7 @@ export interface ShoukakuOptions {
 export interface MergedShoukakuOptions {
     resume: boolean;
     resumeKey: string;
+    resumeByLibrary: boolean;
     resumeTimeout: number;
     reconnectTries: number;
     reconnectInterval: number;

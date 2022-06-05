@@ -95,10 +95,6 @@ export class Node extends EventEmitter {
      */
     public reconnects: number;
     /**
-     * Boolean that represents if this connection is destroyed
-     */
-    public destroyed: boolean;
-    /**
      * The state of this connection
      */
     public state: State;
@@ -110,6 +106,14 @@ export class Node extends EventEmitter {
      * Websocket instance
      */
     public ws: Websocket|null;
+    /**
+     * Boolean that represents if this connection is destroyed
+     */
+    private initialized: boolean;
+    /**
+     * Boolean that represents if this connection is destroyed
+     */
+    private destroyed: boolean;
     /**
      * @param manager Shoukaku instance
      * @param options.name Name of this node
@@ -129,10 +133,11 @@ export class Node extends EventEmitter {
         this.url = `${options.secure ? 'wss' : 'ws'}://${options.url}`;
         this.auth = options.auth;
         this.reconnects = 0;
-        this.destroyed = false;
         this.state = State.DISCONNECTED;
         this.stats = null;
         this.ws = null;
+        this.initialized = false;
+        this.destroyed = false;
     }
 
     /**
@@ -154,14 +159,13 @@ export class Node extends EventEmitter {
 
     /**
      * Connect to Lavalink
-     * @param reconnect Whether to reconnect on failure or not
      */
-    public connect(reconnect = false): void {
-        if (!this.manager.id) throw new Error('Do not connect a node when the library is not yet ready');
-        this.destroyed = false;
+    public connect(): void {
+        if (!this.manager.id) throw new Error('Don\'t connect a node when the library is not yet ready');
+        if (this.destroyed) throw new Error('You can\'t re-use the same instance of a node once disconnected, please re-add the node again');
         this.state = State.CONNECTING;
         let headers: ResumableHeaders|NonResumableHeaders;
-        if (reconnect && (this.manager.options.resume && this.manager.options.resumeKey)) {
+        if (this.manager.options.resume && this.manager.options.resumeKey) {
             headers = {
                 'Client-Name': this.manager.options.userAgent,
                 'User-Agent': this.manager.options.userAgent,
@@ -179,7 +183,8 @@ export class Node extends EventEmitter {
         }
         this.emit('debug', this.name, `[Socket] -> [${this.name}] : Connecting ${this.url}`);
         this.ws = new Websocket(this.url, { headers } as Websocket.ClientOptions);
-        this.ws.once('upgrade', response => this.ws!.once('open', () => this.open(response, reconnect)));
+        if (!this.initialized) this.initialized = true;
+        this.ws.once('upgrade', response => this.ws!.once('open', () => this.open(response)));
         this.ws.once('close', (...args) => this.close(...args));
         this.ws.on('error', error => this.emit('error', this.name, error));
         this.ws.on('message', data => this.message(data));
@@ -248,7 +253,7 @@ export class Node extends EventEmitter {
      * @param reconnect Whether to reconnect on failure
      * @internal
      */
-    private open(response: IncomingMessage, reconnect = false): void {
+    private open(response: IncomingMessage): void {
         const resumed = response.headers['session-resumed'] === 'true';
         this.queue.add();
         if (this.manager.options.resume && this.manager.options.resumeKey) {
@@ -258,7 +263,8 @@ export class Node extends EventEmitter {
                 timeout: this.manager.options.resumeTimeout
             });
         }
-        if (!resumed && reconnect) {
+        const resumeByLibrary = this.initialized && this.manager.options.resumeByLibrary;
+        if (!resumed && resumeByLibrary) {
             for (const player of [...this.players.values()]) {
                 player.connection.resendServerUpdate();
                 player.resume();
@@ -266,8 +272,8 @@ export class Node extends EventEmitter {
         }
         this.reconnects = 0;
         this.state = State.CONNECTED;
-        this.emit('debug', this.name, `[Socket] <-> [${this.name}] : Connection Open ${this.url} | Resumed: ${!resumed && reconnect ? reconnect : resumed}`);
-        this.emit('ready', this.name, !resumed && reconnect ? reconnect : resumed);
+        this.emit('debug', this.name, `[Socket] <-> [${this.name}] : Connection Open ${this.url} | Resumed: ${resumed || resumeByLibrary}`);
+        this.emit('ready', this.name,  resumed || resumeByLibrary);
     }
 
     /**
@@ -336,7 +342,7 @@ export class Node extends EventEmitter {
         if (this.state !== State.DISCONNECTED) return;
         this.reconnects++;
         this.emit('debug', this.name, `[Socket] -> [${this.name}] : Reconnecting. ${this.manager.options.reconnectTries - this.reconnects} tries left`);
-        setTimeout(() => this.connect(true), this.manager.options.reconnectInterval);
+        setTimeout(() => this.connect(), this.manager.options.reconnectInterval);
     }
 
     /**

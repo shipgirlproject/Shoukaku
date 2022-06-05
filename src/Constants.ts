@@ -33,7 +33,8 @@ export enum OPCodes {
 
 export const ShoukakuDefaults: ShoukakuOptions = {
     resume: false,
-    resumeKey: 'Aircraft_Carrier',
+    resumeKey: `Shoukaku@${Info.version}(${Info.repository.url})`,
+    resumeByLibrary: false,
     resumeTimeout: 30000,
     reconnectTries: 3,
     reconnectInterval: 5000,
