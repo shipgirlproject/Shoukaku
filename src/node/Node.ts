@@ -302,15 +302,22 @@ export class Node extends EventEmitter {
      * @param reason Reason for connection close
      */
     private close(code: number, reason: Buffer): void {
-        this.state = State.DISCONNECTED;
+        this.destroy();
         this.emit('debug', this.name, `[Socket] <-/-> [${this.name}] : Connection Closed, Code: ${code || 'Unknown Code'}`);
-        this.ws?.removeAllListeners();
-        this.ws = null;
         this.emit('close', this.name, code, reason);
         if (this.destroyed || this.reconnects >= this.manager.options.reconnectTries)
             this.clean();
         else
             this.reconnect();
+    }
+    /**
+     * Destroys the websocket connection
+     * @internal
+     */
+    private destroy() {
+        this.state = State.DISCONNECTED;
+        this.ws?.removeAllListeners();
+        this.ws = null;
     }
 
     /**
@@ -343,7 +350,7 @@ export class Node extends EventEmitter {
      * @internal
      */
     private reconnect(): void {
-        if (this.state !== State.DISCONNECTED) return;
+        if (this.state !== State.DISCONNECTED) this.destroy();
         this.reconnects++;
         this.emit('debug', this.name, `[Socket] -> [${this.name}] : Reconnecting. ${this.manager.options.reconnectTries - this.reconnects} tries left`);
         setTimeout(() => this.connect(), this.manager.options.reconnectInterval);
