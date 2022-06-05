@@ -96,14 +96,19 @@
 <td>Resume key for Lavalink</td>
 </tr>
 <tr>
+<td>resumeTimeout</td>
+<td>number</td>
+<td>Timeout before resuming a connection <strong>in seconds</strong></td>
+</tr>
+<tr>
 <td>resumeByLibrary</td>
 <td>boolean</td>
 <td>Whether to resume the players by doing it in the library side (Client Side) (Note: TRIES TO RESUME REGARDLESS OF WHAT HAPPENED ON A LAVALINK SERVER)</td>
 </tr>
 <tr>
-<td>resumeTimeout</td>
-<td>number</td>
-<td>Timeout before resuming a connection <strong>in seconds</strong></td>
+<td>alwaysSendResumeKey</td>
+<td>boolean</td>
+<td>Disables the first time initialization tracking of nodes, and just sends the resume key always (Note: Useful for people who save their players to redis and wants to resume sessions even at first boot)</td>
 </tr>
 <tr>
 <td>reconnectTries</td>
