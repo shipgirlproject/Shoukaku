@@ -295,7 +295,7 @@ export class Node extends EventEmitter {
     }
 
     /**
-     * Handle closed event from laavlink
+     * Handle closed event from lavalink
      * @param code Status close
      * @param reason Reason for connection close
      */
