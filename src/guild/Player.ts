@@ -13,6 +13,7 @@ export type PlayerEventType = 'TrackStartEvent' | 'TrackEndEvent' | 'TrackExcept
  */
 export interface PlayOptions {
     track: string;
+    lavalinkState: boolean,
     options?: {
         noReplace?: boolean;
         pause?: boolean;
@@ -576,6 +577,7 @@ export class Player extends EventEmitter {
     public onLavalinkMessage(json: any): void {
         if (json.op === OPCodes.PLAYER_UPDATE) {
             this.position = json.state.position;
+            this.lavalinkState = json.state.lavalinkState;
             this.emit('update', json);
         } else if (json.op === OPCodes.EVENT)
             this.onPlayerEvent(json);
