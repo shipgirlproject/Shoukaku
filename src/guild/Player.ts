@@ -275,6 +275,10 @@ export class Player extends EventEmitter {
      */
     public position: number;
     /**
+     * Etat de connexion interne par lavalink
+     */
+    public lavalinkState: boolean|null;
+    /**
      * Filters on current track
      */
     public filters: Filters;
