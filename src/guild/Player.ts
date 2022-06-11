@@ -13,7 +13,7 @@ export type PlayerEventType = 'TrackStartEvent' | 'TrackEndEvent' | 'TrackExcept
  */
 export interface PlayOptions {
     track: string;
-    lavalinkState: boolean,
+    lavalinkState?: boolean,
     options?: {
         noReplace?: boolean;
         pause?: boolean;
