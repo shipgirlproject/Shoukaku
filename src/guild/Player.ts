@@ -13,7 +13,6 @@ export type PlayerEventType = 'TrackStartEvent' | 'TrackEndEvent' | 'TrackExcept
  */
 export interface PlayOptions {
     track: string;
-    lavalinkState?: boolean,
     options?: {
         noReplace?: boolean;
         pause?: boolean;
@@ -294,6 +293,7 @@ export class Player extends EventEmitter {
         this.track = null;
         this.paused = false;
         this.position = 0;
+        this.lavalinkState = null,
         this.filters = new Filters();
     }
 
