@@ -577,7 +577,7 @@ export class Player extends EventEmitter {
     public onLavalinkMessage(json: any): void {
         if (json.op === OPCodes.PLAYER_UPDATE) {
             this.position = json.state.position;
-            this.lavalinkState = json.state.lavalinkState;
+            this.lavalinkState = json.state.connected;
             this.emit('update', json);
         } else if (json.op === OPCodes.EVENT)
             this.onPlayerEvent(json);
