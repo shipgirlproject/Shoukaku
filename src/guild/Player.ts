@@ -275,9 +275,9 @@ export class Player extends EventEmitter {
      */
     public position: number;
     /**
-     * Internal connection state via lavalink
+     * Internal player state
      */
-    public lavalinkState: boolean|null;
+    public playerState: boolean|null;
     /**
      * Filters on current track
      */
@@ -297,7 +297,7 @@ export class Player extends EventEmitter {
         this.track = null;
         this.paused = false;
         this.position = 0;
-        this.lavalinkState = null,
+        this.playerState = null,
         this.filters = new Filters();
     }
 
@@ -581,7 +581,7 @@ export class Player extends EventEmitter {
     public onLavalinkMessage(json: any): void {
         if (json.op === OPCodes.PLAYER_UPDATE) {
             this.position = json.state.position;
-            this.lavalinkState = json.state.connected;
+            this.playerState = json.state.connected;
             this.emit('update', json);
         } else if (json.op === OPCodes.EVENT)
             this.onPlayerEvent(json);
