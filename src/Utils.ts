@@ -5,20 +5,20 @@ export type Constructor<T> = new (...args: any[]) => T;
  * @param given User input
  * @returns Merged options
  */
-export function mergeDefault(def: any, given: any): any {
-    if (!given) return def;
-    const defaultKeys = Object.keys(def);
-    for (const key of defaultKeys) {
-        if (def[key] === null) {
-            if (!given[key]) throw new Error(`${key} was not found from the given options.`);
-        }
-        if (given[key] === null || given[key] === undefined) given[key] = def[key];
-    }
-    for (const key in defaultKeys) {
+export function mergeDefault<T extends { [key: string]: any }>(def: T, given: T): Required<T> {
+    if (!given) return def as Required<T>;
+    const defaultKeys: (keyof T)[] = Object.keys(def);
+    for (const key in given) {
         if (defaultKeys.includes(key)) continue;
         delete given[key];
     }
-    return given;
+    for (const key of defaultKeys) {
+        if (def[key] === null || (typeof def[key] === 'string' && def[key].length === 0)) {
+            if (!given[key]) throw new Error(`${String(key)} was not found from the given options.`);
+        }
+        if (given[key] === null || given[key] === undefined) given[key] = def[key];
+    }
+    return given as Required<T>;
 }
 
 /**
