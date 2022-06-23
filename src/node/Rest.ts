@@ -1,12 +1,18 @@
 import { Node } from './Node';
 import { NodeOption } from '../Shoukaku';
-import Petitio from 'petitio';
+import Petitio, { HTTPMethod } from 'petitio';
 
 export type LoadType = 'TRACK_LOADED' | 'PLAYLIST_LOADED' | 'SEARCH_RESULT' | 'NO_MATCHES' | 'LOAD_FAILED';
 
 interface FetchOptions {
     endpoint: string;
-    options: any;
+    options: {
+        headers?: Record<string, string>;
+        params?: Record<string, string>;
+        method?: HTTPMethod;
+        body?: Record<string, unknown>;
+        [key: string]: unknown;
+    };
 }
 
 export interface Track {
@@ -90,12 +96,13 @@ export class Rest {
      * @param identifier Track ID
      * @returns A promise that resolves to a Lavalink response or void
      */
-    public resolve(identifier: string): Promise<LavalinkResponse|void> {
+    public async resolve(identifier: string): Promise<LavalinkResponse|null> {
         const options = {
             endpoint: '/loadtracks',
             options: { params: { identifier }}
         };
-        return this.fetch(options);
+
+        return this.fetch<LavalinkResponse>(options);
     }
 
     /**
@@ -103,12 +110,13 @@ export class Rest {
      * @param track Encoded track
      * @returns Promise that resolves to a track or void
      */
-    public decode(track: string): Promise<Track|void> {
+    public async decode(track: string): Promise<Track|null> {
         const options = {
             endpoint: '/decodetrack',
             options: { params: { track }}
         };
-        return this.fetch(options);
+
+        return this.fetch<Track>(options);
     }
 
     /**
@@ -116,12 +124,13 @@ export class Rest {
      * @returns Promise that resolves to a routeplanner response or void
      * @internal
      */
-    public getRoutePlannerStatus(): Promise<RoutePlanner|void> {
+    public async getRoutePlannerStatus(): Promise<RoutePlanner|null> {
         const options = {
             endpoint: '/routeplanner/status',
             options: {}
         };
-        return this.fetch(options);
+
+        return this.fetch<RoutePlanner>(options);
     }
 
     /**
@@ -129,16 +138,17 @@ export class Rest {
      * @param address IP address
      * @internal
      */
-    public unmarkFailedAddress(address: string): Promise<void> {
+    public async unmarkFailedAddress(address: string): Promise<void | null> {
         const options = {
             endpoint: '/routeplanner/free/address',
             options: {
-                method: 'POST',
+                method: 'POST' as HTTPMethod,
                 headers: { 'Content-Type': 'application/json' },
                 body: { address }
             }
         };
-        return this.fetch(options);
+
+        return this.fetch<void>(options);
     }
 
     /**
@@ -147,25 +157,31 @@ export class Rest {
      * @param fetchOptions.options Options passed to petitio
      * @internal
      */
-    private async fetch(fetchOptions: FetchOptions): Promise<any|void> {
+    private async fetch<T = unknown>(fetchOptions: FetchOptions) {
         const { endpoint, options } = fetchOptions;
-        let headers: Record<string, any> = {
+        let headers = {
             'Authorization': this.auth,
             'User-Agent': this.node.manager.options.userAgent
         };
+
         if (options.headers) headers = { ...headers, ...options.headers };
+
         const url = new URL(`${this.url}${endpoint}`);
         if (options.params) url.search = new URLSearchParams(options.params).toString();
+
         const request = await Petitio(url.toString())
-            .method(options.method?.toUpperCase() || 'GET')
+            .method(options.method?.toUpperCase() as HTTPMethod || 'GET')
             .header(headers)
-            .body(options.body ?? null)
+            .body(options.body ?? {})
             .timeout(this.node.manager.options.restTimeout || 15000)
             .send();
+
         if (request.statusCode && (request.statusCode >= 400))
             throw new Error(`Rest request failed with response code: ${request.statusCode}`);
+
         const body = request.body.toString('utf8');
-        if (!body?.length) return;
-        return JSON.parse(body);
+        if (!body?.length) return null;
+
+        return JSON.parse(body) as T;
     }
 }

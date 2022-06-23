@@ -59,6 +59,7 @@ export class Queue {
             this.node.ws?.close(code, reason);
             return;
         }
+
         this.flushes++;
         setTimeout(() => this.flush(code, reason), 1000);
     }
@@ -69,6 +70,7 @@ export class Queue {
      */
     protected process(): void {
         if (!this.node.ws || this.node.ws.readyState !== Websocket.OPEN || !this.pending.length) return;
+
         while(this.pending.length) {
             const message = this.pending.shift();
             if (!message) return;
