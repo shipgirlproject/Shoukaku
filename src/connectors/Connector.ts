@@ -1,5 +1,5 @@
 import { NodeOption, Shoukaku } from '../Shoukaku';
-import { ShoukakuDefaults } from '../Constants';
+import { NodeDefaults } from '../Constants';
 import { mergeDefault } from '../Utils';
 
 export interface ConnectorMethods {
@@ -23,7 +23,7 @@ export abstract class Connector {
     protected ready(nodes: NodeOption[]): void {
         this.manager!.id = this.getId();
         this.manager!.emit('debug', 'Manager', `[Manager] : Connecting ${nodes.length} nodes`);
-        for (const node of nodes) this.manager!.addNode(mergeDefault(ShoukakuDefaults, node));
+        for (const node of nodes) this.manager!.addNode(mergeDefault(NodeDefaults, node));
     }
 
     protected raw(packet: any): void {
