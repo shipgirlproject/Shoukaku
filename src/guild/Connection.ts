@@ -146,11 +146,14 @@ export class Connection extends EventEmitter {
         let { guildId, channelId, deaf, mute } = options;
         if (typeof deaf === undefined) deaf = true;
         if (typeof mute === undefined) mute = false;
+
         this.state = State.CONNECTING;
         this.send({ guild_id: guildId, channel_id: channelId, self_deaf: deaf, self_mute: mute }, true);
         this.player.node.emit('debug', this.player.node.name, `[Voice] -> [Discord] : Requesting Connection | Guild: ${this.guildId}`);
+
         const controller = new AbortController();
         const timeout = setTimeout(() => controller.abort(), 15000);
+
         try {
             const [status] = await once(this, 'connectionUpdate', { signal: controller.signal });
             if (status !== VoiceState.SESSION_READY) {
@@ -185,11 +188,13 @@ export class Connection extends EventEmitter {
             this.moved = true;
             this.player.node.emit('debug', this.player.node.name, `[Voice] <- [Discord] : Channel Moved | Old Channel: ${this.channelId} Guild: ${this.guildId}`);
         }
+
         this.channelId = channel_id || this.channelId;
         if (!channel_id) {
             this.state = State.DISCONNECTED;
             this.player.node.emit('debug', this.player.node.name, `[Voice] <- [Discord] : Channel Disconnected | Guild: ${this.guildId}`);
         }
+
         this.deafened = self_deaf;
         this.muted = self_mute;
         this.sessionId = session_id || null;
@@ -205,14 +210,17 @@ export class Connection extends EventEmitter {
             this.emit('connectionUpdate', VoiceState.SESSION_ENDPOINT_MISSING);
             return;
         }
+
         if (!this.sessionId) {
             this.emit('connectionUpdate', VoiceState.SESSION_ID_MISSING);
             return;
         }
+
         if (this.region && !data.endpoint.startsWith(this.region)) {
             this.moved = true;
             this.player.node.emit('debug', this.player.node.name, `[Voice] <- [Discord] : Voice Region Moved | Old Region: ${this.region} Guild: ${this.guildId}`);
         }
+
         this.region = data.endpoint.split('.').shift()?.replace(/[0-9]/g, '') || null;
         this.serverUpdate = data;
         this.player.node.queue.add({ op: OPCodes.VOICE_UPDATE, guildId: this.guildId, sessionId: this.sessionId, event: this.serverUpdate });

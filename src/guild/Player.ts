@@ -305,6 +305,7 @@ export class Player extends EventEmitter {
         const node = this.node.manager.nodes.get(name);
         if (!node || node.name === this.node.name) return this;
         if (node.state !== State.CONNECTED) throw new Error('The node you specified is not ready');
+
         this.connection.destroyLavalinkPlayer();
         this.node.players.delete(this.connection.guildId);
         this.node = node;
@@ -327,12 +328,15 @@ export class Player extends EventEmitter {
             noReplace: playable.options?.noReplace ?? true,
             pause: playable.options?.pause ?? false
         };
+
         if (playable.options?.startTime) payload.startTime = playable.options.startTime;
         if (playable.options?.endTime) payload.endTime = playable.options.startTime;
+
         this.node.queue.add(payload);
         this.track = playable.track;
         this.paused = playable.options?.pause ?? false;
         this.position = 0;
+
         return this;
     }
 
@@ -346,6 +350,7 @@ export class Player extends EventEmitter {
             op: OPCodes.STOP,
             guildId: this.connection.guildId
         });
+
         return this;
     }
 
@@ -360,6 +365,7 @@ export class Player extends EventEmitter {
             guildId: this.connection.guildId,
             pause
         });
+
         this.paused = pause;
         return this;
     }
@@ -375,6 +381,7 @@ export class Player extends EventEmitter {
             guildId: this.connection.guildId,
             position
         });
+
         return this;
     }
 
@@ -387,6 +394,7 @@ export class Player extends EventEmitter {
         volume = Math.min(5, Math.max(0, volume));
         this.filters.volume = volume;
         this.updateFilters();
+
         return this;
     }
 
@@ -398,6 +406,7 @@ export class Player extends EventEmitter {
     public setEqualizer(bands: Band[]): Player {
         this.filters.equalizer = bands;
         this.updateFilters();
+
         return this;
     }
 
@@ -409,6 +418,7 @@ export class Player extends EventEmitter {
     public setKaraoke(karaoke?: KaraokeSettings): Player {
         this.filters.karaoke = karaoke|| null;
         this.updateFilters();
+
         return this;
     }
 
@@ -420,6 +430,7 @@ export class Player extends EventEmitter {
     public setTimescale(timescale?: TimescaleSettings): Player {
         this.filters.timescale = timescale || null;
         this.updateFilters();
+
         return this;
     }
 
@@ -431,6 +442,7 @@ export class Player extends EventEmitter {
     public setTremolo(tremolo?: FreqSettings): Player {
         this.filters.tremolo = tremolo || null;
         this.updateFilters();
+
         return this;
     }
 
@@ -442,6 +454,7 @@ export class Player extends EventEmitter {
     public setVibrato(vibrato?: FreqSettings): Player {
         this.filters.vibrato = vibrato || null;
         this.updateFilters();
+
         return this;
     }
 
@@ -453,6 +466,7 @@ export class Player extends EventEmitter {
     public setRotation(rotation?: RotationSettings): Player {
         this.filters.rotation = rotation || null;
         this.updateFilters();
+
         return this;
     }
 
@@ -464,6 +478,7 @@ export class Player extends EventEmitter {
     public setDistortion(distortion: DistortionSettings): Player {
         this.filters.distortion = distortion || null;
         this.updateFilters();
+
         return this;
     }
 
@@ -475,6 +490,7 @@ export class Player extends EventEmitter {
     public setChannelMix(mix: ChannelMixSettings): Player {
         this.filters.channelMix = mix || null;
         this.updateFilters();
+
         return this;
     }
 
@@ -486,6 +502,7 @@ export class Player extends EventEmitter {
     public setLowPass(pass: LowPassSettings): Player {
         this.filters.lowPass = pass || null;
         this.updateFilters();
+
         return this;
     }
 
@@ -497,6 +514,7 @@ export class Player extends EventEmitter {
     public setFilters(options: FilterOptions): Player {
         this.filters = new Filters(options);
         this.updateFilters();
+
         return this;
     }
 
@@ -510,6 +528,7 @@ export class Player extends EventEmitter {
             op: OPCodes.FILTERS,
             guildId: this.connection.guildId
         });
+
         return this;
     }
 
@@ -524,6 +543,7 @@ export class Player extends EventEmitter {
             options = mergeDefault({ startTime: this.position, pause: this.paused }, options);
             this.playTrack({ track: this.track, options });
         }
+
         this.emit('resumed');
         return this;
     }

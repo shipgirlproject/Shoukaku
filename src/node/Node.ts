@@ -148,12 +148,15 @@ export class Node extends EventEmitter {
     get penalties(): number {
         let penalties = 0;
         if (!this.stats) return penalties;
+
         penalties += this.stats.players;
         penalties += Math.round(Math.pow(1.05, 100 * this.stats.cpu.systemLoad) * 10 - 10);
+
         if (this.stats.frameStats) {
             penalties += this.stats.frameStats.deficit;
             penalties += this.stats.frameStats.nulled * 2;
         }
+
         return penalties;
     }
 
@@ -163,9 +166,11 @@ export class Node extends EventEmitter {
     public connect(): void {
         if (!this.manager.id) throw new Error('Don\'t connect a node when the library is not yet ready');
         if (this.destroyed) throw new Error('You can\'t re-use the same instance of a node once disconnected, please re-add the node again');
+
         const resume = this.initialized && (this.manager.options.resume && this.manager.options.resumeKey);
         this.state = State.CONNECTING;
         let headers: ResumableHeaders|NonResumableHeaders;
+
         if (resume) {
             headers = {
                 'Client-Name': this.manager.options.userAgent,
@@ -182,8 +187,11 @@ export class Node extends EventEmitter {
                 'User-Id': this.manager.id
             };
         }
+
         this.emit('debug', this.name, `[Socket] -> [${this.name}] : Connecting ${this.url}, Trying to resume? ${resume}`);
+
         if (!this.initialized) this.initialized = true;
+
         this.ws = new Websocket(this.url, { headers } as Websocket.ClientOptions);
         this.ws.once('upgrade', response => this.ws!.once('open', () => this.open(response)));
         this.ws.once('close', (...args) => this.close(...args));
@@ -198,6 +206,7 @@ export class Node extends EventEmitter {
      */
     public disconnect(code: number, reason?:string): void {
         if (this.destroyed) return;
+
         this.destroyed = true;
         this.state = State.DISCONNECTING;
         this.clean();
@@ -257,6 +266,7 @@ export class Node extends EventEmitter {
     private open(response: IncomingMessage): void {
         const resumed = response.headers['session-resumed'] === 'true';
         this.queue.add();
+
         if (this.manager.options.resume && this.manager.options.resumeKey) {
             this.queue.add({
                 op: OPCodes.CONFIGURE_RESUMING,
@@ -265,6 +275,7 @@ export class Node extends EventEmitter {
             });
             this.emit('debug', this.name, `[Socket] -> [${this.name}] : Resuming configured on Lavalink`);
         }
+
         const resumeByLibrary = this.initialized && (this.manager.options.resumeByLibrary && this.players.size);
         if (!resumed && resumeByLibrary) {
             for (const player of [...this.players.values()]) {
@@ -272,6 +283,7 @@ export class Node extends EventEmitter {
                 player.resume();
             }
         }
+
         this.emit('debug', this.name, `[Socket] <-> [${this.name}] : Connection ready ${this.url} | Lavalink Resumed: ${resumed} | Shoukaku Resumed: ${resumeByLibrary}`);
         this.reconnects = 0;
         this.state = State.CONNECTED;
@@ -291,6 +303,7 @@ export class Node extends EventEmitter {
             this.stats = json;
             return;
         }
+
         this.players.get(json.guildId)?.onLavalinkMessage(json);
     }
 
@@ -326,19 +339,24 @@ export class Node extends EventEmitter {
     private clean(): void {
         const players = [...this.players.values()];
         const move = this.manager.options.moveOnDisconnect && [...this.manager.nodes.values()].filter(node => node.group === this.group).length > 1;
+
         for (const player of players) {
             if (!move) {
                 player.connection.disconnect();
                 continue;
             }
+
             const name = this.group ? [this.group] : 'auto';
             const node = this.manager.getNode(name);
+
             if (!node) {
                 player.connection.disconnect();
                 continue;
             }
+
             player.move(node.name);
         }
+
         this.queue.clear();
         this.manager.nodes.delete(this.name);
         this.emit('disconnect', this.name, players, players.length > 0 && move);
@@ -350,6 +368,7 @@ export class Node extends EventEmitter {
      */
     private reconnect(): void {
         if (this.state !== State.DISCONNECTED) this.destroy();
+
         this.reconnects++;
         this.emit('debug', this.name, `[Socket] -> [${this.name}] : Reconnecting in ${this.manager.options.reconnectInterval}ms. ${this.manager.options.reconnectTries - this.reconnects} tries left`);
         setTimeout(() => this.connect(), this.manager.options.reconnectInterval);
@@ -362,11 +381,13 @@ export class Node extends EventEmitter {
      */
     public discordRaw(packet: any): void {
         const player = this.players.get(packet.d.guild_id);
+
         if (!player) return;
         if (packet.t === 'VOICE_SERVER_UPDATE') {
             player.connection.setServerUpdate(packet.d);
             return;
         }
+
         if (packet.d.user_id !== this.manager.id) return;
         player.connection.setStateUpdate(packet.d);
     }
