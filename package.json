@@ -15,7 +15,7 @@
     "build": "tsc && npm run build:esm && npm run build:docs",
     "build:esm": "gen-esm-wrapper dist/index.js dist/index.mjs",
     "build:docs": "typedoc --theme default --readme README.md --out docs/ --entryPointStrategy expand src/.",
-    "prepare": "tsc"
+    "prepare": "tsc && npm run build:esm"
   },
   "keywords": [
     "bot",
