@@ -1,6 +1,6 @@
 {
   "name": "shoukaku",
-  "version": "3.1.0",
+  "version": "3.1.1",
   "description": "A stable and updated wrapper around Lavalink",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -44,7 +44,7 @@
   },
   "devDependencies": {
     "@augu/eslint-config": "^2.2.0",
-    "@types/node": "^17.0.40",
+    "@types/node": "^18.0.0",
     "@types/ws": "^8.5.3",
     "@typescript-eslint/eslint-plugin": "^5.27.0",
     "@typescript-eslint/parser": "^5.27.0",
