@@ -105,7 +105,7 @@ export class Connection extends EventEmitter {
      */
     public setDeaf(deaf = false): void {
         this.deafened = deaf;
-        this.send({ guild_id: this.guildId, channel_id: this.channelId, self_deaf: this.deafened, self_mute: this.muted }, true);
+        this.send({ guild_id: this.guildId, channel_id: this.channelId, self_deaf: this.deafened, self_mute: this.muted }, false);
     }
 
     /**
@@ -115,7 +115,7 @@ export class Connection extends EventEmitter {
      */
     public setMute(mute = false): void {
         this.muted = mute;
-        this.send({ guild_id: this.guildId, channel_id: this.channelId, self_deaf: this.deafened, self_mute: this.muted }, true);
+        this.send({ guild_id: this.guildId, channel_id: this.channelId, self_deaf: this.deafened, self_mute: this.muted }, false);
     }
 
     /**
@@ -124,7 +124,7 @@ export class Connection extends EventEmitter {
     public disconnect(): void {
         if (this.state !== State.DISCONNECTED) {
             this.state = State.DISCONNECTING;
-            this.send({ guild_id: this.guildId, channel_id: null, self_mute: false, self_deaf: false }, true);
+            this.send({ guild_id: this.guildId, channel_id: null, self_mute: false, self_deaf: false }, false);
         }
         this.player.node.players.delete(this.guildId);
         // this.player.clean();
@@ -148,7 +148,7 @@ export class Connection extends EventEmitter {
         if (typeof mute === undefined) mute = false;
 
         this.state = State.CONNECTING;
-        this.send({ guild_id: guildId, channel_id: channelId, self_deaf: deaf, self_mute: mute }, true);
+        this.send({ guild_id: guildId, channel_id: channelId, self_deaf: deaf, self_mute: mute }, false);
         this.player.node.emit('debug', this.player.node.name, `[Voice] -> [Discord] : Requesting Connection | Guild: ${this.guildId}`);
 
         const controller = new AbortController();
