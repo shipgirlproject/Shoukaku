@@ -39,7 +39,7 @@
     "url": "https://github.com/Deivu/Shoukaku"
   },
   "dependencies": {
-    "petitio": "^1.4.0",
+    "undici": "^5.8.0",
     "ws": "^8.7.0"
   },
   "devDependencies": {
