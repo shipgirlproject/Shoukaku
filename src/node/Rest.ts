@@ -1,6 +1,7 @@
 import { Node } from './Node';
 import { NodeOption } from '../Shoukaku';
-import Petitio, { HTTPMethod } from 'petitio';
+import { fetch } from 'undici';
+import { HttpMethod } from 'undici/types/dispatcher';
 
 export type LoadType = 'TRACK_LOADED' | 'PLAYLIST_LOADED' | 'SEARCH_RESULT' | 'NO_MATCHES' | 'LOAD_FAILED';
 
@@ -9,7 +10,7 @@ interface FetchOptions {
     options: {
         headers?: Record<string, string>;
         params?: Record<string, string>;
-        method?: HTTPMethod;
+        method?: HttpMethod;
         body?: Record<string, unknown>;
         [key: string]: unknown;
     };
@@ -96,10 +97,10 @@ export class Rest {
      * @param identifier Track ID
      * @returns A promise that resolves to a Lavalink response or void
      */
-    public async resolve(identifier: string): Promise<LavalinkResponse|null> {
+    public async resolve(identifier: string): Promise<LavalinkResponse | null> {
         const options = {
             endpoint: '/loadtracks',
-            options: { params: { identifier }}
+            options: { params: { identifier } }
         };
 
         return this.fetch<LavalinkResponse>(options);
@@ -110,10 +111,10 @@ export class Rest {
      * @param track Encoded track
      * @returns Promise that resolves to a track or void
      */
-    public async decode(track: string): Promise<Track|null> {
+    public async decode(track: string): Promise<Track | null> {
         const options = {
             endpoint: '/decodetrack',
-            options: { params: { track }}
+            options: { params: { track } }
         };
 
         return this.fetch<Track>(options);
@@ -124,7 +125,7 @@ export class Rest {
      * @returns Promise that resolves to a routeplanner response or void
      * @internal
      */
-    public async getRoutePlannerStatus(): Promise<RoutePlanner|null> {
+    public async getRoutePlannerStatus(): Promise<RoutePlanner | null> {
         const options = {
             endpoint: '/routeplanner/status',
             options: {}
@@ -142,7 +143,7 @@ export class Rest {
         const options = {
             endpoint: '/routeplanner/free/address',
             options: {
-                method: 'POST' as HTTPMethod,
+                method: 'POST' as HttpMethod,
                 headers: { 'Content-Type': 'application/json' },
                 body: { address }
             }
@@ -154,7 +155,7 @@ export class Rest {
     /**
      * Make a request to Lavalink
      * @param fetchOptions.endpoint Lavalink endpoint
-     * @param fetchOptions.options Options passed to petitio
+     * @param fetchOptions.options Options passed to fetch
      * @internal
      */
     private async fetch<T = unknown>(fetchOptions: FetchOptions) {
@@ -169,19 +170,25 @@ export class Rest {
         const url = new URL(`${this.url}${endpoint}`);
         if (options.params) url.search = new URLSearchParams(options.params).toString();
 
-        const request = await Petitio(url.toString())
-            .method(options.method?.toUpperCase() as HTTPMethod || 'GET')
-            .header(headers)
-            .body(options.body ?? {})
-            .timeout(this.node.manager.options.restTimeout || 15000)
-            .send();
+        const abortController = new AbortController();
+        const timeout = setTimeout(() => abortController.abort(), this.node.manager.options.restTimeout || 15000);
 
-        if (request.statusCode && (request.statusCode >= 400))
-            throw new Error(`Rest request failed with response code: ${request.statusCode}`);
+        const request = await fetch(url.toString(), {
+            method: options.method?.toUpperCase() as HttpMethod || 'GET',
+            headers: { ...headers, ...options.headers },
+            ...((['GET', 'HEAD'].includes(options.method?.toUpperCase() as HttpMethod || 'GET')) && options.body ? { body: JSON.stringify(options.body ?? {}) } : {}),
+            signal: abortController.signal
+        });
 
-        const body = request.body.toString('utf8');
-        if (!body?.length) return null;
+        clearTimeout(timeout);
 
-        return JSON.parse(body) as T;
+        if (request.status && (request.status >= 400))
+            throw new Error(`Rest request failed with response code: ${request.status}`);
+
+        if (!request.body) return null;
+        const body = await request.json().catch(() => null);
+        if (!body) return null;
+
+        return body as T;
     }
 }
