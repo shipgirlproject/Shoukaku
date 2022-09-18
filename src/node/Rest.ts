@@ -100,10 +100,10 @@ export class Rest {
     public async resolve(identifier: string): Promise<LavalinkResponse | null> {
         const options = {
             endpoint: '/loadtracks',
-            options: { params: { identifier } }
+            options: { params: { identifier }}
         };
 
-        return this.fetch<LavalinkResponse>(options);
+        return await this.fetch<LavalinkResponse>(options);
     }
 
     /**
@@ -114,10 +114,10 @@ export class Rest {
     public async decode(track: string): Promise<Track | null> {
         const options = {
             endpoint: '/decodetrack',
-            options: { params: { track } }
+            options: { params: { track }}
         };
 
-        return this.fetch<Track>(options);
+        return await this.fetch<Track>(options);
     }
 
     /**
@@ -131,7 +131,7 @@ export class Rest {
             options: {}
         };
 
-        return this.fetch<RoutePlanner>(options);
+        return await this.fetch<RoutePlanner>(options);
     }
 
     /**
@@ -149,7 +149,7 @@ export class Rest {
             }
         };
 
-        return this.fetch<void>(options);
+        return await this.fetch<void>(options);
     }
 
     /**
