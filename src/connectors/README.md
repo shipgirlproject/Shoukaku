@@ -14,6 +14,13 @@ const { Shoukaku, Connectors } = require('shoukaku');
 new Shoukaku(new Connectors.Eris(client), servers, options)
 ```
 
+> [Oceanic.JS](https://oceanic.ws/) (1.0.x)
+
+```js
+const { Shoukaku, Connectors } = require('shoukaku');
+new Shoukaku(new Connectors.OceanicJS(client), servers, options)
+```
+
 > Implement your own 
 
 ## Implementing your own
