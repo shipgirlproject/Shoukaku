@@ -225,7 +225,7 @@ export declare interface Player {
      */
     on(event: 'exception', listener: (reason: TrackExceptionEvent) => void): this;
     /**
-     * Emitted when the current playing track ends
+     * Emitted when the library manages to resume the player
      * @eventProperty
      */
     on(event: 'resumed', listener: () => void): this;
