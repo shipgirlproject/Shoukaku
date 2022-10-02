@@ -59,6 +59,15 @@ const shoukaku = new Shoukaku(new Connectors.DiscordJS(client), Nodes);
 // ALWAYS handle error, logging it will do
 shoukaku.on('error', (_, error) => console.error(error));
 client.login('token');
+// If you want shoukaku to be available on client, then bind it to it, here is one example of it
+client.shoukaku = shoukaku;
+```
+> Never initialize Shoukaku like this, or else she will never initialize, start shoukaku before you call `client.login()`
+```js
+// NEVER DO THIS, OR SHOUKAKU WILL NEVER INITIALIZE
+client.on('ready', () => {
+    client.shoukaku = new Shoukaku(new Connectors.DiscordJS(client), Nodes);
+});
 ```
 > Searching and joining a channel (Async Function Implementation)
 ```js
