@@ -297,6 +297,7 @@ export class Player extends EventEmitter {
         this.track = null;
         this.paused = false;
         this.position = 0;
+        this.ping = 0;
         this.filters = new Filters();
     }
 
