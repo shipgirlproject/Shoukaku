@@ -273,7 +273,7 @@ export class Player extends EventEmitter {
     /**
      * Ping represents the number of milliseconds between heartbeat and ack. Could be `-1` if not connected
      */
-    public paused: boolean;
+    public ping: number;
     /**
      * Position in ms of current track
      */
