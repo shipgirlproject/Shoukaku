@@ -271,6 +271,10 @@ export class Player extends EventEmitter {
      */
     public paused: boolean;
     /**
+     * Ping represents the number of milliseconds between heartbeat and ack. Could be `-1` if not connected
+     */
+    public ping: number;
+    /**
      * Position in ms of current track
      */
     public position: number;
@@ -293,6 +297,7 @@ export class Player extends EventEmitter {
         this.track = null;
         this.paused = false;
         this.position = 0;
+        this.ping = 0;
         this.filters = new Filters();
     }
 
@@ -596,6 +601,8 @@ export class Player extends EventEmitter {
     public onLavalinkMessage(json: any): void {
         if (json.op === OPCodes.PLAYER_UPDATE) {
             this.position = json.state.position;
+            // ping property require lavalink >=3.5.1
+            this.ping = json.state.ping ?? 0;
             this.emit('update', json);
         } else if (json.op === OPCodes.EVENT)
             this.onPlayerEvent(json);
