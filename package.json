@@ -42,15 +42,16 @@
     "ws": "^8.11.0"
   },
   "devDependencies": {
-    "@augu/eslint-config": "^2.2.0",
-    "@types/node": "^18.0.0",
+    "@augu/eslint-config": "^3.0.0",
+    "@types/node": "^18.11.17",
+    "@types/node-fetch": "^2.6.2",
     "@types/ws": "^8.5.3",
-    "@typescript-eslint/eslint-plugin": "^5.27.0",
-    "@typescript-eslint/parser": "^5.27.0",
-    "eslint": "^8.17.0",
+    "@typescript-eslint/eslint-plugin": "^5.36.1",
+    "@typescript-eslint/parser": "^5.36.1",
+    "eslint": "^8.23.0",
     "gen-esm-wrapper": "^1.1.3",
-    "ts-node": "^10.8.1",
-    "typedoc": "^0.22.17",
-    "typescript": "^4.7.3"
+    "ts-node": "^10.9.1",
+    "typedoc": "^0.23.23",
+    "typescript": "^4.9.4"
   }
 }
