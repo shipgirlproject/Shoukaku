@@ -1,7 +1,5 @@
 import { Node } from './Node';
 import { NodeOption } from '../Shoukaku';
-import { fetch } from 'undici';
-import { HttpMethod } from 'undici/types/dispatcher';
 
 export type LoadType = 'TRACK_LOADED' | 'PLAYLIST_LOADED' | 'SEARCH_RESULT' | 'NO_MATCHES' | 'LOAD_FAILED';
 
@@ -10,7 +8,7 @@ interface FetchOptions {
     options: {
         headers?: Record<string, string>;
         params?: Record<string, string>;
-        method?: HttpMethod;
+        method?: string;
         body?: Record<string, unknown>;
         [key: string]: unknown;
     };
@@ -143,7 +141,7 @@ export class Rest {
         const options = {
             endpoint: '/routeplanner/free/address',
             options: {
-                method: 'POST' as HttpMethod,
+                method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: { address }
             }
@@ -168,27 +166,23 @@ export class Rest {
         if (options.headers) headers = { ...headers, ...options.headers };
 
         const url = new URL(`${this.url}${endpoint}`);
+
         if (options.params) url.search = new URLSearchParams(options.params).toString();
 
         const abortController = new AbortController();
         const timeout = setTimeout(() => abortController.abort(), this.node.manager.options.restTimeout || 15000);
 
         const request = await fetch(url.toString(), {
-            method: options.method?.toUpperCase() as HttpMethod || 'GET',
+            method: options.method?.toUpperCase() || 'GET',
             headers: { ...headers, ...options.headers },
-            ...((['GET', 'HEAD'].includes(options.method?.toUpperCase() as HttpMethod || 'GET')) && options.body ? { body: JSON.stringify(options.body ?? {}) } : {}),
+            ...((['GET', 'HEAD'].includes(options.method?.toUpperCase() || 'GET')) && options.body ? { body: JSON.stringify(options.body ?? {}) } : {}),
             signal: abortController.signal
-        });
+        })
+            .finally(() => clearTimeout(timeout));
 
-        clearTimeout(timeout);
-
-        if (request.status && (request.status >= 400))
+        if (!request.ok)
             throw new Error(`Rest request failed with response code: ${request.status}`);
 
-        if (!request.body) return null;
-        const body = await request.json().catch(() => null);
-        if (!body) return null;
-
-        return body as T;
+        return await request.json() as T;
     }
 }
