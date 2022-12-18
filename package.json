@@ -39,8 +39,7 @@
     "url": "https://github.com/Deivu/Shoukaku"
   },
   "dependencies": {
-    "undici": "^5.8.0",
-    "ws": "^8.8.1"
+    "ws": "^8.11.0"
   },
   "devDependencies": {
     "@augu/eslint-config": "^2.2.0",
