@@ -174,7 +174,7 @@ export class Rest {
 
         const request = await fetch(url.toString(), {
             method: options.method?.toUpperCase() || 'GET',
-            headers: { ...headers, ...options.headers },
+            headers,
             ...((['GET', 'HEAD'].includes(options.method?.toUpperCase() || 'GET')) && options.body ? { body: JSON.stringify(options.body ?? {}) } : {}),
             signal: abortController.signal
         })
