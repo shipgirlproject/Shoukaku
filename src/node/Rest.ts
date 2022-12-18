@@ -176,6 +176,7 @@ export class Rest {
             method: options.method?.toUpperCase() || 'GET',
             headers,
             ...((['GET', 'HEAD'].includes(options.method?.toUpperCase() || 'GET')) && options.body ? { body: JSON.stringify(options.body ?? {}) } : {}),
+            // @ts-expect-error
             signal: abortController.signal
         })
             .finally(() => clearTimeout(timeout));
