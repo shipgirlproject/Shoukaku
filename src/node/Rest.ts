@@ -1,6 +1,6 @@
 import { Node } from './Node';
 import { NodeOption } from '../Shoukaku';
-import { default as fetch } from 'node-fetch';
+import Fetch from 'node-fetch';
 
 export type LoadType = 'TRACK_LOADED' | 'PLAYLIST_LOADED' | 'SEARCH_RESULT' | 'NO_MATCHES' | 'LOAD_FAILED';
 
@@ -172,7 +172,7 @@ export class Rest {
         const abortController = new AbortController();
         const timeout = setTimeout(() => abortController.abort(), this.node.manager.options.restTimeout || 15000);
 
-        const request = await fetch(url.toString(), {
+        const request = await Fetch(url.toString(), {
             method: options.method?.toUpperCase() || 'GET',
             headers,
             ...((['GET', 'HEAD'].includes(options.method?.toUpperCase() || 'GET')) && options.body ? { body: JSON.stringify(options.body ?? {}) } : {}),
