@@ -134,7 +134,9 @@ const client = new Client();
 const shoukaku = new Shoukaku(new Connectors.DiscordJS(client), Nodes, ShoukakuOptions);
 ```
 ### Plugins
-* stone-deezer (A plugin to stream audio from deezer)
+* stone-deezer 
+> A plugin to simplify deezer links and then play it from available sources **requires kazagumo**
+
 > [documentation](https://www.npmjs.com/package/stone-deezer) | [Discord support](https://stonemusic.in/support)
 
 > Install it with `npm install stone-deezer`
