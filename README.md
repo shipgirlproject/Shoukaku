@@ -133,6 +133,12 @@ const ShoukakuOptions = { structures: { rest: CustomRest } } // pass the custom 
 const client = new Client();
 const shoukaku = new Shoukaku(new Connectors.DiscordJS(client), Nodes, ShoukakuOptions);
 ```
+### Plugins
+* stone-deezer (A plugin to stream audio from deezer)
+> [documentation](https://www.npmjs.com/package/stone-deezer) | [Discord support](https://stonemusic.in/support)
+
+> Install it with `npm install stone-deezer`
+
 ### Other Links
 
 [Support](https://discord.gg/FVqbtGu) (#Development) | [Lavalink](https://github.com/freyacodes/Lavalink)
