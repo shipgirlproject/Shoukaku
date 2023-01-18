@@ -103,10 +103,8 @@ export interface MergedShoukakuOptions {
 
 export declare interface Shoukaku {
     /**
-     * Emitted when reconnect tries are occurring and how many tries are left
-     * @eventProperty
+     * Emitted when reconnect tries are occ
      */
-    on(event: 'reconnecting', listener: (name: string, info: string, tries: number, triesLeft: number, reconnectInterval: number) => void): this;
     /**
      * Emitted when data useful for debugging is produced
      * @eventProperty
@@ -132,13 +130,11 @@ export declare interface Shoukaku {
      * @eventProperty
      */
     on(event: 'disconnect', listener: (name: string, players: Player[], moved: boolean) => void): this;
-    once(event: 'reconnecting', listener: (name: string, info: string, tries: number, triesLeft: number, reconnectInterval: number) => void): this;
     once(event: 'debug', listener: (name: string, info: string) => void): this;
     once(event: 'error', listener: (name: string, error: Error) => void): this;
     once(event: 'ready', listener: (name: string, reconnected: boolean) => void): this;
     once(event: 'close', listener: (name: string, code: number, reason: string) => void): this;
     once(event: 'disconnect', listener: (name: string, players: Player[], moved: boolean) => void): this;
-    off(event: 'reconnecting', listener: (name: string, info: string, tries: number, triesLeft: number, reconnectInterval: number) => void): this;
     off(event: 'debug', listener: (name: string, info: string) => void): this;
     off(event: 'error', listener: (name: string, error: Error) => void): this;
     off(event: 'ready', listener: (name: string, reconnected: boolean) => void): this;
@@ -214,7 +210,6 @@ export class Shoukaku extends EventEmitter {
     public addNode(options: NodeOption): void {
         const node = new Node(this, options);
         node.on('debug', (...args) => this.emit('debug', ...args));
-        node.on('reconnecting', (...args) => this.emit('reconnecting', ...args));
         node.on('error', (...args) => this.emit('error', ...args));
         node.on('close', (...args) => this.emit('close', ...args));
         node.on('ready', (...args) => this.emit('ready', ...args));

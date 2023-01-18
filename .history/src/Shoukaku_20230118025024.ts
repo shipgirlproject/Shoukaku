@@ -106,7 +106,7 @@ export declare interface Shoukaku {
      * Emitted when reconnect tries are occurring and how many tries are left
      * @eventProperty
      */
-    on(event: 'reconnecting', listener: (name: string, info: string, tries: number, triesLeft: number, reconnectInterval: number) => void): this;
+    on(event: 'reconnecting', listener: (name: string, info: string, tries: number, reconnectInterval: number) => void): this;
     /**
      * Emitted when data useful for debugging is produced
      * @eventProperty

@@ -370,7 +370,7 @@ export class Node extends EventEmitter {
         if (this.state !== State.DISCONNECTED) this.destroy();
 
         this.reconnects++;
-        this.emit("reconnecting", this.name, `[Socket] -> [${this.name}] : Reconnecting in ${this.manager.options.reconnectInterval}ms. ${this.manager.options.reconnectTries - this.reconnects} tries left`, this.reconnect, this.manager.options.reconnectInterval, this.manager.options.reconnectTries - this.reconnects)
+        this.emit("reconnecting", this.name)
         this.emit('debug', this.name, `[Socket] -> [${this.name}] : Reconnecting in ${this.manager.options.reconnectInterval}ms. ${this.manager.options.reconnectTries - this.reconnects} tries left`);
         setTimeout(() => this.connect(), this.manager.options.reconnectInterval);
     }
