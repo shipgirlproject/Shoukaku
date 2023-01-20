@@ -96,13 +96,13 @@ export class Rest {
      * @param identifier Track ID
      * @returns A promise that resolves to a Lavalink response or void
      */
-    public async resolve(identifier: string): Promise<LavalinkResponse | null> {
+    public resolve(identifier: string): Promise<LavalinkResponse | null> {
         const options = {
             endpoint: '/loadtracks',
             options: { params: { identifier }}
         };
 
-        return await this.fetch<LavalinkResponse>(options);
+        return this.fetch<LavalinkResponse>(options);
     }
 
     /**
@@ -110,13 +110,13 @@ export class Rest {
      * @param track Encoded track
      * @returns Promise that resolves to a track or void
      */
-    public async decode(track: string): Promise<Track | null> {
+    public decode(track: string): Promise<Track | null> {
         const options = {
             endpoint: '/decodetrack',
             options: { params: { track }}
         };
 
-        return await this.fetch<Track>(options);
+        return this.fetch<Track>(options);
     }
 
     /**
@@ -124,13 +124,13 @@ export class Rest {
      * @returns Promise that resolves to a routeplanner response or void
      * @internal
      */
-    public async getRoutePlannerStatus(): Promise<RoutePlanner | null> {
+    public getRoutePlannerStatus(): Promise<RoutePlanner | null> {
         const options = {
             endpoint: '/routeplanner/status',
             options: {}
         };
 
-        return await this.fetch<RoutePlanner>(options);
+        return this.fetch<RoutePlanner>(options);
     }
 
     /**
@@ -138,7 +138,7 @@ export class Rest {
      * @param address IP address
      * @internal
      */
-    public async unmarkFailedAddress(address: string): Promise<void | null> {
+    public unmarkFailedAddress(address: string): Promise<void | null> {
         const options = {
             endpoint: '/routeplanner/free/address',
             options: {
@@ -148,7 +148,7 @@ export class Rest {
             }
         };
 
-        return await this.fetch<void>(options);
+        return this.fetch<void>(options);
     }
 
     /**
