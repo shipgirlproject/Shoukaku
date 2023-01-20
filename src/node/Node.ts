@@ -2,7 +2,7 @@ import { EventEmitter } from 'events';
 import { IncomingMessage } from 'http';
 import { NodeOption, Shoukaku } from '../Shoukaku';
 import { Player } from '../guild/Player';
-import { OPCodes, State } from '../Constants';
+import { OPCodes, State, Versions } from '../Constants';
 import { Queue } from './Queue';
 import { Rest } from './Rest';
 import Websocket from 'ws';
@@ -83,6 +83,10 @@ export class Node extends EventEmitter {
      */
     public readonly group?: string;
     /**
+     * Websocket version this node will use
+     */
+    public readonly version: number;
+    /**
      * URL of Lavalink
      */
     private readonly url: string;
@@ -130,6 +134,7 @@ export class Node extends EventEmitter {
         this.queue = new Queue(this);
         this.name = options.name;
         this.group = options.group;
+        this.version = Versions.WEBSOCKET_VERSION;
         this.url = `${options.secure ? 'wss' : 'ws'}://${options.url}`;
         this.auth = options.auth;
         this.reconnects = 0;
@@ -188,11 +193,14 @@ export class Node extends EventEmitter {
             };
         }
 
-        this.emit('debug', this.name, `[Socket] -> [${this.name}] : Connecting ${this.url}, Trying to resume? ${resume}`);
+        this.emit('debug', this.name, `[Socket] -> [${this.name}] : Connecting ${this.url}, Version: /${this.version}, Trying to resume? ${resume}`);
 
         if (!this.initialized) this.initialized = true;
 
-        this.ws = new Websocket(this.url, { headers } as Websocket.ClientOptions);
+        const version = `/${this.version}`;
+        const url = new URL(`${this.url}${version}`);
+
+        this.ws = new Websocket(url.toString(), { headers } as Websocket.ClientOptions);
         this.ws.once('upgrade', response => this.ws!.once('open', () => this.open(response)));
         this.ws.once('close', (...args) => this.close(...args));
         this.ws.on('error', error => this.emit('error', this.name, error));
@@ -370,7 +378,7 @@ export class Node extends EventEmitter {
         if (this.state !== State.DISCONNECTED) this.destroy();
 
         this.reconnects++;
-        this.emit("reconnecting", this.name, `[Socket] -> [${this.name}] : Reconnecting in ${this.manager.options.reconnectInterval}ms. ${this.manager.options.reconnectTries - this.reconnects} tries left`, this.reconnect, this.manager.options.reconnectInterval, this.manager.options.reconnectTries - this.reconnects)
+        this.emit("reconnecting", this.name, `[Socket] -> [${this.name}] : Reconnecting in ${this.manager.options.reconnectInterval}ms. ${this.manager.options.reconnectTries - this.reconnects} tries left`, this.reconnect, this.manager.options.reconnectInterval, this.manager.options.reconnectTries - this.reconnects);
         this.emit('debug', this.name, `[Socket] -> [${this.name}] : Reconnecting in ${this.manager.options.reconnectInterval}ms. ${this.manager.options.reconnectTries - this.reconnects} tries left`);
         setTimeout(() => this.connect(), this.manager.options.reconnectInterval);
     }

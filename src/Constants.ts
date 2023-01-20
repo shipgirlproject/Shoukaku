@@ -31,6 +31,11 @@ export enum OPCodes {
     EVENT = 'event'
 }
 
+export enum Versions {
+    REST_VERSION = 3,
+    WEBSOCKET_VERSION = 3
+}
+
 export const ShoukakuDefaults: ShoukakuOptions = {
     resume: false,
     resumeKey: `Shoukaku@${Info.version}(${Info.repository.url})`,

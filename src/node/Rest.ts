@@ -1,5 +1,7 @@
-import { Node } from './Node';
+import { Node, NodeStats } from './Node';
 import { NodeOption } from '../Shoukaku';
+import { Versions } from '../Constants';
+import { Band, Filters } from '../guild/Player';
 
 export type LoadType = 'TRACK_LOADED' | 'PLAYLIST_LOADED' | 'SEARCH_RESULT' | 'NO_MATCHES' | 'LOAD_FAILED';
 
@@ -16,6 +18,7 @@ interface FetchOptions {
 
 export interface Track {
     track: string;
+    encoded: string;
     info: {
         identifier: string;
         isSeekable: boolean;
@@ -24,7 +27,7 @@ export interface Track {
         isStream: boolean;
         position: number;
         title: string;
-        uri: string;
+        uri?: string;
         sourceName: string;
     }
 }
@@ -60,6 +63,53 @@ export interface RoutePlanner {
     currentAddressIndex?: string;
 }
 
+export interface LavalinkPlayerVoice {
+    token: string;
+    endpoint: string;
+    sessionId: string;
+    connected?: boolean;
+    ping?: number
+}
+
+export interface LavalinkPlayerVoiceOptions extends Omit<LavalinkPlayerVoice, 'connected'|'ping'> {}
+
+export interface LavalinkFilters extends Omit<Filters, 'volume'|'equalizer'> {
+    volume?: number;
+    band?: Band[]
+}
+
+export interface LavalinkPlayer {
+    guildId: string,
+    track?: Track,
+    volume: number;
+    paused: boolean;
+    voice: LavalinkPlayerVoice
+    filters: LavalinkFilters
+}
+
+export interface UpdatePlayerOptions {
+    encodedTrack?: string;
+    identifier?: string;
+    position?: number;
+    endTime?: number;
+    volume?: number;
+    paused?: boolean;
+    filters?:  LavalinkFilters;
+    voice?: LavalinkPlayerVoiceOptions;
+}
+
+export interface UpdatePlayerInfo {
+    guildId: string;
+    sessionId: string;
+    playerOptions: UpdatePlayerOptions;
+    noReplace?: boolean;
+}
+
+export interface SessionInfo {
+    resumingKey?: string;
+    timeout: number;
+}
+
 /**
  * Wrapper around Lavalink REST API
  */
@@ -77,6 +127,10 @@ export class Rest {
      */
     protected readonly auth: string;
     /**
+     * Rest version to use
+     */
+    protected readonly version: number;
+    /**
      * @param node An instance of Node
      * @param options.name Name of this node
      * @param options.url URL of Lavalink
@@ -87,57 +141,141 @@ export class Rest {
     constructor(node: Node, options: NodeOption) {
         this.node = node;
         this.url = `${options.secure ? 'https' : 'http'}://${options.url}`;
+        this.version = Versions.REST_VERSION;
         this.auth = options.auth;
     }
 
     /**
      * Resolve a track
      * @param identifier Track ID
-     * @returns A promise that resolves to a Lavalink response or void
+     * @returns A promise that resolves to a Lavalink response
      */
-    public resolve(identifier: string): Promise<LavalinkResponse | null> {
+    public resolve(identifier: string): Promise<LavalinkResponse> {
         const options = {
             endpoint: '/loadtracks',
             options: { params: { identifier }}
         };
-
         return this.fetch<LavalinkResponse>(options);
     }
 
     /**
      * Decode a track
      * @param track Encoded track
-     * @returns Promise that resolves to a track or void
+     * @returns Promise that resolves to a track
      */
-    public decode(track: string): Promise<Track | null> {
+    public decode(track: string): Promise<Track> {
         const options = {
             endpoint: '/decodetrack',
             options: { params: { track }}
         };
-
         return this.fetch<Track>(options);
     }
 
     /**
-     * Get routplanner status from Lavalink
-     * @returns Promise that resolves to a routeplanner response or void
-     * @internal
+     * Gets all the player with the specified sessionId
+     * @param sessionId SessionId from Discord
+     * @returns Promise that resolves to an array of Lavalink players
      */
-    public getRoutePlannerStatus(): Promise<RoutePlanner | null> {
+    public getPlayers(sessionId: string): Promise<LavalinkPlayer[]> {
+        const options = {
+            endpoint: `/sessions/${sessionId}/players`,
+            options: {}
+        };
+        return this.fetch<LavalinkPlayer[]>(options);
+    }
+
+    /**
+     * Gets all the player with the specified sessionId
+     * @param sessionId SessionId from Discord
+     * @returns Promise that resolves to an array of Lavalink players
+     */
+    public getPlayer(sessionId: string, guildId: string): Promise<LavalinkPlayer> {
+        const options = {
+            endpoint: `/sessions/${sessionId}/players/${guildId}`,
+            options: {}
+        };
+        return this.fetch<LavalinkPlayer>(options);
+    }
+
+    /**
+     * Updates a Lavalink player
+     * @param data SessionId from Discord
+     * @returns Promise that resolves to a Lavalink player
+     */
+    public updatePlayer(data: UpdatePlayerInfo): Promise<LavalinkPlayer> {
+        const options = {
+            endpoint: `/sessions/${data.sessionId}/players/${data.guildId}`,
+            options: {
+                method: 'PATCH',
+                params: { noReplace: data.noReplace?.toString() || 'false' },
+                headers: { 'Content-Type': 'application/json' },
+                body: data.playerOptions as Record<string, unknown>
+            }
+        };
+        return this.fetch<LavalinkPlayer>(options);
+    }
+
+    /**
+     * Deletes a Lavalink player
+     * @param sessionId SessionId from Discord
+     * @param guildId guildId where this player is
+     */
+    public destroyPlayer(sessionId: string, guildId: string): Promise<void> {
+        const options = {
+            endpoint: `/sessions/${sessionId}/players/${guildId}`,
+            options: { method: 'DELETE' }
+        };
+        return this.fetch<void>(options);
+    }
+
+    /**
+     * Updates the session with a resuming key and timeout
+     * @param sessionId SessionId from Discord
+     * @param resumingKey Resuming key to set
+     * @param timeout Timeout to wait for resuming
+     * @returns Promise that resolves to a Lavalink player
+     */
+    public updateSession(sessionId: string, resumingKey?: string, timeout?: number): Promise<SessionInfo> {
+        const options = {
+            endpoint: `/sessions/${sessionId}`,
+            options: {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: { resumingKey, timeout }
+            }
+        };
+        return this.fetch<SessionInfo>(options);
+    }
+
+    /**
+     * Gets the status of this node
+     * @returns Promise that resolves to a node stats response
+     */
+    public stats(): Promise<NodeStats> {
+        const options = {
+            endpoint: '/stats',
+            options: {}
+        };
+        return this.fetch<NodeStats>(options);
+    }
+
+    /**
+     * Get routplanner status from Lavalink
+     * @returns Promise that resolves to a routeplanner response
+     */
+    public getRoutePlannerStatus(): Promise<RoutePlanner> {
         const options = {
             endpoint: '/routeplanner/status',
             options: {}
         };
-
         return this.fetch<RoutePlanner>(options);
     }
 
     /**
      * Release blacklisted IP address into pool of IPs
      * @param address IP address
-     * @internal
      */
-    public unmarkFailedAddress(address: string): Promise<void | null> {
+    public unmarkFailedAddress(address: string): Promise<void> {
         const options = {
             endpoint: '/routeplanner/free/address',
             options: {
@@ -146,7 +284,6 @@ export class Rest {
                 body: { address }
             }
         };
-
         return this.fetch<void>(options);
     }
 
@@ -156,7 +293,7 @@ export class Rest {
      * @param fetchOptions.options Options passed to fetch
      * @internal
      */
-    private async fetch<T = unknown>(fetchOptions: FetchOptions) {
+    protected async fetch<T = unknown>(fetchOptions: FetchOptions) {
         const { endpoint, options } = fetchOptions;
         let headers = {
             'Authorization': this.auth,
@@ -165,7 +302,8 @@ export class Rest {
 
         if (options.headers) headers = { ...headers, ...options.headers };
 
-        const url = new URL(`${this.url}${endpoint}`);
+        const version = `/${this.version}`;
+        const url = new URL(`${this.url}${version}${endpoint}`);
 
         if (options.params) url.search = new URLSearchParams(options.params).toString();
 
