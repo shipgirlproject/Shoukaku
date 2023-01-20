@@ -127,7 +127,7 @@ export class Connection extends EventEmitter {
             this.send({ guild_id: this.guildId, channel_id: null, self_mute: false, self_deaf: false }, false);
         }
         this.player.node.players.delete(this.guildId);
-        // this.player.clean();
+        this.player.clean();
         this.destroyLavalinkPlayer();
         this.state = State.DISCONNECTED;
         this.player.node.emit('debug', this.player.node.name, `[Voice] -> [Node] & [Discord] : Link & Player Destroyed | Guild: ${this.guildId}`);

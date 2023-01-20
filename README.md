@@ -111,7 +111,8 @@ structures | Object{rest?, player?} | Custom structures for shoukaku to use |
 
 Name   | Link     | Description
 -------|----------|------------
- ..... | ........ | ..........
+Kazagumo | [Github](https://github.com/Takiyo0/Kazagumo) | A Shoukaku wrapper that have built-in queue system 
+stone-deezer | [NPM](https://www.npmjs.com/package/stone-deezer) | A plugin to simplify deezer links and then play it from available sources (**REQUIRES [KAZAGUMO](https://github.com/Takiyo0/Kazagumo)**)
 
 ### Creating Plugins
 > Shoukaku has now official supports for plugins. However, implementing this is up to the developers that is interested on doing it
@@ -133,6 +134,7 @@ const ShoukakuOptions = { structures: { rest: CustomRest } } // pass the custom 
 const client = new Client();
 const shoukaku = new Shoukaku(new Connectors.DiscordJS(client), Nodes, ShoukakuOptions);
 ```
+
 ### Other Links
 
 [Support](https://discord.gg/FVqbtGu) (#Development) | [Lavalink](https://github.com/freyacodes/Lavalink)
