@@ -283,7 +283,7 @@ export class Node extends EventEmitter {
         if (!resumed && resumeByLibrary) {
             const promises = [];
             for (const player of [ ...this.players.values() ]) {
-                if (!player.connection.sessionId) continue;
+                if (!player.connection.hasRequiredVoiceData) continue;
                 promises.push(player.update(player.playerData));
             }
             try {

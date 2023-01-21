@@ -326,8 +326,13 @@ export class Rest {
         const request = await fetch(url.toString(), finalFetchOptions)
             .finally(() => clearTimeout(timeout));
 
-        if (!request.ok)
-            throw new Error(`Rest request failed with response code: ${request.status}`);
+        if (!request.ok) {
+            const response = (await request.json()).catch(() => null);
+            if (!response?.message)
+                throw new Error(`Rest request failed with response code: ${request.status}`);
+            else
+                throw new Error(`Rest request failed with response code: ${request.status} | message: ${response.message}`);
+        }
 
         return await request.json() as T;
     }

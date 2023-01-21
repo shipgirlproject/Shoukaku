@@ -109,7 +109,7 @@ export class Connection extends EventEmitter {
     }
 
     public get hasRequiredVoiceData(): boolean {
-        return (this.serverUpdate && this.sessionId) as unknown as boolean;
+        return !!this.serverUpdate;
     }
 
     /**
@@ -251,7 +251,7 @@ export class Connection extends EventEmitter {
         try {
             const playerUpdate = {
                 guildId: this.guildId,
-                sessionId: this.sessionId!,
+                sessionId: this.player.node.sessionId!,
                 playerOptions: {
                     voice: {
                         token: this.serverUpdate!.token,
@@ -278,8 +278,8 @@ export class Connection extends EventEmitter {
      * Destroy the current Lavalink player
      */
     public async destroyLavalinkPlayer(): Promise<void> {
-        if (!this.sessionId) return;
-        await this.player.node.rest.destroyPlayer(this.sessionId, this.guildId);
+        if (!this.player.node.sessionId) return;
+        await this.player.node.rest.destroyPlayer(this.player.node.sessionId, this.guildId);
         this.player.node.emit('debug', this.player.node.name, `[Lavalink] <- [Shoukaku] : Destroy player sent | Server: ${this.region} Guild: ${this.guildId}`);
     }
 
