@@ -271,7 +271,7 @@ export class Player extends EventEmitter {
                 paused: this.paused,
                 filters: this.filters,
                 voice: this.connection.serverUpdateInfo,
-                volume: this.filters.volume ?? 1
+                volume: this.filters.volume ?? 100
             }
         };
     }
@@ -354,10 +354,10 @@ export class Player extends EventEmitter {
 
     /**
      * Change the volume of the currently playing track
-     * @param volume Target volume as a decimal
+     * @param volume Target volume
      */
     public async setVolume(volume: number): Promise<void> {
-        volume = Math.min(5, Math.max(0, volume));
+        volume = Math.min(Math.max(volume, 0), 100);
         await this.node.rest.updatePlayer({
             guildId: this.connection.guildId,
             playerOptions: { filters: { volume }}
@@ -491,7 +491,7 @@ export class Player extends EventEmitter {
      */
     public clearFilters(): Promise<void> {
         return this.setFilters({
-            volume: 1,
+            volume: 100,
             equalizer: [],
             karaoke: null,
             timescale: null,
