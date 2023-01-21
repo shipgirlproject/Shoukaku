@@ -256,7 +256,7 @@ export class Connection extends EventEmitter {
                     voice: {
                         token: this.serverUpdate!.token,
                         endpoint: this.serverUpdate!.endpoint,
-                        sessionId: this.serverUpdate!.token
+                        sessionId: this.sessionId!
                     }
                 }
             };

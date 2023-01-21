@@ -1,7 +1,7 @@
 import { Node, NodeStats } from './Node';
 import { NodeOption } from '../Shoukaku';
 import { Versions } from '../Constants';
-import { Band, FilterOptions } from '../guild/Player';
+import { FilterOptions } from '../guild/Player';
 
 export type LoadType = 'TRACK_LOADED' | 'PLAYLIST_LOADED' | 'SEARCH_RESULT' | 'NO_MATCHES' | 'LOAD_FAILED';
 
@@ -103,6 +103,13 @@ export interface UpdatePlayerInfo {
 export interface SessionInfo {
     resumingKey?: string;
     timeout: number;
+}
+
+interface FinalFetchOptions {
+    method: string;
+    headers: Record<string, string>;
+    signal: AbortSignal;
+    body?: string;
 }
 
 /**
@@ -305,12 +312,18 @@ export class Rest {
         const abortController = new AbortController();
         const timeout = setTimeout(() => abortController.abort(), this.node.manager.options.restTimeout || 15000);
 
-        const request = await fetch(url.toString(), {
-            method: options.method?.toUpperCase() || 'GET',
+        const method = options.method?.toUpperCase() || 'GET';
+
+        const finalFetchOptions: FinalFetchOptions = {
+            method,
             headers,
-            ...(([ 'GET', 'HEAD' ].includes(options.method?.toUpperCase() || 'GET')) && options.body ? { body: JSON.stringify(options.body ?? {}) } : {}),
             signal: abortController.signal
-        })
+        };
+
+        if (![ 'GET', 'HEAD' ].includes(method) && options.body)
+            finalFetchOptions.body = JSON.stringify(options.body);
+
+        const request = await fetch(url.toString(), finalFetchOptions)
             .finally(() => clearTimeout(timeout));
 
         if (!request.ok)
