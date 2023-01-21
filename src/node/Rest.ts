@@ -155,12 +155,12 @@ export class Rest {
      * @param identifier Track ID
      * @returns A promise that resolves to a Lavalink response
      */
-    public resolve(identifier: string): Promise<LavalinkResponse> {
+    public resolve(identifier: string): Promise<LavalinkResponse|{}> {
         const options = {
             endpoint: '/loadtracks',
             options: { params: { identifier }}
         };
-        return this.fetch<LavalinkResponse>(options);
+        return this.fetch(options);
     }
 
     /**
@@ -168,7 +168,7 @@ export class Rest {
      * @param track Encoded track
      * @returns Promise that resolves to a track
      */
-    public decode(track: string): Promise<Track> {
+    public decode(track: string): Promise<Track|{}> {
         const options = {
             endpoint: '/decodetrack',
             options: { params: { track }}
@@ -180,24 +180,28 @@ export class Rest {
      * Gets all the player with the specified sessionId
      * @returns Promise that resolves to an array of Lavalink players
      */
-    public getPlayers(): Promise<LavalinkPlayer[]> {
+    public async getPlayers(): Promise<LavalinkPlayer[]> {
         const options = {
             endpoint: `/sessions/${this.sessionId}/players`,
             options: {}
         };
-        return this.fetch<LavalinkPlayer[]>(options);
+        const players = await this.fetch(options);
+        if (!Array.isArray(players))
+            return [];
+        else
+            return players;
     }
 
     /**
      * Gets all the player with the specified sessionId
      * @returns Promise that resolves to an array of Lavalink players
      */
-    public getPlayer(guildId: string): Promise<LavalinkPlayer> {
+    public getPlayer(guildId: string): Promise<LavalinkPlayer|{}> {
         const options = {
             endpoint: `/sessions/${this.sessionId}/players/${guildId}`,
             options: {}
         };
-        return this.fetch<LavalinkPlayer>(options);
+        return this.fetch(options);
     }
 
     /**
@@ -205,7 +209,7 @@ export class Rest {
      * @param data SessionId from Discord
      * @returns Promise that resolves to a Lavalink player
      */
-    public updatePlayer(data: UpdatePlayerInfo): Promise<LavalinkPlayer> {
+    public updatePlayer(data: UpdatePlayerInfo): Promise<LavalinkPlayer|{}> {
         const options = {
             endpoint: `/sessions/${this.sessionId}/players/${data.guildId}`,
             options: {
@@ -222,12 +226,12 @@ export class Rest {
      * Deletes a Lavalink player
      * @param guildId guildId where this player is
      */
-    public destroyPlayer(guildId: string): Promise<void> {
+    public async destroyPlayer(guildId: string): Promise<void> {
         const options = {
             endpoint: `/sessions/${this.sessionId}/players/${guildId}`,
             options: { method: 'DELETE' }
         };
-        return this.fetch<void>(options);
+        await this.fetch(options);
     }
 
     /**
@@ -236,7 +240,7 @@ export class Rest {
      * @param timeout Timeout to wait for resuming
      * @returns Promise that resolves to a Lavalink player
      */
-    public updateSession(resumingKey?: string, timeout?: number): Promise<SessionInfo> {
+    public updateSession(resumingKey?: string, timeout?: number): Promise<SessionInfo|{}> {
         const options = {
             endpoint: `/sessions/${this.sessionId}`,
             options: {
@@ -245,19 +249,19 @@ export class Rest {
                 body: { resumingKey, timeout }
             }
         };
-        return this.fetch<SessionInfo>(options);
+        return this.fetch(options);
     }
 
     /**
      * Gets the status of this node
      * @returns Promise that resolves to a node stats response
      */
-    public stats(): Promise<NodeStats> {
+    public stats(): Promise<NodeStats|{}> {
         const options = {
             endpoint: '/stats',
             options: {}
         };
-        return this.fetch<NodeStats>(options);
+        return this.fetch(options);
     }
 
     /**
@@ -269,14 +273,14 @@ export class Rest {
             endpoint: '/routeplanner/status',
             options: {}
         };
-        return this.fetch<RoutePlanner>(options);
+        return this.fetch(options);
     }
 
     /**
      * Release blacklisted IP address into pool of IPs
      * @param address IP address
      */
-    public unmarkFailedAddress(address: string): Promise<void> {
+    public async unmarkFailedAddress(address: string): Promise<void> {
         const options = {
             endpoint: '/routeplanner/free/address',
             options: {
@@ -285,7 +289,7 @@ export class Rest {
                 body: { address }
             }
         };
-        return this.fetch<void>(options);
+        await this.fetch(options);
     }
 
     /**
@@ -333,7 +337,10 @@ export class Rest {
             else
                 throw new Error(`Rest request failed with response code: ${request.status} | message: ${response.message}`);
         }
-
-        return await request.json() as T;
+        try {
+            return await request.json() as T;
+        } catch (error) {
+            return {};
+        }
     }
 }
