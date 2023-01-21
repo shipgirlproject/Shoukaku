@@ -1,6 +1,7 @@
 import { EventEmitter, once } from 'events';
 import { OPCodes, State, VoiceState } from '../Constants';
 import { VoiceChannelOptions } from '../node/Node';
+import { LavalinkPlayerVoiceOptions } from '../node/Rest';
 import { Player } from './Player';
 
 /**
@@ -98,6 +99,19 @@ export class Connection extends EventEmitter {
         this.serverUpdate = null;
     }
 
+    public get serverUpdateInfo(): LavalinkPlayerVoiceOptions {
+        if (!this.hasRequiredVoiceData) throw new Error('No server update / session id present');
+        return {
+            token: this.serverUpdate!.token,
+            endpoint: this.serverUpdate!.endpoint,
+            sessionId: this.sessionId!
+        };
+    }
+
+    public get hasRequiredVoiceData(): boolean {
+        return !!this.serverUpdate;
+    }
+
     /**
      * Set the deafen status for the current bot user
      * @param deaf Boolean value to indicate whether to deafen or undeafen
@@ -121,14 +135,14 @@ export class Connection extends EventEmitter {
     /**
      * Disconnect the current bot user from the connected voice channel
      */
-    public disconnect(): void {
+    public async disconnect(): Promise<void> {
         if (this.state !== State.DISCONNECTED) {
             this.state = State.DISCONNECTING;
             this.send({ guild_id: this.guildId, channel_id: null, self_mute: false, self_deaf: false }, false);
         }
         this.player.node.players.delete(this.guildId);
         this.player.clean();
-        this.destroyLavalinkPlayer();
+        await this.destroyLavalinkPlayer();
         this.state = State.DISCONNECTED;
         this.player.node.emit('debug', this.player.node.name, `[Voice] -> [Node] & [Discord] : Link & Player Destroyed | Guild: ${this.guildId}`);
     }
@@ -155,12 +169,13 @@ export class Connection extends EventEmitter {
         const timeout = setTimeout(() => controller.abort(), 15000);
 
         try {
-            const [status] = await once(this, 'connectionUpdate', { signal: controller.signal });
+            const [ status, error ] = await once(this, 'connectionUpdate', { signal: controller.signal });
             if (status !== VoiceState.SESSION_READY) {
-                if (status === VoiceState.SESSION_ID_MISSING)
-                    throw new Error('The voice connection is not established due to missing session id');
-                else
-                    throw new Error('The voice connection is not established due to missing connection endpoint');
+                switch(status) {
+                    case VoiceState.SESSION_ID_MISSING: throw new Error('The voice connection is not established due to missing session id');
+                    case VoiceState.SESSION_ENDPOINT_MISSING: throw new Error('The voice connection is not established due to missing connection endpoint');
+                    case VoiceState.SESSION_FAILED_UPDATE: throw error;
+                }
             }
             this.state = State.CONNECTED;
         } catch (error: any) {
@@ -223,27 +238,48 @@ export class Connection extends EventEmitter {
 
         this.region = data.endpoint.split('.').shift()?.replace(/[0-9]/g, '') || null;
         this.serverUpdate = data;
-        this.player.node.queue.add({ op: OPCodes.VOICE_UPDATE, guildId: this.guildId, sessionId: this.sessionId, event: this.serverUpdate });
-        this.player.node.emit('debug', this.player.node.name, `[Voice] <- [Discord] : Server Update, Voice Update Sent | Server: ${this.region} Guild: ${this.guildId}`);
-        this.emit('connectionUpdate', VoiceState.SESSION_READY);
+        this.player.node.emit('debug', this.player.node.name, `[Voice] <- [Discord] : Server Update Received | Server: ${this.region} Guild: ${this.guildId}`);
+
+        this.updateVoiceServerUpdate(true);
     }
 
     /**
-     * Send voiceUpdate to Lavalink again
-     * @internal
+     * Send voice data to lavalink
      */
-    public resendServerUpdate(): void {
-        if (!this.serverUpdate) return;
-        this.player.node.queue.add({ op: OPCodes.VOICE_UPDATE, guildId: this.guildId, sessionId: this.sessionId, event: this.serverUpdate });
-        this.player.node.emit('debug', this.player.node.name, `[Voice] <- [Discord] : Server Update, Voice Update Resent! | Server: ${this.region} Guild: ${this.guildId}`);
+    public async updateVoiceServerUpdate(emit: boolean = false): Promise<void> {
+        if (!this.hasRequiredVoiceData) return;
+        try {
+            const playerUpdate = {
+                guildId: this.guildId,
+                playerOptions: {
+                    voice: {
+                        token: this.serverUpdate!.token,
+                        endpoint: this.serverUpdate!.endpoint,
+                        sessionId: this.sessionId!
+                    }
+                }
+            };
+            await this.player.node.rest.updatePlayer(playerUpdate);
+            this.player.node.emit('debug', this.player.node.name, `[Lavalink] <- [Shoukaku] : Voice Server Update Sent | Server: ${this.region} Guild: ${this.guildId}`);
+            if (emit) this.emit('connectionUpdate', VoiceState.SESSION_READY);
+        } catch (error) {
+            if (emit) {
+                if (this.listenerCount('connectionUpdate') > 0)
+                    this.emit('connectionUpdate', VoiceState.SESSION_FAILED_UPDATE, error);
+                else
+                    this.player.node.error(error);
+            } else
+                throw error;
+        }
     }
 
     /**
      * Destroy the current Lavalink player
      */
-    public destroyLavalinkPlayer(): void {
-        this.player.node.queue.add({ op: OPCodes.DESTROY, guildId: this.guildId });
-        this.player.node.emit('debug', this.player.node.name, `[Voice] -> [Discord] : Destroyed the player on Lavalink | Server: ${this.region} Guild: ${this.guildId}`);
+    public async destroyLavalinkPlayer(): Promise<void> {
+        if (!this.player.node.sessionId) return;
+        await this.player.node.rest.destroyPlayer(this.guildId);
+        this.player.node.emit('debug', this.player.node.name, `[Lavalink] <- [Shoukaku] : Destroy player sent | Server: ${this.region} Guild: ${this.guildId}`);
     }
 
     /**

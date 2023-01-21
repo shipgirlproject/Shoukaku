@@ -1,6 +1,6 @@
 {
   "name": "shoukaku",
-  "version": "3.3.0",
+  "version": "4.0.0-dev",
   "description": "A stable and updated wrapper around Lavalink",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -15,6 +15,7 @@
     "build": "tsc && npm run build:esm && npm run build:docs",
     "build:esm": "gen-esm-wrapper dist/index.js dist/index.mjs",
     "build:docs": "typedoc --theme default --readme README.md --out docs/ --entryPointStrategy expand src/.",
+    "lint": "eslint --fix --ext .ts",
     "prepare": "tsc && npm run build:esm"
   },
   "keywords": [
@@ -29,7 +30,7 @@
     "weeb-library"
   ],
   "engines": {
-    "node": ">=16.0.0",
+    "node": ">=18.0.0",
     "npm": ">=7.0.0"
   },
   "author": "Saya",
@@ -53,6 +54,6 @@
     "gen-esm-wrapper": "^1.1.3",
     "ts-node": "^10.9.1",
     "typedoc": "^0.23.24",
-    "typescript": "^4.9.4"
+    "typescript": "^4.9.0"
   }
 }

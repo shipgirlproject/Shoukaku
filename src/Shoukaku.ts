@@ -198,7 +198,7 @@ export class Shoukaku extends EventEmitter {
     get players(): Map<string, Player> {
         const players = new Map();
         for (const node of this.nodes.values()) {
-            for (const [id, player] of node.players) players.set(id, player);
+            for (const [ id, player ] of node.players) players.set(id, player);
         }
         return players;
     }
@@ -256,7 +256,7 @@ export class Shoukaku extends EventEmitter {
      * @internal
      */
     private getIdeal(group: string|string[]): Node|undefined {
-        const nodes = [...this.nodes.values()]
+        const nodes = [ ...this.nodes.values() ]
             .filter(node => node.state === State.CONNECTED);
         if (group === 'auto') {
             return nodes

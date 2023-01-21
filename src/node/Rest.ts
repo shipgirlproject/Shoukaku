@@ -1,6 +1,7 @@
-import { Node } from './Node';
+import { Node, NodeStats } from './Node';
 import { NodeOption } from '../Shoukaku';
-import Fetch from 'node-fetch';
+import { Versions } from '../Constants';
+import { FilterOptions } from '../guild/Player';
 
 export type LoadType = 'TRACK_LOADED' | 'PLAYLIST_LOADED' | 'SEARCH_RESULT' | 'NO_MATCHES' | 'LOAD_FAILED';
 
@@ -17,6 +18,7 @@ interface FetchOptions {
 
 export interface Track {
     track: string;
+    encoded: string;
     info: {
         identifier: string;
         isSeekable: boolean;
@@ -25,7 +27,7 @@ export interface Track {
         isStream: boolean;
         position: number;
         title: string;
-        uri: string;
+        uri?: string;
         sourceName: string;
     }
 }
@@ -61,6 +63,54 @@ export interface RoutePlanner {
     currentAddressIndex?: string;
 }
 
+export interface LavalinkPlayerVoice {
+    token: string;
+    endpoint: string;
+    sessionId: string;
+    connected?: boolean;
+    ping?: number
+}
+
+export interface LavalinkPlayerVoiceOptions extends Omit<LavalinkPlayerVoice, 'connected'|'ping'> {}
+
+export interface LavalinkPlayer {
+    guildId: string,
+    track?: Track,
+    volume: number;
+    paused: boolean;
+    voice: LavalinkPlayerVoice
+    filters: FilterOptions
+}
+
+export interface UpdatePlayerOptions {
+    encodedTrack?: string|null;
+    identifier?: string;
+    position?: number;
+    endTime?: number;
+    volume?: number;
+    paused?: boolean;
+    filters?:  FilterOptions;
+    voice?: LavalinkPlayerVoiceOptions;
+}
+
+export interface UpdatePlayerInfo {
+    guildId: string;
+    playerOptions: UpdatePlayerOptions;
+    noReplace?: boolean;
+}
+
+export interface SessionInfo {
+    resumingKey?: string;
+    timeout: number;
+}
+
+interface FinalFetchOptions {
+    method: string;
+    headers: Record<string, string>;
+    signal: AbortSignal;
+    body?: string;
+}
+
 /**
  * Wrapper around Lavalink REST API
  */
@@ -78,6 +128,10 @@ export class Rest {
      */
     protected readonly auth: string;
     /**
+     * Rest version to use
+     */
+    protected readonly version: string;
+    /**
      * @param node An instance of Node
      * @param options.name Name of this node
      * @param options.url URL of Lavalink
@@ -88,57 +142,145 @@ export class Rest {
     constructor(node: Node, options: NodeOption) {
         this.node = node;
         this.url = `${options.secure ? 'https' : 'http'}://${options.url}`;
+        this.version = `/v${Versions.REST_VERSION}`;
         this.auth = options.auth;
+    }
+
+    protected get sessionId(): string {
+        return this.node.sessionId!;
     }
 
     /**
      * Resolve a track
      * @param identifier Track ID
-     * @returns A promise that resolves to a Lavalink response or void
+     * @returns A promise that resolves to a Lavalink response
      */
-    public resolve(identifier: string): Promise<LavalinkResponse | null> {
+    public resolve(identifier: string): Promise<LavalinkResponse|{}> {
         const options = {
             endpoint: '/loadtracks',
             options: { params: { identifier }}
         };
-
-        return this.fetch<LavalinkResponse>(options);
+        return this.fetch(options);
     }
 
     /**
      * Decode a track
      * @param track Encoded track
-     * @returns Promise that resolves to a track or void
+     * @returns Promise that resolves to a track
      */
-    public decode(track: string): Promise<Track | null> {
+    public decode(track: string): Promise<Track|{}> {
         const options = {
             endpoint: '/decodetrack',
             options: { params: { track }}
         };
-
         return this.fetch<Track>(options);
     }
 
     /**
-     * Get routplanner status from Lavalink
-     * @returns Promise that resolves to a routeplanner response or void
-     * @internal
+     * Gets all the player with the specified sessionId
+     * @returns Promise that resolves to an array of Lavalink players
      */
-    public getRoutePlannerStatus(): Promise<RoutePlanner | null> {
+    public async getPlayers(): Promise<LavalinkPlayer[]> {
+        const options = {
+            endpoint: `/sessions/${this.sessionId}/players`,
+            options: {}
+        };
+        const players = await this.fetch(options);
+        if (!Array.isArray(players))
+            return [];
+        else
+            return players;
+    }
+
+    /**
+     * Gets all the player with the specified sessionId
+     * @returns Promise that resolves to an array of Lavalink players
+     */
+    public getPlayer(guildId: string): Promise<LavalinkPlayer|{}> {
+        const options = {
+            endpoint: `/sessions/${this.sessionId}/players/${guildId}`,
+            options: {}
+        };
+        return this.fetch(options);
+    }
+
+    /**
+     * Updates a Lavalink player
+     * @param data SessionId from Discord
+     * @returns Promise that resolves to a Lavalink player
+     */
+    public updatePlayer(data: UpdatePlayerInfo): Promise<LavalinkPlayer|{}> {
+        const options = {
+            endpoint: `/sessions/${this.sessionId}/players/${data.guildId}`,
+            options: {
+                method: 'PATCH',
+                params: { noReplace: data.noReplace?.toString() || 'false' },
+                headers: { 'Content-Type': 'application/json' },
+                body: data.playerOptions as Record<string, unknown>
+            }
+        };
+        return this.fetch<LavalinkPlayer>(options);
+    }
+
+    /**
+     * Deletes a Lavalink player
+     * @param guildId guildId where this player is
+     */
+    public async destroyPlayer(guildId: string): Promise<void> {
+        const options = {
+            endpoint: `/sessions/${this.sessionId}/players/${guildId}`,
+            options: { method: 'DELETE' }
+        };
+        await this.fetch(options);
+    }
+
+    /**
+     * Updates the session with a resuming key and timeout
+     * @param resumingKey Resuming key to set
+     * @param timeout Timeout to wait for resuming
+     * @returns Promise that resolves to a Lavalink player
+     */
+    public updateSession(resumingKey?: string, timeout?: number): Promise<SessionInfo|{}> {
+        const options = {
+            endpoint: `/sessions/${this.sessionId}`,
+            options: {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: { resumingKey, timeout }
+            }
+        };
+        return this.fetch(options);
+    }
+
+    /**
+     * Gets the status of this node
+     * @returns Promise that resolves to a node stats response
+     */
+    public stats(): Promise<NodeStats|{}> {
+        const options = {
+            endpoint: '/stats',
+            options: {}
+        };
+        return this.fetch(options);
+    }
+
+    /**
+     * Get routplanner status from Lavalink
+     * @returns Promise that resolves to a routeplanner response
+     */
+    public getRoutePlannerStatus(): Promise<RoutePlanner> {
         const options = {
             endpoint: '/routeplanner/status',
             options: {}
         };
-
-        return this.fetch<RoutePlanner>(options);
+        return this.fetch(options);
     }
 
     /**
      * Release blacklisted IP address into pool of IPs
      * @param address IP address
-     * @internal
      */
-    public unmarkFailedAddress(address: string): Promise<void | null> {
+    public async unmarkFailedAddress(address: string): Promise<void> {
         const options = {
             endpoint: '/routeplanner/free/address',
             options: {
@@ -147,8 +289,7 @@ export class Rest {
                 body: { address }
             }
         };
-
-        return this.fetch<void>(options);
+        await this.fetch(options);
     }
 
     /**
@@ -157,7 +298,7 @@ export class Rest {
      * @param fetchOptions.options Options passed to fetch
      * @internal
      */
-    private async fetch<T = unknown>(fetchOptions: FetchOptions) {
+    protected async fetch<T = unknown>(fetchOptions: FetchOptions) {
         const { endpoint, options } = fetchOptions;
         let headers = {
             'Authorization': this.auth,
@@ -166,24 +307,40 @@ export class Rest {
 
         if (options.headers) headers = { ...headers, ...options.headers };
 
-        const url = new URL(`${this.url}${endpoint}`);
+        const url = new URL(`${this.url}${this.version}${endpoint}`);
+
         if (options.params) url.search = new URLSearchParams(options.params).toString();
 
         const abortController = new AbortController();
         const timeout = setTimeout(() => abortController.abort(), this.node.manager.options.restTimeout || 15000);
 
-        const request = await Fetch(url.toString(), {
-            method: options.method?.toUpperCase() || 'GET',
+        const method = options.method?.toUpperCase() || 'GET';
+
+        const finalFetchOptions: FinalFetchOptions = {
+            method,
             headers,
-            ...((['GET', 'HEAD'].includes(options.method?.toUpperCase() || 'GET')) && options.body ? { body: JSON.stringify(options.body ?? {}) } : {}),
-            // @ts-expect-error
             signal: abortController.signal
-        })
+        };
+
+        if (![ 'GET', 'HEAD' ].includes(method) && options.body)
+            finalFetchOptions.body = JSON.stringify(options.body);
+
+        const request = await fetch(url.toString(), finalFetchOptions)
             .finally(() => clearTimeout(timeout));
 
-        if (!request.ok)
-            throw new Error(`Rest request failed with response code: ${request.status}`);
-
-        return await request.json() as T;
+        if (!request.ok) {
+            const response = await request
+                .json()
+                .catch(() => null);
+            if (!response?.message)
+                throw new Error(`Rest request failed with response code: ${request.status}`);
+            else
+                throw new Error(`Rest request failed with response code: ${request.status} | message: ${response.message}`);
+        }
+        try {
+            return await request.json() as T;
+        } catch (error) {
+            return {};
+        }
     }
 }
