@@ -34,17 +34,23 @@ Refer to [/src/connectors](https://github.com/Deivu/Shoukaku/tree/master/src/con
 
 ### Installation
 
-* Stable
+* Stable ( 3.x.x ) ( Needs Lavalink Versions: `3.5.x` < | `3.9.x` > )
 
 > `npm install shoukaku`
 
-* Dev
+* Dev ( 4.0.0-dev ) (Needs Lavalink Versions: `3.7.x` < )
 
-> `npm install https://github.com/Deivu/Shoukaku.git#v4` or `npm install https://github.com/Deivu/Shoukaku.git#master` (Needs Lavalink Versions: `3.7.x <` )
+> For last known stable: `npm install https://github.com/Deivu/Shoukaku.git#v4`
+
+> For living on the edge but with latest features: `npm install https://github.com/Deivu/Shoukaku.git#master`
+
+> Dev versions are not guaranteed to stay the same api wise, and even with last known stable, I won't say it's 100% stable
 
 ### Documentation
 
 https://deivu.github.io/Shoukaku/ (Stable v3 version only)
+
+https://github.com/Deivu/Shoukaku/tree/v3 (v3 stable github branch)
 
 > v4.x.x docs are in your intellisense for now (I only deploy stable release docs on the Github page)
 
