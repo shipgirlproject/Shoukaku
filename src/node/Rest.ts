@@ -327,7 +327,9 @@ export class Rest {
             .finally(() => clearTimeout(timeout));
 
         if (!request.ok) {
-            const response = (await request.json()).catch(() => null);
+            const response = await request
+                .json()
+                .catch(() => null);
             if (!response?.message)
                 throw new Error(`Rest request failed with response code: ${request.status}`);
             else
