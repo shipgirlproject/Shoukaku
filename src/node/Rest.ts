@@ -95,7 +95,6 @@ export interface UpdatePlayerOptions {
 
 export interface UpdatePlayerInfo {
     guildId: string;
-    sessionId: string;
     playerOptions: UpdatePlayerOptions;
     noReplace?: boolean;
 }
@@ -131,7 +130,7 @@ export class Rest {
     /**
      * Rest version to use
      */
-    protected readonly version: number;
+    protected readonly version: string;
     /**
      * @param node An instance of Node
      * @param options.name Name of this node
@@ -143,8 +142,12 @@ export class Rest {
     constructor(node: Node, options: NodeOption) {
         this.node = node;
         this.url = `${options.secure ? 'https' : 'http'}://${options.url}`;
-        this.version = Versions.REST_VERSION;
+        this.version = `/v${Versions.REST_VERSION}`;
         this.auth = options.auth;
+    }
+
+    protected get sessionId(): string {
+        return this.node.sessionId!;
     }
 
     /**
@@ -175,12 +178,11 @@ export class Rest {
 
     /**
      * Gets all the player with the specified sessionId
-     * @param sessionId SessionId from Discord
      * @returns Promise that resolves to an array of Lavalink players
      */
-    public getPlayers(sessionId: string): Promise<LavalinkPlayer[]> {
+    public getPlayers(): Promise<LavalinkPlayer[]> {
         const options = {
-            endpoint: `/sessions/${sessionId}/players`,
+            endpoint: `/sessions/${this.sessionId}/players`,
             options: {}
         };
         return this.fetch<LavalinkPlayer[]>(options);
@@ -188,12 +190,11 @@ export class Rest {
 
     /**
      * Gets all the player with the specified sessionId
-     * @param sessionId SessionId from Discord
      * @returns Promise that resolves to an array of Lavalink players
      */
-    public getPlayer(sessionId: string, guildId: string): Promise<LavalinkPlayer> {
+    public getPlayer(guildId: string): Promise<LavalinkPlayer> {
         const options = {
-            endpoint: `/sessions/${sessionId}/players/${guildId}`,
+            endpoint: `/sessions/${this.sessionId}/players/${guildId}`,
             options: {}
         };
         return this.fetch<LavalinkPlayer>(options);
@@ -206,7 +207,7 @@ export class Rest {
      */
     public updatePlayer(data: UpdatePlayerInfo): Promise<LavalinkPlayer> {
         const options = {
-            endpoint: `/sessions/${data.sessionId}/players/${data.guildId}`,
+            endpoint: `/sessions/${this.sessionId}/players/${data.guildId}`,
             options: {
                 method: 'PATCH',
                 params: { noReplace: data.noReplace?.toString() || 'false' },
@@ -219,12 +220,11 @@ export class Rest {
 
     /**
      * Deletes a Lavalink player
-     * @param sessionId SessionId from Discord
      * @param guildId guildId where this player is
      */
-    public destroyPlayer(sessionId: string, guildId: string): Promise<void> {
+    public destroyPlayer(guildId: string): Promise<void> {
         const options = {
-            endpoint: `/sessions/${sessionId}/players/${guildId}`,
+            endpoint: `/sessions/${this.sessionId}/players/${guildId}`,
             options: { method: 'DELETE' }
         };
         return this.fetch<void>(options);
@@ -232,14 +232,13 @@ export class Rest {
 
     /**
      * Updates the session with a resuming key and timeout
-     * @param sessionId SessionId from Discord
      * @param resumingKey Resuming key to set
      * @param timeout Timeout to wait for resuming
      * @returns Promise that resolves to a Lavalink player
      */
-    public updateSession(sessionId: string, resumingKey?: string, timeout?: number): Promise<SessionInfo> {
+    public updateSession(resumingKey?: string, timeout?: number): Promise<SessionInfo> {
         const options = {
-            endpoint: `/sessions/${sessionId}`,
+            endpoint: `/sessions/${this.sessionId}`,
             options: {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },

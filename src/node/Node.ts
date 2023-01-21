@@ -80,7 +80,7 @@ export class Node extends EventEmitter {
     /**
      * Websocket version this node will use
      */
-    public readonly version: number;
+    public readonly version: string;
     /**
      * URL of Lavalink
      */
@@ -132,7 +132,7 @@ export class Node extends EventEmitter {
         this.rest = new (this.manager.options.structures.rest || Rest)(this, options);
         this.name = options.name;
         this.group = options.group;
-        this.version = Versions.WEBSOCKET_VERSION;
+        this.version = `/v${Versions.WEBSOCKET_VERSION}`;
         this.url = `${options.secure ? 'wss' : 'ws'}://${options.url}`;
         this.auth = options.auth;
         this.reconnects = 0;
@@ -173,7 +173,6 @@ export class Node extends EventEmitter {
 
         const resume = this.initialized && (this.manager.options.resume && this.manager.options.resumeKey);
         this.state = State.CONNECTING;
-        this.sessionId = null;
         let headers: ResumableHeaders|NonResumableHeaders;
 
         if (resume) {
@@ -193,13 +192,11 @@ export class Node extends EventEmitter {
             };
         }
 
-        this.emit('debug', this.name, `[Socket] -> [${this.name}] : Connecting ${this.url}, Version: /${this.version}, Trying to resume? ${resume}`);
+        this.emit('debug', this.name, `[Socket] -> [${this.name}] : Connecting ${this.url}, Version: ${this.version}, Trying to resume? ${resume}`);
 
         if (!this.initialized) this.initialized = true;
 
-        const version = `/v${this.version}`;
-        const endpoint = '/websocket';
-        const url = new URL(`${this.url}${version}${endpoint}`);
+        const url = new URL(`${this.url}${this.version}/websocket`);
 
         this.ws = new Websocket(url.toString(), { headers } as Websocket.ClientOptions);
         this.ws.once('upgrade', response => this.ws!.once('open', () => this.open(response)));
@@ -277,26 +274,11 @@ export class Node extends EventEmitter {
      * @param response Response from Lavalink
      * @internal
      */
-    private async open(response: IncomingMessage): Promise<void> {
+    private open(response: IncomingMessage): void {
         const resumed = response.headers['session-resumed'] === 'true';
-        const resumeByLibrary = this.initialized && (this.manager.options.resumeByLibrary && this.players.size);
-        if (!resumed && resumeByLibrary) {
-            const promises = [];
-            for (const player of [ ...this.players.values() ]) {
-                if (!player.connection.hasRequiredVoiceData) continue;
-                promises.push(player.update(player.playerData));
-            }
-            try {
-                await Promise.all(promises);
-            } catch (error) {
-                this.error(error);
-            }
-        }
-
-        this.emit('debug', this.name, `[Socket] <-> [${this.name}] : Connection Handshake Done! ${this.url} | Lavalink Resumed: ${resumed} | Shoukaku Resumed: ${resumeByLibrary}`);
+        this.emit('debug', this.name, `[Socket] <-> [${this.name}] : Connection Handshake Done! ${this.url} | Upgrade Headers Resuned: ${resumed}`);
         this.reconnects = 0;
-        this.state = State.CONNECTED;
-        this.emit('ready', this.name,  resumed || resumeByLibrary);
+        this.state = State.NEARLY;
     }
 
     /**
@@ -313,12 +295,29 @@ export class Node extends EventEmitter {
                 this.stats = json;
                 break;
             case OPCodes.READY:
-                this.sessionId = message.sessionId;
-                this.emit('debug', this.name, `[Socket] -> [${this.name}] : Lavalink is ready!`);
+                this.sessionId = json.sessionId;
+                const resumeByLibrary = this.initialized && (this.players.size && this.manager.options.resumeByLibrary);
+
+                if (!json.resumed && resumeByLibrary) {
+                    const promises = [];
+                    for (const player of [ ...this.players.values() ]) {
+                        if (!player.connection.hasRequiredVoiceData) continue;
+                        promises.push(player.update(player.playerData));
+                    }
+                    try {
+                        await Promise.all(promises);
+                    } catch (error) {
+                        this.error(error);
+                    }
+                }
+
+                this.emit('debug', this.name, `[Socket] -> [${this.name}] : Lavalink is ready! | Lavalink resume: ${json.resumed} | Lib resume: ${resumeByLibrary}`);
+                this.emit('ready', this.name,  json.resumed || resumeByLibrary);
+
                 if (this.manager.options.resume && this.manager.options.resumeKey) {
                     try {
-                        await this.rest.updateSession(this.sessionId!, this.manager.options.resumeKey, this.manager.options.resumeTimeout);
-                        this.emit('debug', this.name, `[Socket] -> [${this.name}] : Resuming configured on Lavalink`);
+                        await this.rest.updateSession(this.manager.options.resumeKey, this.manager.options.resumeTimeout);
+                        this.emit('debug', this.name, `[Socket] -> [${this.name}] : Resuming configured!`);
                     } catch (error) {
                         this.error(error);
                     }
@@ -360,6 +359,7 @@ export class Node extends EventEmitter {
         this.ws?.removeAllListeners();
         this.ws?.close();
         this.ws = null;
+        this.sessionId = null;
         this.state = State.DISCONNECTED;
     }
 

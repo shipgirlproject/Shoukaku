@@ -36,7 +36,7 @@ export interface ResumeOptions {
     noReplace?: boolean;
     pause?: boolean;
     startTime?: number;
-    endtime?: number;
+    endTime?: number;
 }
 
 export interface Band {
@@ -264,7 +264,6 @@ export class Player extends EventEmitter {
     public get playerData(): UpdatePlayerInfo {
         return {
             guildId: this.connection.guildId,
-            sessionId: this.node.sessionId!,
             playerOptions: {
                 encodedTrack: this.track,
                 position: this.position,
@@ -304,7 +303,6 @@ export class Player extends EventEmitter {
         };
         await this.node.rest.updatePlayer({
             guildId: this.connection.guildId,
-            sessionId: this.node.sessionId!,
             noReplace: playable.options?.noReplace ?? false,
             playerOptions
         });
@@ -319,7 +317,6 @@ export class Player extends EventEmitter {
     public async stopTrack(): Promise<void> {
         await this.node.rest.updatePlayer({
             guildId: this.connection.guildId,
-            sessionId: this.node.sessionId!,
             playerOptions: { encodedTrack: null }
         });
         this.position = 0;
@@ -332,7 +329,6 @@ export class Player extends EventEmitter {
     public async setPaused(paused = true): Promise<void> {
         await this.node.rest.updatePlayer({
             guildId: this.connection.guildId,
-            sessionId: this.node.sessionId!,
             playerOptions: { paused }
         });
         this.paused = paused;
@@ -345,7 +341,6 @@ export class Player extends EventEmitter {
     public async seekTo(position: number): Promise<void> {
         await this.node.rest.updatePlayer({
             guildId: this.connection.guildId,
-            sessionId: this.node.sessionId!,
             playerOptions: { position }
         });
         this.position = position;
@@ -359,7 +354,6 @@ export class Player extends EventEmitter {
         volume = Math.min(5, Math.max(0, volume));
         await this.node.rest.updatePlayer({
             guildId: this.connection.guildId,
-            sessionId: this.node.sessionId!,
             playerOptions: { filters: { volume }}
         });
         this.filters.volume = volume;
@@ -372,7 +366,6 @@ export class Player extends EventEmitter {
     public async setEqualizer(equalizer: Band[]): Promise<void> {
         await this.node.rest.updatePlayer({
             guildId: this.connection.guildId,
-            sessionId: this.node.sessionId!,
             playerOptions: { filters: { equalizer }}
         });
         this.filters.equalizer = equalizer;
@@ -385,7 +378,6 @@ export class Player extends EventEmitter {
     public async setKaraoke(karaoke?: KaraokeSettings): Promise<void> {
         await this.node.rest.updatePlayer({
             guildId: this.connection.guildId,
-            sessionId: this.node.sessionId!,
             playerOptions: { filters: { karaoke }}
         });
         this.filters.karaoke = karaoke || null;
@@ -398,7 +390,6 @@ export class Player extends EventEmitter {
     public async setTimescale(timescale?: TimescaleSettings): Promise<void> {
         await this.node.rest.updatePlayer({
             guildId: this.connection.guildId,
-            sessionId: this.node.sessionId!,
             playerOptions: { filters: { timescale }}
         });
         this.filters.timescale = timescale || null;
@@ -411,7 +402,6 @@ export class Player extends EventEmitter {
     public async setTremolo(tremolo?: FreqSettings): Promise<void> {
         await this.node.rest.updatePlayer({
             guildId: this.connection.guildId,
-            sessionId: this.node.sessionId!,
             playerOptions: { filters: { tremolo }}
         });
         this.filters.tremolo = tremolo || null;
@@ -424,7 +414,6 @@ export class Player extends EventEmitter {
     public async setVibrato(vibrato?: FreqSettings): Promise<void> {
         await this.node.rest.updatePlayer({
             guildId: this.connection.guildId,
-            sessionId: this.node.sessionId!,
             playerOptions: { filters: { vibrato }}
         });
         this.filters.vibrato = vibrato || null;
@@ -437,7 +426,6 @@ export class Player extends EventEmitter {
     public async setRotation(rotation?: RotationSettings): Promise<void> {
         await this.node.rest.updatePlayer({
             guildId: this.connection.guildId,
-            sessionId: this.node.sessionId!,
             playerOptions: { filters: { rotation }}
         });
         this.filters.rotation = rotation || null;
@@ -451,7 +439,6 @@ export class Player extends EventEmitter {
     public async setDistortion(distortion: DistortionSettings): Promise<void> {
         await this.node.rest.updatePlayer({
             guildId: this.connection.guildId,
-            sessionId: this.node.sessionId!,
             playerOptions: { filters: { distortion }}
         });
         this.filters.distortion = distortion || null;
@@ -464,7 +451,6 @@ export class Player extends EventEmitter {
     public async setChannelMix(channelMix: ChannelMixSettings): Promise<void> {
         await this.node.rest.updatePlayer({
             guildId: this.connection.guildId,
-            sessionId: this.node.sessionId!,
             playerOptions: { filters: { channelMix }}
         });
         this.filters.channelMix = channelMix || null;
@@ -477,7 +463,6 @@ export class Player extends EventEmitter {
     public async setLowPass(lowPass: LowPassSettings): Promise<void> {
         await this.node.rest.updatePlayer({
             guildId: this.connection.guildId,
-            sessionId: this.node.sessionId!,
             playerOptions: { filters: { lowPass }}
         });
         this.filters.lowPass = lowPass || null;
@@ -490,7 +475,6 @@ export class Player extends EventEmitter {
     public async setFilters(filters: FilterOptions): Promise<void> {
         await this.node.rest.updatePlayer({
             guildId: this.connection.guildId,
-            sessionId: this.node.sessionId!,
             playerOptions: { filters }
         });
         this.filters = filters;
@@ -534,11 +518,13 @@ export class Player extends EventEmitter {
      * @param options An object that conforms to ResumeOptions that specify behavior on resuming
      */
     public async resume(options: ResumeOptions = {}): Promise<void> {
-        await this.setFilters(this.filters);
-        if (this.track && this.connection.sessionId) {
-            await this.update(this.playerData);
-            this.emit('resumed');
-        }
+        if (!this.track) return;
+        const data = this.playerData;
+        if (options.noReplace) data.noReplace = options.noReplace;
+        if (options.startTime) data.playerOptions.position = options.startTime;
+        if (options.endTime) data.playerOptions.position;
+        if (options.pause) data.playerOptions.paused = options.pause;
+        await this.update(data);
     }
 
     /**
@@ -566,9 +552,9 @@ export class Player extends EventEmitter {
      */
     public onLavalinkMessage(json: any): void {
         if (json.op === OPCodes.PLAYER_UPDATE) {
-            this.position = json.state.position;
-            // ping property require lavalink >=3.5.1
-            this.ping = json.state.ping ?? 0;
+            const { position, ping } = json.state;
+            this.position = position;
+            this.ping = ping ?? 0;
             this.emit('update', json);
         } else if (json.op === OPCodes.EVENT)
             this.onPlayerEvent(json);

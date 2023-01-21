@@ -251,7 +251,6 @@ export class Connection extends EventEmitter {
         try {
             const playerUpdate = {
                 guildId: this.guildId,
-                sessionId: this.player.node.sessionId!,
                 playerOptions: {
                     voice: {
                         token: this.serverUpdate!.token,
@@ -279,7 +278,7 @@ export class Connection extends EventEmitter {
      */
     public async destroyLavalinkPlayer(): Promise<void> {
         if (!this.player.node.sessionId) return;
-        await this.player.node.rest.destroyPlayer(this.player.node.sessionId, this.guildId);
+        await this.player.node.rest.destroyPlayer(this.guildId);
         this.player.node.emit('debug', this.player.node.name, `[Lavalink] <- [Shoukaku] : Destroy player sent | Server: ${this.region} Guild: ${this.guildId}`);
     }
 

@@ -3,6 +3,7 @@ import Info from '../package.json';
 
 export enum State {
     CONNECTING,
+    NEARLY,
     CONNECTED,
     DISCONNECTING,
     DISCONNECTED
