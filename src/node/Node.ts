@@ -198,7 +198,8 @@ export class Node extends EventEmitter {
         if (!this.initialized) this.initialized = true;
 
         const version = `/v${this.version}`;
-        const url = new URL(`${this.url}${version}`);
+        const endpoint = '/websocket';
+        const url = new URL(`${this.url}${version}${endpoint}`);
 
         this.ws = new Websocket(url.toString(), { headers } as Websocket.ClientOptions);
         this.ws.once('upgrade', response => this.ws!.once('open', () => this.open(response)));
