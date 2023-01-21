@@ -303,8 +303,7 @@ export class Rest {
 
         if (options.headers) headers = { ...headers, ...options.headers };
 
-        const version = `/v${this.version}`;
-        const url = new URL(`${this.url}${version}${endpoint}`);
+        const url = new URL(`${this.url}${this.version}${endpoint}`);
 
         if (options.params) url.search = new URLSearchParams(options.params).toString();
 
