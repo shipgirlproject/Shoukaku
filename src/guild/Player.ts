@@ -19,6 +19,7 @@ export interface PlayOptions {
         pause?: boolean;
         startTime?: number;
         endTime?: number;
+        volume?: number;
     }
 }
 
@@ -295,20 +296,25 @@ export class Player extends EventEmitter {
      * @param playable Options for playing this track
      */
     public async playTrack(playable: PlayOptions): Promise<void> {
-        const playerOptions = {
-            encodedTrack: playable.track,
-            pause: playable.options?.pause ?? false,
-            position: playable.options?.startTime,
-            endTime: playable.options?.endTime
+        const playerOptions: UpdatePlayerOptions = {
+            encodedTrack: playable.track
         };
+        if (playable.options) {
+            const { pause, startTime, endTime, volume } = playable.options;
+            if (pause) playerOptions.paused = pause;
+            if (startTime) playerOptions.position = startTime;
+            if (endTime) playerOptions.endTime = endTime;
+            if (volume) playerOptions.volume = volume;
+        }
         await this.node.rest.updatePlayer({
             guildId: this.connection.guildId,
             noReplace: playable.options?.noReplace ?? false,
             playerOptions
         });
         this.track = playable.track;
-        this.paused = playable.options?.pause ?? false;
-        this.position = playerOptions.position ?? 0;
+        if (playerOptions.paused) this.paused = playerOptions.paused;
+        if (playerOptions.position) this.position = playerOptions.position;
+        if (playerOptions.volume) this.filters.volume = playerOptions.volume;
     }
 
     /**
