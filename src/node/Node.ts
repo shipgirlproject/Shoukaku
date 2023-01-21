@@ -311,7 +311,8 @@ export class Node extends EventEmitter {
                     }
                 }
 
-                this.emit('debug', this.name, `[Socket] -> [${this.name}] : Lavalink is ready! | Lavalink resume: ${json.resumed} | Lib resume: ${resumeByLibrary}`);
+                this.state = State.CONNECTED;
+                this.emit('debug', this.name, `[Socket] -> [${this.name}] : Lavalink is ready! | Lavalink resume: ${json.resumed} | Lib resume: ${!!resumeByLibrary}`);
                 this.emit('ready', this.name,  json.resumed || resumeByLibrary);
 
                 if (this.manager.options.resume && this.manager.options.resumeKey) {
