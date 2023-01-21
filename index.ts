@@ -5,6 +5,5 @@ export * from './src/connectors/Connector';
 export * from './src/guild/Connection';
 export * from './src/guild/Player';
 export * from './src/node/Node';
-export * from './src/node/Queue';
 export * from './src/node/Rest';
 export * from './src/Shoukaku';

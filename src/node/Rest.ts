@@ -1,7 +1,7 @@
 import { Node, NodeStats } from './Node';
 import { NodeOption } from '../Shoukaku';
 import { Versions } from '../Constants';
-import { Band, Filters } from '../guild/Player';
+import { Band, FilterOptions } from '../guild/Player';
 
 export type LoadType = 'TRACK_LOADED' | 'PLAYLIST_LOADED' | 'SEARCH_RESULT' | 'NO_MATCHES' | 'LOAD_FAILED';
 
@@ -73,28 +73,23 @@ export interface LavalinkPlayerVoice {
 
 export interface LavalinkPlayerVoiceOptions extends Omit<LavalinkPlayerVoice, 'connected'|'ping'> {}
 
-export interface LavalinkFilters extends Omit<Filters, 'volume'|'equalizer'> {
-    volume?: number;
-    band?: Band[]
-}
-
 export interface LavalinkPlayer {
     guildId: string,
     track?: Track,
     volume: number;
     paused: boolean;
     voice: LavalinkPlayerVoice
-    filters: LavalinkFilters
+    filters: FilterOptions
 }
 
 export interface UpdatePlayerOptions {
-    encodedTrack?: string;
+    encodedTrack?: string|null;
     identifier?: string;
     position?: number;
     endTime?: number;
     volume?: number;
     paused?: boolean;
-    filters?:  LavalinkFilters;
+    filters?:  FilterOptions;
     voice?: LavalinkPlayerVoiceOptions;
 }
 
@@ -313,7 +308,7 @@ export class Rest {
         const request = await fetch(url.toString(), {
             method: options.method?.toUpperCase() || 'GET',
             headers,
-            ...((['GET', 'HEAD'].includes(options.method?.toUpperCase() || 'GET')) && options.body ? { body: JSON.stringify(options.body ?? {}) } : {}),
+            ...(([ 'GET', 'HEAD' ].includes(options.method?.toUpperCase() || 'GET')) && options.body ? { body: JSON.stringify(options.body ?? {}) } : {}),
             signal: abortController.signal
         })
             .finally(() => clearTimeout(timeout));

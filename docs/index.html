@@ -55,19 +55,22 @@
 <li>Stable</li>
 </ul>
 <blockquote>
-<p>npm install shoukaku</p>
+<p><code>npm install shoukaku</code></p>
 </blockquote>
 <ul>
-<li>Dev<blockquote>
-<p>npm install <a href="https://github.com/Deivu/Shoukaku.git#master">https://github.com/Deivu/Shoukaku.git#master</a></p>
-</blockquote>
-</li>
+<li>Dev</li>
 </ul>
+<blockquote>
+<p><code>npm install https://github.com/Deivu/Shoukaku.git#v4</code> or <code>npm install https://github.com/Deivu/Shoukaku.git#master</code> (Needs Lavalink Versions: <code>3.7.x &lt;</code> )</p>
+</blockquote>
 
 <a href="#documentation" id="documentation" style="color: inherit; text-decoration: none;">
   <h3>Documentation</h3>
 </a>
-<p><a href="https://deivu.github.io/Shoukaku/">https://deivu.github.io/Shoukaku/</a></p>
+<p><a href="https://deivu.github.io/Shoukaku/">https://deivu.github.io/Shoukaku/</a> (Stable v3 version only)</p>
+<blockquote>
+<p>v4.x.x docs are in your intellisense for now (I only deploy stable release docs on the Github page)</p>
+</blockquote>
 
 <a href="#small-code-snippet-examples" id="small-code-snippet-examples" style="color: inherit; text-decoration: none;">
   <h3>Small code snippet examples</h3>
@@ -90,7 +93,12 @@
 <blockquote>
 <p>Playing a track and changing a playback option (in this example, volume)</p>
 </blockquote>
-<pre><code class="language-js"><span class="hl-5">player</span><br/><span class="hl-1">    .</span><span class="hl-3">playTrack</span><span class="hl-1">({ </span><span class="hl-5">track:</span><span class="hl-1"> </span><span class="hl-5">metadata</span><span class="hl-1">.</span><span class="hl-5">track</span><span class="hl-1"> })</span><br/><span class="hl-1">    .</span><span class="hl-3">setVolume</span><span class="hl-1">(</span><span class="hl-8">0.5</span><span class="hl-1">);</span>
+<pre><code class="language-js"><span class="hl-7">await</span><span class="hl-1"> </span><span class="hl-5">player</span><span class="hl-1">.</span><span class="hl-3">playTrack</span><span class="hl-1">({ </span><span class="hl-5">track:</span><span class="hl-1"> </span><span class="hl-5">metadata</span><span class="hl-1">.</span><span class="hl-5">encodedTrack</span><span class="hl-1"> });</span><br/><span class="hl-7">await</span><span class="hl-1"> </span><span class="hl-5">player</span><span class="hl-1">.</span><span class="hl-3">setVolume</span><span class="hl-1">(</span><span class="hl-8">0.5</span><span class="hl-1">);</span>
+</code></pre>
+<blockquote>
+<p>Updating the whole player if you don&#39;t want to use my helper functions</p>
+</blockquote>
+<pre><code class="language-js"><span class="hl-7">await</span><span class="hl-1"> </span><span class="hl-5">player</span><span class="hl-1">.</span><span class="hl-3">update</span><span class="hl-1">({ ...</span><span class="hl-5">playerOptions</span><span class="hl-1"> });</span>
 </code></pre>
 
 <a href="#shoukaku39s-options" id="shoukaku39s-options" style="color: inherit; text-decoration: none;">
@@ -176,26 +184,16 @@
 </tr>
 </thead>
 <tbody><tr>
-<td>.....</td>
-<td>........</td>
-<td>..........</td>
+<td>Kazagumo</td>
+<td><a href="https://github.com/Takiyo0/Kazagumo">Github</a></td>
+<td>A Shoukaku wrapper that have built-in queue system</td>
+</tr>
+<tr>
+<td>stone-deezer</td>
+<td><a href="https://www.npmjs.com/package/stone-deezer">NPM</a></td>
+<td>A plugin to simplify deezer links and then play it from available sources (<strong>REQUIRES <a href="https://github.com/Takiyo0/Kazagumo">KAZAGUMO</a></strong>)</td>
 </tr>
 </tbody></table>
-
-<a href="#creating-plugins" id="creating-plugins" style="color: inherit; text-decoration: none;">
-  <h3>Creating Plugins</h3>
-</a>
-<blockquote>
-<p>Shoukaku has now official supports for plugins. However, implementing this is up to the developers that is interested on doing it</p>
-</blockquote>
-<blockquote>
-<p>Shoukaku support modification on Rest.ts and Player.ts</p>
-</blockquote>
-<blockquote>
-<p>To apply your plugin, put the extended classes on <strong>ShoukakuOptions.structures</strong>. Example below</p>
-</blockquote>
-<pre><code class="language-js"><span class="hl-0">const</span><span class="hl-1"> { </span><span class="hl-2">Client</span><span class="hl-1"> } = </span><span class="hl-3">require</span><span class="hl-1">(</span><span class="hl-4">&#39;discord.js&#39;</span><span class="hl-1">);</span><br/><span class="hl-0">const</span><span class="hl-1"> { </span><span class="hl-2">Shoukaku</span><span class="hl-1">, </span><span class="hl-2">Rest</span><span class="hl-1">, </span><span class="hl-2">Connectors</span><span class="hl-1"> } = </span><span class="hl-3">require</span><span class="hl-1">(</span><span class="hl-4">&#39;shoukaku&#39;</span><span class="hl-1">);</span><br/><span class="hl-0">class</span><span class="hl-1"> </span><span class="hl-9">CustomRest</span><span class="hl-1"> </span><span class="hl-0">extends</span><span class="hl-1"> </span><span class="hl-9">Rest</span><span class="hl-1"> { }; </span><span class="hl-6">// extended structure of your choice</span><br/><span class="hl-0">const</span><span class="hl-1"> </span><span class="hl-2">Nodes</span><span class="hl-1"> = [{</span><br/><span class="hl-1">    </span><span class="hl-5">name:</span><span class="hl-1"> </span><span class="hl-4">&#39;Localhost&#39;</span><span class="hl-1">,</span><br/><span class="hl-1">    </span><span class="hl-5">url:</span><span class="hl-1"> </span><span class="hl-4">&#39;localhost:6969&#39;</span><span class="hl-1">,</span><br/><span class="hl-1">    </span><span class="hl-5">auth:</span><span class="hl-1"> </span><span class="hl-4">&#39;marin_kitagawa&#39;</span><br/><span class="hl-1">}];</span><br/><span class="hl-0">const</span><span class="hl-1"> </span><span class="hl-2">ShoukakuOptions</span><span class="hl-1"> = { </span><span class="hl-5">structures:</span><span class="hl-1"> { </span><span class="hl-5">rest:</span><span class="hl-1"> </span><span class="hl-5">CustomRest</span><span class="hl-1"> } } </span><span class="hl-6">// pass the custom structure to Shoukaku</span><br/><span class="hl-0">const</span><span class="hl-1"> </span><span class="hl-2">client</span><span class="hl-1"> = </span><span class="hl-0">new</span><span class="hl-1"> </span><span class="hl-3">Client</span><span class="hl-1">();</span><br/><span class="hl-0">const</span><span class="hl-1"> </span><span class="hl-2">shoukaku</span><span class="hl-1"> = </span><span class="hl-0">new</span><span class="hl-1"> </span><span class="hl-3">Shoukaku</span><span class="hl-1">(</span><span class="hl-0">new</span><span class="hl-1"> </span><span class="hl-5">Connectors</span><span class="hl-1">.</span><span class="hl-3">DiscordJS</span><span class="hl-1">(</span><span class="hl-5">client</span><span class="hl-1">), </span><span class="hl-5">Nodes</span><span class="hl-1">, </span><span class="hl-5">ShoukakuOptions</span><span class="hl-1">);</span>
-</code></pre>
 
 <a href="#other-links" id="other-links" style="color: inherit; text-decoration: none;">
   <h3>Other Links</h3>
@@ -248,7 +246,6 @@
 <li class="tsd-kind-module"><a href="modules/guild_Connection.html">guild/<wbr/>Connection</a></li>
 <li class="tsd-kind-module"><a href="modules/guild_Player.html">guild/<wbr/>Player</a></li>
 <li class="tsd-kind-module"><a href="modules/node_Node.html">node/<wbr/>Node</a></li>
-<li class="tsd-kind-module"><a href="modules/node_Queue.html">node/<wbr/>Queue</a></li>
 <li class="tsd-kind-module"><a href="modules/node_Rest.html">node/<wbr/>Rest</a></li></ul></li></ul></div></details></nav></div></div>
 <div class="container tsd-generator">
 <p>Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p></div>

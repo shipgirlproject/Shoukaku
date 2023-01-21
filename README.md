@@ -33,16 +33,20 @@
 Refer to [/src/connectors](https://github.com/Deivu/Shoukaku/tree/master/src/connectors) for list of supported libraries + how to support other libraries
 
 ### Installation
+
 * Stable
 
-> npm install shoukaku
+> `npm install shoukaku`
 
 * Dev
-> npm install https://github.com/Deivu/Shoukaku.git#master
+
+> `npm install https://github.com/Deivu/Shoukaku.git#v4` or `npm install https://github.com/Deivu/Shoukaku.git#master` (Needs Lavalink Versions: `3.7.x <` )
 
 ### Documentation
 
-https://deivu.github.io/Shoukaku/
+https://deivu.github.io/Shoukaku/ (Stable v3 version only)
+
+> v4.x.x docs are in your intellisense for now (I only deploy stable release docs on the Github page)
 
 ### Small code snippet examples
 > Initializing the library (Using Connector Discord.JS)
@@ -85,9 +89,13 @@ const player = await node.joinChannel({
 ```
 > Playing a track and changing a playback option (in this example, volume)
 ```js
-player
-    .playTrack({ track: metadata.track })
-    .setVolume(0.5);
+await player.playTrack({ track: metadata.encodedTrack });
+await player.setVolume(0.5);
+```
+
+> Updating the whole player if you don\'t want to use my helper functions
+```js
+await player.update({ ...playerOptions });
 ```
 
 ### Shoukaku's options
@@ -113,27 +121,6 @@ Name   | Link     | Description
 -------|----------|------------
 Kazagumo | [Github](https://github.com/Takiyo0/Kazagumo) | A Shoukaku wrapper that have built-in queue system 
 stone-deezer | [NPM](https://www.npmjs.com/package/stone-deezer) | A plugin to simplify deezer links and then play it from available sources (**REQUIRES [KAZAGUMO](https://github.com/Takiyo0/Kazagumo)**)
-
-### Creating Plugins
-> Shoukaku has now official supports for plugins. However, implementing this is up to the developers that is interested on doing it
-
-> Shoukaku support modification on Rest.ts and Player.ts
-
-> To apply your plugin, put the extended classes on **ShoukakuOptions.structures**. Example below
-
-```js
-const { Client } = require('discord.js');
-const { Shoukaku, Rest, Connectors } = require('shoukaku');
-class CustomRest extends Rest { }; // extended structure of your choice
-const Nodes = [{
-    name: 'Localhost',
-    url: 'localhost:6969',
-    auth: 'marin_kitagawa'
-}];
-const ShoukakuOptions = { structures: { rest: CustomRest } } // pass the custom structure to Shoukaku
-const client = new Client();
-const shoukaku = new Shoukaku(new Connectors.DiscordJS(client), Nodes, ShoukakuOptions);
-```
 
 ### Other Links
 

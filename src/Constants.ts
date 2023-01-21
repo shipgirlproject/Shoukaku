@@ -11,24 +11,15 @@ export enum State {
 export enum VoiceState {
     SESSION_READY,
     SESSION_ID_MISSING,
-    SESSION_ENDPOINT_MISSING
+    SESSION_ENDPOINT_MISSING,
+    SESSION_FAILED_UPDATE
 }
 
 export enum OPCodes {
-    // From Lavalink
-    VOICE_UPDATE = 'voiceUpdate',
-    PLAY = 'play',
-    STOP = 'stop',
-    PAUSE = 'pause',
-    SEEK = 'seek',
-    VOLUME = 'volume',
-    FILTERS = 'filters',
-    DESTROY = 'destroy',
-    // To Lavalink
     PLAYER_UPDATE = 'playerUpdate',
-    CONFIGURE_RESUMING = 'configureResuming',
     STATS = 'stats',
-    EVENT = 'event'
+    EVENT = 'event',
+    READY = 'ready'
 }
 
 export enum Versions {
