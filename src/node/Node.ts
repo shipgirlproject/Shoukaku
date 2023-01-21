@@ -197,7 +197,7 @@ export class Node extends EventEmitter {
 
         if (!this.initialized) this.initialized = true;
 
-        const version = `/${this.version}`;
+        const version = `/v${this.version}`;
         const url = new URL(`${this.url}${version}`);
 
         this.ws = new Websocket(url.toString(), { headers } as Websocket.ClientOptions);
