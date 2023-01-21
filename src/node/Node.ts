@@ -363,7 +363,7 @@ export class Node extends EventEmitter {
     }
 
     /**
-     * Clear message queue and move players to other nodes if possible
+     * Cleans and moves players to other nodes if possible
      * @internal
      */
     private async clean(): Promise<void> {
