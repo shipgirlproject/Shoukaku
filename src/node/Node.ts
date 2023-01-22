@@ -298,7 +298,7 @@ export class Node extends EventEmitter {
     private message(message: any): void {
         const json = JSON.parse(message);
         if (!json) return;
-        if (this.listeners('rawEvents')) {
+        if (this.listeners('rawEvents').length) {
             this.emit('rawEvents', json);
         }
         if (json.op === OPCodes.STATS) {
