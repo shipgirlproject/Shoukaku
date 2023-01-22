@@ -298,6 +298,9 @@ export class Node extends EventEmitter {
     private message(message: any): void {
         const json = JSON.parse(message);
         if (!json) return;
+        if (this.listeners('rawEvents').length) {
+            this.emit('rawEvents', json);
+        }
         if (json.op === OPCodes.STATS) {
             this.emit('debug', this.name, `[Socket] <- [${this.name}] : Node Status Update | Server Load: ${this.penalties}`);
             this.stats = json;
