@@ -5,6 +5,7 @@ export enum State {
     CONNECTING,
     NEARLY,
     CONNECTED,
+    RECONNECTING,
     DISCONNECTING,
     DISCONNECTED
 }
@@ -31,12 +32,12 @@ export enum Versions {
 export const ShoukakuDefaults: ShoukakuOptions = {
     resume: false,
     resumeKey: `Shoukaku@${Info.version}(${Info.repository.url})`,
-    resumeTimeout: 30000,
+    resumeTimeout: 30,
     resumeByLibrary: false,
     alwaysSendResumeKey: false,
     reconnectTries: 3,
-    reconnectInterval: 5000,
-    restTimeout: 60000,
+    reconnectInterval: 5,
+    restTimeout: 60,
     moveOnDisconnect: false,
     userAgent: `${Info.name}bot/${Info.version} (${Info.repository.url})`,
     structures: {}

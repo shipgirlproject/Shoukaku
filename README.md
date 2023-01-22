@@ -34,11 +34,11 @@ Refer to [/src/connectors](https://github.com/Deivu/Shoukaku/tree/master/src/con
 
 ### Installation
 
-* Stable ( 3.x.x ) ( Needs Lavalink Versions: `3.5.x` < | `3.9.x` > )
+*   Stable ( 3.x.x ) ( Needs Lavalink Versions: `3.5.x` < | `3.9.x` > )
 
 > `npm install shoukaku`
 
-* Dev ( 4.0.0-dev ) (Needs Lavalink Versions: `3.7.x` < )
+*   Dev ( 4.0.0-dev ) ( Needs Lavalink Versions: `3.7.x` < )
 
 > For living on the edge but with latest features: `npm install https://github.com/Deivu/Shoukaku.git#v4`
 
@@ -111,8 +111,8 @@ resumeTimeout | number | Timeout before resuming a connection **in seconds** |
 resumeByLibrary | boolean | Whether to resume the players by doing it in the library side (Client Side) (Note: TRIES TO RESUME REGARDLESS OF WHAT HAPPENED ON A LAVALINK SERVER) |
 alwaysSendResumeKey | boolean | Disables the first time initialization tracking of nodes, and just sends the resume key always (Note: Useful for people who save their players to redis and wants to resume sessions even at first boot) |
 reconnectTries | number | Number of times to try and reconnect to Lavalink before giving up |
-reconnectInterval | number | Timeout before trying to reconnect **in milliseconds** |
-restTimeout | number | Time to wait for a response from the Lavalink REST API before giving up **in milliseconds** |
+reconnectInterval | number | Timeout before trying to reconnect **in seconds** |
+restTimeout | number | Time to wait for a response from the Lavalink REST API before giving up **in seconds** |
 moveOnDisconnect | boolean | Whether to move players to a different Lavalink node when a node disconnects |
 userAgent | string | User Agent to use when making requests to Lavalink |
 structures | Object{rest?, player?} | Custom structures for shoukaku to use |

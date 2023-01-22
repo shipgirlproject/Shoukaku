@@ -3,6 +3,7 @@ import { IncomingMessage } from 'http';
 import { NodeOption, Shoukaku } from '../Shoukaku';
 import { Player } from '../guild/Player';
 import { OPCodes, State, Versions } from '../Constants';
+import { wait } from '../Utils';
 import { Rest } from './Rest';
 import Websocket from 'ws';
 
@@ -165,6 +166,14 @@ export class Node extends EventEmitter {
     }
 
     /**
+     * If we should clean this node
+     * @internal @readonly
+     */
+    private get shouldClean(): boolean {
+        return this.destroyed || this.reconnects >= this.manager.options.reconnectTries;
+    }
+
+    /**
      * Connect to Lavalink
      */
     public connect(): void {
@@ -199,10 +208,10 @@ export class Node extends EventEmitter {
         const url = new URL(`${this.url}${this.version}/websocket`);
 
         this.ws = new Websocket(url.toString(), { headers } as Websocket.ClientOptions);
-        this.ws.once('upgrade', response => this.ws!.once('open', () => this.open(response)));
+        this.ws.once('upgrade', response => this.open(response));
         this.ws.once('close', (...args) => this.close(...args));
-        this.ws.on('error', error => this.emit('error', this.name, error));
-        this.ws.on('message', data => this.message(data));
+        this.ws.on('error', error => this.error(error));
+        this.ws.on('message', data => this.wrap('message', data));
     }
 
     /**
@@ -210,17 +219,16 @@ export class Node extends EventEmitter {
      * @param code Status code
      * @param reason Reason for disconnect
      */
-    public async disconnect(code: number, reason?:string): Promise<void> {
+    public disconnect(code: number, reason?:string): void {
         if (this.destroyed) return;
+
         this.destroyed = true;
         this.state = State.DISCONNECTING;
 
-        await this.clean();
-
         if (this.ws)
-            this.ws?.close(code, reason);
+            this.ws.close(code, reason);
         else
-            this.destroy();
+            this.clean();
     }
 
     /**
@@ -286,8 +294,9 @@ export class Node extends EventEmitter {
      * @param message JSON message
      * @internal
      */
-    private async message(message: any): Promise<void> {
-        const json = JSON.parse(message);
+    private async message(message: unknown): Promise<void> {
+        if (this.destroyed) return;
+        const json = JSON.parse(message as string);
         if (!json) return;
         switch(json.op) {
             case OPCodes.STATS:
@@ -305,6 +314,7 @@ export class Node extends EventEmitter {
                         promises.push(player.update(player.playerData));
                     }
                     try {
+                        // this should not cancel the execution below even it errors
                         await Promise.all(promises);
                     } catch (error) {
                         this.error(error);
@@ -316,16 +326,21 @@ export class Node extends EventEmitter {
                 this.emit('ready', this.name,  json.resumed || resumeByLibrary);
 
                 if (this.manager.options.resume && this.manager.options.resumeKey) {
-                    try {
-                        await this.rest.updateSession(this.manager.options.resumeKey, this.manager.options.resumeTimeout);
-                        this.emit('debug', this.name, `[Socket] -> [${this.name}] : Resuming configured!`);
-                    } catch (error) {
-                        this.error(error);
-                    }
+                    await this.rest.updateSession(this.manager.options.resumeKey, this.manager.options.resumeTimeout);
+                    this.emit('debug', this.name, `[Socket] -> [${this.name}] : Resuming configured!`);
                 }
                 break;
+            case OPCodes.EVENT:
+            case OPCodes.PLAYER_UPDATE:
+                const player = this.players.get(json.guildId);
+                if (!player) return;
+                if (json.op === OPCodes.EVENT)
+                    player.onPlayerEvent(json);
+                else
+                    player.onPlayerUpdate(json);
+                break;
             default:
-                this.players.get(json.guildId)?.onLavalinkMessage(json);
+                this.emit('debug', this.name, `[Player] -> [Node] : Unknown Message OP ${json.op}`);
         }
     }
 
@@ -334,21 +349,20 @@ export class Node extends EventEmitter {
      * @param code Status close
      * @param reason Reason for connection close
      */
-    private async close(code: number, reason: Buffer): Promise<void> {
-        this.destroy();
+    private close(code: number, reason: unknown): void {
         this.emit('debug', this.name, `[Socket] <-/-> [${this.name}] : Connection Closed, Code: ${code || 'Unknown Code'}`);
         this.emit('close', this.name, code, reason);
-        if (this.destroyed || this.reconnects >= this.manager.options.reconnectTries)
-            await this.clean();
-        else
+        if (!this.shouldClean)
             this.reconnect();
+        else
+            this.clean();
     }
 
     /**
      * Handle closed event from lavalink
      * @param error error message
      */
-    public error(error: Error|unknown) {
+    public error(error: Error|unknown): void {
         this.emit('error', this.name, error);
     }
 
@@ -356,12 +370,14 @@ export class Node extends EventEmitter {
      * Destroys the websocket connection
      * @internal
      */
-    private destroy() {
+    private destroy(players: Player[], move: boolean): void {
         this.ws?.removeAllListeners();
         this.ws?.close();
+        this.destroyed = true;
         this.ws = null;
         this.sessionId = null;
         this.state = State.DISCONNECTED;
+        if (this.shouldClean) this.emit('disconnect', this.name, players, players.length > 0 && move);
     }
 
     /**
@@ -369,11 +385,11 @@ export class Node extends EventEmitter {
      * @internal
      */
     private async clean(): Promise<void> {
+        if (!this.shouldClean) return this.destroy([], false);
+
         const players = [ ...this.players.values() ];
         const move = this.manager.options.moveOnDisconnect && [ ...this.manager.nodes.values() ].filter(node => node.group === this.group).length > 1;
-
         const promises = [];
-
         for (const player of players) {
             promises.push((async () => {
                 if (!move)
@@ -393,24 +409,33 @@ export class Node extends EventEmitter {
             await Promise.all(promises);
         } catch (error) {
             this.error(error);
+        } finally {
+            this.destroy(players, move);
         }
-
-        this.manager.nodes.delete(this.name);
-        this.emit('disconnect', this.name, players, players.length > 0 && move);
     }
 
     /**
      * Reconnect to Lavalink
      * @internal
      */
-    private reconnect(): void {
-        if (this.state !== State.DISCONNECTED) this.destroy();
-
+    private async reconnect(): Promise<void> {
+        if (this.state === State.RECONNECTING) return;
+        if (this.state !== State.DISCONNECTED) await this.clean();
+        this.state = State.RECONNECTING;
         this.reconnects++;
-        this.emit('reconnecting', this.name, `[Socket] -> [${this.name}] : Reconnecting in ${this.manager.options.reconnectInterval}ms. ${this.manager.options.reconnectTries - this.reconnects} tries left`, this.reconnect, this.manager.options.reconnectInterval, this.manager.options.reconnectTries - this.reconnects);
-        this.emit('debug', this.name, `[Socket] -> [${this.name}] : Reconnecting in ${this.manager.options.reconnectInterval}ms. ${this.manager.options.reconnectTries - this.reconnects} tries left`);
+        this.emit('reconnecting', this.name, this.manager.options.reconnectTries - this.reconnects, this.manager.options.reconnectInterval);
+        this.emit('debug', this.name, `[Socket] -> [${this.name}] : Reconnecting in ${this.manager.options.reconnectInterval} seconds. ${this.manager.options.reconnectTries - this.reconnects} tries left`);
+        await wait(this.manager.options.reconnectInterval * 1000);
+        this.connect();
+    }
 
-        setTimeout(() => this.connect(), this.manager.options.reconnectInterval);
+    /**
+     * Wraps the compatible function with an error handling
+     * @internal
+     */
+    private wrap(name: 'message', ...args: [unknown]): void {
+        this[name].apply(this, args)
+            .catch(error => this.error(error));
     }
 
     /**

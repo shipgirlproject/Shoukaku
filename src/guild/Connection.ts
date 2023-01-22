@@ -142,7 +142,7 @@ export class Connection extends EventEmitter {
         }
         this.player.node.players.delete(this.guildId);
         this.player.clean();
-        await this.destroyLavalinkPlayer();
+        await this.destroy();
         this.state = State.DISCONNECTED;
         this.player.node.emit('debug', this.player.node.name, `[Voice] -> [Node] & [Discord] : Link & Player Destroyed | Guild: ${this.guildId}`);
     }
@@ -186,6 +186,14 @@ export class Connection extends EventEmitter {
         } finally {
             clearTimeout(timeout);
         }
+    }
+
+    /**
+     * Destroy the current Lavalink player
+     */
+    public async destroy(): Promise<void> {
+        await this.player.node.rest.destroyPlayer(this.guildId);
+        this.player.node.emit('debug', this.player.node.name, `[Lavalink] <- [Shoukaku] : Destroy player sent | Server: ${this.region} Guild: ${this.guildId}`);
     }
 
     /**
@@ -240,46 +248,19 @@ export class Connection extends EventEmitter {
         this.serverUpdate = data;
         this.player.node.emit('debug', this.player.node.name, `[Voice] <- [Discord] : Server Update Received | Server: ${this.region} Guild: ${this.guildId}`);
 
-        this.updateVoiceServerUpdate(true);
-    }
-
-    /**
-     * Send voice data to lavalink
-     */
-    public async updateVoiceServerUpdate(emit: boolean = false): Promise<void> {
-        if (!this.hasRequiredVoiceData) return;
-        try {
-            const playerUpdate = {
-                guildId: this.guildId,
-                playerOptions: {
-                    voice: {
-                        token: this.serverUpdate!.token,
-                        endpoint: this.serverUpdate!.endpoint,
-                        sessionId: this.sessionId!
-                    }
+        const playerUpdate = {
+            guildId: this.guildId,
+            playerOptions: {
+                voice: {
+                    token: this.serverUpdate!.token,
+                    endpoint: this.serverUpdate!.endpoint,
+                    sessionId: this.sessionId!
                 }
-            };
-            await this.player.node.rest.updatePlayer(playerUpdate);
-            this.player.node.emit('debug', this.player.node.name, `[Lavalink] <- [Shoukaku] : Voice Server Update Sent | Server: ${this.region} Guild: ${this.guildId}`);
-            if (emit) this.emit('connectionUpdate', VoiceState.SESSION_READY);
-        } catch (error) {
-            if (emit) {
-                if (this.listenerCount('connectionUpdate') > 0)
-                    this.emit('connectionUpdate', VoiceState.SESSION_FAILED_UPDATE, error);
-                else
-                    this.player.node.error(error);
-            } else
-                throw error;
-        }
-    }
-
-    /**
-     * Destroy the current Lavalink player
-     */
-    public async destroyLavalinkPlayer(): Promise<void> {
-        if (!this.player.node.sessionId) return;
-        await this.player.node.rest.destroyPlayer(this.guildId);
-        this.player.node.emit('debug', this.player.node.name, `[Lavalink] <- [Shoukaku] : Destroy player sent | Server: ${this.region} Guild: ${this.guildId}`);
+            }
+        };
+        this.player.node.rest.updatePlayer(playerUpdate)
+            .then(() => this.emit('connectionUpdate', VoiceState.SESSION_READY))
+            .catch(error => this.listenerCount('connectionUpdate') > 0 ? this.emit('connectionUpdate', VoiceState.SESSION_FAILED_UPDATE, error) : this.player.node.error(error));
     }
 
     /**

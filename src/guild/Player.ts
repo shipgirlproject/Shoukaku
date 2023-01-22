@@ -189,7 +189,7 @@ export declare interface Player {
      * Emitted when the library manages to resume the player
      * @eventProperty
      */
-    on(event: 'resumed', listener: () => void): this;
+    on(event: 'resumed', listener: (player: Player) => void): this;
     /**
      * Emitted when a playerUpdate even is recieved from Lavalink
      * @eventProperty
@@ -200,14 +200,14 @@ export declare interface Player {
     once(event: 'closed', listener: (reason: WebSocketClosedEvent) => void): this;
     once(event: 'start', listener: (data: TrackStartEvent) => void): this;
     once(event: 'exception', listener: (reason: TrackExceptionEvent) => void): this;
-    once(event: 'resumed', listener: () => void): this;
+    once(event: 'resumed', listener: (player: Player) => void): this;
     once(event: 'update', listener: (data: PlayerUpdate) => void): this;
     off(event: 'end', listener: (reason: TrackEndEvent) => void): this;
     off(event: 'stuck', listener: (data: TrackStuckEvent) => void): this;
     off(event: 'closed', listener: (reason: WebSocketClosedEvent) => void): this;
     off(event: 'start', listener: (data: TrackStartEvent) => void): this;
     off(event: 'exception', listener: (reason: TrackExceptionEvent) => void): this;
-    off(event: 'resumed', listener: () => void): this;
+    off(event: 'resumed', listener: (player: Player) => void): this;
     off(event: 'update', listener: (data: PlayerUpdate) => void): this;
 }
 
@@ -284,7 +284,7 @@ export class Player extends EventEmitter {
         const node = this.node.manager.nodes.get(name);
         if (!node || node.name === this.node.name) return;
         if (node.state !== State.CONNECTED) throw new Error('The node you specified is not ready');
-        await this.connection.destroyLavalinkPlayer();
+        await this.connection.destroy();
         this.node.players.delete(this.connection.guildId);
         this.node = node;
         this.node.players.set(this.connection.guildId, this);
@@ -531,6 +531,7 @@ export class Player extends EventEmitter {
         if (options.endTime) data.playerOptions.position;
         if (options.pause) data.playerOptions.paused = options.pause;
         await this.update(data);
+        this.emit('resume', this);
     }
 
     /**
@@ -552,21 +553,13 @@ export class Player extends EventEmitter {
     }
 
     /**
-     * Handle JSON data recieved from Lavalink
-     * @param json JSON data from Lavalink
-     * @internal
+     * Handle player update data
      */
-    public onLavalinkMessage(json: any): void {
-        if (json.op === OPCodes.PLAYER_UPDATE) {
-            const { position, ping } = json.state;
-            this.position = position;
-            this.ping = ping ?? 0;
-            this.emit('update', json);
-        } else if (json.op === OPCodes.EVENT)
-            this.onPlayerEvent(json);
-        else {
-            this.node.emit('debug', this.node.name, `[Player] -> [Node] : Unknown Message OP ${json.op} | Guild: ${this.connection.guildId}`);
-        }
+    public onPlayerUpdate(json: { state: { position: number, ping: number } }): void {
+        const { position, ping } = json.state;
+        this.position = position;
+        this.ping = ping;
+        this.emit('update', json);
     }
 
     /**
@@ -574,7 +567,7 @@ export class Player extends EventEmitter {
      * @param json JSON data from Lavalink
      * @internal
      */
-    private onPlayerEvent(json: any): void {
+    public onPlayerEvent(json: { type: string, encodedTrack: string }): void {
         switch (json.type) {
             case 'TrackStartEvent':
                 if (this.track) this.track = json.encodedTrack;

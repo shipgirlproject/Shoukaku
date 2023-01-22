@@ -106,7 +106,7 @@ export declare interface Shoukaku {
      * Emitted when reconnect tries are occurring and how many tries are left
      * @eventProperty
      */
-    on(event: 'reconnecting', listener: (name: string, info: string, tries: number, triesLeft: number, reconnectInterval: number) => void): this;
+    on(event: 'reconnecting', listener: (name: string, reconnectsLeft: number, reconnectInterval: number) => void): this;
     /**
      * Emitted when data useful for debugging is produced
      * @eventProperty
@@ -132,13 +132,13 @@ export declare interface Shoukaku {
      * @eventProperty
      */
     on(event: 'disconnect', listener: (name: string, players: Player[], moved: boolean) => void): this;
-    once(event: 'reconnecting', listener: (name: string, info: string, tries: number, triesLeft: number, reconnectInterval: number) => void): this;
+    once(event: 'reconnecting', listener: (name: string, reconnectsLeft: number, reconnectInterval: number) => void): this;
     once(event: 'debug', listener: (name: string, info: string) => void): this;
     once(event: 'error', listener: (name: string, error: Error) => void): this;
     once(event: 'ready', listener: (name: string, reconnected: boolean) => void): this;
     once(event: 'close', listener: (name: string, code: number, reason: string) => void): this;
     once(event: 'disconnect', listener: (name: string, players: Player[], moved: boolean) => void): this;
-    off(event: 'reconnecting', listener: (name: string, info: string, tries: number, triesLeft: number, reconnectInterval: number) => void): this;
+    off(event: 'reconnecting', listener: (name: string, reconnectsLeft: number, reconnectInterval: number) => void): this;
     off(event: 'debug', listener: (name: string, info: string) => void): this;
     off(event: 'error', listener: (name: string, error: Error) => void): this;
     off(event: 'ready', listener: (name: string, reconnected: boolean) => void): this;
@@ -218,7 +218,7 @@ export class Shoukaku extends EventEmitter {
         node.on('error', (...args) => this.emit('error', ...args));
         node.on('close', (...args) => this.emit('close', ...args));
         node.on('ready', (...args) => this.emit('ready', ...args));
-        node.on('disconnect', (...args) => this.emit('disconnect', ...args));
+        node.once('disconnect', (...args) => this.clean(node, ...args));
         node.connect();
         this.nodes.set(node.name, node);
     }
@@ -232,7 +232,6 @@ export class Shoukaku extends EventEmitter {
         const node = this.nodes.get(name);
         if (!node) throw new Error('The node name you specified doesn\'t exist');
         node.disconnect(1000, reason);
-        node.removeAllListeners();
     }
 
     /**
@@ -267,5 +266,18 @@ export class Shoukaku extends EventEmitter {
             .filter(node => node.group && group.includes(node.group))
             .sort((a, b) => a.penalties - b.penalties)
             .shift();
+    }
+
+    /**
+     * Cleans the disconnected lavalink node
+     * @param node The node to clean
+     * @param args Additional arguments for Shoukaku to emit
+     * @returns A Lavalink node or undefined
+     * @internal
+     */
+    private clean(node: Node, ...args: unknown[]): void {
+        node.removeAllListeners();
+        this.nodes.delete(node.name);
+        this.emit('disconnect', ...args);
     }
 }

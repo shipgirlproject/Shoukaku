@@ -312,7 +312,7 @@ export class Rest {
         if (options.params) url.search = new URLSearchParams(options.params).toString();
 
         const abortController = new AbortController();
-        const timeout = setTimeout(() => abortController.abort(), this.node.manager.options.restTimeout || 15000);
+        const timeout = setTimeout(() => abortController.abort(), this.node.manager.options.restTimeout * 1000);
 
         const method = options.method?.toUpperCase() || 'GET';
 
