@@ -136,21 +136,21 @@ export declare interface Shoukaku {
      * Emitted when a websocket message is recived from Lavalink
      * @eventProperty
      */
-    on(event: 'rawEvents', listener: (json: any) => void): this;
+    on(event: 'raw', listener: (name: string, json: any) => void): this;
     once(event: 'reconnecting', listener: (name: string, reconnectsLeft: number, reconnectInterval: number) => void): this;
     once(event: 'debug', listener: (name: string, info: string) => void): this;
     once(event: 'error', listener: (name: string, error: Error) => void): this;
     once(event: 'ready', listener: (name: string, reconnected: boolean) => void): this;
     once(event: 'close', listener: (name: string, code: number, reason: string) => void): this;
     once(event: 'disconnect', listener: (name: string, players: Player[], moved: boolean) => void): this;
-    once(event: 'rawEvents', listener: (json: any) => void): this;
+    once(event: 'raw', listener: (name: string, json: any) => void): this;
     off(event: 'reconnecting', listener: (name: string, reconnectsLeft: number, reconnectInterval: number) => void): this;
     off(event: 'debug', listener: (name: string, info: string) => void): this;
     off(event: 'error', listener: (name: string, error: Error) => void): this;
     off(event: 'ready', listener: (name: string, reconnected: boolean) => void): this;
     off(event: 'close', listener: (name: string, code: number, reason: string) => void): this;
     off(event: 'disconnect', listener: (name: string, players: Player[], moved: boolean) => void): this;
-    off(event: 'rawEvents', listener: (json: any) => void): this;
+    off(event: 'raw', listener: (name: string, json: unknow) => void): this;
 }
 
 /**
@@ -225,6 +225,7 @@ export class Shoukaku extends EventEmitter {
         node.on('error', (...args) => this.emit('error', ...args));
         node.on('close', (...args) => this.emit('close', ...args));
         node.on('ready', (...args) => this.emit('ready', ...args));
+        node.on('raw', (...args) => this.emit('raw', ...args));
         node.once('disconnect', (...args) => this.clean(node, ...args));
         node.connect();
         this.nodes.set(node.name, node);
