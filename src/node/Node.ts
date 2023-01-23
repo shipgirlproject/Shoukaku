@@ -201,7 +201,7 @@ export class Node extends EventEmitter {
             };
         }
 
-        this.emit('debug', this.name, `[Socket] -> [${this.name}] : Connecting ${this.url}, Version: ${this.version}, Trying to resume? ${resume}`);
+        this.emit('debug', `[Socket] -> [${this.name}] : Connecting ${this.url}, Version: ${this.version}, Trying to resume? ${resume}`);
 
         if (!this.initialized) this.initialized = true;
 
@@ -284,7 +284,7 @@ export class Node extends EventEmitter {
      */
     private open(response: IncomingMessage): void {
         const resumed = response.headers['session-resumed'] === 'true';
-        this.emit('debug', this.name, `[Socket] <-> [${this.name}] : Connection Handshake Done! ${this.url} | Upgrade Headers Resuned: ${resumed}`);
+        this.emit('debug', `[Socket] <-> [${this.name}] : Connection Handshake Done! ${this.url} | Upgrade Headers Resuned: ${resumed}`);
         this.reconnects = 0;
         this.state = State.NEARLY;
     }
@@ -300,34 +300,28 @@ export class Node extends EventEmitter {
         if (!json) return;
         switch(json.op) {
             case OPCodes.STATS:
-                this.emit('debug', this.name, `[Socket] <- [${this.name}] : Node Status Update | Server Load: ${this.penalties}`);
+                this.emit('debug', `[Socket] <- [${this.name}] : Node Status Update | Server Load: ${this.penalties}`);
                 this.stats = json;
                 break;
             case OPCodes.READY:
                 this.sessionId = json.sessionId;
-                const resumeByLibrary = this.initialized && (this.players.size && this.manager.options.resumeByLibrary);
 
+                const resumeByLibrary = this.initialized && (this.players.size && this.manager.options.resumeByLibrary);
                 if (!json.resumed && resumeByLibrary) {
-                    const promises = [];
-                    for (const player of [ ...this.players.values() ]) {
-                        if (!player.connection.hasRequiredVoiceData) continue;
-                        promises.push(player.update(player.playerData));
-                    }
                     try {
-                        // this should not cancel the execution below even it errors
-                        await Promise.all(promises);
+                        await this.resumeInternally();
                     } catch (error) {
                         this.error(error);
                     }
                 }
 
                 this.state = State.CONNECTED;
-                this.emit('debug', this.name, `[Socket] -> [${this.name}] : Lavalink is ready! | Lavalink resume: ${json.resumed} | Lib resume: ${!!resumeByLibrary}`);
-                this.emit('ready', this.name,  json.resumed || resumeByLibrary);
+                this.emit('debug', `[Socket] -> [${this.name}] : Lavalink is ready! | Lavalink resume: ${json.resumed} | Lib resume: ${!!resumeByLibrary}`);
+                this.emit('ready', json.resumed || resumeByLibrary);
 
                 if (this.manager.options.resume && this.manager.options.resumeKey) {
                     await this.rest.updateSession(this.manager.options.resumeKey, this.manager.options.resumeTimeout);
-                    this.emit('debug', this.name, `[Socket] -> [${this.name}] : Resuming configured!`);
+                    this.emit('debug', `[Socket] -> [${this.name}] : Resuming configured!`);
                 }
                 break;
             case OPCodes.EVENT:
@@ -340,7 +334,7 @@ export class Node extends EventEmitter {
                     player.onPlayerUpdate(json);
                 break;
             default:
-                this.emit('debug', this.name, `[Player] -> [Node] : Unknown Message OP ${json.op}`);
+                this.emit('debug', `[Player] -> [Node] : Unknown Message OP ${json.op}`);
         }
     }
 
@@ -350,8 +344,8 @@ export class Node extends EventEmitter {
      * @param reason Reason for connection close
      */
     private close(code: number, reason: unknown): void {
-        this.emit('debug', this.name, `[Socket] <-/-> [${this.name}] : Connection Closed, Code: ${code || 'Unknown Code'}`);
-        this.emit('close', this.name, code, reason);
+        this.emit('debug', `[Socket] <-/-> [${this.name}] : Connection Closed, Code: ${code || 'Unknown Code'}`);
+        this.emit('close', code, reason);
         if (!this.shouldClean)
             this.reconnect();
         else
@@ -359,25 +353,25 @@ export class Node extends EventEmitter {
     }
 
     /**
-     * Handle closed event from lavalink
+     * To emit error events easily
      * @param error error message
      */
     public error(error: Error|unknown): void {
-        this.emit('error', this.name, error);
+        this.emit('error', error);
     }
 
     /**
      * Destroys the websocket connection
      * @internal
      */
-    private destroy(players: Player[], move: boolean): void {
+    private destroy(move: boolean, count: number = 0): void {
         this.ws?.removeAllListeners();
         this.ws?.close();
         this.destroyed = true;
         this.ws = null;
         this.sessionId = null;
         this.state = State.DISCONNECTED;
-        if (this.shouldClean) this.emit('disconnect', this.name, players, players.length > 0 && move);
+        if (this.shouldClean) this.emit('disconnect', move, count);
     }
 
     /**
@@ -385,32 +379,16 @@ export class Node extends EventEmitter {
      * @internal
      */
     private async clean(): Promise<void> {
-        if (!this.shouldClean) return this.destroy([], false);
-
-        const players = [ ...this.players.values() ];
+        if (!this.shouldClean) return this.destroy(false);
         const move = this.manager.options.moveOnDisconnect && [ ...this.manager.nodes.values() ].filter(node => node.group === this.group).length > 1;
-        const promises = [];
-        for (const player of players) {
-            promises.push((async () => {
-                if (!move)
-                    return await player.connection.disconnect();
-
-                const name = this.group ? [ this.group ] : 'auto';
-                const node = this.manager.getNode(name);
-
-                if (!node)
-                    return await player.connection.disconnect();
-
-                await player.move(node.name);
-            })());
-        }
-
+        if (!move) return this.destroy(false);
+        const count = this.players.size;
         try {
-            await Promise.all(promises);
+            await this.movePlayers();
         } catch (error) {
             this.error(error);
         } finally {
-            this.destroy(players, move);
+            this.destroy(move, count);
         }
     }
 
@@ -423,8 +401,8 @@ export class Node extends EventEmitter {
         if (this.state !== State.DISCONNECTED) await this.clean();
         this.state = State.RECONNECTING;
         this.reconnects++;
-        this.emit('reconnecting', this.name, this.manager.options.reconnectTries - this.reconnects, this.manager.options.reconnectInterval);
-        this.emit('debug', this.name, `[Socket] -> [${this.name}] : Reconnecting in ${this.manager.options.reconnectInterval} seconds. ${this.manager.options.reconnectTries - this.reconnects} tries left`);
+        this.emit('reconnecting', this.manager.options.reconnectTries - this.reconnects, this.manager.options.reconnectInterval);
+        this.emit('debug', `[Socket] -> [${this.name}] : Reconnecting in ${this.manager.options.reconnectInterval} seconds. ${this.manager.options.reconnectTries - this.reconnects} tries left`);
         await wait(this.manager.options.reconnectInterval * 1000);
         this.connect();
     }
@@ -436,6 +414,36 @@ export class Node extends EventEmitter {
     private wrap(name: 'message', ...args: [unknown]): void {
         this[name].apply(this, args)
             .catch(error => this.error(error));
+    }
+
+    /**
+     * Tries to resume the players internally
+     * @internal
+     */
+    private async resumeInternally(): Promise<void> {
+        const playersWithData = [];
+        const playersWithoutData = [];
+
+        for (const player of this.players.values()) {
+            if (player.connection.hasRequiredVoiceData)
+                playersWithData.push(player);
+            else
+                playersWithoutData.push(player);
+        }
+
+        await Promise.all([
+            ...playersWithData.map(player => player.resume()),
+            ...playersWithoutData.map(player => player.connection.disconnect(false))
+        ]);
+    }
+
+    /**
+     * Tries to move the players to another node
+     * @internal
+     */
+    private async movePlayers(): Promise<void> {
+        const players = [ ...this.players.values() ];
+        await Promise.all(players.map(player => player.moveToRecommendedNode()));
     }
 
     /**

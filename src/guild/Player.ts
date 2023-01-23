@@ -284,11 +284,30 @@ export class Player extends EventEmitter {
         const node = this.node.manager.nodes.get(name);
         if (!node || node.name === this.node.name) return;
         if (node.state !== State.CONNECTED) throw new Error('The node you specified is not ready');
-        await this.connection.destroy();
-        this.node.players.delete(this.connection.guildId);
-        this.node = node;
-        this.node.players.set(this.connection.guildId, this);
-        await this.resume();
+        try {
+            await this.connection.destroy();
+            this.node.players.delete(this.connection.guildId);
+            this.node = node;
+            this.node.players.set(this.connection.guildId, this);
+            await this.resume();
+        } catch (error) {
+            // to ensure a clean disconnect on Discord side
+            await this.connection.disconnect(false);
+            // now we destroy it remotely, and if it errors, no leaks will happen in the lib
+            await this.connection.destroy();
+            throw error;
+        }
+    }
+
+    /**
+     * Automatically moves this player to recommended node
+     */
+    public async moveToRecommendedNode(): Promise<void> {
+        let name: string|string[] = 'auto';
+        if (this.node.group) name = [ this.node.group ];
+        const node = this.node.manager.getNode(name);
+        if (!node) return await this.connection.disconnect();
+        await this.move(node.name);
     }
 
     /**
@@ -520,7 +539,7 @@ export class Player extends EventEmitter {
     }
 
     /**
-     * Resume the current track
+     * Resumes the current track
      * @param options An object that conforms to ResumeOptions that specify behavior on resuming
      */
     public async resume(options: ResumeOptions = {}): Promise<void> {
