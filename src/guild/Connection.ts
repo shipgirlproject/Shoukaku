@@ -119,7 +119,7 @@ export class Connection extends EventEmitter {
      */
     public setDeaf(deaf = false): void {
         this.deafened = deaf;
-        this.send({ guild_id: this.guildId, channel_id: this.channelId, self_deaf: this.deafened, self_mute: this.muted }, false);
+        this.send({ guild_id: this.guildId, channel_id: this.channelId, self_deaf: this.deafened, self_mute: this.muted });
     }
 
     /**
@@ -129,22 +129,23 @@ export class Connection extends EventEmitter {
      */
     public setMute(mute = false): void {
         this.muted = mute;
-        this.send({ guild_id: this.guildId, channel_id: this.channelId, self_deaf: this.deafened, self_mute: this.muted }, false);
+        this.send({ guild_id: this.guildId, channel_id: this.channelId, self_deaf: this.deafened, self_mute: this.muted });
     }
 
     /**
      * Disconnect the current bot user from the connected voice channel
+     * @param destroyRemotePlayer If you want to destroy the remote player automatically when this is called or not
      */
-    public async disconnect(): Promise<void> {
+    public async disconnect(destroyRemotePlayer: boolean = true): Promise<void> {
         if (this.state !== State.DISCONNECTED) {
             this.state = State.DISCONNECTING;
-            this.send({ guild_id: this.guildId, channel_id: null, self_mute: false, self_deaf: false }, false);
+            this.send({ guild_id: this.guildId, channel_id: null, self_mute: false, self_deaf: false });
         }
         this.player.node.players.delete(this.guildId);
         this.player.clean();
-        await this.destroy();
         this.state = State.DISCONNECTED;
-        this.player.node.emit('debug', this.player.node.name, `[Voice] -> [Node] & [Discord] : Link & Player Destroyed | Guild: ${this.guildId}`);
+        if (destroyRemotePlayer) await this.destroy();
+        this.player.node.emit('debug', `[Voice] -> [Node] & [Discord] : Connection Destroyed | Guild: ${this.guildId} | Destroy remote player: ${destroyRemotePlayer}`);
     }
 
     /**
@@ -162,8 +163,8 @@ export class Connection extends EventEmitter {
         if (typeof mute === undefined) mute = false;
 
         this.state = State.CONNECTING;
-        this.send({ guild_id: guildId, channel_id: channelId, self_deaf: deaf, self_mute: mute }, false);
-        this.player.node.emit('debug', this.player.node.name, `[Voice] -> [Discord] : Requesting Connection | Guild: ${this.guildId}`);
+        this.send({ guild_id: guildId, channel_id: channelId, self_deaf: deaf, self_mute: mute });
+        this.player.node.emit('debug', `[Voice] -> [Discord] : Requesting Connection | Guild: ${this.guildId}`);
 
         const controller = new AbortController();
         const timeout = setTimeout(() => controller.abort(), 15000);
@@ -179,7 +180,7 @@ export class Connection extends EventEmitter {
             }
             this.state = State.CONNECTED;
         } catch (error: any) {
-            this.player.node.emit('debug', this.player.node.name, `[Voice] </- [Discord] : Request Connection Failed | Guild: ${this.guildId}`);
+            this.player.node.emit('debug', `[Voice] </- [Discord] : Request Connection Failed | Guild: ${this.guildId}`);
             if (error.name === 'AbortError')
                 throw new Error('The voice connection is not established in 15 seconds');
             throw error;
@@ -193,7 +194,7 @@ export class Connection extends EventEmitter {
      */
     public async destroy(): Promise<void> {
         await this.player.node.rest.destroyPlayer(this.guildId);
-        this.player.node.emit('debug', this.player.node.name, `[Lavalink] <- [Shoukaku] : Destroy player sent | Server: ${this.region} Guild: ${this.guildId}`);
+        this.player.node.emit('debug', `[Lavalink] <- [Shoukaku] : Destroy player sent | Server: ${this.region} Guild: ${this.guildId}`);
     }
 
     /**
@@ -209,19 +210,19 @@ export class Connection extends EventEmitter {
         const { session_id, channel_id, self_deaf, self_mute } = options;
         if (this.channelId && (channel_id && this.channelId !== channel_id)) {
             this.moved = true;
-            this.player.node.emit('debug', this.player.node.name, `[Voice] <- [Discord] : Channel Moved | Old Channel: ${this.channelId} Guild: ${this.guildId}`);
+            this.player.node.emit('debug', `[Voice] <- [Discord] : Channel Moved | Old Channel: ${this.channelId} Guild: ${this.guildId}`);
         }
 
         this.channelId = channel_id || this.channelId;
         if (!channel_id) {
             this.state = State.DISCONNECTED;
-            this.player.node.emit('debug', this.player.node.name, `[Voice] <- [Discord] : Channel Disconnected | Guild: ${this.guildId}`);
+            this.player.node.emit('debug', `[Voice] <- [Discord] : Channel Disconnected | Guild: ${this.guildId}`);
         }
 
         this.deafened = self_deaf;
         this.muted = self_mute;
         this.sessionId = session_id || null;
-        this.player.node.emit('debug', this.player.node.name, `[Voice] <- [Discord] : State Update Received | Channel: ${this.channelId} Session ID: ${session_id} Guild: ${this.guildId}`);
+        this.player.node.emit('debug', `[Voice] <- [Discord] : State Update Received | Channel: ${this.channelId} Session ID: ${session_id} Guild: ${this.guildId}`);
     }
 
     /**
@@ -241,12 +242,12 @@ export class Connection extends EventEmitter {
 
         if (this.region && !data.endpoint.startsWith(this.region)) {
             this.moved = true;
-            this.player.node.emit('debug', this.player.node.name, `[Voice] <- [Discord] : Voice Region Moved | Old Region: ${this.region} Guild: ${this.guildId}`);
+            this.player.node.emit('debug', `[Voice] <- [Discord] : Voice Region Moved | Old Region: ${this.region} Guild: ${this.guildId}`);
         }
 
         this.region = data.endpoint.split('.').shift()?.replace(/[0-9]/g, '') || null;
         this.serverUpdate = data;
-        this.player.node.emit('debug', this.player.node.name, `[Voice] <- [Discord] : Server Update Received | Server: ${this.region} Guild: ${this.guildId}`);
+        this.player.node.emit('debug', `[Voice] <- [Discord] : Server Update Received | Server: ${this.region} Guild: ${this.guildId}`);
 
         const playerUpdate = {
             guildId: this.guildId,
@@ -269,7 +270,7 @@ export class Connection extends EventEmitter {
      * @param important Whether to prioritize sending this packet in the queue
      * @internal
      */
-    private send(data: any, important = false): void {
-        this.player.node.manager.connector.sendPacket(this.shardId, { op: 4, d: data }, important);
+    private send(data: any): void {
+        this.player.node.manager.connector.sendPacket(this.shardId, { op: 4, d: data }, false);
     }
 }

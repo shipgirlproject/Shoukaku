@@ -34,11 +34,11 @@ Refer to [/src/connectors](https://github.com/Deivu/Shoukaku/tree/master/src/con
 
 ### Installation
 
-*   Stable ( 3.x.x ) ( Needs Lavalink Versions: `3.5.x` < | `3.9.x` > )
+*   Stable (3.x.x) (Needs Lavalink Versions: `3.5.x` < | `3.9.x` >)
 
 > `npm install shoukaku`
 
-*   Dev ( 4.0.0-dev ) ( Needs Lavalink Versions: `3.7.x` < )
+*   Dev (4.0.0-dev) (Needs Lavalink Versions: `3.7.x` <)
 
 > For living on the edge but with latest features: `npm install https://github.com/Deivu/Shoukaku.git#v4`
 
