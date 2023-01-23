@@ -298,9 +298,7 @@ export class Node extends EventEmitter {
         if (this.destroyed) return;
         const json = JSON.parse(message as string);
         if (!json) return;
-        if (this.listeners('rawEvents').length) {
-            this.emit('rawEvents', json);
-        }
+            this.emit('raw', (this.name, json));
         switch(json.op) {
             case OPCodes.STATS:
                 this.emit('debug', this.name, `[Socket] <- [${this.name}] : Node Status Update | Server Load: ${this.penalties}`);
