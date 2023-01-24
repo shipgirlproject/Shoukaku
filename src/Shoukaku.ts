@@ -133,7 +133,7 @@ export declare interface Shoukaku {
      */
     on(event: 'disconnect', listener: (name: string, players: Player[], moved: boolean) => void): this;
     /**
-     * Emitted when a websocket connection to Lavalink disconnects
+     * Emitted when a raw message is recived from Lavalink
      * @eventProperty
      */
     on(event: 'raw', listener: (name: string, json: unknown) => void): this;
