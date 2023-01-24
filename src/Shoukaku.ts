@@ -225,8 +225,8 @@ export class Shoukaku extends EventEmitter {
         node.on('error', (...args) => this.emit('error', node.name, ...args));
         node.on('close', (...args) => this.emit('close', node.name, ...args));
         node.on('ready', (...args) => this.emit('ready', node.name, ...args));
-        node.once('disconnect', (...args) => this.clean(node, ...args));
         node.on('raw', (...args) => this.emit('raw', node.name, ...args));
+        node.once('disconnect', (...args) => this.clean(node, ...args));
         node.connect();
         this.nodes.set(node.name, node);
     }
