@@ -345,6 +345,7 @@ export class Node extends EventEmitter {
      * @param reason Reason for connection close
      */
     private close(code: number, reason: unknown): void {
+        this.state = State.DISCONNECTED;
         this.emit('debug', `[Socket] <-/-> [${this.name}] : Connection Closed, Code: ${code || 'Unknown Code'}`);
         this.emit('close', code, reason);
         if (!this.shouldClean)
