@@ -371,10 +371,9 @@ export class Node extends EventEmitter {
         this.ws = null;
         this.sessionId = null;
         this.state = State.DISCONNECTED;
-        if (this.shouldClean) {
-            this.destroyed = true;
-            this.emit('disconnect', move, count);
-        }
+        if (!this.shouldClean) return;
+        this.destroyed = true;
+        this.emit('disconnect', move, count);
     }
 
     /**
@@ -455,8 +454,8 @@ export class Node extends EventEmitter {
      */
     public discordRaw(packet: any): void {
         const player = this.players.get(packet.d.guild_id);
-
         if (!player) return;
+
         if (packet.t === 'VOICE_SERVER_UPDATE') {
             player.connection.setServerUpdate(packet.d);
             return;
