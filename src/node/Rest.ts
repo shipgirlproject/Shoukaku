@@ -48,19 +48,19 @@ export interface Address {
 }
 
 export interface RoutePlanner {
-    class?: string;
-    details?: {
+    class: null | 'RotatingIpRoutePlanner' | 'NanoIpRoutePlanner' | 'RotatingNanoIpRoutePlanner' | 'BalancingIpRoutePlanner';
+    details: null | {
         ipBlock: {
             type: string;
             size: string;
-        },
-        failingAddresses: Address[]
-    }
-    rotateIndex?: string;
-    ipIndex?: string;
-    currentAddress?: string;
-    blockIndex?: string;
-    currentAddressIndex?: string;
+        };
+        failingAddresses: Address[];
+        rotateIndex: string;
+        ipIndex: string;
+        currentAddress: string;
+        blockIndex: string;
+        currentAddressIndex: string;
+    };
 }
 
 export interface LavalinkPlayerVoice {
