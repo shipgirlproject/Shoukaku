@@ -348,10 +348,10 @@ export class Node extends EventEmitter {
         this.state = State.DISCONNECTED;
         this.emit('debug', `[Socket] <-/-> [${this.name}] : Connection Closed, Code: ${code || 'Unknown Code'}`);
         this.emit('close', code, reason);
-        if (!this.shouldClean)
-            this.reconnect();
-        else
+        if (this.shouldClean)
             this.clean();
+        else
+            this.reconnect();
     }
 
     /**
@@ -369,11 +369,12 @@ export class Node extends EventEmitter {
     private destroy(move: boolean, count: number = 0): void {
         this.ws?.removeAllListeners();
         this.ws?.close();
-        this.destroyed = true;
         this.ws = null;
         this.sessionId = null;
         this.state = State.DISCONNECTED;
-        if (this.shouldClean) this.emit('disconnect', move, count);
+        if (!this.shouldClean) return;
+        this.destroyed = true;
+        this.emit('disconnect', move, count);
     }
 
     /**
@@ -381,7 +382,6 @@ export class Node extends EventEmitter {
      * @internal
      */
     private async clean(): Promise<void> {
-        if (!this.shouldClean) return this.destroy(false);
         const move = this.manager.options.moveOnDisconnect && [ ...this.manager.nodes.values() ].filter(node => node.group === this.group).length > 1;
         if (!move) return this.destroy(false);
         const count = this.players.size;
@@ -400,7 +400,7 @@ export class Node extends EventEmitter {
      */
     private async reconnect(): Promise<void> {
         if (this.state === State.RECONNECTING) return;
-        if (this.state !== State.DISCONNECTED) await this.clean();
+        if (this.state !== State.DISCONNECTED) this.destroy(false);
         this.state = State.RECONNECTING;
         this.reconnects++;
         this.emit('reconnecting', this.manager.options.reconnectTries - this.reconnects, this.manager.options.reconnectInterval);
@@ -455,8 +455,8 @@ export class Node extends EventEmitter {
      */
     public discordRaw(packet: any): void {
         const player = this.players.get(packet.d.guild_id);
-
         if (!player) return;
+
         if (packet.t === 'VOICE_SERVER_UPDATE') {
             player.connection.setServerUpdate(packet.d);
             return;
