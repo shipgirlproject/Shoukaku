@@ -17,6 +17,7 @@ interface FetchOptions {
 }
 
 export interface Track {
+    /** @deprecated */
     track: string;
     encoded: string;
     info: {
