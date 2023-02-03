@@ -181,12 +181,12 @@ export class Rest {
      * Gets all the player with the specified sessionId
      * @returns Promise that resolves to an array of Lavalink players
      */
-    public getPlayers(): Promise<LavalinkPlayer[]> {
+    public getPlayers(): Promise<LavalinkPlayer[] | undefined> {
         const options = {
             endpoint: `/sessions/${this.sessionId}/players`,
             options: {}
         };
-        return this.fetch<LavalinkPlayer[]>(options) ?? [];
+        return this.fetch<LavalinkPlayer[]>(options);
     }
 
     /**
