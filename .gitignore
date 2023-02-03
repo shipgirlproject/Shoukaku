@@ -3,3 +3,8 @@ node_modules
 dist
 .idea
 .gitattributes
+.DS_Store
+yarn.lock
+yarn-debug.log*
+yarn-error.log*
+.vscode
