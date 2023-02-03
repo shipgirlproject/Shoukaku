@@ -17,6 +17,7 @@ interface FetchOptions {
 }
 
 export interface Track {
+    /** @deprecated */
     track: string;
     encoded: string;
     info: {
@@ -48,19 +49,19 @@ export interface Address {
 }
 
 export interface RoutePlanner {
-    class?: string;
-    details?: {
+    class: null | 'RotatingIpRoutePlanner' | 'NanoIpRoutePlanner' | 'RotatingNanoIpRoutePlanner' | 'BalancingIpRoutePlanner';
+    details: null | {
         ipBlock: {
             type: string;
             size: string;
-        },
-        failingAddresses: Address[]
-    }
-    rotateIndex?: string;
-    ipIndex?: string;
-    currentAddress?: string;
-    blockIndex?: string;
-    currentAddressIndex?: string;
+        };
+        failingAddresses: Address[];
+        rotateIndex: string;
+        ipIndex: string;
+        currentAddress: string;
+        blockIndex: string;
+        currentAddressIndex: string;
+    };
 }
 
 export interface LavalinkPlayerVoice {
@@ -155,7 +156,7 @@ export class Rest {
      * @param identifier Track ID
      * @returns A promise that resolves to a Lavalink response
      */
-    public resolve(identifier: string): Promise<LavalinkResponse|{}> {
+    public resolve(identifier: string): Promise<LavalinkResponse | undefined> {
         const options = {
             endpoint: '/loadtracks',
             options: { params: { identifier }}
@@ -168,7 +169,7 @@ export class Rest {
      * @param track Encoded track
      * @returns Promise that resolves to a track
      */
-    public decode(track: string): Promise<Track|{}> {
+    public decode(track: string): Promise<Track | undefined> {
         const options = {
             endpoint: '/decodetrack',
             options: { params: { track }}
@@ -185,18 +186,14 @@ export class Rest {
             endpoint: `/sessions/${this.sessionId}/players`,
             options: {}
         };
-        const players = await this.fetch(options);
-        if (!Array.isArray(players))
-            return [];
-        else
-            return players;
+        return await this.fetch<LavalinkPlayer[]>(options) ?? [];
     }
 
     /**
      * Gets all the player with the specified sessionId
      * @returns Promise that resolves to an array of Lavalink players
      */
-    public getPlayer(guildId: string): Promise<LavalinkPlayer|{}> {
+    public getPlayer(guildId: string): Promise<LavalinkPlayer | undefined> {
         const options = {
             endpoint: `/sessions/${this.sessionId}/players/${guildId}`,
             options: {}
@@ -209,7 +206,7 @@ export class Rest {
      * @param data SessionId from Discord
      * @returns Promise that resolves to a Lavalink player
      */
-    public updatePlayer(data: UpdatePlayerInfo): Promise<LavalinkPlayer|{}> {
+    public updatePlayer(data: UpdatePlayerInfo): Promise<LavalinkPlayer | undefined> {
         const options = {
             endpoint: `/sessions/${this.sessionId}/players/${data.guildId}`,
             options: {
@@ -240,7 +237,7 @@ export class Rest {
      * @param timeout Timeout to wait for resuming
      * @returns Promise that resolves to a Lavalink player
      */
-    public updateSession(resumingKey?: string, timeout?: number): Promise<SessionInfo|{}> {
+    public updateSession(resumingKey?: string, timeout?: number): Promise<SessionInfo | undefined> {
         const options = {
             endpoint: `/sessions/${this.sessionId}`,
             options: {
@@ -256,7 +253,7 @@ export class Rest {
      * Gets the status of this node
      * @returns Promise that resolves to a node stats response
      */
-    public stats(): Promise<NodeStats|{}> {
+    public stats(): Promise<NodeStats | undefined> {
         const options = {
             endpoint: '/stats',
             options: {}
@@ -268,7 +265,7 @@ export class Rest {
      * Get routplanner status from Lavalink
      * @returns Promise that resolves to a routeplanner response
      */
-    public getRoutePlannerStatus(): Promise<RoutePlanner> {
+    public getRoutePlannerStatus(): Promise<RoutePlanner | undefined> {
         const options = {
             endpoint: '/routeplanner/status',
             options: {}
@@ -339,8 +336,8 @@ export class Rest {
         }
         try {
             return await request.json() as T;
-        } catch (error) {
-            return {};
+        } catch {
+            return;
         }
     }
 }
