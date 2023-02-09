@@ -1,10 +1,10 @@
 import { EventEmitter } from 'events';
 import { State, ShoukakuDefaults } from './Constants';
-import { Node } from './node/Node';
+import { Node, VoiceChannelOptions } from './node/Node';
 import { Connector } from './connectors/Connector';
 import { Constructor, mergeDefault } from './Utils';
 import { Player } from './guild/Player';
-import { Rest } from './node/Rest';
+import { Rest, UpdatePlayerInfo } from './node/Rest';
 
 export interface Structures {
     /**
@@ -99,6 +99,20 @@ export interface MergedShoukakuOptions {
     moveOnDisconnect: boolean;
     userAgent: string;
     structures: Structures;
+}
+
+export interface DumpedData {
+    [key: string]: {
+        [key: string]: {
+            data: {
+                token: string|null;
+                endpoint: string|null;
+                sessionId: string|null;
+            };
+            playerOptions: UpdatePlayerInfo['playerOptions'];
+            options: VoiceChannelOptions;
+        };
+    };
 }
 
 export declare interface Shoukaku {
@@ -208,6 +222,83 @@ export class Shoukaku extends EventEmitter {
             for (const [ id, player ] of node.players) players.set(id, player);
         }
         return players;
+    }
+
+    /**
+     * Don't use this method in production (yet), thanks = Rattley
+     *
+     * Dump all player data
+     */
+    dumpState(): DumpedData {
+        let state: DumpedData = {};
+        for (const node of this.nodes.values()) {
+            for (const [ id, player ] of node.players) {
+                let serverUpdateToken: string|null = null;
+                let serverUpdateEndpoint: string|null = null;
+                try {
+                    serverUpdateToken = player.connection.serverUpdateInfo.token;
+                    serverUpdateEndpoint = player.connection.serverUpdateInfo.endpoint;
+                } catch { /* catch error from accessing serverUpdateInfo */ }
+                state[node.name][id] = {
+                    data: {
+                        token: serverUpdateToken!,
+                        endpoint: serverUpdateEndpoint!,
+                        sessionId: player.connection.sessionId,
+                    },
+                    playerOptions: player.playerData.playerOptions,
+                    options: {
+                        guildId: player.connection.guildId,
+                        shardId: player.connection.shardId,
+                        channelId: player.connection.channelId!,
+                        deaf: player.connection.deafened,
+                        mute: player.connection.muted,
+                    }
+                };
+            }
+        }
+        return state;
+    }
+
+    /**
+     * Don't use this method in production (yet), thanks - Rattley
+     *
+     * Restore player state from previous session
+     * @param state Dumped state from the dumpState function
+     * @param sentIdent Set to true if your bot sent opcode 2 (Identify) when restarted
+     * @throws {Error} Will throw error if unable to restore state
+     */
+    async loadState(state: DumpedData, sentIdent?: boolean): Promise<void> {
+        try {
+            for (const nodeName of Object.keys(state)) {
+                const node = this.getNode(nodeName);
+                for (const playerData of Object.values(state[nodeName])) {
+                    const player = await node?.joinChannel(playerData.options)!;
+                    if (!sentIdent) {
+                        // mimic discord state update
+                        player.connection.setStateUpdate({
+                            channel_id: playerData.options.channelId,
+                            session_id: playerData.data.sessionId ?? undefined,
+                            self_deaf: playerData.options.deaf ?? false,
+                            self_mute: playerData.options.mute ?? false,
+                        });
+                        // mimic lavalink voiceupdate event
+                        player.connection.setServerUpdate({
+                            token: playerData.data.token ?? '',
+                            guild_id: playerData.options.guildId,
+                            endpoint: playerData.data.endpoint ?? '',
+                        });
+                    }
+
+                    // set options and resume playback
+                    await player.update({
+                        guildId: playerData.options.guildId,
+                        playerOptions: playerData.playerOptions,
+                    });
+                }
+            }
+        } catch (ex) {
+            throw new Error('Cannot resume previous state due to:\n' + ex);
+        }
     }
 
     /**
