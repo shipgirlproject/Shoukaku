@@ -271,7 +271,7 @@ export class Player extends EventEmitter {
                 paused: this.paused,
                 filters: this.filters,
                 voice: this.connection.serverUpdateInfo,
-                volume: this.filters.volume ?? 100
+                volume: this.filters.volume ?? 1
             }
         };
     }
