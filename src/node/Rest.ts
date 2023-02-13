@@ -39,7 +39,12 @@ export interface LavalinkResponse {
         name?: string;
         selectedTrack?: number;
     }
-    tracks: Track[]
+    tracks: Track[],
+    exception?: {
+        message?: string;
+        severity: 'COMMON' | 'SUSPICIOUS' | 'FAULT';
+        cause: string;
+    }
 }
 
 export interface Address {
