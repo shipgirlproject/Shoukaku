@@ -301,47 +301,89 @@ export class Rest {
      * @internal
      */
     protected async fetch<T = unknown>(fetchOptions: FetchOptions) {
-        const { endpoint, options } = fetchOptions;
-        let headers = {
-            'Authorization': this.auth,
-            'User-Agent': this.node.manager.options.userAgent
-        };
+        // const { endpoint, options } = fetchOptions;
+        // let headers = {
+        //     'Authorization': this.auth,
+        //     'User-Agent': this.node.manager.options.userAgent
+        // };
+        // if (options.headers)
+        //     headers = { ...headers, ...options.headers };
+        // const url = new URL(`${this.url}${this.version}${endpoint}`);
+        // if (options.params)
+        //     url.search = new URLSearchParams(options.params).toString();
+        // const abortController = new AbortController();
+        // const timeout = setTimeout(() => abortController.abort(), this.node.manager.options.restTimeout * 1000);
+        // const method = options.method?.toUpperCase() || 'GET';
+        // const finalFetchOptions = {
+        //     method,
+        //     headers,
+        //     signal: abortController.signal
+        // };
+        // if (!['GET', 'HEAD'].includes(method) && options.body)
+        //     finalFetchOptions.body = JSON.stringify(options.body);
 
-        if (options.headers) headers = { ...headers, ...options.headers };
+        // const request = await fetch(url.toString(), finalFetchOptions)
+        //     .finally(() => clearTimeout(timeout));
 
-        const url = new URL(`${this.url}${this.version}${endpoint}`);
+        // if (!request.ok) {
+        //     const response = await request
+        //         .json()
+        //         .catch(() => null);
+        //     if (!response?.message)
+        //         throw new Error(`Rest request failed with response code: ${request.status}`);
+        //     else
+        //         throw new Error(`Rest request failed with response code: ${request.status} | message: ${response.message}`);
+        // }
+        // try {
+        //     return await request.json();
+        // }
+        // catch {
+        //     return;
+        // }
 
-        if (options.params) url.search = new URLSearchParams(options.params).toString();
-
-        const abortController = new AbortController();
-        const timeout = setTimeout(() => abortController.abort(), this.node.manager.options.restTimeout * 1000);
-
-        const method = options.method?.toUpperCase() || 'GET';
-
-        const finalFetchOptions: FinalFetchOptions = {
-            method,
-            headers,
-            signal: abortController.signal
-        };
-
-        if (![ 'GET', 'HEAD' ].includes(method) && options.body)
-            finalFetchOptions.body = JSON.stringify(options.body);
-
-        const request = await fetch(url.toString(), finalFetchOptions)
-            .finally(() => clearTimeout(timeout));
-
-        if (!request.ok) {
-            const response = await request
-                .json()
-                .catch(() => null);
-            if (!response?.message)
-                throw new Error(`Rest request failed with response code: ${request.status}`);
-            else
-                throw new Error(`Rest request failed with response code: ${request.status} | message: ${response.message}`);
-        }
         try {
-            return await request.json() as T;
-        } catch {
+
+            return new Promise((resolve, reject) => {
+                const { endpoint, options } = fetchOptions;
+                const reqOptions = {
+                    method: options.method?.toUpperCase() || "GET",
+                    headers: {
+                        'Authorization': this.auth,
+                        'User-Agent': this.node.manager.options.userAgent,
+                    }
+                };
+                const url = new URL(`${this.url}${this.version}${endpoint}`);
+                if (options.headers)
+                    reqOptions.headers = { ...reqOptions.headers, ...options.headers };
+                if (options.params)
+                    url.search = new URLSearchParams(options.params).toString();
+
+                const req = request(url.toString(), reqOptions, (res) => {
+                    const data = [];
+                    res.on("data", d => data.push(d));
+                    res.on("end", () => {
+                        const result = Buffer.concat(data).toString();
+                        let d;
+                        try {
+                            d = JSON.parse(result);
+                        } catch (err) {
+                            console.log("Error REST 1", err);
+                            return resolve(null);
+                        }
+                        resolve(d);
+                    });
+                });
+
+                req.on("error", (err) => {
+                    reject(err);
+                });
+                if (!['GET', 'HEAD'].includes(reqOptions.method) && options.body) {
+                    req.write(JSON.stringify(options.body));
+                }
+                req.end();
+            });
+        } catch (error) {
+            console.log("Error REST 2");
             return;
         }
     }
