@@ -2,6 +2,7 @@ import { Node, NodeStats } from './Node';
 import { NodeOption } from '../Shoukaku';
 import { Versions } from '../Constants';
 import { FilterOptions } from '../guild/Player';
+import { request } from "http";
 
 export type LoadType = 'TRACK_LOADED' | 'PLAYLIST_LOADED' | 'SEARCH_RESULT' | 'NO_MATCHES' | 'LOAD_FAILED';
 
@@ -357,7 +358,7 @@ export class Rest {
                         url.search = new URLSearchParams(options.params).toString();
         
                     const req = request(url.toString(), reqOptions, (res) => {
-                        const data = [];
+                        const data: Buffer[] = [];
                         res.on("data", d => data.push(d));
                         res.on("end", () => {
                             const result = Buffer.concat(data).toString();
