@@ -341,50 +341,50 @@ export class Rest {
         //     return;
         // }
 
-        try {
+       // try {
 
-            return new Promise((resolve, reject) => {
-                const { endpoint, options } = fetchOptions;
-                const reqOptions = {
-                    method: options.method?.toUpperCase() || "GET",
-                    headers: {
-                        'Authorization': this.auth,
-                        'User-Agent': this.node.manager.options.userAgent,
-                    }
-                };
-                const url = new URL(`${this.url}${this.version}${endpoint}`);
-                if (options.headers)
-                    reqOptions.headers = { ...reqOptions.headers, ...options.headers };
-                if (options.params)
-                    url.search = new URLSearchParams(options.params).toString();
-
-                const req = request(url.toString(), reqOptions, (res) => {
-                    const data = [];
-                    res.on("data", d => data.push(d));
-                    res.on("end", () => {
-                        const result = Buffer.concat(data).toString();
-                        let d;
-                        try {
-                            d = JSON.parse(result);
-                        } catch (err) {
-                            console.log("Error REST 1", err);
-                            return resolve(null);
-                        }
-                        resolve(d);
-                    });
-                });
-
-                req.on("error", (err) => {
-                    reject(err);
-                });
-                if (!['GET', 'HEAD'].includes(reqOptions.method) && options.body) {
-                    req.write(JSON.stringify(options.body));
+        return new Promise((resolve, reject) => {
+            const { endpoint, options } = fetchOptions;
+            const reqOptions = {
+                method: options.method?.toUpperCase() || "GET",
+                headers: {
+                    'Authorization': this.auth,
+                    'User-Agent': this.node.manager.options.userAgent,
                 }
-                req.end();
+            };
+            const url = new URL(`${this.url}${this.version}${endpoint}`);
+            if (options.headers)
+                reqOptions.headers = { ...reqOptions.headers, ...options.headers };
+            if (options.params)
+                url.search = new URLSearchParams(options.params).toString();
+
+            const req = request(url.toString(), reqOptions, (res) => {
+                const data = [];
+                res.on("data", d => data.push(d));
+                res.on("end", () => {
+                    const result = Buffer.concat(data).toString();
+                    let d;
+                    try {
+                        d = JSON.parse(result);
+                    } catch (err) {
+                        console.log("Error REST 1", err);
+                        return resolve(null);
+                    }
+                    resolve(d);
+                });
             });
-        } catch (error) {
-            console.log("Error REST 2");
-            return;
-        }
+
+            req.on("error", (err) => {
+                reject(err);
+            });
+            if (!['GET', 'HEAD'].includes(reqOptions.method) && options.body) {
+                req.write(JSON.stringify(options.body));
+            }
+            req.end();
+        });
+        // } catch (error) {
+        //     console.log("Error REST 2");
+        //     return;
+        // }
     }
 }
