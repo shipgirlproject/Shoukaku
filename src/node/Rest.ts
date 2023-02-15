@@ -363,10 +363,9 @@ export class Rest {
                 const data: Buffer[] = [];
                 res.on('data', d => data.push(d));
                 res.on('end', () => {
+
                     const result = Buffer.concat(data).toString();
-
                     // console.log("code:", res.statusCode, res.statusMessage)
-
                     if (!res.statusCode || res.statusCode < 200 || res.statusCode > 299) {
                         return reject(`Request failled with status code: ${res.statusCode} message: `);
                     }
@@ -379,11 +378,9 @@ export class Rest {
                     resolve(d);
                 });
             });
-
-            req.on('error', (err: any) => {
-                console.log('Error 2', err);
-                resolve(undefined);
-                throw new Error(err);
+            req.on('error', (err) => {
+                console.log('Error 2 rest', err);
+                reject(err);
             });
             if (![ 'GET', 'HEAD' ].includes(reqOptions.method) && options.body) {
                 req.write(JSON.stringify(options.body));
