@@ -2,7 +2,7 @@ import { Node, NodeStats } from './Node';
 import { NodeOption } from '../Shoukaku';
 import { Versions } from '../Constants';
 import { FilterOptions } from '../guild/Player';
-import { request } from "http";
+import { request } from 'http';
 
 export type LoadType = 'TRACK_LOADED' | 'PLAYLIST_LOADED' | 'SEARCH_RESULT' | 'NO_MATCHES' | 'LOAD_FAILED';
 
@@ -301,91 +301,96 @@ export class Rest {
      * @param fetchOptions.options Options passed to fetch
      * @internal
      */
-    protected async fetch<T = unknown>(fetchOptions: FetchOptions) {
-        // const { endpoint, options } = fetchOptions;
-        // let headers = {
-        //     'Authorization': this.auth,
-        //     'User-Agent': this.node.manager.options.userAgent
-        // };
-        // if (options.headers)
-        //     headers = { ...headers, ...options.headers };
-        // const url = new URL(`${this.url}${this.version}${endpoint}`);
-        // if (options.params)
-        //     url.search = new URLSearchParams(options.params).toString();
-        // const abortController = new AbortController();
-        // const timeout = setTimeout(() => abortController.abort(), this.node.manager.options.restTimeout * 1000);
-        // const method = options.method?.toUpperCase() || 'GET';
-        // const finalFetchOptions = {
-        //     method,
-        //     headers,
-        //     signal: abortController.signal
-        // };
-        // if (!['GET', 'HEAD'].includes(method) && options.body)
-        //     finalFetchOptions.body = JSON.stringify(options.body);
+    protected async fetch<T >(fetchOptions: FetchOptions): Promise<T | undefined> {
 
-        // const request = await fetch(url.toString(), finalFetchOptions)
-        //     .finally(() => clearTimeout(timeout));
+        /*
+        const { endpoint, options } = fetchOptions;
+        let headers = {
+            'Authorization': this.auth,
+            'User-Agent': this.node.manager.options.userAgent,
+        };
+        if (options.headers)
+            headers = { ...headers, ...options.headers };
+        const url = new URL(`${this.url}${this.version}${endpoint}`);
+        if (options.params)
+            url.search = new URLSearchParams(options.params).toString();
+        const abortController = new AbortController();
+        const timeout = setTimeout(() => abortController.abort(), this.node.manager.options.restTimeout * 1000);
+        const method = options.method?.toUpperCase() || 'GET';
+        const finalFetchOptions = {
+            method,
+            headers,
+            signal: abortController.signal
+        };
+        if (![ 'GET', 'HEAD' ].includes(method) && options.body)
+            finalFetchOptions.body = JSON.stringify(options.body);
+        const request = await fetch(url.toString(), finalFetchOptions)
+            .finally(() => clearTimeout(timeout));
+        if (!request.ok) {
+            const response = await request
+                .json()
+                .catch(() => null);
+            if (!response?.message)
+                throw new Error(`Rest request failed with response code: ${request.status}`);
+            else
+                throw new Error(`Rest request failed with response code: ${request.status} | message: ${response.message}`);
+        }
+        try {
+            return await request.json();
+        }
+        catch {
+            return;
+        }
+*/
 
-        // if (!request.ok) {
-        //     const response = await request
-        //         .json()
-        //         .catch(() => null);
-        //     if (!response?.message)
-        //         throw new Error(`Rest request failed with response code: ${request.status}`);
-        //     else
-        //         throw new Error(`Rest request failed with response code: ${request.status} | message: ${response.message}`);
-        // }
-        // try {
-        //     return await request.json();
-        // }
-        // catch {
-        //     return;
-        // }
 
-                return new Promise((resolve, reject) => {
-                    const { endpoint, options } = fetchOptions;
-                    const reqOptions = {
-                        method: options.method?.toUpperCase() || "GET",
-                        headers: {
-                            'Authorization': this.auth,
-                            'User-Agent': this.node.manager.options.userAgent,
-                        }
-                    };
-                    const url = new URL(`${this.url}${this.version}${endpoint}`);
-                    if (options.headers)
-                        reqOptions.headers = { ...reqOptions.headers, ...options.headers };
-                    if (options.params)
-                        url.search = new URLSearchParams(options.params).toString();
-        
-                    const req = request(url.toString(), reqOptions, (res) => {
-                        const data: Buffer[] = [];
-                        res.on("data", d => data.push(d));
-                        res.on("end", () => {
-                            const result = Buffer.concat(data).toString();
-        
-                            // console.log("code:", res.statusCode, res.statusMessage)
-        
-                            if (res.statusCode < 200 || res.statusCode > 299) {
-                                return reject(`Request failled with status code: ${res.statusCode}`);
-                            }
-                            let d;
-                            try {
-                                d = JSON.parse(result);
-                            } catch (err) {
-                                return resolve(undefined);
-                            }
-                            resolve(d);
-                        });
-                    });
-        
-                    req.on("error", (err: any) => {
-                        console.log("Error 2", err)
-                        reject(err);
-                    });
-                    if (!['GET', 'HEAD'].includes(reqOptions.method) && options.body) {
-                        req.write(JSON.stringify(options.body));
+        return await new Promise((resolve, reject) => {
+            const { endpoint, options } = fetchOptions;
+            const reqOptions = {
+                method: options.method?.toUpperCase() || 'GET',
+                headers: {
+                    'Authorization': this.auth,
+                    'User-Agent': this.node.manager.options.userAgent,
+                }
+            };
+            const url = new URL(`${this.url}${this.version}${endpoint}`);
+            if (options.headers)
+                reqOptions.headers = { ...reqOptions.headers, ...options.headers };
+            if (options.params)
+                url.search = new URLSearchParams(options.params).toString();
+
+            const req = request(url.toString(), reqOptions, (res) => {
+                const data: Buffer[] = [];
+                res.on('data', d => data.push(d));
+                res.on('end', () => {
+                    const result = Buffer.concat(data).toString();
+
+                    // console.log("code:", res.statusCode, res.statusMessage)
+
+                    if (!res.statusCode || res.statusCode < 200 || res.statusCode > 299) {
+                        return reject(`Request failled with status code: ${res.statusCode} message: `);
                     }
-                    req.end();
-                }).catch((err: any) => { throw new Error(err) });
+                    let d;
+                    try {
+                        d = JSON.parse(result);
+                    } catch (err) {
+                        return resolve(undefined);
+                    }
+                    resolve(d);
+                });
+            });
+
+            req.on('error', (err: any) => {
+                console.log('Error 2', err);
+                resolve(undefined);
+                throw new Error(err);
+            });
+            if (![ 'GET', 'HEAD' ].includes(reqOptions.method) && options.body) {
+                req.write(JSON.stringify(options.body));
+            }
+            req.end();
+        });
+
+
     }
 }
