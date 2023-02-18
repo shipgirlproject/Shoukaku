@@ -360,11 +360,9 @@ export class Rest {
                 url.search = new URLSearchParams(options.params).toString();
 
             const req = request(url.toString(), reqOptions);
-            // req.setTimeout(this.node.manager.options.restTimeout * 1000);
-            req.setTimeout(1000);
+            req.setTimeout(this.node.manager.options.restTimeout * 1000);
             req.once('timeout', () => {
-                console.log('never called lol');
-                reject('never called');
+                reject(`Request Aborted timeout: ${this.node.manager.options.restTimeout}s`);
             });
 
 
