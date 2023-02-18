@@ -78,7 +78,7 @@ export interface LavalinkPlayerVoice {
     ping?: number
 }
 
-export interface LavalinkPlayerVoiceOptions extends Omit<LavalinkPlayerVoice, 'connected'|'ping'> {}
+export interface LavalinkPlayerVoiceOptions extends Omit<LavalinkPlayerVoice, 'connected' | 'ping'> { }
 
 export interface LavalinkPlayer {
     guildId: string,
@@ -90,13 +90,13 @@ export interface LavalinkPlayer {
 }
 
 export interface UpdatePlayerOptions {
-    encodedTrack?: string|null;
+    encodedTrack?: string | null;
     identifier?: string;
     position?: number;
     endTime?: number;
     volume?: number;
     paused?: boolean;
-    filters?:  FilterOptions;
+    filters?: FilterOptions;
     voice?: LavalinkPlayerVoiceOptions;
 }
 
@@ -301,7 +301,7 @@ export class Rest {
      * @param fetchOptions.options Options passed to fetch
      * @internal
      */
-    protected async fetch<T >(fetchOptions: FetchOptions): Promise<T | undefined> {
+    protected async fetch<T>(fetchOptions: FetchOptions): Promise<T | undefined> {
 
         /*
         const { endpoint, options } = fetchOptions;
@@ -359,15 +359,19 @@ export class Rest {
             if (options.params)
                 url.search = new URLSearchParams(options.params).toString();
 
-            const req = request(url.toString(), reqOptions, (res) => {
-                const data: Buffer[] = [];
-                res.on('data', d => data.push(d));
-                res.on('end', () => {
+            const req = request(url.toString(), reqOptions);
 
-                    const result = Buffer.concat(data).toString();
+            req.on('response', (resp) => {
+                // console.log(res, res.);
+                let buffData = '';
+                resp.on('data', (str) => {
+                    buffData += str;
+                }).once('end', () => {
+
+                    const result = buffData.toString();
                     // console.log("code:", res.statusCode, res.statusMessage)
-                    if (!res.statusCode || res.statusCode < 200 || res.statusCode > 299) {
-                        return reject(`Request failled with status code: ${res.statusCode} message: `);
+                    if (!resp.statusCode || resp.statusCode < 200 || resp.statusCode > 299) {
+                        return reject(`Request failled with status code: ${resp.statusCode} message: `);
                     }
                     let d;
                     try {
@@ -378,6 +382,13 @@ export class Rest {
                     resolve(d);
                 });
             });
+
+            req.setTimeout(this.node.manager.options.restTimeout * 1000);
+
+            req.once('timeout', () => {
+                reject('timeout');
+            });
+
             req.on('error', (err) => {
                 console.log('Error 2 rest', err);
                 reject(err);
