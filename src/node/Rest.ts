@@ -365,7 +365,6 @@ export class Rest {
                 reject(`Request Aborted timeout: ${this.node.manager.options.restTimeout}s`);
             });
 
-
             req.once('response', (resp) => {
                 // console.log(res, res.);
                 let buffData = '';
