@@ -301,7 +301,7 @@ export class Rest {
      * @param fetchOptions.options Options passed to fetch
      * @internal
      */
-    protected async fetch<T>(fetchOptions: FetchOptions): Promise<T | undefined> {
+    protected fetch<T>(fetchOptions: FetchOptions): Promise<T | undefined> {
 
         /*
         const { endpoint, options } = fetchOptions;
@@ -344,7 +344,7 @@ export class Rest {
 */
 
 
-        return await new Promise((resolve, reject) => {
+        return new Promise((resolve, reject) => {
             const { endpoint, options } = fetchOptions;
             const reqOptions = {
                 method: options.method?.toUpperCase() || 'GET',
@@ -360,12 +360,19 @@ export class Rest {
                 url.search = new URLSearchParams(options.params).toString();
 
             const req = request(url.toString(), reqOptions);
+            // req.setTimeout(this.node.manager.options.restTimeout * 1000);
+            req.setTimeout(1000);
+            req.once('timeout', () => {
+                console.log('never called lol');
+                reject('never called');
+            });
+
 
             req.once('response', (resp) => {
                 // console.log(res, res.);
                 let buffData = '';
-                resp.on('data', (str) => {
-                    buffData += str;
+                resp.on('data', (chunk) => {
+                    buffData += chunk;
                 }).once('end', () => {
 
                     const result = buffData.toString();
@@ -381,12 +388,6 @@ export class Rest {
                     }
                     resolve(d);
                 });
-            });
-
-            req.setTimeout(this.node.manager.options.restTimeout * 1000);
-
-            req.once('timeout', () => {
-                reject('timeout');
             });
 
             req.on('error', (err) => {
