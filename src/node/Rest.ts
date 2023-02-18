@@ -361,7 +361,7 @@ export class Rest {
 
             const req = request(url.toString(), reqOptions);
 
-            req.on('response', (resp) => {
+            req.once('response', (resp) => {
                 // console.log(res, res.);
                 let buffData = '';
                 resp.on('data', (str) => {
