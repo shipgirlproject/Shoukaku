@@ -375,7 +375,7 @@ export class Rest {
                     const result = buffData.toString();
                     // console.log("code:", res.statusCode, res.statusMessage)
                     if (!resp.statusCode || resp.statusCode < 200 || resp.statusCode > 299) {
-                        return reject(`Request failled with status code: ${resp.statusCode} message: `);
+                        return reject(`Request failled with status code: ${resp.statusCode} message: ${resp.statusMessage}`);
                     }
                     let d;
                     try {
