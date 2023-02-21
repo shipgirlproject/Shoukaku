@@ -374,10 +374,15 @@ export class Rest {
 
                     const result = buffData.toString();
                     // console.log("code:", res.statusCode, res.statusMessage)
-                    if (!resp.statusCode || resp.statusCode < 200 || resp.statusCode > 299) {
-                        return reject(`Request failled with status code: ${resp.statusCode} message: ${resp.statusMessage}`);
-                    }
                     let d;
+                    if (!resp.statusCode || resp.statusCode < 200 || resp.statusCode > 299) {
+                        try {
+                            d = JSON.parse(result);
+                            if (d.message)
+                                return reject(`Request failled with status code: ${resp.statusCode} message: ${d.message}`);
+                        } catch (err) { /* empty */ }
+                        return reject(`Request failled with status code: ${resp.statusCode} `);
+                    }
                     try {
                         d = JSON.parse(result);
                     } catch (err) {
