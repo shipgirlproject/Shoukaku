@@ -363,6 +363,7 @@ export class Rest {
             req.setTimeout(this.node.manager.options.restTimeout * 1000);
             req.once('timeout', () => {
                 reject(`Request Aborted timeout: ${this.node.manager.options.restTimeout}s`);
+                req.destroy();
             });
 
             req.once('response', (resp) => {
