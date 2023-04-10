@@ -363,7 +363,7 @@ export class Rest {
             req.setTimeout(this.node.manager.options.restTimeout * 1000);
             req.once('timeout', () => {
                 reject(`Request Aborted timeout: ${this.node.manager.options.restTimeout}s`);
-                req.end();
+                req.destroy();
             });
 
             req.once('response', (resp) => {
@@ -394,6 +394,8 @@ export class Rest {
             });
 
             req.on('error', (err) => {
+                if (req.destroyed) return;
+
                 console.log('Error 2 rest', err);
                 reject(err);
             });
