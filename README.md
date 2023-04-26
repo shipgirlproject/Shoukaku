@@ -10,10 +10,11 @@
 ![NPM](https://img.shields.io/npm/l/shoukaku?style=flat-square)
 
 <p align="center">
-    <img src="https://cdn.donmai.us/original/0e/a4/0ea4a25416f850823d62d61ce51fc659.png"> 
+    <img src="https://azurlane.netojuu.com/images/6/69/Shoukaku.png"> 
 </p>
 
-> The ShipGirl Project, feat Shoukaku; ⓒ Kancolle
+> The ShipGirl Project, feat Shoukaku; ⓒ Azur Lane 
+
 ### Features
 
 ✅ Stable
