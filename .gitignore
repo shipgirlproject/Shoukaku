@@ -1,5 +1,11 @@
-package-lock.json
-node_modules
-dist
 .idea
 .gitattributes
+.DS_Store
+.vscode
+node_modules/
+dist/
+package-lock.json
+yarn.lock
+yarn-debug.log*
+yarn-error.log*
+**.tgz
