@@ -10,10 +10,11 @@
 ![NPM](https://img.shields.io/npm/l/shoukaku?style=flat-square)
 
 <p align="center">
-    <img src="https://cdn.donmai.us/original/0e/a4/0ea4a25416f850823d62d61ce51fc659.png"> 
+    <img src="https://azurlane.netojuu.com/images/6/69/Shoukaku.png"> 
 </p>
 
-> The ShipGirl Project, feat Shoukaku; ⓒ Kancolle
+> The ShipGirl Project, feat Shoukaku; ⓒ Azur Lane 
+
 ### Features
 
 ✅ Stable
@@ -40,7 +41,7 @@ Refer to [/src/connectors](https://github.com/Deivu/Shoukaku/tree/master/src/con
 
 *   Dev (4.0.0-dev) (Needs Lavalink Versions: `3.7.x` <)
 
-> For living on the edge but with latest features: `npm install https://github.com/Deivu/Shoukaku.git#v4`
+> For living on the edge but with latest features: `npm install https://github.com/Deivu/Shoukaku.git`
 
 > Dev versions are not guaranteed to stay the same api wise, and even with last known stable, I won't say it's 100% stable
 
