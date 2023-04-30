@@ -220,7 +220,7 @@ export class Player extends EventEmitter {
      */
     public node: Node;
     /**
-     * Discort voice channel that this player is connected to
+     * Discord voice channel that this player is connected to
      */
     public readonly connection: Connection;
     /**
