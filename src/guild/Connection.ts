@@ -231,6 +231,7 @@ export class Connection extends EventEmitter {
      */
     public setServerUpdate(data: ServerUpdate): void {
         if (!data.endpoint) {
+            console.log('Data from Connection.ts', data);
             this.emit('connectionUpdate', VoiceState.SESSION_ENDPOINT_MISSING);
             return;
         }
