@@ -167,12 +167,12 @@ export class Connection extends EventEmitter {
         this.player.node.emit('debug', `[Voice] -> [Discord] : Requesting Connection | Guild: ${this.guildId}`);
 
         const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 15000);
+        const timeout = setTimeout(() => controller.abort(), (this.player.node.manager.options.voiceConnectionTimeout ?? 15) * 1000);
 
         try {
             const [ status, error ] = await once(this, 'connectionUpdate', { signal: controller.signal });
             if (status !== VoiceState.SESSION_READY) {
-                switch(status) {
+                switch (status) {
                     case VoiceState.SESSION_ID_MISSING: throw new Error('The voice connection is not established due to missing session id');
                     case VoiceState.SESSION_ENDPOINT_MISSING: throw new Error('The voice connection is not established due to missing connection endpoint');
                     case VoiceState.SESSION_FAILED_UPDATE: throw error;
