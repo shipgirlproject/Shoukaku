@@ -172,7 +172,7 @@ export class Connection extends EventEmitter {
         try {
             const [ status, error ] = await once(this, 'connectionUpdate', { signal: controller.signal });
             if (status !== VoiceState.SESSION_READY) {
-                switch (status) {
+                switch(status) {
                     case VoiceState.SESSION_ID_MISSING: throw new Error('The voice connection is not established due to missing session id');
                     case VoiceState.SESSION_ENDPOINT_MISSING: throw new Error('The voice connection is not established due to missing connection endpoint');
                     case VoiceState.SESSION_FAILED_UPDATE: throw error;
