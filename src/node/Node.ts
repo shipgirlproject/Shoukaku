@@ -284,7 +284,7 @@ export class Node extends EventEmitter {
      */
     private open(response: IncomingMessage): void {
         const resumed = response.headers['session-resumed'] === 'true';
-        this.emit('debug', `[Socket] <-> [${this.name}] : Connection Handshake Done! ${this.url} | Upgrade Headers Resuned: ${resumed}`);
+        this.emit('debug', `[Socket] <-> [${this.name}] : Connection Handshake Done! ${this.url} | Upgrade Headers Resumed: ${resumed}`);
         this.reconnects = 0;
         this.state = State.NEARLY;
     }
