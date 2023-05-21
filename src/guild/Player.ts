@@ -289,7 +289,7 @@ export class Player extends EventEmitter {
             this.node.players.delete(this.connection.guildId);
             this.node = node;
             this.node.players.set(this.connection.guildId, this);
-            await this.update(this.playerData);
+            await this.resume();
         } catch (error) {
             // to ensure a clean disconnect on Discord side
             await this.connection.disconnect(false);
@@ -543,7 +543,6 @@ export class Player extends EventEmitter {
      * @param options An object that conforms to ResumeOptions that specify behavior on resuming
      */
     public async resume(options: ResumeOptions = {}): Promise<void> {
-        if (!this.track) return;
         const data = this.playerData;
         if (options.noReplace) data.noReplace = options.noReplace;
         if (options.startTime) data.playerOptions.position = options.startTime;
