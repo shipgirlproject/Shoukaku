@@ -288,7 +288,7 @@ export class Player extends EventEmitter {
             this.node.players.delete(this.connection.guildId);
             this.node = node;
             this.node.players.set(this.connection.guildId, this);
-            await this.update(this.playerData);
+            await this.resume();
         } catch (error) {
             // to ensure a clean disconnect on Discord side
             await this.connection.disconnect(false);
