@@ -549,7 +549,7 @@ export class Player extends EventEmitter {
         if (options.endTime) data.playerOptions.position;
         if (options.pause) data.playerOptions.paused = options.pause;
         await this.update(data);
-        this.emit('resume', this);
+        this.emit('resumed', this);
     }
 
     /**
