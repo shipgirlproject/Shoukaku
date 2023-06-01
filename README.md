@@ -94,7 +94,7 @@ const player = await node.joinChannel({
 ```
 > Playing a track and changing a playback option (in this example, volume)
 ```js
-await player.playTrack({ track: metadata.encodedTrack });
+await player.playTrack({ track: metadata.track });
 await player.setVolume(0.5);
 ```
 
