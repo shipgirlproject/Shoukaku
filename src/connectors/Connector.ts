@@ -11,7 +11,7 @@ export const AllowedPackets = [ 'VOICE_STATE_UPDATE', 'VOICE_SERVER_UPDATE' ];
 
 export abstract class Connector {
     protected readonly client: any;
-    protected manager: Shoukaku|null;
+    protected manager: Shoukaku | null;
     constructor(client: any) {
         this.client = client;
         this.manager = null;
@@ -29,7 +29,12 @@ export abstract class Connector {
 
     protected raw(packet: any): void {
         if (!AllowedPackets.includes(packet.t)) return;
-        for (const node of this.manager!.nodes.values()) node.discordRaw(packet);
+        for (const node of this.manager!.nodes.values()) {
+            if (node.players.has(packet.d.guild_id)) {
+                node.discordRaw(packet);
+                break;
+            }
+        }
     }
 
     abstract getId(): string;
