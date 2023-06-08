@@ -40,7 +40,8 @@ export const ShoukakuDefaults: ShoukakuOptions = {
     restTimeout: 60,
     moveOnDisconnect: false,
     userAgent: `${Info.name}bot/${Info.version} (${Info.repository.url})`,
-    structures: {}
+    structures: {},
+    voiceConnectionTimeout: 15
 };
 
 export const NodeDefaults: NodeOption = {

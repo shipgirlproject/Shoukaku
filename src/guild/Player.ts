@@ -220,7 +220,7 @@ export class Player extends EventEmitter {
      */
     public node: Node;
     /**
-     * Discort voice channel that this player is connected to
+     * Discord voice channel that this player is connected to
      */
     public readonly connection: Connection;
     /**
@@ -376,7 +376,7 @@ export class Player extends EventEmitter {
      * @param volume Target volume
      */
     public async setVolume(volume: number): Promise<void> {
-        volume = Math.min(Math.max(volume, 0), 100);
+        volume = Math.min(Math.max(volume, 0), 100) / 100;
         await this.node.rest.updatePlayer({
             guildId: this.connection.guildId,
             playerOptions: { filters: { volume }}
@@ -510,7 +510,7 @@ export class Player extends EventEmitter {
      */
     public clearFilters(): Promise<void> {
         return this.setFilters({
-            volume: 100,
+            volume: 1,
             equalizer: [],
             karaoke: null,
             timescale: null,
@@ -543,14 +543,13 @@ export class Player extends EventEmitter {
      * @param options An object that conforms to ResumeOptions that specify behavior on resuming
      */
     public async resume(options: ResumeOptions = {}): Promise<void> {
-        if (!this.track) return;
         const data = this.playerData;
         if (options.noReplace) data.noReplace = options.noReplace;
         if (options.startTime) data.playerOptions.position = options.startTime;
         if (options.endTime) data.playerOptions.position;
         if (options.pause) data.playerOptions.paused = options.pause;
         await this.update(data);
-        this.emit('resume', this);
+        this.emit('resumed', this);
     }
 
     /**
