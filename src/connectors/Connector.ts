@@ -29,6 +29,7 @@ export abstract class Connector {
 
     protected raw(packet: any): void {
         if (!AllowedPackets.includes(packet.t)) return;
+
         for (const node of this.manager!.nodes.values()) {
             if (node.players.has(packet.d.guild_id)) {
                 node.discordRaw(packet);
