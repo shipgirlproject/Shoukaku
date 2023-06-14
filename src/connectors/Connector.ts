@@ -29,7 +29,7 @@ export abstract class Connector {
 
     protected raw(packet: any): void {
         if (!AllowedPackets.includes(packet.t)) return;
-        const guildId = packet.d.guildId;
+        const guildId = packet.d.guild_id;
         const connection = this.manager!.connections.get(guildId);
         if (!connection) return;
         if (packet.t === 'VOICE_SERVER_UPDATE') {
