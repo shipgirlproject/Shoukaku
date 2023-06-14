@@ -264,19 +264,19 @@ export class Shoukaku extends EventEmitter {
 
     /**
      * Cleans the disconnected lavalink node
-     * @param options.guildId Guild ID in which voice channel to connect to is located
-     * @param options.shardId Unused parameter
-     * @param options.channelId Channel ID of voice channel to connect to
+     * @param options.guildId GuildId in which the ChannelId of the voice channel is located
+     * @param options.shardId ShardId to track where this should send on sharded websockets, put 0 if you are unsharded
+     * @param options.channelId ChannelId of the voice channel you want to connect to
      * @param options.deaf Optional boolean value to specify whether to deafen or undeafen the current bot user
      * @param options.mute Optional boolean value to specify whether to mute or unmute the current bot user
      * @param options.getNode Optional getter function if you have custom node resolving
-     * @returns A Lavalink node or undefined
+     * @returns The created player
      * @internal
      */
     public async joinVoiceChannel(options: VoiceChannelOptions): Promise<Player> {
         if (this.connections.has(options.guildId))
             throw new Error('This guild already have an existing connection');
-        if (!options.getNode) options.getNode = this.getIdeal;
+        if (!options.getNode) options.getNode = this.getIdealNode;
         const connection = new Connection(this, options);
         this.connections.set(connection.guildId, connection);
         try {
@@ -309,7 +309,7 @@ export class Shoukaku extends EventEmitter {
      * Cleans the disconnected lavalink node
      * @param node The node to clean
      * @param args Additional arguments for Shoukaku to emit
-     * @returns A Lavalink node or undefined
+     * @returns The destroyed / disconnected player or undefined if none
      * @internal
      */
     public async leaveVoiceChannel(guildId: string): Promise<Player|undefined> {
@@ -321,12 +321,10 @@ export class Shoukaku extends EventEmitter {
     }
 
     /**
-     * Get the Lavalink node the least penalty score
-     * @param group A group, an array of groups, or the string `auto`
-     * @returns A Lavalink node or undefined
-     * @internal
+     * Gets the Lavalink node the least penalty score
+     * @returns A Lavalink node or undefined if there are no nodes ready
      */
-    public getIdeal(): Node|undefined {
+    public getIdealNode(): Node|undefined {
         return [ ...this.nodes.values() ]
             .filter(node => node.state === State.CONNECTED)
             .sort((a, b) => a.penalties - b.penalties)
