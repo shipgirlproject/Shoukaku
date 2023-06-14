@@ -1,6 +1,5 @@
 import { EventEmitter } from 'events';
-import { Node, VoiceChannelOptions } from '../node/Node';
-import { mergeDefault } from '../Utils';
+import { Node } from '../node/Node';
 import { OPCodes, State } from '../Constants';
 import { Connection } from './Connection';
 import { UpdatePlayerInfo, UpdatePlayerOptions } from '../node/Rest';
@@ -216,13 +215,17 @@ export declare interface Player {
  */
 export class Player extends EventEmitter {
     /**
+     * GuildId of this player
+     */
+    public readonly guildId: string;
+    /**
+     * Connection class that this player is bound on
+     */
+    public readonly connection: Connection;
+    /**
      * Lavalink node this player is connected to
      */
     public node: Node;
-    /**
-     * Discord voice channel that this player is connected to
-     */
-    public readonly connection: Connection;
     /**
      * ID of current track
      */
@@ -245,16 +248,13 @@ export class Player extends EventEmitter {
     public filters: FilterOptions;
     /**
      * @param node An instance of Node (Lavalink API wrapper)
-     * @param options.guildId Guild ID in which voice channel to connect to is located
-     * @param options.shardId Shard ID in which the guild exists
-     * @param options.channelId Channel ID of voice channel to connect to
-     * @param options.deaf Optional boolean value to specify whether to deafen the current bot user
-     * @param options.mute Optional boolean value to specify whether to mute the current bot user
+     * @param connection An instance of connection class
      */
-    constructor(node: Node, options: VoiceChannelOptions) {
+    constructor(node: Node, connection: Connection) {
         super();
+        this.guildId = connection.guildId;
+        this.connection = connection;
         this.node = node;
-        this.connection = new Connection(this, options);
         this.track = null;
         this.paused = false;
         this.position = 0;
@@ -264,7 +264,7 @@ export class Player extends EventEmitter {
 
     public get playerData(): UpdatePlayerInfo {
         return {
-            guildId: this.connection.guildId,
+            guildId: this.guildId,
             playerOptions: {
                 encodedTrack: this.track,
                 position: this.position,
@@ -277,37 +277,37 @@ export class Player extends EventEmitter {
     }
 
     /**
-     * Move player to another node
-     * @param name Name of node to move to
+     * Move player to another node. Auto disconnects when the node specified is not found
+     * @param name? Name of node to move to, or the default ideal node
      */
-    public async move(name: string): Promise<void> {
-        const node = this.node.manager.nodes.get(name);
-        if (!node || node.name === this.node.name) return;
-        if (node.state !== State.CONNECTED) throw new Error('The node you specified is not ready');
+    public async move(name?: string): Promise<boolean> {
+        const node = this.node.manager.nodes.get(name!) || this.connection.getNode(this.connection.manager.nodes, this.connection);
+        if (!node || node.state !== State.CONNECTED) {
+            this.connection.disconnect();
+            await this.destroyPlayer(true);
+            return false;
+        }
+        if (node.name === this.node.name) return false;
         try {
-            await this.connection.destroy();
-            this.node.players.delete(this.connection.guildId);
+            await this.destroyPlayer();
             this.node = node;
-            this.node.players.set(this.connection.guildId, this);
+            this.node.players.set(this.guildId, this);
             await this.resume();
+            return true;
         } catch (error) {
-            // to ensure a clean disconnect on Discord side
-            await this.connection.disconnect(false);
-            // now we destroy it remotely, and if it errors, no leaks will happen in the lib
-            await this.connection.destroy();
+            this.connection.disconnect();
+            await this.destroyPlayer(true);
             throw error;
         }
     }
 
     /**
-     * Automatically moves this player to recommended node
+     * Destroys the player in remote lavalink side
      */
-    public async moveToRecommendedNode(): Promise<void> {
-        let name: string|string[] = 'auto';
-        if (this.node.group) name = [ this.node.group ];
-        const node = this.node.manager.getNode(name);
-        if (!node) return await this.connection.disconnect();
-        await this.move(node.name);
+    public async destroyPlayer(clean: boolean = false): Promise<void> {
+        this.node.players.delete(this.guildId);
+        if (clean) this.clean();
+        await this.node.rest.destroyPlayer(this.guildId);
     }
 
     /**
@@ -326,7 +326,7 @@ export class Player extends EventEmitter {
             if (volume) playerOptions.volume = volume;
         }
         await this.node.rest.updatePlayer({
-            guildId: this.connection.guildId,
+            guildId: this.guildId,
             noReplace: playable.options?.noReplace ?? false,
             playerOptions
         });
@@ -341,7 +341,7 @@ export class Player extends EventEmitter {
      */
     public async stopTrack(): Promise<void> {
         await this.node.rest.updatePlayer({
-            guildId: this.connection.guildId,
+            guildId: this.guildId,
             playerOptions: { encodedTrack: null }
         });
         this.position = 0;
@@ -353,7 +353,7 @@ export class Player extends EventEmitter {
      */
     public async setPaused(paused = true): Promise<void> {
         await this.node.rest.updatePlayer({
-            guildId: this.connection.guildId,
+            guildId: this.guildId,
             playerOptions: { paused }
         });
         this.paused = paused;
@@ -365,7 +365,7 @@ export class Player extends EventEmitter {
      */
     public async seekTo(position: number): Promise<void> {
         await this.node.rest.updatePlayer({
-            guildId: this.connection.guildId,
+            guildId: this.guildId,
             playerOptions: { position }
         });
         this.position = position;
@@ -378,7 +378,7 @@ export class Player extends EventEmitter {
     public async setVolume(volume: number): Promise<void> {
         volume = Math.min(Math.max(volume, 0), 100) / 100;
         await this.node.rest.updatePlayer({
-            guildId: this.connection.guildId,
+            guildId: this.guildId,
             playerOptions: { filters: { volume }}
         });
         this.filters.volume = volume;
@@ -390,7 +390,7 @@ export class Player extends EventEmitter {
      */
     public async setEqualizer(equalizer: Band[]): Promise<void> {
         await this.node.rest.updatePlayer({
-            guildId: this.connection.guildId,
+            guildId: this.guildId,
             playerOptions: { filters: { equalizer }}
         });
         this.filters.equalizer = equalizer;
@@ -402,7 +402,7 @@ export class Player extends EventEmitter {
      */
     public async setKaraoke(karaoke?: KaraokeSettings): Promise<void> {
         await this.node.rest.updatePlayer({
-            guildId: this.connection.guildId,
+            guildId: this.guildId,
             playerOptions: { filters: { karaoke }}
         });
         this.filters.karaoke = karaoke || null;
@@ -414,7 +414,7 @@ export class Player extends EventEmitter {
      */
     public async setTimescale(timescale?: TimescaleSettings): Promise<void> {
         await this.node.rest.updatePlayer({
-            guildId: this.connection.guildId,
+            guildId: this.guildId,
             playerOptions: { filters: { timescale }}
         });
         this.filters.timescale = timescale || null;
@@ -426,7 +426,7 @@ export class Player extends EventEmitter {
      */
     public async setTremolo(tremolo?: FreqSettings): Promise<void> {
         await this.node.rest.updatePlayer({
-            guildId: this.connection.guildId,
+            guildId: this.guildId,
             playerOptions: { filters: { tremolo }}
         });
         this.filters.tremolo = tremolo || null;
@@ -438,7 +438,7 @@ export class Player extends EventEmitter {
      */
     public async setVibrato(vibrato?: FreqSettings): Promise<void> {
         await this.node.rest.updatePlayer({
-            guildId: this.connection.guildId,
+            guildId: this.guildId,
             playerOptions: { filters: { vibrato }}
         });
         this.filters.vibrato = vibrato || null;
@@ -450,7 +450,7 @@ export class Player extends EventEmitter {
      */
     public async setRotation(rotation?: RotationSettings): Promise<void> {
         await this.node.rest.updatePlayer({
-            guildId: this.connection.guildId,
+            guildId: this.guildId,
             playerOptions: { filters: { rotation }}
         });
         this.filters.rotation = rotation || null;
@@ -463,7 +463,7 @@ export class Player extends EventEmitter {
      */
     public async setDistortion(distortion: DistortionSettings): Promise<void> {
         await this.node.rest.updatePlayer({
-            guildId: this.connection.guildId,
+            guildId: this.guildId,
             playerOptions: { filters: { distortion }}
         });
         this.filters.distortion = distortion || null;
@@ -475,7 +475,7 @@ export class Player extends EventEmitter {
      */
     public async setChannelMix(channelMix: ChannelMixSettings): Promise<void> {
         await this.node.rest.updatePlayer({
-            guildId: this.connection.guildId,
+            guildId: this.guildId,
             playerOptions: { filters: { channelMix }}
         });
         this.filters.channelMix = channelMix || null;
@@ -487,7 +487,7 @@ export class Player extends EventEmitter {
      */
     public async setLowPass(lowPass: LowPassSettings): Promise<void> {
         await this.node.rest.updatePlayer({
-            guildId: this.connection.guildId,
+            guildId: this.guildId,
             playerOptions: { filters: { lowPass }}
         });
         this.filters.lowPass = lowPass || null;
@@ -499,7 +499,7 @@ export class Player extends EventEmitter {
      */
     public async setFilters(filters: FilterOptions): Promise<void> {
         await this.node.rest.updatePlayer({
-            guildId: this.connection.guildId,
+            guildId: this.guildId,
             playerOptions: { filters }
         });
         this.filters = filters;
@@ -527,7 +527,7 @@ export class Player extends EventEmitter {
      * If you want to update the whole player yourself, sends raw update player info to lavalink
      */
     public async update(updatePlayer: UpdatePlayerInfo): Promise<void> {
-        const data = { ...updatePlayer, ...{ guildId: this.connection.guildId, sessionId: this.node.sessionId! }};
+        const data = { ...updatePlayer, ...{ guildId: this.guildId, sessionId: this.node.sessionId! }};
         await this.node.rest.updatePlayer(data);
         if (updatePlayer.playerOptions) {
             const options = updatePlayer.playerOptions;
@@ -564,11 +564,39 @@ export class Player extends EventEmitter {
 
     /**
      * Reset the track, position and filters on this instance to defaults
+     * @internal
      */
     public reset(): void {
         this.track = null;
         this.position = 0;
         this.filters = {};
+    }
+
+    /**
+     * Sends server update to lavalink
+     * @internal
+     */
+    public async sendServerUpdate(): Promise<void> {
+        try {
+            const serverUpdate = this.connection.serverUpdateInfo;
+            const playerUpdate = {
+                guildId: this.guildId,
+                playerOptions: {
+                    voice: {
+                        token: serverUpdate.token,
+                        endpoint: serverUpdate.endpoint,
+                        sessionId: this.connection.sessionId!
+                    }
+                }
+            };
+            await this.node.rest.updatePlayer(playerUpdate);
+        } catch (error) {
+            if (!this.connection.established) throw error;
+            this.connection.disconnect();
+            try {
+                await this.destroyPlayer(true);
+            } catch (_) { }
+        }
     }
 
     /**
@@ -613,7 +641,7 @@ export class Player extends EventEmitter {
                 this.node.emit(
                     'debug',
                     this.node.name,
-                    `[Player] -> [Node] : Unknown Player Event Type ${json.type} | Guild: ${this.connection.guildId}`
+                    `[Player] -> [Node] : Unknown Player Event Type ${json.type} | Guild: ${this.guildId}`
                 );
         }
     }

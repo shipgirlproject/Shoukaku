@@ -29,7 +29,20 @@ export abstract class Connector {
 
     protected raw(packet: any): void {
         if (!AllowedPackets.includes(packet.t)) return;
-        for (const node of this.manager!.nodes.values()) node.discordRaw(packet);
+        const guildId = packet.d.guildId;
+        const player = this.manager!.players.get(guildId);
+        if (!player) return;
+        if (packet.t === 'VOICE_SERVER_UPDATE') {
+            player.connection.setServerUpdate(packet.d);
+            if (player.connection.established)
+                player
+                    .sendServerUpdate()
+                    .catch(error => this.manager!.on('error', error))
+            return;
+        }
+        const userId = packet.d.user_id;
+        if (userId !== this.manager!.id) return;
+        player.connection.setStateUpdate(packet.d);
     }
 
     abstract getId(): string;

@@ -7,14 +7,6 @@ import { wait } from '../Utils';
 import { Rest } from './Rest';
 import Websocket from 'ws';
 
-export interface VoiceChannelOptions {
-    guildId: string;
-    shardId: number;
-    channelId: string;
-    deaf?: boolean;
-    mute?: boolean;
-}
-
 export interface NodeStats {
     players: number;
     playingPlayers: number;
@@ -211,7 +203,7 @@ export class Node extends EventEmitter {
         this.ws.once('upgrade', response => this.open(response));
         this.ws.once('close', (...args) => this.close(...args));
         this.ws.on('error', error => this.error(error));
-        this.ws.on('message', data => this.wrap('message', data));
+        this.ws.on('message', data => this.message(data).catch(error => this.error(error)));
     }
 
     /**
@@ -229,52 +221,6 @@ export class Node extends EventEmitter {
             this.ws.close(code, reason);
         else
             this.clean();
-    }
-
-    /**
-     * Join a voice channel in a guild
-     * @param options.guildId Guild ID in which voice channel to connect to is located
-     * @param options.shardId Shard ID in which the guild exists
-     * @param options.channelId Channel ID of voice channel to connect to
-     * @param options.deaf Optional boolean value to specify whether to deafen the current bot user
-     * @param options.mute Optional boolean value to specify whether to mute the current bot user
-     * @returns A promise that resolves to a player class
-     */
-    public async joinChannel(options: VoiceChannelOptions): Promise<Player> {
-        if (this.state !== State.CONNECTED)
-            throw new Error('This node is not yet ready');
-        let player = this.players.get(options.guildId);
-        if (player?.connection.state === State.CONNECTING)
-            throw new Error('Can\'t join this channel. This connection is connecting');
-        if (player?.connection.state === State.CONNECTED)
-            throw new Error('Can\'t join this channel. This connection is already connected');
-        if (player?.connection.reconnecting)
-            throw new Error('Can\'t join this channel. This connection is currently force-reconnecting');
-        try {
-            if (!player) {
-                if (this.manager.options.structures.player) {
-                    player = new this.manager.options.structures.player(this, options);
-                } else {
-                    player = new Player(this, options);
-                }
-                this.players.set(options.guildId, player!);
-            }
-            await player!.connection.connect(options);
-            return player!;
-        } catch (error) {
-            this.players.delete(options.guildId);
-            throw error;
-        }
-    }
-
-    /**
-     * Disconnect from connected voice channel
-     * @param guildId ID of guild that contains voice channel
-     */
-    public async leaveChannel(guildId: string): Promise<void> {
-        const player = this.players.get(guildId);
-        if (!player) return;
-        return await player.connection.disconnect();
     }
 
     /**
@@ -381,11 +327,12 @@ export class Node extends EventEmitter {
      * @internal
      */
     private async clean(): Promise<void> {
-        const move = this.manager.options.moveOnDisconnect && [ ...this.manager.nodes.values() ].filter(node => node.group === this.group).length > 1;
+        let move = this.manager.options.moveOnDisconnect;
         if (!move) return this.destroy(false);
-        const count = this.players.size;
+        let count;
         try {
-            await this.movePlayers();
+            count = await this.movePlayers();
+            move = count > 0;
         } catch (error) {
             this.error(error);
         } finally {
@@ -409,15 +356,6 @@ export class Node extends EventEmitter {
     }
 
     /**
-     * Wraps the compatible function with an error handling
-     * @internal
-     */
-    private wrap(name: 'message', ...args: [unknown]): void {
-        this[name].apply(this, args)
-            .catch(error => this.error(error));
-    }
-
-    /**
      * Tries to resume the players internally
      * @internal
      */
@@ -434,7 +372,10 @@ export class Node extends EventEmitter {
 
         await Promise.all([
             ...playersWithData.map(player => player.resume()),
-            ...playersWithoutData.map(player => player.connection.disconnect(false))
+            ...playersWithoutData.map(player => {
+                player.connection.disconnect();
+                return player.destroyPlayer(true);
+            })
         ]);
     }
 
@@ -442,26 +383,9 @@ export class Node extends EventEmitter {
      * Tries to move the players to another node
      * @internal
      */
-    private async movePlayers(): Promise<void> {
+    private async movePlayers(): Promise<number> {
         const players = [ ...this.players.values() ];
-        await Promise.all(players.map(player => player.moveToRecommendedNode()));
-    }
-
-    /**
-     * Handle raw message from Discord
-     * @param packet Packet data
-     * @internal
-     */
-    public discordRaw(packet: any): void {
-        const player = this.players.get(packet.d.guild_id);
-        if (!player) return;
-
-        if (packet.t === 'VOICE_SERVER_UPDATE') {
-            player.connection.setServerUpdate(packet.d);
-            return;
-        }
-
-        if (packet.d.user_id !== this.manager.id) return;
-        player.connection.setStateUpdate(packet.d);
+        const data = await Promise.all(players.map(player => player.move()));
+        return data.filter(Boolean).length;
     }
 }

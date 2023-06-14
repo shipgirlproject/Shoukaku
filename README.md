@@ -54,6 +54,7 @@ https://github.com/Deivu/Shoukaku/tree/v3 (v3 stable github branch)
 > v4.x.x docs are in your intellisense for now (I only deploy stable release docs on the Github page)
 
 ### Small code snippet examples
+
 > Initializing the library (Using Connector Discord.JS)
 ```js
 const { Client } = require('discord.js');
@@ -71,6 +72,7 @@ client.login('token');
 // If you want shoukaku to be available on client, then bind it to it, here is one example of it
 client.shoukaku = shoukaku;
 ```
+
 > Never initialize Shoukaku like this, or else she will never initialize, start shoukaku before you call `client.login()`
 ```js
 // NEVER DO THIS, OR SHOUKAKU WILL NEVER INITIALIZE
@@ -78,29 +80,46 @@ client.on('ready', () => {
     client.shoukaku = new Shoukaku(new Connectors.DiscordJS(client), Nodes);
 });
 ```
+
 > Searching and joining a channel (Async Function Implementation)
 ```js
 const node = shoukaku.getNode();
 if (!node) return;
-const result = await node.rest.resolve('scsearch:snowhalation');
-if (!result?.tracks.length) return;
-const metadata = result.tracks.shift();
 const player = await node.joinChannel({
     guildId: 'your_guild_id',
     channelId: 'your_channel_id',
     shardId: 0 // if unsharded it will always be zero (depending on your library implementation)
 });
-// player is created and ready, do your thing
+// player is created, now search for a track
+const result = await player.node.rest.resolve('scsearch:snowhalation');
+if (!result?.tracks.length) return;
+const metadata = result.tracks.shift();
+// play the searched track
+await player.playTrack({ track: metadata.encoded });
 ```
+
 > Playing a track and changing a playback option (in this example, volume)
 ```js
-await player.playTrack({ track: metadata.encodedTrack });
+await player.playTrack({ track: metadata.encoded });
 await player.setVolume(0.5);
 ```
 
 > Updating the whole player if you don\'t want to use my helper functions
 ```js
 await player.update({ ...playerOptions });
+```
+
+> Setting a custom get node ideal function
+```js
+const player = await node.joinChannel({
+    guildId: 'your_guild_id',
+    channelId: 'your_channel_id',
+    shardId: 0,
+    getNode: (nodes, connection) => { 
+        nodes = [ ...nodes.values() ];
+        return nodes.find(node => node.group === connection.region);
+    }
+});
 ```
 
 ### Shoukaku's options

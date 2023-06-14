@@ -5,6 +5,7 @@ import { Connector } from './connectors/Connector';
 import { Constructor, mergeDefault } from './Utils';
 import { Player } from './guild/Player';
 import { Rest } from './node/Rest';
+import { Connection } from './guild/Connection.js';
 
 export interface Structures {
     /**
@@ -85,6 +86,15 @@ export interface ShoukakuOptions {
      * Custom structures for shoukaku to use
      */
     structures?: Structures;
+}
+
+export interface VoiceChannelOptions {
+    guildId: string;
+    shardId: number;
+    channelId: string;
+    deaf?: boolean;
+    mute?: boolean;
+    getNode?: (node: Map<string, Node>, connection: Connection) => Node|undefined;
 }
 
 export interface MergedShoukakuOptions {
@@ -170,6 +180,10 @@ export class Shoukaku extends EventEmitter {
      */
     public readonly nodes: Map<string, Node>;
     /**
+     * Voice connections being handled
+     */
+    public readonly connections: Map<string, Connection>;
+    /**
      * Shoukaku instance identifier
      */
     public id: string|null;
@@ -193,6 +207,7 @@ export class Shoukaku extends EventEmitter {
         this.connector = connector.set(this);
         this.options = mergeDefault(ShoukakuDefaults, options);
         this.nodes = new Map();
+        this.connections = new Map();
         this.id = null;
         this.connector.listen(nodes);
     }
@@ -243,17 +258,61 @@ export class Shoukaku extends EventEmitter {
     }
 
     /**
-     * Select a Lavalink node from the pool of nodes
-     * @param name A specific node, an array of nodes, or the string `auto`
+     * Cleans the disconnected lavalink node
+     * @param options.guildId Guild ID in which voice channel to connect to is located
+     * @param options.shardId Unused parameter
+     * @param options.channelId Channel ID of voice channel to connect to
+     * @param options.deaf Optional boolean value to specify whether to deafen or undeafen the current bot user
+     * @param options.mute Optional boolean value to specify whether to mute or unmute the current bot user
+     * @param options.getNode Optional getter function if you have custom node resolving
      * @returns A Lavalink node or undefined
+     * @internal
      */
-    public getNode(name: string|string[] = 'auto'): Node|undefined {
-        if (!this.nodes.size) throw new Error('No nodes available, please add a node first');
-        if (Array.isArray(name) || name === 'auto') return this.getIdeal(name);
-        const node = this.nodes.get(name);
-        if (!node) throw new Error('The node name you specified is not one of my nodes');
-        if (node.state !== State.CONNECTED) throw new Error('This node is not yet ready');
-        return node;
+    public async joinVoiceChannel(options: VoiceChannelOptions): Promise<Player> {
+        if (this.connections.has(options.guildId))
+            throw new Error('This guild already have an existing connection');
+        if (!options.getNode) options.getNode = this.getIdeal;
+        const connection = new Connection(this, options);
+        this.connections.set(connection.guildId, connection);
+        try {
+            await connection.connect();
+        } catch (error) {
+            this.connections.delete(options.guildId);
+            throw error;
+        }
+        try {
+            const node = options.getNode(this.nodes, connection);
+            if (!node)
+                throw new Error('Can\'t find any nodes to connect on');
+            const player = new Player(node, connection);
+            node.players.set(player.guildId, player);
+            try {
+                await player.sendServerUpdate();
+            } catch (error) {
+                node.players.delete(options.guildId);
+                throw error;
+            }
+            connection.established = true;
+            return player;
+        } catch (error) {
+            await connection.disconnect();
+            throw error;
+        }
+    }
+
+    /**
+     * Cleans the disconnected lavalink node
+     * @param node The node to clean
+     * @param args Additional arguments for Shoukaku to emit
+     * @returns A Lavalink node or undefined
+     * @internal
+     */
+    public async leaveVoiceChannel(guildId: string): Promise<Player|undefined> {
+        const connection = this.connections.get(guildId);
+        if (connection) connection.disconnect();
+        const player = this.players.get(guildId);
+        if (player) await player.destroyPlayer(true);
+        return player;
     }
 
     /**
@@ -262,16 +321,9 @@ export class Shoukaku extends EventEmitter {
      * @returns A Lavalink node or undefined
      * @internal
      */
-    private getIdeal(group: string|string[]): Node|undefined {
-        const nodes = [ ...this.nodes.values() ]
-            .filter(node => node.state === State.CONNECTED);
-        if (group === 'auto') {
-            return nodes
-                .sort((a, b) => a.penalties - b.penalties)
-                .shift();
-        }
-        return nodes
-            .filter(node => node.group && group.includes(node.group))
+    public getIdeal(): Node|undefined {
+        return [ ...this.nodes.values() ]
+            .filter(node => node.state === State.CONNECTED)
             .sort((a, b) => a.penalties - b.penalties)
             .shift();
     }
