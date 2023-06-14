@@ -195,6 +195,7 @@ export class Shoukaku extends EventEmitter {
     /**
      * @param connector A Discord library connector
      * @param nodes An array that conforms to the NodeOption type that specifies nodes to connect to
+     * @param options Options to pass to create this Shoukaku instance
      * @param options.resume Whether to resume a connection on disconnect to Lavalink (Server Side) (Note: DOES NOT RESUME WHEN THE LAVALINK SERVER DIES)
      * @param options.resumeKey Resume key for Lavalink
      * @param options.resumeTimeout Time to wait before lavalink starts to destroy the players of the disconnected client
@@ -300,7 +301,7 @@ export class Shoukaku extends EventEmitter {
             connection.established = true;
             return player;
         } catch (error) {
-            await connection.disconnect();
+            connection.disconnect();
             throw error;
         }
     }

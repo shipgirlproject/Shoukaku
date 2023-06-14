@@ -30,19 +30,20 @@ export abstract class Connector {
     protected raw(packet: any): void {
         if (!AllowedPackets.includes(packet.t)) return;
         const guildId = packet.d.guildId;
-        const player = this.manager!.players.get(guildId);
-        if (!player) return;
+        const connection = this.manager!.connections.get(guildId);
+        if (!connection) return;
         if (packet.t === 'VOICE_SERVER_UPDATE') {
-            player.connection.setServerUpdate(packet.d);
-            if (player.connection.established)
-                player
-                    .sendServerUpdate()
-                    .catch(error => this.manager!.on('error', error))
+            connection.setServerUpdate(packet.d);
+            if (!connection.established) return;
+            const player = this.manager!.players.get(guildId);
+            player
+                .sendServerUpdate()
+                .catch(error => this.manager!.on('error', error));
             return;
         }
         const userId = packet.d.user_id;
         if (userId !== this.manager!.id) return;
-        player.connection.setStateUpdate(packet.d);
+        connection.setStateUpdate(packet.d);
     }
 
     abstract getId(): string;

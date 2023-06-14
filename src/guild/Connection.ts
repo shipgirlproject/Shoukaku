@@ -1,7 +1,6 @@
 import { EventEmitter, once } from 'events';
 import { State, VoiceState } from '../Constants';
 import { Node } from '../node/Node';
-import { LavalinkPlayerVoiceOptions } from '../node/Rest';
 import { Shoukaku, VoiceChannelOptions } from '../Shoukaku.js';
 
 /**
@@ -78,16 +77,17 @@ export class Connection extends EventEmitter {
     /**
      * Cached serverUpdate event from Lavalink
      */
-    private serverUpdate: ServerUpdate|null;
+    public serverUpdate: ServerUpdate|null;
     /**
      * Get node function to get new nodes
      */
     public getNode: (node: Map<string, Node>, connection: Connection) => Node|undefined
     /**
      * @param manager The manager of this connection
-     * @param options.guildId Guild ID in which voice channel to connect to is located
-     * @param options.shardId Shard ID in which the guild exists
-     * @param options.channelId Channel ID of voice channel to connect to
+     * @param options The options to pass in connection creation
+     * @param options.guildId GuildId in which voice channel to connect to is located
+     * @param options.shardId ShardId in which the guild exists
+     * @param options.channelId ChannelId of voice channel to connect to
      * @param options.deaf Optional boolean value to specify whether to deafen the current bot user
      * @param options.mute Optional boolean value to specify whether to mute the current bot user
      * @param options.getNode Optional move function for moving players around
@@ -108,19 +108,6 @@ export class Connection extends EventEmitter {
         this.established = false;
         this.serverUpdate = null;
         this.getNode = options.getNode!;
-    }
-
-    public get serverUpdateInfo(): LavalinkPlayerVoiceOptions {
-        if (!this.hasRequiredVoiceData) throw new Error('No server update / session id present');
-        return {
-            token: this.serverUpdate!.token,
-            endpoint: this.serverUpdate!.endpoint,
-            sessionId: this.sessionId!
-        };
-    }
-
-    public get hasRequiredVoiceData(): boolean {
-        return !!this.serverUpdate;
     }
 
     /**
@@ -240,7 +227,6 @@ export class Connection extends EventEmitter {
     /**
      * Send data to Discord
      * @param data The data to send
-     * @param important Whether to prioritize sending this packet in the queue
      * @internal
      */
     private send(data: any): void {

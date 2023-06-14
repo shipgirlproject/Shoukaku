@@ -270,7 +270,11 @@ export class Player extends EventEmitter {
                 position: this.position,
                 paused: this.paused,
                 filters: this.filters,
-                voice: this.connection.serverUpdateInfo,
+                voice: {
+                    token: this.connection.serverUpdate!.token,
+                    endpoint: this.connection.serverUpdate!.endpoint,
+                    sessionId: this.connection.sessionId!
+                },
                 volume: this.filters.volume ?? 100
             }
         };
@@ -577,13 +581,12 @@ export class Player extends EventEmitter {
      */
     public async sendServerUpdate(): Promise<void> {
         try {
-            const serverUpdate = this.connection.serverUpdateInfo;
             const playerUpdate = {
                 guildId: this.guildId,
                 playerOptions: {
                     voice: {
-                        token: serverUpdate.token,
-                        endpoint: serverUpdate.endpoint,
+                        token: this.connection.serverUpdate!.token,
+                        endpoint: this.connection.serverUpdate!.endpoint,
                         sessionId: this.connection.sessionId!
                     }
                 }
@@ -592,9 +595,9 @@ export class Player extends EventEmitter {
         } catch (error) {
             if (!this.connection.established) throw error;
             this.connection.disconnect();
-            try {
-                await this.destroyPlayer(true);
-            } catch (_) { }
+            await this
+                .destroyPlayer(true)
+                .catch(() => {});
         }
     }
 
