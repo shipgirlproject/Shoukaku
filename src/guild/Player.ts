@@ -3,7 +3,6 @@ import { Node } from '../node/Node';
 import { OPCodes, State } from '../Constants';
 import { Connection } from './Connection';
 import { UpdatePlayerInfo, UpdatePlayerOptions } from '../node/Rest';
-import { IntRange } from '../Utils.js';
 
 export type TrackEndReason = 'FINISHED' | 'LOAD_FAILED' | 'STOPPED' | 'REPLACED' | 'CLEANUP';
 export type Severity = 'COMMON' | 'SUSPICIOUS' | 'FAULT';
@@ -384,9 +383,9 @@ export class Player extends EventEmitter {
 
     /**
      * Sets the global volume of the player
-     * @param volume Target volume
+     * @param volume Target volume 0-1000
      */
-    public async setGlobalVolume(volume: IntRange<0, 1000>): Promise<void> {
+    public async setGlobalVolume(volume: number): Promise<void> {
         this.volume = volume;
         await this.node.rest.updatePlayer({
             guildId: this.guildId,
@@ -396,9 +395,9 @@ export class Player extends EventEmitter {
 
     /**
      * Sets the filter volume of the player
-     * @param volume Target volume
+     * @param volume Target volume 0.0-5.0
      */
-    public async setFilterVolume(volume: IntRange<0.0, 5.0>):  Promise<void> {
+    public async setFilterVolume(volume: number):  Promise<void> {
         this.filters.volume = volume;
         await this.setFilters(this.filters);
     }

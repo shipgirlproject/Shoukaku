@@ -36,6 +36,7 @@ export abstract class Connector {
             connection.setServerUpdate(packet.d);
             if (!connection.established) return;
             const player = this.manager!.players.get(guildId);
+            if (!player) return;
             player
                 .sendServerUpdate()
                 .catch(error => this.manager!.on('error', error));

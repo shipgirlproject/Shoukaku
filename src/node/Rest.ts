@@ -323,7 +323,6 @@ export class Rest {
         if (![ 'GET', 'HEAD' ].includes(method) && options.body)
             finalFetchOptions.body = JSON.stringify(options.body);
 
-        // @ts-expect-error
         const request = await fetch(url.toString(), finalFetchOptions)
             .finally(() => clearTimeout(timeout));
 
