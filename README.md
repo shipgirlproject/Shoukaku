@@ -81,7 +81,7 @@ client.on('ready', () => {
 });
 ```
 
-> Searching and joining a channel (Async Function Implementation)
+> Join a voice channel, search for a track, play the track, then disconnect after 30 seconds
 ```js
 const player = await shoukaku.joinChannel({
     guildId: 'your_guild_id',
@@ -94,6 +94,8 @@ if (!result?.tracks.length) return;
 const metadata = result.tracks.shift();
 // play the searched track
 await player.playTrack({ track: metadata.encoded });
+// disconnect after 30 seconds
+setTimeout(() => shoukaku.leaveVoiceChannel(player.guildId), 30000).unref();
 ```
 
 > Playing a track and changing a playback option (in this example, volume)
