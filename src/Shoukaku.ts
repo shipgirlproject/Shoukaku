@@ -307,8 +307,7 @@ export class Shoukaku extends EventEmitter {
 
     /**
      * Leaves a voice channel
-     * @param node The node to clean
-     * @param args Additional arguments for Shoukaku to emit
+     * @param guildId The id of the guild you want to delete
      * @returns The destroyed / disconnected player or undefined if none
      * @internal
      */
