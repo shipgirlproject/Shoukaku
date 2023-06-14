@@ -263,7 +263,7 @@ export class Shoukaku extends EventEmitter {
     }
 
     /**
-     * Cleans the disconnected lavalink node
+     * Joins a voice channel
      * @param options.guildId GuildId in which the ChannelId of the voice channel is located
      * @param options.shardId ShardId to track where this should send on sharded websockets, put 0 if you are unsharded
      * @param options.channelId ChannelId of the voice channel you want to connect to
@@ -306,7 +306,7 @@ export class Shoukaku extends EventEmitter {
     }
 
     /**
-     * Cleans the disconnected lavalink node
+     * Leaves a voice channel
      * @param node The node to clean
      * @param args Additional arguments for Shoukaku to emit
      * @returns The destroyed / disconnected player or undefined if none
