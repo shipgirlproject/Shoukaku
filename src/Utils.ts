@@ -1,4 +1,5 @@
 export type Constructor<T> = new (...args: any[]) => T;
+
 /**
  * Merge the default options to user input
  * @param def Default options
