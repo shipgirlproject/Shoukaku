@@ -112,6 +112,7 @@ export class Node extends EventEmitter {
     protected destroyed: boolean;
     /**
      * @param manager Shoukaku instance
+     * @param options Options on creating this node
      * @param options.name Name of this node
      * @param options.url URL of Lavalink
      * @param options.auth Credentials to access Lavalnk
@@ -364,7 +365,7 @@ export class Node extends EventEmitter {
         const playersWithoutData = [];
 
         for (const player of this.players.values()) {
-            if (player.connection.hasRequiredVoiceData)
+            if (player.connection.serverUpdate)
                 playersWithData.push(player);
             else
                 playersWithoutData.push(player);
