@@ -86,6 +86,10 @@ export interface ShoukakuOptions {
      * Custom structures for shoukaku to use
      */
     structures?: Structures;
+    /**
+     * Timeout before abort connection
+     */
+    voiceConnectionTimeout?: number;
 }
 
 export interface VoiceChannelOptions {
@@ -109,6 +113,7 @@ export interface MergedShoukakuOptions {
     moveOnDisconnect: boolean;
     userAgent: string;
     structures: Structures;
+    voiceConnectionTimeout: number;
 }
 
 export declare interface Shoukaku {
@@ -142,7 +147,7 @@ export declare interface Shoukaku {
      * @eventProperty
      */
     on(event: 'disconnect', listener: (name: string, moved: boolean, count: number) => void): this;
-     /**
+    /**
      * Emitted when a raw message is recived from Lavalink
      * @eventProperty
      */

@@ -136,6 +136,7 @@ restTimeout | number | Time to wait for a response from the Lavalink REST API be
 moveOnDisconnect | boolean | Whether to move players to a different Lavalink node when a node disconnects |
 userAgent | string | User Agent to use when making requests to Lavalink |
 structures | Object{rest?, player?} | Custom structures for shoukaku to use |
+voiceConnectionTimeout | number | Timeout before abort connection **in seconds** |
 
 ### Plugins list
 

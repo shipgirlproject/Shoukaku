@@ -162,7 +162,7 @@ export class Connection extends EventEmitter {
         this.debug(`[Voice] -> [Discord] : Requesting Connection | Guild: ${this.guildId}`);
 
         const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 15000);
+        const timeout = setTimeout(() => controller.abort(), this.player.node.manager.options.voiceConnectionTimeout * 1000);
 
         try {
             const [ status ] = await once(this, 'connectionUpdate', { signal: controller.signal });

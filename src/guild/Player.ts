@@ -543,14 +543,13 @@ export class Player extends EventEmitter {
      * @param options An object that conforms to ResumeOptions that specify behavior on resuming
      */
     public async resume(options: ResumeOptions = {}): Promise<void> {
-        if (!this.track) return;
         const data = this.playerData;
         if (options.noReplace) data.noReplace = options.noReplace;
         if (options.startTime) data.playerOptions.position = options.startTime;
         if (options.endTime) data.playerOptions.position;
         if (options.pause) data.playerOptions.paused = options.pause;
         await this.update(data);
-        this.emit('resume', this);
+        this.emit('resumed', this);
     }
 
     /**
