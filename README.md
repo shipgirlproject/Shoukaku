@@ -185,7 +185,7 @@ console.log(player.filters.volume)
 ```js
 // new variable in shoukaku class, which handles the "connection data" of discord only
 console.log(shoukaku.connections);
-// getNode() is removed in favor of joinVoiceChannel custom resolve function, example:
+// getNode() is removed in favor of joinChannel custom get node function, example:
 const player = await shoukaku.joinChannel({
     guildId: 'your_guild_id',
     channelId: 'your_channel_id',
