@@ -83,9 +83,7 @@ client.on('ready', () => {
 
 > Searching and joining a channel (Async Function Implementation)
 ```js
-const node = shoukaku.getNode();
-if (!node) return;
-const player = await node.joinChannel({
+const player = await shoukaku.joinChannel({
     guildId: 'your_guild_id',
     channelId: 'your_channel_id',
     shardId: 0 // if unsharded it will always be zero (depending on your library implementation)
@@ -111,7 +109,7 @@ await player.update({ ...playerOptions });
 
 > Setting a custom get node ideal function
 ```js
-const player = await node.joinChannel({
+const player = await shoukaku.joinChannel({
     guildId: 'your_guild_id',
     channelId: 'your_channel_id',
     shardId: 0,
