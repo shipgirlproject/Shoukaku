@@ -132,6 +132,7 @@ export class Connection extends EventEmitter {
 
     /**
      * Disconnect the current bot user from the connected voice channel
+     * @internal
      */
     public disconnect(): void {
         this.send({ guild_id: this.guildId, channel_id: null, self_mute: false, self_deaf: false });
@@ -142,6 +143,7 @@ export class Connection extends EventEmitter {
 
     /**
      * Connect the current bot user to a voice channel
+     * @internal
      */
     public async connect(): Promise<void> {
         this.state = State.CONNECTING;
