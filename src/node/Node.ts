@@ -371,12 +371,9 @@ export class Node extends EventEmitter {
                 playersWithoutData.push(player);
         }
 
-        await Promise.all([
+        await Promise.allSettled([
             ...playersWithData.map(player => player.resume()),
-            ...playersWithoutData.map(player => {
-                player.connection.disconnect();
-                return player.destroyPlayer(true);
-            })
+            ...playersWithoutData.map(player => this.manager.leaveVoiceChannel(player.guildId))
         ]);
     }
 
@@ -386,7 +383,7 @@ export class Node extends EventEmitter {
      */
     private async movePlayers(): Promise<number> {
         const players = [ ...this.players.values() ];
-        const data = await Promise.all(players.map(player => player.move()));
-        return data.filter(Boolean).length;
+        const data = await Promise.allSettled(players.map(player => player.move()));
+        return data.filter(results => results.status === 'fulfilled').length;
     }
 }

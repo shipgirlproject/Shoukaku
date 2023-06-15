@@ -289,20 +289,19 @@ export class Player extends EventEmitter {
      * Move player to another node. Auto disconnects when the node specified is not found
      * @param name? Name of node to move to, or the default ideal node
      */
-    public async move(name?: string): Promise<boolean> {
-        const node = this.node.manager.nodes.get(name!) || this.connection.getNode(this.connection.manager.nodes, this.connection);
-        if (!node || node.state !== State.CONNECTED) {
-            this.connection.disconnect();
-            await this.destroyPlayer(true);
-            return false;
-        }
-        if (node.name === this.node.name) return false;
+    public async move(name?: string): Promise<void> {
         try {
+            const node = this.node.manager.nodes.get(name!) || this.connection.getNode(this.connection.manager.nodes, this.connection);
+            if (!node)
+                throw new Error('No node available to move to');
+            if (node.state !== State.CONNECTED)
+                throw new Error('Tried to move to a node that is not connected');
+            if (node.name === this.node.name)
+                throw new Error('Tried to move to the same node where the current player is connected on');
             await this.destroyPlayer();
             this.node = node;
             this.node.players.set(this.guildId, this);
             await this.resume();
-            return true;
         } catch (error) {
             this.connection.disconnect();
             await this.destroyPlayer(true);
@@ -584,9 +583,7 @@ export class Player extends EventEmitter {
         } catch (error) {
             if (!this.connection.established) throw error;
             this.connection.disconnect();
-            await this
-                .destroyPlayer(true)
-                .catch(() => {});
+            await Promise.allSettled([this.destroyPlayer(true)])
         }
     }
 
