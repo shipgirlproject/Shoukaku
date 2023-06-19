@@ -81,7 +81,7 @@ export class Connection extends EventEmitter {
     /**
      * Get node function to get new nodes
      */
-    public getNode: (node: Map<string, Node>, connection: Connection) => Node|undefined
+    public getNode: (node: Map<string, Node>, connection: Connection) => Node|undefined;
     /**
      * @param manager The manager of this connection
      * @param options The options to pass in connection creation
@@ -98,8 +98,8 @@ export class Connection extends EventEmitter {
         this.guildId = options.guildId;
         this.channelId = options.channelId;
         this.shardId = options.shardId;
-        this.muted = options.deaf ?? false;
-        this.deafened = options.mute ?? false;
+        this.muted = options.mute ?? false;
+        this.deafened = options.deaf ?? false;
         this.sessionId = null;
         this.region = null;
         this.state = State.DISCONNECTED;
@@ -132,7 +132,6 @@ export class Connection extends EventEmitter {
 
     /**
      * Disconnect the current bot user from the connected voice channel
-     * @internal
      */
     public disconnect(): void {
         this.send({ guild_id: this.guildId, channel_id: null, self_mute: false, self_deaf: false });
@@ -143,7 +142,6 @@ export class Connection extends EventEmitter {
 
     /**
      * Connect the current bot user to a voice channel
-     * @internal
      */
     public async connect(): Promise<void> {
         this.state = State.CONNECTING;
@@ -165,7 +163,7 @@ export class Connection extends EventEmitter {
         } catch (error: any) {
             this.debug(`[Voice] </- [Discord] : Request Connection Failed | Guild: ${this.guildId}`);
             if (error.name === 'AbortError')
-                throw new Error(`The voice connection is not established in ${this.manager.options.voiceConnectionTimeout * 1000} seconds`);
+                throw new Error('The voice connection is not established in 15 seconds');
             throw error;
         } finally {
             clearTimeout(timeout);
@@ -206,6 +204,7 @@ export class Connection extends EventEmitter {
      */
     public setServerUpdate(data: ServerUpdate): void {
         if (!data.endpoint) {
+            console.log('Data from Connection.ts', data);
             this.emit('connectionUpdate', VoiceState.SESSION_ENDPOINT_MISSING);
             return;
         }
