@@ -277,7 +277,7 @@ export class Shoukaku extends EventEmitter {
     public async joinVoiceChannel(options: VoiceChannelOptions): Promise<Player> {
         if (this.connections.has(options.guildId))
             throw new Error('This guild already have an existing connection');
-        if (!options.getNode) options.getNode = this.getIdealNode;
+        if (!options.getNode) options.getNode = this.getIdealNode.bind(this);
         const connection = new Connection(this, options);
         this.connections.set(connection.guildId, connection);
         try {
@@ -290,7 +290,7 @@ export class Shoukaku extends EventEmitter {
             const node = options.getNode(this.nodes, connection);
             if (!node)
                 throw new Error('Can\'t find any nodes to connect on');
-            const player = new Player(node, connection);
+            const player = this.options.structures.player ? new this.options.structures.player(node, connection) : new Player(node, connection);
             node.players.set(player.guildId, player);
             try {
                 await player.sendServerUpdate();
