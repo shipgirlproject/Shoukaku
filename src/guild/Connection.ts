@@ -81,7 +81,7 @@ export class Connection extends EventEmitter {
     /**
      * Get node function to get new nodes
      */
-    public getNode: (node: Map<string, Node>, connection: Connection) => Node|undefined
+    public getNode: (node: Map<string, Node>, connection: Connection) => Node|undefined;
     /**
      * @param manager The manager of this connection
      * @param options The options to pass in connection creation
@@ -98,8 +98,8 @@ export class Connection extends EventEmitter {
         this.guildId = options.guildId;
         this.channelId = options.channelId;
         this.shardId = options.shardId;
-        this.muted = options.deaf ?? false;
-        this.deafened = options.mute ?? false;
+        this.muted = options.mute ?? false;
+        this.deafened = options.deaf ?? false;
         this.sessionId = null;
         this.region = null;
         this.state = State.DISCONNECTED;
