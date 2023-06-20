@@ -277,7 +277,7 @@ export class Shoukaku extends EventEmitter {
     public async joinVoiceChannel(options: VoiceChannelOptions): Promise<Player> {
         if (this.connections.has(options.guildId))
             throw new Error('This guild already have an existing connection');
-        if (!options.getNode) options.getNode = this.getIdealNode;
+        if (!options.getNode) options.getNode = this.getIdealNode.bind(this);
         const connection = new Connection(this, options);
         this.connections.set(connection.guildId, connection);
         try {
