@@ -165,7 +165,7 @@ export class Connection extends EventEmitter {
         } catch (error: any) {
             this.debug(`[Voice] </- [Discord] : Request Connection Failed | Guild: ${this.guildId}`);
             if (error.name === 'AbortError')
-                throw new Error(`The voice connection is not established in ${this.manager.options.voiceConnectionTimeout * 1000} seconds`);
+                throw new Error(`The voice connection is not established in ${this.manager.options.voiceConnectionTimeout} seconds`);
             throw error;
         } finally {
             clearTimeout(timeout);
