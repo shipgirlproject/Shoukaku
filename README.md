@@ -101,7 +101,7 @@ setTimeout(() => shoukaku.leaveVoiceChannel(player.guildId), 30000).unref();
 > Playing a track and changing a playback option (in this example, volume)
 ```js
 await player.playTrack({ track: metadata.encoded });
-await player.setVolume(0.5);
+await player.setGlobalVolume(50);
 ```
 
 > Updating the whole player if you don\'t want to use my helper functions
