@@ -83,7 +83,7 @@ client.on('ready', () => {
 
 > Join a voice channel, search for a track, play the track, then disconnect after 30 seconds
 ```js
-const player = await shoukaku.joinChannel({
+const player = await shoukaku.joinVoiceChannel({
     guildId: 'your_guild_id',
     channelId: 'your_channel_id',
     shardId: 0 // if unsharded it will always be zero (depending on your library implementation)
@@ -101,7 +101,7 @@ setTimeout(() => shoukaku.leaveVoiceChannel(player.guildId), 30000).unref();
 > Playing a track and changing a playback option (in this example, volume)
 ```js
 await player.playTrack({ track: metadata.encoded });
-await player.setVolume(0.5);
+await player.setGlobalVolume(50);
 ```
 
 > Updating the whole player if you don\'t want to use my helper functions
@@ -111,7 +111,7 @@ await player.update({ ...playerOptions });
 
 > Setting a custom get node ideal function
 ```js
-const player = await shoukaku.joinChannel({
+const player = await shoukaku.joinVoiceChannel({
     guildId: 'your_guild_id',
     channelId: 'your_channel_id',
     shardId: 0,
@@ -145,7 +145,7 @@ client.once('ready', async () => {
     // we now have a track metadata, we can use this to play tracks
     const metadata = result.tracks.shift();
     // you now join a voice channel by querying the main shoukaku class, not on the node anymore
-    const player = await shoukaku.joinChannel({
+    const player = await shoukaku.joinVoiceChannel({
         guildId: 'your_guild_id',
         channelId: 'your_channel_id',
         shardId: 0 // if unsharded it will always be zero (depending on your library implementation)
@@ -185,8 +185,8 @@ console.log(player.filters.volume)
 ```js
 // new variable in shoukaku class, which handles the "connection data" of discord only
 console.log(shoukaku.connections);
-// getNode() is removed in favor of joinChannel custom get node function, example:
-const player = await shoukaku.joinChannel({
+// getNode() is removed in favor of joinVoiceChannel custom get node function, example:
+const player = await shoukaku.joinVoiceChannel({
     guildId: 'your_guild_id',
     channelId: 'your_channel_id',
     shardId: 0,
