@@ -298,7 +298,7 @@ export class Player extends EventEmitter {
                 throw new Error('Tried to move to a node that is not connected');
             if (node.name === this.node.name)
                 throw new Error('Tried to move to the same node where the current player is connected on');
-            await this.destroyPlayer();
+            await this.destroyPlayer().catch(() => null);
             this.node = node;
             this.node.players.set(this.guildId, this);
             await this.resume();
