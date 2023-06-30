@@ -35,6 +35,12 @@
     "npm": ">=7.0.0"
   },
   "author": "Saya",
+  "contributors": [
+    {
+      "name": "flav-code",
+      "link": "https://github.com/flav-code"
+    }
+  ],
   "license": "MIT",
   "repository": {
     "type": "git",
