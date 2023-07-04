@@ -1,7 +1,7 @@
 import { Node, NodeStats } from './Node';
 import { NodeOption } from '../Shoukaku';
 import { Versions } from '../Constants';
-import { FilterOptions } from '../guild/Player';
+import { Exception, FilterOptions } from '../guild/Player';
 
 export type LoadType = 'TRACK_LOADED' | 'PLAYLIST_LOADED' | 'SEARCH_RESULT' | 'NO_MATCHES' | 'LOAD_FAILED';
 
@@ -17,8 +17,6 @@ interface FetchOptions {
 }
 
 export interface Track {
-    /** @deprecated */
-    track: string;
     encoded: string;
     info: {
         identifier: string;
@@ -29,18 +27,46 @@ export interface Track {
         position: number;
         title: string;
         uri?: string;
+        artworkUrl?: string;
+        isrc?: string;
         sourceName: string;
+    }
+    pluginInfo: object;
+}
+
+export interface TrackLoadResult {
+    loadType: 'track';
+    data: Track;
+}
+
+export interface PlaylistLoadResult {
+    loadType: 'playlist';
+    data: {
+        info: {
+            name: string;
+            selectedTrack: number;
+        }
+        pluginInfo: object;
+        tracks: Track[];
     }
 }
 
-export interface LavalinkResponse {
-    loadType: LoadType;
-    playlistInfo: {
-        name?: string;
-        selectedTrack?: number;
-    }
-    tracks: Track[]
+export interface SearchLoadResult {
+    loadType: 'search';
+    data: Track[];
 }
+
+export interface EmptyLoadResult {
+    loadType: 'empty';
+    data: {};
+}
+
+export interface ErrorLoadResult {
+    loadType: 'error';
+    data: Exception;
+}
+
+export type LavalinkResponse = TrackLoadResult | PlaylistLoadResult | SearchLoadResult | EmptyLoadResult | ErrorLoadResult;
 
 export interface Address {
     address: string;
@@ -233,18 +259,18 @@ export class Rest {
     }
 
     /**
-     * Updates the session with a resuming key and timeout
-     * @param resumingKey Resuming key to set
+     * Updates the session with a resume boolean and timeout
+     * @param resuming Whether resuming is enabled for this session or not
      * @param timeout Timeout to wait for resuming
      * @returns Promise that resolves to a Lavalink player
      */
-    public updateSession(resumingKey?: string, timeout?: number): Promise<SessionInfo | undefined> {
+    public updateSession(resuming?: boolean, timeout?: number): Promise<SessionInfo | undefined> {
         const options = {
             endpoint: `/sessions/${this.sessionId}`,
             options: {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
-                body: { resumingKey, timeout }
+                body: { resuming, timeout }
             }
         };
         return this.fetch(options);

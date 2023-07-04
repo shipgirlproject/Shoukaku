@@ -134,7 +134,7 @@ export class Node extends EventEmitter {
         this.stats = null;
         this.ws = null;
         this.sessionId = null;
-        this.initialized = this.manager.options.alwaysSendResumeKey ?? false;
+        this.initialized = this.manager.options.alwaysSendSessionId ?? false;
         this.destroyed = false;
     }
 
@@ -173,7 +173,7 @@ export class Node extends EventEmitter {
         if (!this.manager.id) throw new Error('Don\'t connect a node when the library is not yet ready');
         if (this.destroyed) throw new Error('You can\'t re-use the same instance of a node once disconnected, please re-add the node again');
 
-        const resume = this.initialized && (this.manager.options.resume && this.manager.options.resumeKey);
+        const resume = this.initialized && (this.manager.options.resume && this.manager.options.sessionId);
         this.state = State.CONNECTING;
         let headers: ResumableHeaders|NonResumableHeaders;
 
@@ -183,7 +183,7 @@ export class Node extends EventEmitter {
                 'User-Agent': this.manager.options.userAgent,
                 'Authorization': this.auth,
                 'User-Id': this.manager.id,
-                'Resume-Key': this.manager.options.resumeKey
+                'Session-Id': this.manager.options.sessionId
             };
         } else {
             headers = {
@@ -267,8 +267,8 @@ export class Node extends EventEmitter {
                 this.emit('debug', `[Socket] -> [${this.name}] : Lavalink is ready! | Lavalink resume: ${json.resumed} | Lib resume: ${!!resumeByLibrary}`);
                 this.emit('ready', json.resumed || resumeByLibrary);
 
-                if (this.manager.options.resume && this.manager.options.resumeKey) {
-                    await this.rest.updateSession(this.manager.options.resumeKey, this.manager.options.resumeTimeout);
+                if (this.manager.options.resume && this.manager.options.sessionId) {
+                    await this.rest.updateSession(this.manager.options.resume, this.manager.options.resumeTimeout);
                     this.emit('debug', `[Socket] -> [${this.name}] : Resuming configured!`);
                 }
                 break;
