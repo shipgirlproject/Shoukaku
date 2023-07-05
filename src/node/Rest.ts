@@ -3,7 +3,13 @@ import { NodeOption } from '../Shoukaku';
 import { Versions } from '../Constants';
 import { Exception, FilterOptions } from '../guild/Player';
 
-export type LoadType = 'track' | 'playlist' | 'search' | 'empty' | 'error';
+export enum LoadType {
+    TRACK = 'track',
+    PLAYLIST = 'playlist',
+    SEARCH = 'search',
+    EMPTY = 'empty',
+    ERROR = 'error'
+}
 
 interface FetchOptions {
     endpoint: string;
@@ -35,12 +41,12 @@ export interface Track {
 }
 
 export interface TrackLoadResult {
-    loadType: 'track';
+    loadType: LoadType.TRACK;
     data: Track;
 }
 
 export interface PlaylistLoadResult {
-    loadType: 'playlist';
+    loadType: LoadType.PLAYLIST;
     data: {
         info: {
             name: string;
@@ -52,17 +58,17 @@ export interface PlaylistLoadResult {
 }
 
 export interface SearchLoadResult {
-    loadType: 'search';
+    loadType: LoadType.SEARCH;
     data: Track[];
 }
 
 export interface EmptyLoadResult {
-    loadType: 'empty';
+    loadType: LoadType.EMPTY;
     data: {};
 }
 
 export interface ErrorLoadResult {
-    loadType: 'error';
+    loadType: LoadType.ERROR;
     data: Exception;
 }
 
