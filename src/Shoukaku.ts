@@ -47,10 +47,6 @@ export interface ShoukakuOptions {
      */
     resume?: boolean;
     /**
-     * Session ID for lavalink to resume
-     */
-    sessionId?: string;
-    /**
      * Time to wait before lavalink starts to destroy the players of the disconnected client
      */
     resumeTimeout?: number;
@@ -99,7 +95,6 @@ export interface VoiceChannelOptions {
 
 export interface MergedShoukakuOptions {
     resume: boolean;
-    sessionId: string;
     resumeTimeout: number;
     resumeByLibrary: boolean;
     reconnectTries: number;
@@ -192,7 +187,6 @@ export class Shoukaku extends EventEmitter {
      * @param nodes An array that conforms to the NodeOption type that specifies nodes to connect to
      * @param options Options to pass to create this Shoukaku instance
      * @param options.resume Whether to resume a connection on disconnect to Lavalink (Server Side) (Note: DOES NOT RESUME WHEN THE LAVALINK SERVER DIES)
-     * @param options.sessionId Session ID for lavalink to resume
      * @param options.resumeTimeout Time to wait before lavalink starts to destroy the players of the disconnected client
      * @param options.resumeByLibrary Whether to resume the players by doing it in the library side (Client Side) (Note: TRIES TO RESUME REGARDLESS OF WHAT HAPPENED ON A LAVALINK SERVER)
      * @param options.reconnectTries Number of times to try and reconnect to Lavalink before giving up
