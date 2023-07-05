@@ -3,7 +3,7 @@ import { NodeOption } from '../Shoukaku';
 import { Versions } from '../Constants';
 import { Exception, FilterOptions } from '../guild/Player';
 
-export type LoadType = 'TRACK_LOADED' | 'PLAYLIST_LOADED' | 'SEARCH_RESULT' | 'NO_MATCHES' | 'LOAD_FAILED';
+export type LoadType = 'track' | 'playlist' | 'search' | 'empty' | 'error';
 
 interface FetchOptions {
     endpoint: string;
