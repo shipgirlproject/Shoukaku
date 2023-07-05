@@ -35,7 +35,7 @@ export interface ResumableHeaders {
     'User-Agent': string;
     'Authorization': string;
     'User-Id': string;
-    'Resume-Key': string;
+    'Session-Id': string;
 }
 
 export interface NonResumableHeaders {
