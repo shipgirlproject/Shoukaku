@@ -181,7 +181,7 @@ export class Node extends EventEmitter {
                 'User-Agent': this.manager.options.userAgent,
                 'Authorization': this.auth,
                 'User-Id': this.manager.id,
-                'Session-Id': this.sessionId!
+                'Session-Id': this.sessionId
             };
         } else {
             headers = {
