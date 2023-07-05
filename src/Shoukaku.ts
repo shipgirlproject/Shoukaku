@@ -59,10 +59,6 @@ export interface ShoukakuOptions {
      */
     resumeByLibrary?: boolean;
     /**
-     * Disables the first time initialization tracking of nodes, and just sends the session id always (Note: Useful for people who save their players to redis and wants to resume sessions even at first boot)
-     */
-    alwaysSendSessionId?: boolean;
-    /**
      * Number of times to try and reconnect to Lavalink before giving up
      */
     reconnectTries?: number;
@@ -106,7 +102,6 @@ export interface MergedShoukakuOptions {
     sessionId: string;
     resumeTimeout: number;
     resumeByLibrary: boolean;
-    alwaysSendSessionId: boolean;
     reconnectTries: number;
     reconnectInterval: number;
     restTimeout: number;
@@ -200,7 +195,6 @@ export class Shoukaku extends EventEmitter {
      * @param options.sessionId Session ID for lavalink to resume
      * @param options.resumeTimeout Time to wait before lavalink starts to destroy the players of the disconnected client
      * @param options.resumeByLibrary Whether to resume the players by doing it in the library side (Client Side) (Note: TRIES TO RESUME REGARDLESS OF WHAT HAPPENED ON A LAVALINK SERVER)
-     * @param options.alwaysSendSessionId Disables the first time initialization tracking of nodes, and just sends the session id always (Note: Useful for people who save their players to redis and wants to resume sessions even at first boot)
      * @param options.reconnectTries Number of times to try and reconnect to Lavalink before giving up
      * @param options.reconnectInterval Timeout before trying to reconnect
      * @param options.restTimeout Time to wait for a response from the Lavalink REST API before giving up

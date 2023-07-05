@@ -207,7 +207,6 @@ resume | boolean | Whether to resume a connection on disconnect to Lavalink (Ser
 sessionId | string | Session ID for lavalink to resume |
 resumeTimeout | number | Timeout before resuming a connection **in seconds** |
 resumeByLibrary | boolean | Whether to resume the players by doing it in the library side (Client Side) (Note: TRIES TO RESUME REGARDLESS OF WHAT HAPPENED ON A LAVALINK SERVER) |
-alwaysSendSessionId | boolean | Disables the first time initialization tracking of nodes, and just sends the session id always (Note: Useful for people who save their players to redis and wants to resume sessions even at first boot) |
 reconnectTries | number | Number of times to try and reconnect to Lavalink before giving up |
 reconnectInterval | number | Timeout before trying to reconnect **in seconds** |
 restTimeout | number | Time to wait for a response from the Lavalink REST API before giving up **in seconds** |

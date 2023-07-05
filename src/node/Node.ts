@@ -103,7 +103,7 @@ export class Node extends EventEmitter {
      */
     public sessionId: string|null;
     /**
-     * Boolean that represents if the node has initialized once (will always be true when alwaysSendResumeKey is true)
+     * Boolean that represents if the node has initialized once
      */
     protected initialized: boolean;
     /**
@@ -134,7 +134,7 @@ export class Node extends EventEmitter {
         this.stats = null;
         this.ws = null;
         this.sessionId = null;
-        this.initialized = this.manager.options.alwaysSendSessionId ?? false;
+        this.initialized = false;
         this.destroyed = false;
     }
 
