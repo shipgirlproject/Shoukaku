@@ -5,6 +5,7 @@ import { Connector } from './connectors/Connector';
 import { Constructor, mergeDefault } from './Utils';
 import { Player } from './guild/Player';
 import { Rest, UpdatePlayerInfo } from './node/Rest';
+import { Connection } from './guild/Connection';
 
 export interface Structures {
     /**
@@ -89,6 +90,15 @@ export interface ShoukakuOptions {
      * Timeout before abort connection
      */
     voiceConnectionTimeout?: number;
+}
+
+export interface VoiceChannelOptions {
+    guildId: string;
+    shardId: number;
+    channelId: string;
+    deaf?: boolean;
+    mute?: boolean;
+    getNode?: (node: Map<string, Node>, connection: Connection) => Node|undefined;
 }
 
 export interface MergedShoukakuOptions {
@@ -189,12 +199,17 @@ export class Shoukaku extends EventEmitter {
      */
     public readonly nodes: Map<string, Node>;
     /**
+     * Voice connections being handled
+     */
+    public readonly connections: Map<string, Connection>;
+    /**
      * Shoukaku instance identifier
      */
     public id: string|null;
     /**
      * @param connector A Discord library connector
      * @param nodes An array that conforms to the NodeOption type that specifies nodes to connect to
+     * @param options Options to pass to create this Shoukaku instance
      * @param options.resume Whether to resume a connection on disconnect to Lavalink (Server Side) (Note: DOES NOT RESUME WHEN THE LAVALINK SERVER DIES)
      * @param options.resumeKey Resume key for Lavalink
      * @param options.resumeTimeout Time to wait before lavalink starts to destroy the players of the disconnected client
@@ -212,6 +227,7 @@ export class Shoukaku extends EventEmitter {
         this.connector = connector.set(this);
         this.options = mergeDefault(ShoukakuDefaults, options);
         this.nodes = new Map();
+        this.connections = new Map();
         this.id = null;
         this.connector.listen(nodes);
     }
@@ -339,35 +355,69 @@ export class Shoukaku extends EventEmitter {
     }
 
     /**
-     * Select a Lavalink node from the pool of nodes
-     * @param name A specific node, an array of nodes, or the string `auto`
-     * @returns A Lavalink node or undefined
+     * Joins a voice channel
+     * @param options.guildId GuildId in which the ChannelId of the voice channel is located
+     * @param options.shardId ShardId to track where this should send on sharded websockets, put 0 if you are unsharded
+     * @param options.channelId ChannelId of the voice channel you want to connect to
+     * @param options.deaf Optional boolean value to specify whether to deafen or undeafen the current bot user
+     * @param options.mute Optional boolean value to specify whether to mute or unmute the current bot user
+     * @param options.getNode Optional getter function if you have custom node resolving
+     * @returns The created player
+     * @internal
      */
-    public getNode(name: string|string[] = 'auto'): Node|undefined {
-        if (!this.nodes.size) throw new Error('No nodes available, please add a node first');
-        if (Array.isArray(name) || name === 'auto') return this.getIdeal(name);
-        const node = this.nodes.get(name);
-        if (!node) throw new Error('The node name you specified is not one of my nodes');
-        if (node.state !== State.CONNECTED) throw new Error('This node is not yet ready');
-        return node;
+    public async joinVoiceChannel(options: VoiceChannelOptions): Promise<Player> {
+        if (this.connections.has(options.guildId))
+            throw new Error('This guild already have an existing connection');
+        if (!options.getNode) options.getNode = this.getIdealNode.bind(this);
+        const connection = new Connection(this, options);
+        this.connections.set(connection.guildId, connection);
+        try {
+            await connection.connect();
+        } catch (error) {
+            this.connections.delete(options.guildId);
+            throw error;
+        }
+        try {
+            const node = options.getNode(this.nodes, connection);
+            if (!node)
+                throw new Error('Can\'t find any nodes to connect on');
+            const player = this.options.structures.player ? new this.options.structures.player(node, connection) : new Player(node, connection);
+            node.players.set(player.guildId, player);
+            try {
+                await player.sendServerUpdate();
+            } catch (error) {
+                node.players.delete(options.guildId);
+                throw error;
+            }
+            connection.established = true;
+            return player;
+        } catch (error) {
+            connection.disconnect();
+            throw error;
+        }
     }
 
     /**
-     * Get the Lavalink node the least penalty score
-     * @param group A group, an array of groups, or the string `auto`
-     * @returns A Lavalink node or undefined
+     * Leaves a voice channel
+     * @param guildId The id of the guild you want to delete
+     * @returns The destroyed / disconnected player or undefined if none
      * @internal
      */
-    private getIdeal(group: string|string[]): Node|undefined {
-        const nodes = [ ...this.nodes.values() ]
-            .filter(node => node.state === State.CONNECTED);
-        if (group === 'auto') {
-            return nodes
-                .sort((a, b) => a.penalties - b.penalties)
-                .shift();
-        }
-        return nodes
-            .filter(node => node.group && group.includes(node.group))
+    public async leaveVoiceChannel(guildId: string): Promise<Player|undefined> {
+        const connection = this.connections.get(guildId);
+        if (connection) connection.disconnect();
+        const player = this.players.get(guildId);
+        if (player) await player.destroyPlayer(true);
+        return player;
+    }
+
+    /**
+     * Gets the Lavalink node the least penalty score
+     * @returns A Lavalink node or undefined if there are no nodes ready
+     */
+    public getIdealNode(): Node|undefined {
+        return [ ...this.nodes.values() ]
+            .filter(node => node.state === State.CONNECTED)
             .sort((a, b) => a.penalties - b.penalties)
             .shift();
     }

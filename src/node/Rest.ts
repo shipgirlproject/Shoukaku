@@ -134,6 +134,7 @@ export class Rest {
     protected readonly version: string;
     /**
      * @param node An instance of Node
+     * @param options The options to initialize this rest class
      * @param options.name Name of this node
      * @param options.url URL of Lavalink
      * @param options.auth Credentials to access Lavalnk
