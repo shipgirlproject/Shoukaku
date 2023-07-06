@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events';
 import { State, ShoukakuDefaults } from './Constants';
-import { Node, VoiceChannelOptions } from './node/Node';
+import { Node } from './node/Node';
 import { Connector } from './connectors/Connector';
 import { Constructor, mergeDefault } from './Utils';
 import { Player } from './guild/Player';
