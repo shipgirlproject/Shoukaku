@@ -35,7 +35,7 @@ export interface ResumableHeaders {
     'User-Agent': string;
     'Authorization': string;
     'User-Id': string;
-    'Resume-Key': string;
+    'Session-Id': string;
 }
 
 export interface NonResumableHeaders {
@@ -103,7 +103,7 @@ export class Node extends EventEmitter {
      */
     public sessionId: string|null;
     /**
-     * Boolean that represents if the node has initialized once (will always be true when alwaysSendResumeKey is true)
+     * Boolean that represents if the node has initialized once
      */
     protected initialized: boolean;
     /**
@@ -134,7 +134,7 @@ export class Node extends EventEmitter {
         this.stats = null;
         this.ws = null;
         this.sessionId = null;
-        this.initialized = this.manager.options.alwaysSendResumeKey ?? false;
+        this.initialized = false;
         this.destroyed = false;
     }
 
@@ -173,17 +173,15 @@ export class Node extends EventEmitter {
         if (!this.manager.id) throw new Error('Don\'t connect a node when the library is not yet ready');
         if (this.destroyed) throw new Error('You can\'t re-use the same instance of a node once disconnected, please re-add the node again');
 
-        const resume = this.initialized && (this.manager.options.resume && this.manager.options.resumeKey);
-        this.state = State.CONNECTING;
         let headers: ResumableHeaders|NonResumableHeaders;
 
-        if (resume) {
+        if (this.sessionId) {
             headers = {
                 'Client-Name': this.manager.options.userAgent,
                 'User-Agent': this.manager.options.userAgent,
                 'Authorization': this.auth,
                 'User-Id': this.manager.id,
-                'Resume-Key': this.manager.options.resumeKey
+                'Session-Id': this.sessionId
             };
         } else {
             headers = {
@@ -194,7 +192,7 @@ export class Node extends EventEmitter {
             };
         }
 
-        this.emit('debug', `[Socket] -> [${this.name}] : Connecting ${this.url}, Version: ${this.version}, Trying to resume? ${resume}`);
+        this.emit('debug', `[Socket] -> [${this.name}] : Connecting ${this.url}, Version: ${this.version}, Trying to resume? ${this.sessionId ? 'yes' : 'no'}`);
 
         if (!this.initialized) this.initialized = true;
 
@@ -267,8 +265,8 @@ export class Node extends EventEmitter {
                 this.emit('debug', `[Socket] -> [${this.name}] : Lavalink is ready! | Lavalink resume: ${json.resumed} | Lib resume: ${!!resumeByLibrary}`);
                 this.emit('ready', json.resumed || resumeByLibrary);
 
-                if (this.manager.options.resume && this.manager.options.resumeKey) {
-                    await this.rest.updateSession(this.manager.options.resumeKey, this.manager.options.resumeTimeout);
+                if (this.manager.options.resume) {
+                    await this.rest.updateSession(this.manager.options.resume, this.manager.options.resumeTimeout);
                     this.emit('debug', `[Socket] -> [${this.name}] : Resuming configured!`);
                 }
                 break;
