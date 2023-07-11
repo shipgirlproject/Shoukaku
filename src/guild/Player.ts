@@ -2,10 +2,10 @@ import { EventEmitter } from 'events';
 import { Node } from '../node/Node';
 import { OPCodes, State } from '../Constants';
 import { Connection } from './Connection';
-import { UpdatePlayerInfo, UpdatePlayerOptions } from '../node/Rest';
+import { Track, UpdatePlayerInfo, UpdatePlayerOptions } from '../node/Rest';
 
-export type TrackEndReason = 'FINISHED' | 'LOAD_FAILED' | 'STOPPED' | 'REPLACED' | 'CLEANUP';
-export type Severity = 'COMMON' | 'SUSPICIOUS' | 'FAULT';
+export type TrackEndReason = 'finished' | 'loadFailed' | 'stopped' | 'replaced' | 'cleanup';
+export type Severity = 'common' | 'suspicious' | 'fault';
 export type PlayerEventType = 'TrackStartEvent' | 'TrackEndEvent' | 'TrackExceptionEvent' | 'TrackStuckEvent' | 'WebSocketClosedEvent';
 
 /**
@@ -102,29 +102,31 @@ export interface Exception {
 
 export interface TrackStartEvent extends PlayerEvent {
     type: 'TrackStartEvent';
-    track: string;
+    track: Track;
 }
 
 export interface TrackEndEvent extends PlayerEvent {
     type: 'TrackEndEvent';
-    track: string;
+    track: Track;
     reason: TrackEndReason;
 }
 
 export interface TrackStuckEvent extends PlayerEvent {
     type: 'TrackStuckEvent';
-    track: string;
+    track: Track;
     thresholdMs: number;
 }
 
 export interface TrackExceptionEvent extends PlayerEvent {
     type: 'TrackExceptionEvent';
+    track: Track;
     exception?: Exception;
     error: string;
 }
 
 export interface TrackStuckEvent extends PlayerEvent {
     type: 'TrackStuckEvent';
+    track: Track;
     thresholdMs: number;
 }
 
@@ -583,7 +585,7 @@ export class Player extends EventEmitter {
         } catch (error) {
             if (!this.connection.established) throw error;
             this.connection.disconnect();
-            await Promise.allSettled([this.destroyPlayer(true)])
+            await Promise.allSettled([ this.destroyPlayer(true) ]);
         }
     }
 
@@ -602,10 +604,10 @@ export class Player extends EventEmitter {
      * @param json JSON data from Lavalink
      * @internal
      */
-    public onPlayerEvent(json: { type: string, encodedTrack: string }): void {
+    public onPlayerEvent(json: { type: string, track: Track }): void {
         switch (json.type) {
             case 'TrackStartEvent':
-                if (this.track) this.track = json.encodedTrack;
+                if (this.track) this.track = json.track.encoded;
                 this.emit('start', json);
                 break;
             case 'TrackEndEvent':

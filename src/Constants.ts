@@ -25,16 +25,14 @@ export enum OPCodes {
 }
 
 export enum Versions {
-    REST_VERSION = 3,
-    WEBSOCKET_VERSION = 3
+    REST_VERSION = 4,
+    WEBSOCKET_VERSION = 4
 }
 
 export const ShoukakuDefaults: ShoukakuOptions = {
     resume: false,
-    resumeKey: `Shoukaku@${Info.version}(${Info.repository.url})`,
     resumeTimeout: 30,
     resumeByLibrary: false,
-    alwaysSendResumeKey: false,
     reconnectTries: 3,
     reconnectInterval: 5,
     restTimeout: 60,
