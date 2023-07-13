@@ -85,18 +85,18 @@ export interface PlayerEvent {
 
 export interface TrackStartEvent extends PlayerEvent {
     type: 'TrackStartEvent';
-    track: string;
+    track: Track;
 }
 
 export interface TrackEndEvent extends PlayerEvent {
     type: 'TrackEndEvent';
-    track: string;
+    track: Track;
     reason: TrackEndReason;
 }
 
 export interface TrackStuckEvent extends PlayerEvent {
     type: 'TrackStuckEvent';
-    track: string;
+    track: Track;
     thresholdMs: number;
 }
 
@@ -565,7 +565,7 @@ export class Player extends EventEmitter {
         } catch (error) {
             if (!this.connection.established) throw error;
             this.connection.disconnect();
-            await Promise.allSettled([this.destroyPlayer(true)])
+            await Promise.allSettled([ this.destroyPlayer(true) ]);
         }
     }
 
