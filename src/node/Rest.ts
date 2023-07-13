@@ -1,7 +1,9 @@
 import { Node, NodeStats } from './Node';
 import { NodeOption } from '../Shoukaku';
 import { Versions } from '../Constants';
-import { Exception, FilterOptions } from '../guild/Player';
+import { FilterOptions } from '../guild/Player';
+
+export type Severity = 'common' | 'suspicious' | 'fault';
 
 export enum LoadType {
     TRACK = 'track',
@@ -9,17 +11,6 @@ export enum LoadType {
     SEARCH = 'search',
     EMPTY = 'empty',
     ERROR = 'error'
-}
-
-interface FetchOptions {
-    endpoint: string;
-    options: {
-        headers?: Record<string, string>;
-        params?: Record<string, string>;
-        method?: string;
-        body?: Record<string, unknown>;
-        [key: string]: unknown;
-    };
 }
 
 export interface Track {
@@ -37,42 +28,51 @@ export interface Track {
         isrc?: string;
         sourceName: string;
     }
-    pluginInfo: object;
+    pluginInfo: unknown;
 }
 
-export interface TrackLoadResult {
-    loadType: LoadType.TRACK;
-    data: Track;
-}
-
-export interface PlaylistLoadResult {
-    loadType: LoadType.PLAYLIST;
-    data: {
-        info: {
-            name: string;
-            selectedTrack: number;
-        }
-        pluginInfo: object;
-        tracks: Track[];
+export interface Playlist {
+    encoded: string;
+    info: {
+        name: string;
+        selectedTrack: number;
     }
+    pluginInfo: unknown;
+    tracks: Track[];
 }
 
-export interface SearchLoadResult {
-    loadType: LoadType.SEARCH;
-    data: Track[];
+export interface Exception {
+    message: string;
+    severity: Severity;
+    cause: string;
 }
 
-export interface EmptyLoadResult {
-    loadType: LoadType.EMPTY;
-    data: {};
+export interface TrackResult {
+    loadType: LoadType.TRACK,
+    data: Track
 }
 
-export interface ErrorLoadResult {
-    loadType: LoadType.ERROR;
-    data: Exception;
+export interface PlaylistResult {
+    loadType: LoadType.PLAYLIST,
+    data: Playlist
 }
 
-export type LavalinkResponse = TrackLoadResult | PlaylistLoadResult | SearchLoadResult | EmptyLoadResult | ErrorLoadResult;
+export interface SearchResult {
+    loadType: LoadType.SEARCH,
+    data: Track[]
+}
+
+export interface EmptyResult {
+    loadType: LoadType.EMPTY,
+    data: {}
+}
+
+export interface ErrorResult {
+    loadType: LoadType.ERROR,
+    data: Exception
+}
+
+export type LavalinkResponse = TrackResult | PlaylistResult | SearchResult | EmptyResult | ErrorResult;
 
 export interface Address {
     address: string;
@@ -135,6 +135,17 @@ export interface UpdatePlayerInfo {
 export interface SessionInfo {
     resumingKey?: string;
     timeout: number;
+}
+
+interface FetchOptions {
+    endpoint: string;
+    options: {
+        headers?: Record<string, string>;
+        params?: Record<string, string>;
+        method?: string;
+        body?: Record<string, unknown>;
+        [key: string]: unknown;
+    };
 }
 
 interface FinalFetchOptions {
@@ -295,7 +306,7 @@ export class Rest {
     }
 
     /**
-     * Get routplanner status from Lavalink
+     * Get routeplanner status from Lavalink
      * @returns Promise that resolves to a routeplanner response
      */
     public getRoutePlannerStatus(): Promise<RoutePlanner | undefined> {

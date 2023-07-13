@@ -1,5 +1,5 @@
-import { NodeOption, ShoukakuOptions } from './Shoukaku';
 import Info from '../package.json';
+import { NodeOption, ShoukakuOptions } from './Shoukaku';
 
 export enum State {
     CONNECTING,
@@ -17,7 +17,7 @@ export enum VoiceState {
     SESSION_FAILED_UPDATE
 }
 
-export enum OPCodes {
+export enum OpCodes {
     PLAYER_UPDATE = 'playerUpdate',
     STATS = 'stats',
     EVENT = 'event',

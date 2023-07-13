@@ -35,13 +35,13 @@ Refer to [/src/connectors](https://github.com/Deivu/Shoukaku/tree/master/src/con
 
 ### Installation
 
-*   Stable (3.x.x) (Needs Lavalink Versions: `3.5.x` < | `3.9.x` >)
+*   Stable (3.x.x) | Needs Lavalink Versions: `"3.5.x" < "3.9.x" >`
 
 > `npm install shoukaku`
 
-*   Dev (4.0.0-dev) (Needs Lavalink Versions: `3.7.x` <)
+*   Dev (4.0.0-dev) | Needs Lavalink Versions: `"4.x.x <"`
 
-> For living on the edge but with latest features: `npm install https://github.com/Deivu/Shoukaku.git`
+> Lavalink v4 support is currently deployed on master branch `npm install https://github.com/Deivu/Shoukaku.git`
 
 > Dev versions are not guaranteed to stay the same api wise, and even with last known stable, I won't say it's 100% stable
 
@@ -201,27 +201,27 @@ console.log(shoukaku.getIdealNode());
 ```
 
 ### Shoukaku's options
- Option | Type | Description
---------|------|------------
-resume | boolean | Whether to resume a connection on disconnect to Lavalink (Server Side) (Note: DOES NOT RESUME WHEN THE LAVALINK SERVER DIES) |
-resumeTimeout | number | Timeout before resuming a connection **in seconds** |
-resumeByLibrary | boolean | Whether to resume the players by doing it in the library side (Client Side) (Note: TRIES TO RESUME REGARDLESS OF WHAT HAPPENED ON A LAVALINK SERVER) |
-reconnectTries | number | Number of times to try and reconnect to Lavalink before giving up |
-reconnectInterval | number | Timeout before trying to reconnect **in seconds** |
-restTimeout | number | Time to wait for a response from the Lavalink REST API before giving up **in seconds** |
-moveOnDisconnect | boolean | Whether to move players to a different Lavalink node when a node disconnects |
-userAgent | string | User Agent to use when making requests to Lavalink |
-structures | Object{rest?, player?} | Custom structures for shoukaku to use |
-voiceConnectionTimeout | number | Timeout before abort connection **in seconds** |
+| Option                 | Type                   | Description                                                                                                                                          |
+|------------------------|------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------|
+| resume                 | boolean                | Whether to resume a connection on disconnect to Lavalink (Server Side) (Note: DOES NOT RESUME WHEN THE LAVALINK SERVER DIES)                         |
+| resumeTimeout          | number                 | Timeout before resuming a connection **in seconds**                                                                                                  |
+| resumeByLibrary        | boolean                | Whether to resume the players by doing it in the library side (Client Side) (Note: TRIES TO RESUME REGARDLESS OF WHAT HAPPENED ON A LAVALINK SERVER) |
+| reconnectTries         | number                 | Number of times to try and reconnect to Lavalink before giving up                                                                                    |
+| reconnectInterval      | number                 | Timeout before trying to reconnect **in seconds**                                                                                                    |
+| restTimeout            | number                 | Time to wait for a response from the Lavalink REST API before giving up **in seconds**                                                               |
+| moveOnDisconnect       | boolean                | Whether to move players to a different Lavalink node when a node disconnects                                                                         |
+| userAgent              | string                 | User Agent to use when making requests to Lavalink                                                                                                   |
+| structures             | Object{rest?, player?} | Custom structures for shoukaku to use                                                                                                                |
+| voiceConnectionTimeout | number                 | Timeout before abort connection **in seconds**                                                                                                       |
 
 ### Plugins list
 
 > Open a pr to add your plugin here
 
-Name   | Link     | Description
--------|----------|------------
-Kazagumo | [Github](https://github.com/Takiyo0/Kazagumo) | A Shoukaku wrapper that have built-in queue system 
-stone-deezer | [NPM](https://www.npmjs.com/package/stone-deezer) | A plugin to simplify deezer links and then play it from available sources (**REQUIRES [KAZAGUMO](https://github.com/Takiyo0/Kazagumo)**)
+| Name         | Link                                              | Description                                                                                                                              |
+|--------------|---------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------|
+| Kazagumo     | [Github](https://github.com/Takiyo0/Kazagumo)     | A Shoukaku wrapper that have built-in queue system                                                                                       |
+| stone-deezer | [NPM](https://www.npmjs.com/package/stone-deezer) | A plugin to simplify deezer links and then play it from available sources (**REQUIRES [KAZAGUMO](https://github.com/Takiyo0/Kazagumo)**) |
 
 ### Other Links
 
