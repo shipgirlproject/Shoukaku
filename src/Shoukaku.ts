@@ -28,7 +28,7 @@ export interface NodeOption {
      */
     url: string;
     /**
-     * Credentials to access Lavalnk
+     * Credentials to access Lavalink
      */
     auth: string;
     /**
@@ -123,7 +123,7 @@ export declare interface Shoukaku {
      */
     on(event: 'error', listener: (name: string, error: Error) => void): this;
     /**
-     * Emitted when Shoukaku is ready to recieve operations
+     * Emitted when Shoukaku is ready to receive operations
      * @eventProperty
      */
     on(event: 'ready', listener: (name: string, reconnected: boolean) => void): this;
@@ -138,7 +138,7 @@ export declare interface Shoukaku {
      */
     on(event: 'disconnect', listener: (name: string, moved: boolean, count: number) => void): this;
     /**
-     * Emitted when a raw message is recived from Lavalink
+     * Emitted when a raw message is received from Lavalink
      * @eventProperty
      */
     on(event: 'raw', listener: (name: string, json: unknown) => void): this;
