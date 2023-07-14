@@ -146,6 +146,7 @@ interface FetchOptions {
         body?: Record<string, unknown>;
         [key: string]: unknown;
     };
+    withoutVersion?: boolean;
 }
 
 interface FinalFetchOptions {
@@ -334,13 +335,27 @@ export class Rest {
     }
 
     /**
+     * Get lavalink version
+     */
+    public getVersion(): Promise<any> {
+        const options = {
+            endpoint: '/version',
+            options: {
+                method: 'GET',
+            },
+            withoutVersion: true
+        };
+        return this.fetch(options);
+    }
+
+    /**
      * Make a request to Lavalink
      * @param fetchOptions.endpoint Lavalink endpoint
      * @param fetchOptions.options Options passed to fetch
      * @internal
      */
     protected async fetch<T = unknown>(fetchOptions: FetchOptions) {
-        const { endpoint, options } = fetchOptions;
+        const { endpoint, options, withoutVersion = false } = fetchOptions;
         let headers = {
             'Authorization': this.auth,
             'User-Agent': this.node.manager.options.userAgent
@@ -348,7 +363,7 @@ export class Rest {
 
         if (options.headers) headers = { ...headers, ...options.headers };
 
-        const url = new URL(`${this.url}${this.version}${endpoint}`);
+        const url = new URL(`${this.url}${!withoutVersion ? this.version: ''}${endpoint}`);
 
         if (options.params) url.search = new URLSearchParams(options.params).toString();
 
