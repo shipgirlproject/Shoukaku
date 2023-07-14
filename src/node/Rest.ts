@@ -122,7 +122,7 @@ export interface UpdatePlayerOptions {
     endTime?: number;
     volume?: number;
     paused?: boolean;
-    filters?:  FilterOptions;
+    filters?: FilterOptions;
     voice?: LavalinkPlayerVoiceOptions;
 }
 
