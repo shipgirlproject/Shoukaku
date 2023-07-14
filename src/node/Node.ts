@@ -29,6 +29,37 @@ export interface NodeStats {
     uptime: number;
 }
 
+type NodeInfoVersion = {
+    semver: string;
+    major: number;
+    minor: number;
+    patch: number;
+    preRelease?: string;
+    build?: string;
+};
+
+type NodeInfoGit = {
+    branch: string;
+    commit: string;
+    commitTime: number;
+};
+
+type NodeInfoPlugin = {
+    name: string;
+    version: string;
+};
+
+export type NodeInfo = {
+    version: NodeInfoVersion;
+    buildTime: number;
+    git: NodeInfoGit;
+    jvm: string;
+    lavaplayer: string;
+    sourceManagers: string[];
+    filters: string[];
+    plugins: NodeInfoPlugin[];
+};
+
 export interface ResumableHeaders {
     [key: string]: string;
     'Client-Name': string;
@@ -89,6 +120,10 @@ export class Node extends EventEmitter {
      */
     public stats: NodeStats|null;
     /**
+     * Statistics from Lavalink
+    */
+    public info: NodeInfo|null;
+    /**
      * Websocket instance
      */
     public ws: Websocket|null;
@@ -126,6 +161,7 @@ export class Node extends EventEmitter {
         this.reconnects = 0;
         this.state = State.DISCONNECTED;
         this.stats = null;
+        this.info = null;
         this.ws = null;
         this.sessionId = null;
         this.initialized = false;
