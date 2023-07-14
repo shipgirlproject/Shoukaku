@@ -335,7 +335,7 @@ export class Rest {
     }
 
     /**
-     * Get lavalink version
+     * Get Lavalink info
      */
     public getLavalinkInfo(): Promise<any> {
         const options = {
