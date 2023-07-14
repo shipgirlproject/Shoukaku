@@ -1,4 +1,4 @@
-import { Node, NodeStats } from './Node';
+import { Node, NodeInfo, NodeStats } from './Node';
 import { NodeOption } from '../Shoukaku';
 import { Versions } from '../Constants';
 import { FilterOptions } from '../guild/Player';
@@ -337,7 +337,7 @@ export class Rest {
     /**
      * Get Lavalink info
      */
-    public getLavalinkInfo(): Promise<any> {
+    public getLavalinkInfo(): Promise<NodeInfo|undefined> {
         const options = {
             endpoint: '/info',
             options: {
