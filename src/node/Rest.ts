@@ -337,13 +337,12 @@ export class Rest {
     /**
      * Get lavalink version
      */
-    public getVersion(): Promise<any> {
+    public getLavalinkInfo(): Promise<any> {
         const options = {
-            endpoint: '/version',
+            endpoint: '/info',
             options: {
-                method: 'GET',
-            },
-            withoutVersion: true
+                headers: { 'Content-Type': 'application/json' }
+            }
         };
         return this.fetch(options);
     }
@@ -355,7 +354,7 @@ export class Rest {
      * @internal
      */
     protected async fetch<T = unknown>(fetchOptions: FetchOptions) {
-        const { endpoint, options, withoutVersion = false } = fetchOptions;
+        const { endpoint, options } = fetchOptions;
         let headers = {
             'Authorization': this.auth,
             'User-Agent': this.node.manager.options.userAgent
@@ -363,7 +362,7 @@ export class Rest {
 
         if (options.headers) headers = { ...headers, ...options.headers };
 
-        const url = new URL(`${this.url}${!withoutVersion ? this.version: ''}${endpoint}`);
+        const url = new URL(`${this.url}${this.version}${endpoint}`);
 
         if (options.params) url.search = new URLSearchParams(options.params).toString();
 
