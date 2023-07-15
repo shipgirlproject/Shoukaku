@@ -146,7 +146,6 @@ interface FetchOptions {
         body?: Record<string, unknown>;
         [key: string]: unknown;
     };
-    withoutVersion?: boolean;
 }
 
 interface FinalFetchOptions {
