@@ -120,7 +120,7 @@ export class Node extends EventEmitter {
      */
     public stats: NodeStats|null;
     /**
-     * Statistics from Lavalink
+     * Information about lavalink node
     */
     public info: NodeInfo|null;
     /**
