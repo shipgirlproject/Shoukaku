@@ -135,7 +135,10 @@ export class Connection extends EventEmitter {
      * @internal
      */
     public disconnect(): void {
-        this.send({ guild_id: this.guildId, channel_id: null, self_mute: false, self_deaf: false });
+        this.channelId = null;
+        this.deafened = false;
+        this.muted = false;
+        this.sendVoiceUpdate();
         this.manager.connections.delete(this.guildId);
         this.state = State.DISCONNECTED;
         this.debug(`[Voice] -> [Node] & [Discord] : Connection Destroyed | Guild: ${this.guildId}`);
