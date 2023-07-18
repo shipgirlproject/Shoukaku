@@ -1,4 +1,4 @@
-import { Node, NodeStats } from './Node';
+import { Node, NodeInfo, NodeStats } from './Node';
 import { NodeOption } from '../Shoukaku';
 import { Versions } from '../Constants';
 import { FilterOptions } from '../guild/Player';
@@ -122,7 +122,7 @@ export interface UpdatePlayerOptions {
     endTime?: number;
     volume?: number;
     paused?: boolean;
-    filters?:  FilterOptions;
+    filters?: FilterOptions;
     voice?: LavalinkPlayerVoiceOptions;
 }
 
@@ -331,6 +331,19 @@ export class Rest {
             }
         };
         await this.fetch(options);
+    }
+
+    /**
+     * Get Lavalink info
+     */
+    public getLavalinkInfo(): Promise<NodeInfo|undefined> {
+        const options = {
+            endpoint: '/info',
+            options: {
+                headers: { 'Content-Type': 'application/json' }
+            }
+        };
+        return this.fetch(options);
     }
 
     /**
