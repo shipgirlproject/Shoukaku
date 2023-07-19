@@ -28,7 +28,7 @@ export interface NodeOption {
      */
     url: string;
     /**
-     * Credentials to access Lavalnk
+     * Credentials to access Lavalink
      */
     auth: string;
     /**
@@ -47,10 +47,6 @@ export interface ShoukakuOptions {
      */
     resume?: boolean;
     /**
-     * Resume key for Lavalink
-     */
-    resumeKey?: string;
-    /**
      * Time to wait before lavalink starts to destroy the players of the disconnected client
      */
     resumeTimeout?: number;
@@ -58,10 +54,6 @@ export interface ShoukakuOptions {
      * Whether to resume the players by doing it in the library side (Client Side) (Note: TRIES TO RESUME REGARDLESS OF WHAT HAPPENED ON A LAVALINK SERVER)
      */
     resumeByLibrary?: boolean;
-    /**
-     * Disables the first time initialization tracking of nodes, and just sends the resume key always (Note: Useful for people who save their players to redis and wants to resume sessions even at first boot)
-     */
-    alwaysSendResumeKey?: boolean;
     /**
      * Number of times to try and reconnect to Lavalink before giving up
      */
@@ -103,10 +95,8 @@ export interface VoiceChannelOptions {
 
 export interface MergedShoukakuOptions {
     resume: boolean;
-    resumeKey: string;
     resumeTimeout: number;
     resumeByLibrary: boolean;
-    alwaysSendResumeKey: boolean;
     reconnectTries: number;
     reconnectInterval: number;
     restTimeout: number;
@@ -133,7 +123,7 @@ export declare interface Shoukaku {
      */
     on(event: 'error', listener: (name: string, error: Error) => void): this;
     /**
-     * Emitted when Shoukaku is ready to recieve operations
+     * Emitted when Shoukaku is ready to receive operations
      * @eventProperty
      */
     on(event: 'ready', listener: (name: string, reconnected: boolean) => void): this;
@@ -148,7 +138,7 @@ export declare interface Shoukaku {
      */
     on(event: 'disconnect', listener: (name: string, moved: boolean, count: number) => void): this;
     /**
-     * Emitted when a raw message is recived from Lavalink
+     * Emitted when a raw message is received from Lavalink
      * @eventProperty
      */
     on(event: 'raw', listener: (name: string, json: unknown) => void): this;
@@ -197,10 +187,8 @@ export class Shoukaku extends EventEmitter {
      * @param nodes An array that conforms to the NodeOption type that specifies nodes to connect to
      * @param options Options to pass to create this Shoukaku instance
      * @param options.resume Whether to resume a connection on disconnect to Lavalink (Server Side) (Note: DOES NOT RESUME WHEN THE LAVALINK SERVER DIES)
-     * @param options.resumeKey Resume key for Lavalink
      * @param options.resumeTimeout Time to wait before lavalink starts to destroy the players of the disconnected client
      * @param options.resumeByLibrary Whether to resume the players by doing it in the library side (Client Side) (Note: TRIES TO RESUME REGARDLESS OF WHAT HAPPENED ON A LAVALINK SERVER)
-     * @param options.alwaysSendResumeKey Disables the first time initialization tracking of nodes, and just sends the resume key always (Note: Useful for people who save their players to redis and wants to resume sessions even at first boot)
      * @param options.reconnectTries Number of times to try and reconnect to Lavalink before giving up
      * @param options.reconnectInterval Timeout before trying to reconnect
      * @param options.restTimeout Time to wait for a response from the Lavalink REST API before giving up

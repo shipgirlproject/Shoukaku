@@ -1,11 +1,10 @@
 import { EventEmitter } from 'events';
 import { Node } from '../node/Node';
-import { OPCodes, State } from '../Constants';
 import { Connection } from './Connection';
-import { UpdatePlayerInfo, UpdatePlayerOptions } from '../node/Rest';
+import { OpCodes, State } from '../Constants';
+import { Exception, Track, UpdatePlayerInfo, UpdatePlayerOptions } from '../node/Rest';
 
-export type TrackEndReason = 'FINISHED' | 'LOAD_FAILED' | 'STOPPED' | 'REPLACED' | 'CLEANUP';
-export type Severity = 'COMMON' | 'SUSPICIOUS' | 'FAULT';
+export type TrackEndReason = 'finished' | 'loadFailed' | 'stopped' | 'replaced' | 'cleanup';
 export type PlayerEventType = 'TrackStartEvent' | 'TrackEndEvent' | 'TrackExceptionEvent' | 'TrackStuckEvent' | 'WebSocketClosedEvent';
 
 /**
@@ -20,16 +19,6 @@ export interface PlayOptions {
         endTime?: number;
         volume?: number;
     }
-}
-
-export interface PlayPayload {
-    op: string;
-    guildId: string;
-    track: string;
-    noReplace: boolean;
-    pause: boolean;
-    startTime?: number;
-    endTime?: number;
 }
 
 export interface ResumeOptions {
@@ -89,38 +78,31 @@ export interface LowPassSettings {
 }
 
 export interface PlayerEvent {
-    op: OPCodes.EVENT;
+    op: OpCodes.EVENT;
     type: PlayerEventType;
     guildId: string;
 }
 
-export interface Exception {
-    severity: Severity;
-    message: string;
-    cause: string;
-}
-
 export interface TrackStartEvent extends PlayerEvent {
     type: 'TrackStartEvent';
-    track: string;
+    track: Track;
 }
 
 export interface TrackEndEvent extends PlayerEvent {
     type: 'TrackEndEvent';
-    track: string;
+    track: Track;
     reason: TrackEndReason;
 }
 
 export interface TrackStuckEvent extends PlayerEvent {
     type: 'TrackStuckEvent';
-    track: string;
+    track: Track;
     thresholdMs: number;
 }
 
 export interface TrackExceptionEvent extends PlayerEvent {
     type: 'TrackExceptionEvent';
-    exception?: Exception;
-    error: string;
+    exception: Exception;
 }
 
 export interface TrackStuckEvent extends PlayerEvent {
@@ -136,7 +118,7 @@ export interface WebSocketClosedEvent extends PlayerEvent {
 }
 
 export interface PlayerUpdate {
-    op: OPCodes.PLAYER_UPDATE;
+    op: OpCodes.PLAYER_UPDATE;
     state: {
       connected: boolean;
       position?: number;
@@ -190,7 +172,7 @@ export declare interface Player {
      */
     on(event: 'resumed', listener: (player: Player) => void): this;
     /**
-     * Emitted when a playerUpdate even is recieved from Lavalink
+     * Emitted when a playerUpdate even is received from Lavalink
      * @eventProperty
      */
     on(event: 'update', listener: (data: PlayerUpdate) => void): this;
@@ -430,7 +412,7 @@ export class Player extends EventEmitter {
 
     /**
      * Change the tremolo settings applied to the currently playing track
-     * @param tremolo An object that conforms to the FreqSettings type that defines an ocillation in volume
+     * @param tremolo An object that conforms to the FreqSettings type that defines an oscillation in volume
      */
     public async setTremolo(tremolo?: FreqSettings): Promise<void> {
         this.filters.tremolo = tremolo || null;
@@ -439,7 +421,7 @@ export class Player extends EventEmitter {
 
     /**
      * Change the vibrato settings applied to the currently playing track
-     * @param vibrato An object that conforms to the FreqSettings type that defines an ocillation in pitch
+     * @param vibrato An object that conforms to the FreqSettings type that defines an oscillation in pitch
      */
     public async setVibrato(vibrato?: FreqSettings): Promise<void> {
         this.filters.vibrato = vibrato || null;
@@ -583,7 +565,7 @@ export class Player extends EventEmitter {
         } catch (error) {
             if (!this.connection.established) throw error;
             this.connection.disconnect();
-            await Promise.allSettled([this.destroyPlayer(true)])
+            await Promise.allSettled([ this.destroyPlayer(true) ]);
         }
     }
 
@@ -598,14 +580,14 @@ export class Player extends EventEmitter {
     }
 
     /**
-     * Handle player events recieved from Lavalink
+     * Handle player events received from Lavalink
      * @param json JSON data from Lavalink
      * @internal
      */
-    public onPlayerEvent(json: { type: string, encodedTrack: string }): void {
+    public onPlayerEvent(json: { type: string, track: Track }): void {
         switch (json.type) {
             case 'TrackStartEvent':
-                if (this.track) this.track = json.encodedTrack;
+                if (this.track) this.track = json.track.encoded;
                 this.emit('start', json);
                 break;
             case 'TrackEndEvent':

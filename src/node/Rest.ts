@@ -1,24 +1,19 @@
-import { Node, NodeStats } from './Node';
+import { Node, NodeInfo, NodeStats } from './Node';
 import { NodeOption } from '../Shoukaku';
 import { Versions } from '../Constants';
 import { FilterOptions } from '../guild/Player';
 
-export type LoadType = 'TRACK_LOADED' | 'PLAYLIST_LOADED' | 'SEARCH_RESULT' | 'NO_MATCHES' | 'LOAD_FAILED';
+export type Severity = 'common' | 'suspicious' | 'fault';
 
-interface FetchOptions {
-    endpoint: string;
-    options: {
-        headers?: Record<string, string>;
-        params?: Record<string, string>;
-        method?: string;
-        body?: Record<string, unknown>;
-        [key: string]: unknown;
-    };
+export enum LoadType {
+    TRACK = 'track',
+    PLAYLIST = 'playlist',
+    SEARCH = 'search',
+    EMPTY = 'empty',
+    ERROR = 'error'
 }
 
 export interface Track {
-    /** @deprecated */
-    track: string;
     encoded: string;
     info: {
         identifier: string;
@@ -29,18 +24,55 @@ export interface Track {
         position: number;
         title: string;
         uri?: string;
+        artworkUrl?: string;
+        isrc?: string;
         sourceName: string;
     }
+    pluginInfo: unknown;
 }
 
-export interface LavalinkResponse {
-    loadType: LoadType;
-    playlistInfo: {
-        name?: string;
-        selectedTrack?: number;
+export interface Playlist {
+    encoded: string;
+    info: {
+        name: string;
+        selectedTrack: number;
     }
-    tracks: Track[]
+    pluginInfo: unknown;
+    tracks: Track[];
 }
+
+export interface Exception {
+    message: string;
+    severity: Severity;
+    cause: string;
+}
+
+export interface TrackResult {
+    loadType: LoadType.TRACK,
+    data: Track
+}
+
+export interface PlaylistResult {
+    loadType: LoadType.PLAYLIST,
+    data: Playlist
+}
+
+export interface SearchResult {
+    loadType: LoadType.SEARCH,
+    data: Track[]
+}
+
+export interface EmptyResult {
+    loadType: LoadType.EMPTY,
+    data: {}
+}
+
+export interface ErrorResult {
+    loadType: LoadType.ERROR,
+    data: Exception
+}
+
+export type LavalinkResponse = TrackResult | PlaylistResult | SearchResult | EmptyResult | ErrorResult;
 
 export interface Address {
     address: string;
@@ -90,7 +122,7 @@ export interface UpdatePlayerOptions {
     endTime?: number;
     volume?: number;
     paused?: boolean;
-    filters?:  FilterOptions;
+    filters?: FilterOptions;
     voice?: LavalinkPlayerVoiceOptions;
 }
 
@@ -103,6 +135,17 @@ export interface UpdatePlayerInfo {
 export interface SessionInfo {
     resumingKey?: string;
     timeout: number;
+}
+
+interface FetchOptions {
+    endpoint: string;
+    options: {
+        headers?: Record<string, string>;
+        params?: Record<string, string>;
+        method?: string;
+        body?: Record<string, unknown>;
+        [key: string]: unknown;
+    };
 }
 
 interface FinalFetchOptions {
@@ -233,18 +276,18 @@ export class Rest {
     }
 
     /**
-     * Updates the session with a resuming key and timeout
-     * @param resumingKey Resuming key to set
+     * Updates the session with a resume boolean and timeout
+     * @param resuming Whether resuming is enabled for this session or not
      * @param timeout Timeout to wait for resuming
      * @returns Promise that resolves to a Lavalink player
      */
-    public updateSession(resumingKey?: string, timeout?: number): Promise<SessionInfo | undefined> {
+    public updateSession(resuming?: boolean, timeout?: number): Promise<SessionInfo | undefined> {
         const options = {
             endpoint: `/sessions/${this.sessionId}`,
             options: {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
-                body: { resumingKey, timeout }
+                body: { resuming, timeout }
             }
         };
         return this.fetch(options);
@@ -263,7 +306,7 @@ export class Rest {
     }
 
     /**
-     * Get routplanner status from Lavalink
+     * Get routeplanner status from Lavalink
      * @returns Promise that resolves to a routeplanner response
      */
     public getRoutePlannerStatus(): Promise<RoutePlanner | undefined> {
@@ -288,6 +331,19 @@ export class Rest {
             }
         };
         await this.fetch(options);
+    }
+
+    /**
+     * Get Lavalink info
+     */
+    public getLavalinkInfo(): Promise<NodeInfo|undefined> {
+        const options = {
+            endpoint: '/info',
+            options: {
+                headers: { 'Content-Type': 'application/json' }
+            }
+        };
+        return this.fetch(options);
     }
 
     /**
