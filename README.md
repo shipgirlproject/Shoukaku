@@ -204,7 +204,7 @@ console.log(shoukaku.getIdealNode());
 
 ### Shoukaku's options
 | Option                 | Type                   | Default | Description                                                                                                                                          |
-|------------------------|------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------|
+|------------------------|------------------------|---------|---------------------------------------------------------------------------------------------------------------------------------------------|
 | resume                 | boolean                | false   | Whether to resume a connection on disconnect to Lavalink (Server Side) (Note: DOES NOT RESUME WHEN THE LAVALINK SERVER DIES)                         |
 | resumeTimeout          | number                 | 30      | Timeout before resuming a connection **in seconds**                                                                                                  |
 | resumeByLibrary        | boolean                | false   | Whether to resume the players by doing it in the library side (Client Side) (Note: TRIES TO RESUME REGARDLESS OF WHAT HAPPENED ON A LAVALINK SERVER) |
