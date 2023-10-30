@@ -1,6 +1,6 @@
-import { NodeOption, Shoukaku } from '../Shoukaku';
-import { NodeDefaults } from '../Constants';
-import { mergeDefault } from '../Utils';
+import { NodeOption, Shoukaku } from '../Shoukaku.js';
+import { NodeDefaults } from '../Constants.js';
+import { mergeDefault } from '../Utils.js';
 
 export interface ConnectorMethods {
     sendPacket: any;

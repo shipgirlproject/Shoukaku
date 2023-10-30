@@ -1,3 +1,3 @@
-export * from './DiscordJS';
-export * from './Eris';
-export * from './OceanicJS';
+export * from './DiscordJS.js';
+export * from './Eris.js';
+export * from './OceanicJS.js';

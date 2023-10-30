@@ -1,5 +1,5 @@
-import { Connector } from '../Connector';
-import { NodeOption } from '../../Shoukaku';
+import { Connector } from '../Connector.js';
+import { NodeOption } from '../../Shoukaku.js';
 
 export class DiscordJS extends Connector {
     // sendPacket is where your library send packets to Discord Gateway

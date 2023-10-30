@@ -1,6 +1,6 @@
-import { EventEmitter, once } from 'events';
-import { State, VoiceState } from '../Constants';
-import { Node } from '../node/Node';
+import { EventEmitter, once } from 'node:events';
+import { State, VoiceState } from '../Constants.js';
+import { Node } from '../node/Node.js';
 import { Shoukaku, VoiceChannelOptions } from '../Shoukaku.js';
 
 /**

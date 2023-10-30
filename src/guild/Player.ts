@@ -1,8 +1,8 @@
-import { EventEmitter } from 'events';
-import { Node } from '../node/Node';
-import { Connection } from './Connection';
-import { OpCodes, State } from '../Constants';
-import { Exception, Track, UpdatePlayerInfo, UpdatePlayerOptions } from '../node/Rest';
+import { EventEmitter } from 'node:events';
+import { Node } from '../node/Node.js';
+import { Connection } from './Connection.js';
+import { OpCodes, State } from '../Constants.js';
+import { Exception, Track, UpdatePlayerInfo, UpdatePlayerOptions } from '../node/Rest.js';
 
 export type TrackEndReason = 'finished' | 'loadFailed' | 'stopped' | 'replaced' | 'cleanup';
 export type PlayerEventType = 'TrackStartEvent' | 'TrackEndEvent' | 'TrackExceptionEvent' | 'TrackStuckEvent' | 'WebSocketClosedEvent';

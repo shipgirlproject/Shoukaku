@@ -1,7 +1,7 @@
-import { Node, NodeInfo, NodeStats } from './Node';
-import { NodeOption } from '../Shoukaku';
-import { Versions } from '../Constants';
-import { FilterOptions } from '../guild/Player';
+import { Node, NodeInfo, NodeStats } from './Node.js';
+import { NodeOption } from '../Shoukaku.js';
+import { Versions } from '../Constants.js';
+import { FilterOptions } from '../guild/Player.js';
 
 export type Severity = 'common' | 'suspicious' | 'fault';
 

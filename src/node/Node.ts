@@ -1,10 +1,10 @@
-import { EventEmitter } from 'events';
-import { IncomingMessage } from 'http';
-import { NodeOption, Shoukaku } from '../Shoukaku';
-import { Player } from '../guild/Player';
-import { OpCodes, State, Versions } from '../Constants';
-import { wait } from '../Utils';
-import { Rest } from './Rest';
+import { EventEmitter } from 'node:events';
+import { IncomingMessage } from 'node:http';
+import { NodeOption, Shoukaku } from '../Shoukaku.js';
+import { Player } from '../guild/Player.js';
+import { OpCodes, State, Versions } from '../Constants.js';
+import { wait } from '../Utils.js';
+import { Rest } from './Rest.js';
 import Websocket from 'ws';
 
 export interface NodeStats {

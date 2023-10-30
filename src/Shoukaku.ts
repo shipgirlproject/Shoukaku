@@ -1,10 +1,10 @@
-import { EventEmitter } from 'events';
-import { State, ShoukakuDefaults } from './Constants';
-import { Node } from './node/Node';
-import { Connector } from './connectors/Connector';
-import { Constructor, mergeDefault } from './Utils';
-import { Player } from './guild/Player';
-import { Rest } from './node/Rest';
+import { EventEmitter } from 'node:events';
+import { State, ShoukakuDefaults } from './Constants.js';
+import { Node } from './node/Node.js';
+import { Connector } from './connectors/Connector.js';
+import { Constructor, mergeDefault } from './Utils.js';
+import { Player } from './guild/Player.js';
+import { Rest } from './node/Rest.js';
 import { Connection } from './guild/Connection.js';
 
 export interface Structures {
