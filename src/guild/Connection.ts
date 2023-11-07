@@ -108,7 +108,7 @@ export class Connection extends EventEmitter {
      */
     public setDeaf(deaf = false): void {
         this.deafened = deaf;
-        this.send({ guild_id: this.guildId, channel_id: this.channelId, self_deaf: this.deafened, self_mute: this.muted });
+        this.sendVoiceUpdate();
     }
 
     /**
@@ -118,7 +118,7 @@ export class Connection extends EventEmitter {
      */
     public setMute(mute = false): void {
         this.muted = mute;
-        this.send({ guild_id: this.guildId, channel_id: this.channelId, self_deaf: this.deafened, self_mute: this.muted });
+        this.sendVoiceUpdate();
     }
 
     /**
@@ -127,7 +127,10 @@ export class Connection extends EventEmitter {
      */
     public disconnect(): void {
         if (this.state === State.DISCONNECTED) return;
-        this.send({ guild_id: this.guildId, channel_id: null, self_mute: false, self_deaf: false });
+        this.channelId = null;
+        this.deafened = false;
+        this.muted = false;
+        this.sendVoiceUpdate();
         this.state = State.DISCONNECTED;
         this.debug(`[Voice] -> [Node] & [Discord] : Connection Destroyed | Guild: ${this.guildId}`);
     }
@@ -140,7 +143,7 @@ export class Connection extends EventEmitter {
         if (this.state === State.CONNECTING || this.state === State.CONNECTED) return;
 
         this.state = State.CONNECTING;
-        this.send({ guild_id: this.guildId, channel_id: this.channelId, self_deaf: this.deafened, self_mute: this.muted });
+        this.sendVoiceUpdate();
         this.debug(`[Voice] -> [Discord] : Requesting Connection | Guild: ${this.guildId}`);
 
         const controller = new AbortController();
@@ -217,6 +220,14 @@ export class Connection extends EventEmitter {
         this.serverUpdate = data;
         this.emit('connectionUpdate', VoiceState.SESSION_READY);
         this.debug(`[Voice] <- [Discord] : Server Update Received | Server: ${this.region} Guild: ${this.guildId}`);
+    }
+
+    /**
+     * Send voice data to discord
+     * @internal
+     */
+    private sendVoiceUpdate() {
+        this.send({ guild_id: this.guildId, channel_id: this.channelId, self_deaf: this.deafened, self_mute: this.muted });
     }
 
     /**
