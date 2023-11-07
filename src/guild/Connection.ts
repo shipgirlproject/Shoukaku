@@ -130,8 +130,8 @@ export class Connection extends EventEmitter {
         this.channelId = null;
         this.deafened = false;
         this.muted = false;
-        this.sendVoiceUpdate();
         this.removeAllListeners();
+        this.sendVoiceUpdate();
         this.state = State.DISCONNECTED;
         this.debug(`[Voice] -> [Node] & [Discord] : Connection Destroyed | Guild: ${this.guildId}`);
     }
