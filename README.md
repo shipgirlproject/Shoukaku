@@ -39,7 +39,7 @@ Refer to [/src/connectors](https://github.com/Deivu/Shoukaku/tree/master/src/con
 
 *   Lavalink Version: `3.5.x < to 3.9.x >`
 
-*   Node Version: `> 16.0.0 `
+*   Node Version: `16.0.0 <`
 
 > `npm install shoukaku`
 
@@ -47,7 +47,7 @@ Refer to [/src/connectors](https://github.com/Deivu/Shoukaku/tree/master/src/con
 
 *   Needs Lavalink Versions: `4.x.x <`
 
-*   Node Version: `> 18.0.0`
+*   Node Version: `18.0.0 <`
 
 > `npm install https://github.com/shipgirlproject/Shoukaku.git`
 
