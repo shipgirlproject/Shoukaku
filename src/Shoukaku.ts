@@ -1,5 +1,5 @@
 import { EventEmitter } from 'events';
-import { State, ShoukakuDefaults } from './Constants';
+import { State, ShoukakuDefaults, VoiceState } from './Constants';
 import { Node } from './node/Node';
 import { Connector } from './connectors/Connector';
 import { Constructor, mergeDefault } from './Utils';
@@ -82,6 +82,10 @@ export interface ShoukakuOptions {
      * Timeout before abort connection
      */
     voiceConnectionTimeout?: number;
+    /**
+     * Node Resolver to use if you want to customize it
+     */
+    nodeResolver?: (node: Map<string, Node>, connection: Connection) => Node|undefined;
 }
 
 export interface VoiceChannelOptions {
@@ -90,20 +94,6 @@ export interface VoiceChannelOptions {
     channelId: string;
     deaf?: boolean;
     mute?: boolean;
-    getNode?: (node: Map<string, Node>, connection: Connection) => Node|undefined;
-}
-
-export interface MergedShoukakuOptions {
-    resume: boolean;
-    resumeTimeout: number;
-    resumeByLibrary: boolean;
-    reconnectTries: number;
-    reconnectInterval: number;
-    restTimeout: number;
-    moveOnDisconnect: boolean;
-    userAgent: string;
-    structures: Structures;
-    voiceConnectionTimeout: number;
 }
 
 export declare interface Shoukaku {
@@ -136,7 +126,7 @@ export declare interface Shoukaku {
      * Emitted when a websocket connection to Lavalink disconnects
      * @eventProperty
      */
-    on(event: 'disconnect', listener: (name: string, moved: boolean, count: number) => void): this;
+    on(event: 'disconnect', listener: (name: string, count: number) => void): this;
     /**
      * Emitted when a raw message is received from Lavalink
      * @eventProperty
@@ -147,14 +137,14 @@ export declare interface Shoukaku {
     once(event: 'error', listener: (name: string, error: Error) => void): this;
     once(event: 'ready', listener: (name: string, reconnected: boolean) => void): this;
     once(event: 'close', listener: (name: string, code: number, reason: string) => void): this;
-    once(event: 'disconnect', listener: (name: string, moved: boolean, count: number) => void): this;
+    once(event: 'disconnect', listener: (name: string, count: number) => void): this;
     once(event: 'raw', listener: (name: string, json: unknown) => void): this;
     off(event: 'reconnecting', listener: (name: string, reconnectsLeft: number, reconnectInterval: number) => void): this;
     off(event: 'debug', listener: (name: string, info: string) => void): this;
     off(event: 'error', listener: (name: string, error: Error) => void): this;
     off(event: 'ready', listener: (name: string, reconnected: boolean) => void): this;
     off(event: 'close', listener: (name: string, code: number, reason: string) => void): this;
-    off(event: 'disconnect', listener: (name: string, moved: boolean, count: number) => void): this;
+    off(event: 'disconnect', listener: (name: string, count: number) => void): this;
     off(event: 'raw', listener: (name: string, json: unknown) => void): this;
 }
 
@@ -169,7 +159,7 @@ export class Shoukaku extends EventEmitter {
     /**
      * Shoukaku options
      */
-    public readonly options: MergedShoukakuOptions;
+    public readonly options: Required<ShoukakuOptions>;
     /**
      * Connected Lavalink nodes
      */
@@ -178,6 +168,10 @@ export class Shoukaku extends EventEmitter {
      * Voice connections being handled
      */
     public readonly connections: Map<string, Connection>;
+    /**
+     * Players being handled
+     */
+    public readonly players: Map<string, Player>;
     /**
      * Shoukaku instance identifier
      */
@@ -195,6 +189,7 @@ export class Shoukaku extends EventEmitter {
      * @param options.moveOnDisconnect Whether to move players to a different Lavalink node when a node disconnects
      * @param options.userAgent User Agent to use when making requests to Lavalink
      * @param options.structures Custom structures for shoukaku to use
+     * @param options.nodeResolver Used if you have custom lavalink node resolving
      */
     constructor(connector: Connector, nodes: NodeOption[], options: ShoukakuOptions = {}) {
         super();
@@ -202,21 +197,9 @@ export class Shoukaku extends EventEmitter {
         this.options = mergeDefault(ShoukakuDefaults, options);
         this.nodes = new Map();
         this.connections = new Map();
+        this.players = new Map();
         this.id = null;
         this.connector.listen(nodes);
-    }
-
-    /**
-     * Get a list of players
-     * @returns A map of guild IDs and players
-     * @readonly
-     */
-    get players(): Map<string, Player> {
-        const players = new Map();
-        for (const node of this.nodes.values()) {
-            for (const [ id, player ] of node.players) players.set(id, player);
-        }
-        return players;
     }
 
     /**
@@ -258,14 +241,12 @@ export class Shoukaku extends EventEmitter {
      * @param options.channelId ChannelId of the voice channel you want to connect to
      * @param options.deaf Optional boolean value to specify whether to deafen or undeafen the current bot user
      * @param options.mute Optional boolean value to specify whether to mute or unmute the current bot user
-     * @param options.getNode Optional getter function if you have custom node resolving
      * @returns The created player
      * @internal
      */
     public async joinVoiceChannel(options: VoiceChannelOptions): Promise<Player> {
         if (this.connections.has(options.guildId))
             throw new Error('This guild already have an existing connection');
-        if (!options.getNode) options.getNode = this.getIdealNode.bind(this);
         const connection = new Connection(this, options);
         this.connections.set(connection.guildId, connection);
         try {
@@ -275,21 +256,21 @@ export class Shoukaku extends EventEmitter {
             throw error;
         }
         try {
-            const node = options.getNode(this.nodes, connection);
+            const node = this.options.nodeResolver(this.nodes, connection);
             if (!node)
                 throw new Error('Can\'t find any nodes to connect on');
-            const player = this.options.structures.player ? new this.options.structures.player(node, connection) : new Player(node, connection);
-            node.players.set(player.guildId, player);
-            try {
-                await player.sendServerUpdate();
-            } catch (error) {
-                node.players.delete(options.guildId);
-                throw error;
-            }
-            connection.established = true;
+            const player = this.options.structures.player ? new this.options.structures.player(connection.guildId, node) : new Player(connection.guildId, node);
+            const onUpdate = (state: VoiceState) => {
+                if (state !== VoiceState.SESSION_READY) return;
+                player.sendServerUpdate(connection);
+            };
+            await player.sendServerUpdate(connection);
+            connection.on('connectionUpdate', onUpdate);
+            this.players.set(player.guildId, player);
             return player;
         } catch (error) {
             connection.disconnect();
+            this.connections.delete(options.guildId);
             throw error;
         }
     }
@@ -301,22 +282,12 @@ export class Shoukaku extends EventEmitter {
      * @internal
      */
     public async leaveVoiceChannel(guildId: string): Promise<Player|undefined> {
-        const connection = this.connections.get(guildId);
-        if (connection) connection.disconnect();
+        this.connections.get(guildId)?.disconnect();
+        this.connections.delete(guildId);
         const player = this.players.get(guildId);
-        if (player) await player.destroyPlayer(true);
+        if (player) await player.destroy(true);
+        this.players.delete(guildId);
         return player;
-    }
-
-    /**
-     * Gets the Lavalink node the least penalty score
-     * @returns A Lavalink node or undefined if there are no nodes ready
-     */
-    public getIdealNode(): Node|undefined {
-        return [ ...this.nodes.values() ]
-            .filter(node => node.state === State.CONNECTED)
-            .sort((a, b) => a.penalties - b.penalties)
-            .shift();
     }
 
     /**

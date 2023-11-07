@@ -32,15 +32,7 @@ export abstract class Connector {
         const guildId = packet.d.guild_id;
         const connection = this.manager!.connections.get(guildId);
         if (!connection) return;
-        if (packet.t === 'VOICE_SERVER_UPDATE') {
-            connection.setServerUpdate(packet.d);
-            if (!connection.established) return;
-            const player = this.manager!.players.get(guildId);
-            if (!player) return;
-            player.sendServerUpdate()
-                .catch(error => this.manager!.on('error', error));
-            return;
-        }
+        if (packet.t === 'VOICE_SERVER_UPDATE') return connection.setServerUpdate(packet.d);
         const userId = packet.d.user_id;
         if (userId !== this.manager!.id) return;
         connection.setStateUpdate(packet.d);

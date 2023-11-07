@@ -29,7 +29,7 @@ export enum Versions {
     WEBSOCKET_VERSION = 4
 }
 
-export const ShoukakuDefaults: ShoukakuOptions = {
+export const ShoukakuDefaults: Required<ShoukakuOptions> = {
     resume: false,
     resumeTimeout: 30,
     resumeByLibrary: false,
@@ -39,7 +39,11 @@ export const ShoukakuDefaults: ShoukakuOptions = {
     moveOnDisconnect: false,
     userAgent: `${Info.name}bot/${Info.version} (${Info.repository.url})`,
     structures: {},
-    voiceConnectionTimeout: 15
+    voiceConnectionTimeout: 15,
+    nodeResolver: (nodes) => [ ...nodes.values() ]
+        .filter(node => node.state === State.CONNECTED)
+        .sort((a, b) => a.penalties - b.penalties)
+        .shift()
 };
 
 export const NodeDefaults: NodeOption = {

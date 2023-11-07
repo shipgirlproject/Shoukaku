@@ -10,7 +10,7 @@
 ![NPM](https://img.shields.io/npm/l/shoukaku?style=flat-square)
 
 <p align="center">
-    <img src="https://azurlane.netojuu.com/images/6/69/Shoukaku.png"> 
+    <img src="https://safe.saya.moe/lhvaWz3iP67f.webp"> 
 </p>
 
 > The ShipGirl Project, feat Shoukaku; ⓒ Azur Lane 
@@ -35,17 +35,21 @@ Refer to [/src/connectors](https://github.com/Deivu/Shoukaku/tree/master/src/con
 
 ### Installation
 
-*   Stable (3.x.x) | Needs Lavalink Versions: `"3.5.x" < "3.9.x" >`
+*   Shooukaku Version: Stable (3.x.x) 
+
+*   Lavalink Version: `3.5.x < to 3.9.x >`
+
+*   Node Version: `> 16.0.0 `
 
 > `npm install shoukaku`
 
-*   Dev (4.0.0-dev) | Needs Lavalink Versions: `"4.x.x <"`
+*   Version: Dev (4.0.0-dev)
 
-> `npm install https://github.com/Deivu/Shoukaku.git`
+*   Needs Lavalink Versions: `4.x.x <`
 
-> Lavalink v4 support is currently deployed on master branch, do `npm install https://github.com/Deivu/Shoukaku.git`
+*   Node Version: `> 18.0.0`
 
-> Dev versions are not guaranteed to stay the same api wise, and even with last known stable, I won't say it's 100% stable
+> `npm install https://github.com/shipgirlproject/Shoukaku.git`
 
 ### Documentation
 
@@ -64,7 +68,7 @@ const { Shoukaku, Connectors } = require('shoukaku');
 const Nodes = [{
     name: 'Localhost',
     url: 'localhost:6969',
-    auth: 'marin_kitagawa'
+    auth: 're_aoharu'
 }];
 const client = new Client();
 const shoukaku = new Shoukaku(new Connectors.DiscordJS(client), Nodes);
@@ -141,7 +145,7 @@ shoukaku.on('error', (_, error) => console.error(error));
 client.login('token');
 client.once('ready', async () => {
     // get a node with least load to resolve a track
-    const node = shoukaku.getIdealNode();
+    const node = shoukaku.options.nodeResolver(shoukaku.nodes);
     const result = await node.rest.resolve('scsearch:snowhalation');
     if (!result?.tracks.length) return;
     // we now have a track metadata, we can use this to play tracks
@@ -187,18 +191,19 @@ console.log(player.filters.volume)
 ```js
 // new variable in shoukaku class, which handles the "connection data" of discord only
 console.log(shoukaku.connections);
-// getNode() is removed in favor of joinVoiceChannel custom get node function, example:
+// players are moved from `node.players` to `shoukaku.players`
+console.log(shoukaku.players);
+// getNode() is removed in favor of joinVoiceChannel, you can still get the default least loaded node via `shoukaku.options.nodeResolver()`
 const player = await shoukaku.joinVoiceChannel({
     guildId: 'your_guild_id',
     channelId: 'your_channel_id',
     shardId: 0,
-    getNode: (nodes, connection) => {
-        nodes = [ ...nodes.values() ];
-        return nodes.find(node => node.group === connection.region);
-    }
 });
-// you can still get the least loaded node to resolve tracks via getIdealNode();
-console.log(shoukaku.getIdealNode());
+// you can supply a custom node resolver for your own way of getting an ideal node by supplying the nodeResolver option in Shoukaku options
+const ShoukakuOptions = {
+    ...yourShoukakuOptions,
+    nodeResolver: (nodes, connection) => getYourIdealNode(nodes, connection)
+};
 // and other changes I'm not able to document(?);
 ```
 
@@ -214,8 +219,8 @@ console.log(shoukaku.getIdealNode());
 | moveOnDisconnect       | boolean                | Whether to move players to a different Lavalink node when a node disconnects                                                                         |
 | userAgent              | string                 | User Agent to use when making requests to Lavalink                                                                                                   |
 | structures             | Object{rest?, player?} | Custom structures for shoukaku to use                                                                                                                |
-| voiceConnectionTimeout | number                 | Timeout before abort connection **in seconds**                                                                                                       |
-
+| voiceConnectionTimeout | number                 | Timeout before abort connection **in seconds**                                                                                                       |\
+| nodeResolver           | function(nodes, con)   | Custom node resolver if you want to have your own method of getting the ideal node
 ### Plugins list
 
 > Open a pr to add your plugin here
@@ -233,4 +238,4 @@ console.log(shoukaku.getIdealNode());
 > [Kongou](https://github.com/Deivu/Kongou)
 
 ### Made with ❤ by
-> @Sāya#0113
+> @ichimakase 
