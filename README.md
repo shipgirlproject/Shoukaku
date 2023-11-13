@@ -42,7 +42,7 @@ Refer to [/src/connectors](https://github.com/Deivu/Shoukaku/tree/master/src/con
 
 ### Documentation
 
-https://deivu.github.io/Shoukaku/
+https://shoukaku.shipgirl.moe/
 
 ### Small code snippet examples
 > Initializing the library (Using Connector Discord.JS)
@@ -137,10 +137,10 @@ const shoukaku = new Shoukaku(new Connectors.DiscordJS(client), Nodes, ShoukakuO
 
 ### Other Links
 
-[Support](https://discord.gg/FVqbtGu) (#Development) | [Lavalink](https://github.com/freyacodes/Lavalink)
+[Support](https://discord.gg/FVqbtGu) (#Development) | [Lavalink](https://github.com/lavalink-devs/Lavalink)
 
 ### Implementation (Discord.JS)
 > [Kongou](https://github.com/Deivu/Kongou)
 
 ### Made with ❤ by
-> @Sāya#0113
+> @ichimakase
