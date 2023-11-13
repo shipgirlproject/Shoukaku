@@ -582,8 +582,6 @@ export class Player extends EventEmitter {
                 this.emit('exception', json);
                 break;
             case 'WebSocketClosedEvent':
-                const connection = this.node.manager.connections.get(this.guildId)!;
-                if (connection.channelId && connection.channelId !== connection.lastChannelId) break;
                 this.emit('closed', json);
                 break;
             default:
