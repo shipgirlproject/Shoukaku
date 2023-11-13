@@ -53,7 +53,7 @@ Refer to [/src/connectors](https://github.com/Deivu/Shoukaku/tree/master/src/con
 
 ### Documentation
 
-https://deivu.github.io/Shoukaku/ (Stable v3 version only)
+https://shoukaku.shipgirl.moe/ (Stable v3 version only)
 
 https://github.com/Deivu/Shoukaku/tree/v3 (v3 stable github branch)
 
