@@ -117,14 +117,14 @@ await player.update({ ...playerOptions });
 
 > Setting a custom get node ideal function
 ```js
+const shoukaku = new Shoukaku(new Connectors.DiscordJS(client), [{...yourNodeOptions}], {
+    ...yourShoukakuOptions,
+    nodeResolver: (nodes, connection) => getYourIdealNode(nodes, connection)
+});
 const player = await shoukaku.joinVoiceChannel({
     guildId: 'your_guild_id',
     channelId: 'your_channel_id',
-    shardId: 0,
-    getNode: (nodes, connection) => { 
-        nodes = [ ...nodes.values() ];
-        return nodes.find(node => node.group === connection.region);
-    }
+    shardId: 0
 });
 ```
 
