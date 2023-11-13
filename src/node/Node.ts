@@ -324,7 +324,7 @@ export class Node extends EventEmitter {
      * Destroys the websocket connection
      * @internal
      */
-    private destroy(move: boolean, count: number = 0): void {
+    private destroy(count: number = 0): void {
         this.ws?.removeAllListeners();
         this.ws?.close();
         this.ws = null;
@@ -341,14 +341,14 @@ export class Node extends EventEmitter {
      */
     private async clean(): Promise<void> {
         const move = this.manager.options.moveOnDisconnect;
-        if (!move) return this.destroy(false);
+        if (!move) return this.destroy();
         let count = 0;
         try {
             count = await this.movePlayers();
         } catch (error) {
             this.error(error);
         } finally {
-            this.destroy(count > 0, count);
+            this.destroy(count);
         }
     }
 
@@ -358,7 +358,7 @@ export class Node extends EventEmitter {
      */
     private async reconnect(): Promise<void> {
         if (this.state === State.RECONNECTING) return;
-        if (this.state !== State.DISCONNECTED) this.destroy(false);
+        if (this.state !== State.DISCONNECTED) this.destroy();
         this.state = State.RECONNECTING;
         this.reconnects++;
         this.emit('reconnecting', this.manager.options.reconnectTries - this.reconnects, this.manager.options.reconnectInterval);
@@ -384,7 +384,7 @@ export class Node extends EventEmitter {
         }
 
         await Promise.allSettled([
-            ...playersWithData.map(player => player.resume()),
+            ...playersWithData.map(player => player.resumePlayer()),
             ...playersWithoutData.map(player => this.manager.leaveVoiceChannel(player.guildId))
         ]);
     }
@@ -395,7 +395,7 @@ export class Node extends EventEmitter {
      */
     private async movePlayers(): Promise<number> {
         const players = [ ...this.manager.players.values() ];
-        const data = await Promise.allSettled(players.map(player => player.move()));
+        const data = await Promise.allSettled(players.map(player => player.movePlayer()));
         return data.filter(results => results.status === 'fulfilled').length;
     }
 }

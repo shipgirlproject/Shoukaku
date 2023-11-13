@@ -268,7 +268,7 @@ export class Player extends EventEmitter {
      * @param name? Name of node to move to, or the default ideal node
      * @returns true if the player was moved, false if not
      */
-    public async move(name?: string): Promise<boolean> {
+    public async movePlayer(name?: string): Promise<boolean> {
         const connection = this.node.manager.connections.get(this.guildId)!;
         const node = this.node.manager.nodes.get(name!) || this.node.manager.options.nodeResolver(this.node.manager.nodes, connection);
         if (!node && ![ ...this.node.manager.nodes.values() ].some(node => node.state === State.CONNECTED))
@@ -277,14 +277,14 @@ export class Player extends EventEmitter {
         let lastNode = this.node.manager.nodes.get(this.node.name);
         if (!lastNode || lastNode.state !== State.CONNECTED)
             lastNode = ShoukakuDefaults.nodeResolver(this.node.manager.nodes, connection);
-        await this.destroy();
+        await this.destroyPlayer();
         try {
             this.node = node;
-            await this.resume();
+            await this.resumePlayer();
             return true;
         } catch (error) {
             this.node = lastNode!;
-            await this.resume();
+            await this.resumePlayer();
             return false;
         }
     }
@@ -292,8 +292,7 @@ export class Player extends EventEmitter {
     /**
      * Destroys the player in remote lavalink side
      */
-    public async destroy(clean: boolean = false): Promise<void> {
-        if (clean) this.clean();
+    public async destroyPlayer(): Promise<void> {
         await this.node.rest.destroyPlayer(this.guildId);
     }
 
@@ -496,20 +495,20 @@ export class Player extends EventEmitter {
      * Resumes the current track
      * @param options An object that conforms to ResumeOptions that specify behavior on resuming
      */
-    public async resume(options: ResumeOptions = {}): Promise<void> {
+    public async resumePlayer(options: ResumeOptions = {}): Promise<void> {
         const data = this.playerData;
         if (options.noReplace) data.noReplace = options.noReplace;
         if (options.startTime) data.playerOptions.position = options.startTime;
         if (options.endTime) data.playerOptions.position;
         if (options.pause) data.playerOptions.paused = options.pause;
-        await this.update(data);
+        await this.updatePlayer(data);
         this.emit('resumed', this);
     }
 
     /**
      * If you want to update the whole player yourself, sends raw update player info to lavalink
      */
-    public async update(updatePlayer: UpdatePlayerInfo): Promise<void> {
+    public async updatePlayer(updatePlayer: UpdatePlayerInfo): Promise<void> {
         const data = { ...updatePlayer, ...{ guildId: this.guildId, sessionId: this.node.sessionId! }};
         await this.node.rest.updatePlayer(data);
         if (updatePlayer.playerOptions) {
@@ -523,19 +522,11 @@ export class Player extends EventEmitter {
     }
 
     /**
-     * Remove all event listeners on this instance
+     * Cleans this player instance
      * @internal
      */
     public clean(): void {
         this.removeAllListeners();
-        this.reset();
-    }
-
-    /**
-     * Reset the track, position and filters on this instance to defaults
-     * @internal
-     */
-    public reset(): void {
         this.track = null;
         this.volume = 100;
         this.position = 0;

@@ -281,13 +281,18 @@ export class Shoukaku extends EventEmitter {
      * @returns The destroyed / disconnected player or undefined if none
      * @internal
      */
-    public async leaveVoiceChannel(guildId: string): Promise<Player|undefined> {
-        this.connections.get(guildId)?.disconnect();
-        this.connections.delete(guildId);
+    public async leaveVoiceChannel(guildId: string): Promise<void> {
+        const connection = this.connections.get(guildId);
+        if (connection) {
+            connection.disconnect();
+            this.connections.delete(guildId);
+        }
         const player = this.players.get(guildId);
-        if (player) await player.destroy(true);
-        this.players.delete(guildId);
-        return player;
+        if (player) {
+            await player.destroyPlayer();
+            player.clean();
+            this.players.delete(guildId);
+        }
     }
 
     /**
