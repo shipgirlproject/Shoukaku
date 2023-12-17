@@ -230,6 +230,8 @@ const ShoukakuOptions = {
 |--------------|---------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------|
 | Kazagumo     | [Github](https://github.com/Takiyo0/Kazagumo)     | A Shoukaku wrapper that have built-in queue system                                                                                       |
 | stone-deezer | [NPM](https://www.npmjs.com/package/stone-deezer) | A plugin to simplify deezer links and then play it from available sources (**REQUIRES [KAZAGUMO](https://github.com/Takiyo0/Kazagumo)**) |
+| DamonJs | [Github](https://github.com/achiragaming/DamonJs) | A Shoukaku wrapper that have built-in queue system and uses shoukaku v4 |
+| DamonJs-spotify | [Github](https://github.com/achiragaming/DamonJs-Spotify) | A plugin to resolve spotify tracks and made for damonJs and inspired by kazagumo-spotify |
 
 ### Other Links
 
