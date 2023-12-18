@@ -85,7 +85,7 @@ export interface ShoukakuOptions {
     /**
      * Node Resolver to use if you want to customize it
      */
-    nodeResolver?: (nodes: Map<string, Node>) => Node|undefined;
+    nodeResolver?: (nodes: Map<string, Node>, connection?: Connection) => Node|undefined;
 }
 
 export interface VoiceChannelOptions {
