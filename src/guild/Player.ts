@@ -270,13 +270,13 @@ export class Player extends EventEmitter {
      */
     public async movePlayer(name?: string): Promise<boolean> {
         const connection = this.node.manager.connections.get(this.guildId)!;
-        const node = this.node.manager.nodes.get(name!) || this.node.manager.options.nodeResolver(this.node.manager.nodes, connection);
+        const node = this.node.manager.nodes.get(name!) || this.node.manager.options.nodeResolver(this.node.manager.nodes);
         if (!node && ![ ...this.node.manager.nodes.values() ].some(node => node.state === State.CONNECTED))
             throw new Error('No available nodes to move to');
         if (!node || node.name === this.node.name || node.state !== State.CONNECTED) return false;
         let lastNode = this.node.manager.nodes.get(this.node.name);
         if (!lastNode || lastNode.state !== State.CONNECTED)
-            lastNode = ShoukakuDefaults.nodeResolver(this.node.manager.nodes, connection);
+            lastNode = ShoukakuDefaults.nodeResolver(this.node.manager.nodes);
         await this.destroyPlayer();
         try {
             this.node = node;
