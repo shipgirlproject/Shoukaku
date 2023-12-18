@@ -256,7 +256,7 @@ export class Shoukaku extends EventEmitter {
             throw error;
         }
         try {
-            const node = this.options.nodeResolver(this.nodes, connection);
+            const node = this.options.nodeResolver(this.nodes);
             if (!node)
                 throw new Error('Can\'t find any nodes to connect on');
             const player = this.options.structures.player ? new this.options.structures.player(connection.guildId, node) : new Player(connection.guildId, node);
