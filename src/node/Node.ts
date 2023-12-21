@@ -1,7 +1,6 @@
 import { EventEmitter } from 'events';
 import { IncomingMessage } from 'http';
 import { NodeOption, Shoukaku } from '../Shoukaku';
-import { Player } from '../guild/Player';
 import { OpCodes, State, Versions } from '../Constants';
 import { wait } from '../Utils';
 import { Rest } from './Rest';

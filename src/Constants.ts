@@ -40,7 +40,7 @@ export const ShoukakuDefaults: Required<ShoukakuOptions> = {
     userAgent: `${Info.name}bot/${Info.version} (${Info.repository.url})`,
     structures: {},
     voiceConnectionTimeout: 15,
-    nodeResolver: (nodes, _connection) => [ ...nodes.values() ]
+    nodeResolver: (nodes) => [ ...nodes.values() ]
         .filter(node => node.state === State.CONNECTED)
         .sort((a, b) => a.penalties - b.penalties)
         .shift()

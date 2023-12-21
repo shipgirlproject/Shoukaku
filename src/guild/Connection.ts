@@ -1,6 +1,5 @@
 import { EventEmitter, once } from 'events';
 import { State, VoiceState } from '../Constants';
-import { Node } from '../node/Node';
 import { Shoukaku, VoiceChannelOptions } from '../Shoukaku.js';
 
 /**

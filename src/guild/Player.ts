@@ -269,7 +269,7 @@ export class Player extends EventEmitter {
      * @returns true if the player was moved, false if not
      */
     public async move(name?: string): Promise<boolean> {
-        const connection = this.node.manager.connections.get(this.guildId)!;
+        const connection = this.node.manager.connections.get(this.guildId);
         const node = this.node.manager.nodes.get(name!) || this.node.manager.options.nodeResolver(this.node.manager.nodes, connection);
         if (!node && ![ ...this.node.manager.nodes.values() ].some(node => node.state === State.CONNECTED))
             throw new Error('No available nodes to move to');
