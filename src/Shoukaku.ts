@@ -1,5 +1,5 @@
 import { EventEmitter } from 'events';
-import { State, ShoukakuDefaults, VoiceState } from './Constants';
+import { ShoukakuDefaults, VoiceState } from './Constants';
 import { Node } from './node/Node';
 import { Connector } from './connectors/Connector';
 import { Constructor, mergeDefault } from './Utils';
@@ -289,7 +289,7 @@ export class Shoukaku extends EventEmitter {
         }
         const player = this.players.get(guildId);
         if (player) {
-            await player.destroyPlayer();
+            await player.destroy();
             player.clean();
             this.players.delete(guildId);
         }
