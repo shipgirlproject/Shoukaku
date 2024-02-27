@@ -249,7 +249,7 @@ export class Player extends EventEmitter {
         return {
             guildId: this.guildId,
             playerOptions: {
-                encodedTrack: this.track,
+                encoded: this.track,
                 position: this.position,
                 paused: this.paused,
                 filters: this.filters,
@@ -302,7 +302,7 @@ export class Player extends EventEmitter {
      */
     public async playTrack(playable: PlayOptions): Promise<void> {
         const playerOptions: UpdatePlayerOptions = {
-            encodedTrack: playable.track
+            encoded: playable.track
         };
         if (playable.options) {
             const { pause, startTime, endTime, volume } = playable.options;
@@ -329,9 +329,8 @@ export class Player extends EventEmitter {
         this.position = 0;
         await this.node.rest.updatePlayer({
             guildId: this.guildId,
-            playerOptions: { encodedTrack: null }
+            playerOptions: { encoded: null }
         });
-
     }
 
     /**
@@ -513,7 +512,6 @@ export class Player extends EventEmitter {
         await this.node.rest.updatePlayer(data);
         if (updatePlayer.playerOptions) {
             const options = updatePlayer.playerOptions;
-            if (options.encodedTrack) this.track = options.encodedTrack;
             if (options.position) this.position = options.position;
             if (options.paused) this.paused = options.paused;
             if (options.filters) this.filters = options.filters;

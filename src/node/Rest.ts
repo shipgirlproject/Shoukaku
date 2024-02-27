@@ -116,6 +116,10 @@ export interface LavalinkPlayer {
 }
 
 export interface UpdatePlayerOptions {
+    encoded?: string|null;
+    /**
+    * @deprecated this may not work in newer lavalink versions, use "encoded" instead
+    */
     encodedTrack?: string|null;
     identifier?: string;
     position?: number;
