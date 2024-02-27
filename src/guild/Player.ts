@@ -512,6 +512,7 @@ export class Player extends EventEmitter {
         await this.node.rest.updatePlayer(data);
         if (updatePlayer.playerOptions) {
             const options = updatePlayer.playerOptions;
+            if (options.encoded) this.track = options.encoded;
             if (options.position) this.position = options.position;
             if (options.paused) this.paused = options.paused;
             if (options.filters) this.filters = options.filters;
