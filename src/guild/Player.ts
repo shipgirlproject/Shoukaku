@@ -231,7 +231,9 @@ export class Player extends EventEmitter {
         return {
             guildId: this.guildId,
             playerOptions: {
-                track: this.track,
+                track: { 
+                    encoded: this.track 
+                },
                 position: this.position,
                 paused: this.paused,
                 filters: this.filters,
@@ -296,7 +298,7 @@ export class Player extends EventEmitter {
      * Stop the currently playing track
      */
     public stopTrack(): Promise<void> {
-        return this.update({ track: null, position: 0 });
+        return this.update({ track: { encoded: null }, position: 0 });
     }
 
     /**
@@ -472,7 +474,7 @@ export class Player extends EventEmitter {
         }
 
         if (typeof playerOptions.track !== 'undefined')
-            this.track = playerOptions.track || null;
+            this.track = playerOptions.track.encoded || null;
         if (typeof playerOptions.paused === 'boolean')
             this.paused = playerOptions.paused;
         if (typeof playerOptions.volume === 'number')

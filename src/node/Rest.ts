@@ -115,8 +115,14 @@ export interface LavalinkPlayer {
     filters: FilterOptions
 }
 
+export interface UpdatePlayerTrackOptions {
+    encoded?: string|null;
+    identifier?: string;
+    userData?: unknown;
+}
+
 export interface UpdatePlayerOptions {
-    track?: string|null;
+    track?: UpdatePlayerTrackOptions;
     position?: number;
     endTime?: number;
     volume?: number;
