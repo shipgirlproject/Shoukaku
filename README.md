@@ -57,9 +57,11 @@ const Nodes = [
 ];
 const client = new Client();
 const shoukaku = new Shoukaku(new Connectors.DiscordJS(client), Nodes);
-// ALWAYS handle error, logging it will do
+
+// Always handle "error" events or your program may crash due to uncaught error
 shoukaku.on("error", (_, error) => console.error(error));
 client.login("token");
+
 // If you want shoukaku to be available on client, then bind it to it, here is one example of it
 client.shoukaku = shoukaku;
 ```
@@ -67,7 +69,6 @@ client.shoukaku = shoukaku;
 > Never initialize Shoukaku like this, or else she will never initialize, start shoukaku before you call `client.login()`
 
 ```js
-// NEVER DO THIS, OR SHOUKAKU WILL NEVER INITIALIZE
 client.on("ready", () => {
   client.shoukaku = new Shoukaku(new Connectors.DiscordJS(client), Nodes);
 });
@@ -122,124 +123,40 @@ const player = await shoukaku.joinVoiceChannel({
 });
 ```
 
-### Updating from V3 -> V4 (notable changes)
-
-> The way of joining and leaving voice channels is now different
-
-```js
-const { Client } = require("discord.js");
-const { Shoukaku, Connectors } = require("shoukaku");
-const Nodes = [
-  {
-    name: "Localhost",
-    url: "localhost:6969",
-    auth: "marin_kitagawa",
-  },
-];
-const client = new Client();
-const shoukaku = new Shoukaku(new Connectors.DiscordJS(client), Nodes);
-shoukaku.on("error", (_, error) => console.error(error));
-client.login("token");
-client.once("ready", async () => {
-  // get a node with least load to resolve a track
-  const node = shoukaku.options.nodeResolver(shoukaku.nodes);
-  const result = await node.rest.resolve("scsearch:snowhalation");
-  if (!result?.tracks.length) return;
-  // we now have a track metadata, we can use this to play tracks
-  const metadata = result.tracks.shift();
-  // you now join a voice channel by querying the main shoukaku class, not on the node anymore
-  const player = await shoukaku.joinVoiceChannel({
-    guildId: "your_guild_id",
-    channelId: "your_channel_id",
-    shardId: 0, // if unsharded it will always be zero (depending on your library implementation)
-  });
-  // if you want you can also use the player.node property after it connects to resolve tracks
-  const result_2 = await player.node.rest.resolve("scsearch:snowhalation");
-  console.log(result_2.tracks.shift());
-  // now we can play the track
-  await player.playTrack({ track: metadata.encoded });
-  setTimeout(async () => {
-    // simulate a timeout event, after specific amount of time, we leave the voice channel
-    // you now destroy players / leave voice channels by calling leaveVoiceChannel in main shoukaku class
-    await shoukaku.leaveVoiceChannel(player.guildId);
-  }, 30000);
-});
-```
-
-> Usual player methods now return promises
-
-```js
-await player.playTrack(...data);
-await player.stopTrack();
-```
-
-> There are 2 kinds of volumes you can set, global and filter
-
-```js
-// global volume accepts 0-1000 as it's values
-await player.setGlobalVolume(100);
-// to check the current global volume
-console.log(player.volume);
-// filter volume accepts 0.0-5.0 as it's values
-await player.setFilterVolume(1.0);
-// to check the current filter volume (filters.volume can be undefined)
-console.log(player.filters.volume);
-```
-
-> There are other internal changes like
-
-```js
-// new variable in shoukaku class, which handles the "connection data" of discord only
-console.log(shoukaku.connections);
-// players are moved from `node.players` to `shoukaku.players`
-console.log(shoukaku.players);
-// getNode() is removed in favor of joinVoiceChannel, you can still get the default least loaded node via `shoukaku.options.nodeResolver()`
-const player = await shoukaku.joinVoiceChannel({
-  guildId: "your_guild_id",
-  channelId: "your_channel_id",
-  shardId: 0,
-});
-// you can supply a custom node resolver for your own way of getting an ideal node by supplying the nodeResolver option in Shoukaku options
-const ShoukakuOptions = {
-  ...yourShoukakuOptions,
-  nodeResolver: (nodes, connection) => getYourIdealNode(nodes, connection),
-};
-// and other changes I'm not able to document(?);
-```
+> A full bot example can be found at https://github.com/shipgirlproject/Shoukaku?tab=readme-ov-file#implementation-discordjs
 
 ### Shoukaku's options
 
-| Option                 | Type                   | Default  | Description                                                                                                                                          |
-| ---------------------- | ---------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| resume                 | boolean                | false    | Whether to resume a connection on disconnect to Lavalink (Server Side) (Note: DOES NOT RESUME WHEN THE LAVALINK SERVER DIES)                         |
-| resumeTimeout          | number                 | 30       | Timeout before resuming a connection **in seconds**                                                                                                  |
-| resumeByLibrary        | boolean                | false    | Whether to resume the players by doing it in the library side (Client Side) (Note: TRIES TO RESUME REGARDLESS OF WHAT HAPPENED ON A LAVALINK SERVER) |
-| reconnectTries         | number                 | 3        | Number of times to try and reconnect to Lavalink before giving up                                                                                    |
-| reconnectInterval      | number                 | 5        | Timeout before trying to reconnect **in seconds**                                                                                                    |
-| restTimeout            | number                 | 60       | Time to wait for a response from the Lavalink REST API before giving up **in seconds**                                                               |
-| moveOnDisconnect       | boolean                | false    | Whether to move players to a different Lavalink node when a node disconnects                                                                         |
-| userAgent              | string                 | (auto)   | User Agent to use when making requests to Lavalink                                                                                                   |
-| structures             | Object{rest?, player?} | {}       | Custom structures for shoukaku to use                                                                                                                |
-| voiceConnectionTimeout | number                 | 15       | Timeout before abort connection **in seconds**                                                                                                       |
-| nodeResolver           | function               | function | Custom node resolver if you want to have your own method of getting the ideal node                                                                   |
+| Option                 | Type                   | Default  | Description                                                                                      | Notes                    |
+| ---------------------- | ---------------------- | -------- | ------------------------------------------------------------------------------------------------ | ------------------------ |
+| resume                 | boolean                | false    | If you want to enable resuming when your connection when your connection to lavalink disconnects |                          |
+| resumeTimeout          | number                 | 30       | Timeout before lavalink destroys the players on a disconnect                                     | In seconds               |
+| resumeByLibrary        | boolean                | false    | If you want to force resume players no matter what even if it's not resumable by lavalink        |                          |
+| reconnectTries         | number                 | 3        | Number of tries to reconnect to lavalink before disconnecting                                    |                          |
+| reconnectInterval      | number                 | 5        | Timeout between reconnects                                                                       | In seconds               |
+| restTimeout            | number                 | 60       | Maximum amount of time to wait for rest lavalink api requests                                    | In seconds               |
+| moveOnDisconnect       | boolean                | false    | Whether to move players to a different lavalink node when a node disconnects                     |                          |
+| userAgent              | string                 | (auto)   | Changes the user-agent used for lavalink requests                                                | Not recommeded to change |
+| structures             | Object{rest?, player?} | {}       | Custom structures for shoukaku to use                                                            |                          |
+| voiceConnectionTimeout | number                 | 15       | Maximum amount of time to wait for a join voice channel command                                  | In seconds               |
+| nodeResolver           | function               | function | Custom node resolver if you want to have your own method of getting the ideal node               |                          |
 
-### Plugins list
+### 3rd Party Plugins
 
-> Open a pr to add your plugin here
+| Name     | Link                                          | Description                                              |
+| -------- | --------------------------------------------- | -------------------------------------------------------- |
+| Kazagumo | [Github](https://github.com/Takiyo0/Kazagumo) | A wrapper for Shoukaku that has an internal queue system |
 
-| Name         | Link                                              | Description                                                                                                                              |
-| ------------ | ------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| Kazagumo     | [Github](https://github.com/Takiyo0/Kazagumo)     | A Shoukaku wrapper that have built-in queue system                                                                                       |
-| stone-deezer | [NPM](https://www.npmjs.com/package/stone-deezer) | A plugin to simplify deezer links and then play it from available sources (**REQUIRES [KAZAGUMO](https://github.com/Takiyo0/Kazagumo)**) |
+> Open a PR if you want to add your plugin here
 
 ### Other Links
 
-[Support](https://discord.gg/FVqbtGu) (#Development) | [Lavalink](https://github.com/freyacodes/Lavalink)
+> [Support](https://discord.gg/FVqbtGu) (#Development) | [Lavalink](https://github.com/freyacodes/Lavalink)
 
-### Implementation (Discord.JS)
+### Full bot implementation of Shoukaku in Discord.JS
 
 > [Kongou](https://github.com/Deivu/Kongou)
 
 ### Made with ❤ by
 
-> @ichimakase
+> @ichimakase (Saya)

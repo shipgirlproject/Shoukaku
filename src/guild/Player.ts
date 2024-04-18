@@ -3,30 +3,14 @@ import { Node } from '../node/Node';
 import { Connection } from './Connection';
 import { OpCodes, State, ShoukakuDefaults } from '../Constants';
 import { Exception, Track, UpdatePlayerInfo, UpdatePlayerOptions } from '../node/Rest';
+import { time } from 'console';
 
 export type TrackEndReason = 'finished' | 'loadFailed' | 'stopped' | 'replaced' | 'cleanup';
 export type PlayerEventType = 'TrackStartEvent' | 'TrackEndEvent' | 'TrackExceptionEvent' | 'TrackStuckEvent' | 'WebSocketClosedEvent';
 
-/**
- * Options when playing a new track
- */
-export interface PlayOptions {
-    track: string;
-    options?: {
-        noReplace?: boolean;
-        pause?: boolean;
-        startTime?: number;
-        endTime?: number;
-        volume?: number;
-    }
-}
+export type PlayOptions = Omit<UpdatePlayerOptions, 'filters' | 'voice'>;
 
-export interface ResumeOptions {
-    noReplace?: boolean;
-    pause?: boolean;
-    startTime?: number;
-    endTime?: number;
-}
+export type ResumeOptions = Omit<UpdatePlayerOptions, 'track' | 'filters' | 'voice'>;
 
 export interface Band {
     band: number;
@@ -205,7 +189,7 @@ export class Player extends EventEmitter {
      */
     public node: Node;
     /**
-     * ID of current track
+     * Base64 encoded data of the current track
      */
     public track: string|null;
     /**
@@ -249,7 +233,7 @@ export class Player extends EventEmitter {
         return {
             guildId: this.guildId,
             playerOptions: {
-                encoded: this.track,
+                track: this.track,
                 position: this.position,
                 paused: this.paused,
                 filters: this.filters,
@@ -265,19 +249,24 @@ export class Player extends EventEmitter {
 
     /**
      * Move player to another node
-     * @param name? Name of node to move to, or the default ideal node
+     * @param name Name of node to move to, or the default ideal node
      * @returns true if the player was moved, false if not
      */
     public async move(name?: string): Promise<boolean> {
         const connection = this.node.manager.connections.get(this.guildId);
-        const node = this.node.manager.nodes.get(name!) || this.node.manager.options.nodeResolver(this.node.manager.nodes, connection);
+        const node = this.node.manager.nodes.get(name!) || this.node.manager.getIdealNode(connection);
+
         if (!node && ![ ...this.node.manager.nodes.values() ].some(node => node.state === State.CONNECTED))
             throw new Error('No available nodes to move to');
+
         if (!node || node.name === this.node.name || node.state !== State.CONNECTED) return false;
+
         let lastNode = this.node.manager.nodes.get(this.node.name);
         if (!lastNode || lastNode.state !== State.CONNECTED)
-            lastNode = ShoukakuDefaults.nodeResolver(this.node.manager.nodes, connection);
+            lastNode = this.node.manager.getIdealNode(connection);
+
         await this.destroy();
+        
         try {
             this.node = node;
             await this.resume();
@@ -299,137 +288,97 @@ export class Player extends EventEmitter {
     /**
      * Play a new track
      * @param playable Options for playing this track
+     * @param noReplace Set it to true if you don't want to replace the currently playing track
      */
-    public async playTrack(playable: PlayOptions): Promise<void> {
-        const playerOptions: UpdatePlayerOptions = {
-            encoded: playable.track
-        };
-        if (playable.options) {
-            const { pause, startTime, endTime, volume } = playable.options;
-            if (pause) playerOptions.paused = pause;
-            if (startTime) playerOptions.position = startTime;
-            if (endTime) playerOptions.endTime = endTime;
-            if (volume) playerOptions.volume = volume;
-        }
-        this.track = playable.track;
-        if (playerOptions.paused) this.paused = playerOptions.paused;
-        if (playerOptions.position) this.position = playerOptions.position;
-        if (playerOptions.volume) this.volume = playerOptions.volume;
-        await this.node.rest.updatePlayer({
-            guildId: this.guildId,
-            noReplace: playable.options?.noReplace ?? false,
-            playerOptions
-        });
+    public playTrack(playerOptions: PlayOptions, noReplace: boolean = false): Promise<void> {
+        return this.update(playerOptions, noReplace);
     }
 
     /**
      * Stop the currently playing track
      */
-    public async stopTrack(): Promise<void> {
-        this.position = 0;
-        await this.node.rest.updatePlayer({
-            guildId: this.guildId,
-            playerOptions: { encoded: null }
-        });
+    public stopTrack(): Promise<void> {
+        return this.update({ track: null, position: 0 });
     }
 
     /**
      * Pause or unpause the currently playing track
      * @param paused Boolean value to specify whether to pause or unpause the current bot user
      */
-    public async setPaused(paused = true): Promise<void> {
-        this.paused = paused;
-        await this.node.rest.updatePlayer({
-            guildId: this.guildId,
-            playerOptions: { paused }
-        });
+    public setPaused(paused: boolean = true): Promise<void> {
+        return this.update({ paused });
     }
 
     /**
      * Seek to a specific time in the currently playing track
      * @param position Position to seek to in milliseconds
      */
-    public async seekTo(position: number): Promise<void> {
-        this.position = position;
-        await this.node.rest.updatePlayer({
-            guildId: this.guildId,
-            playerOptions: { position }
-        });
+    public seekTo(position: number): Promise<void> {
+        return this.update({ position });
     }
 
     /**
      * Sets the global volume of the player
      * @param volume Target volume 0-1000
      */
-    public async setGlobalVolume(volume: number): Promise<void> {
-        this.volume = volume;
-        await this.node.rest.updatePlayer({
-            guildId: this.guildId,
-            playerOptions: { volume: this.volume }
-        });
+    public setGlobalVolume(volume: number): Promise<void> {
+        return this.update({ volume });
     }
 
     /**
      * Sets the filter volume of the player
      * @param volume Target volume 0.0-5.0
      */
-    public async setFilterVolume(volume: number):  Promise<void> {
-        this.filters.volume = volume;
-        await this.setFilters(this.filters);
+    async setFilterVolume(volume: number):  Promise<void> {
+        return this.setFilters({ volume });
     }
+
     /**
      * Change the equalizer settings applied to the currently playing track
      * @param equalizer An array of objects that conforms to the Bands type that define volumes at different frequencies
      */
     public async setEqualizer(equalizer: Band[]): Promise<void> {
-        this.filters.equalizer = equalizer;
-        await this.setFilters(this.filters);
-
+        return this.setFilters({ equalizer });
     }
 
     /**
      * Change the karaoke settings applied to the currently playing track
      * @param karaoke An object that conforms to the KaraokeSettings type that defines a range of frequencies to mute
      */
-    public async setKaraoke(karaoke?: KaraokeSettings): Promise<void> {
-        this.filters.karaoke = karaoke || null;
-        await this.setFilters(this.filters);
+    public setKaraoke(karaoke?: KaraokeSettings): Promise<void> {
+        return this.setFilters({ karaoke: karaoke || null });
     }
 
     /**
      * Change the timescale settings applied to the currently playing track
      * @param timescale An object that conforms to the TimescaleSettings type that defines the time signature to play the audio at
      */
-    public async setTimescale(timescale?: TimescaleSettings): Promise<void> {
-        this.filters.timescale = timescale || null;
-        await this.setFilters(this.filters);
+    public setTimescale(timescale?: TimescaleSettings): Promise<void> {
+        return this.setFilters({ timescale: timescale || null });
     }
 
     /**
      * Change the tremolo settings applied to the currently playing track
      * @param tremolo An object that conforms to the FreqSettings type that defines an oscillation in volume
      */
-    public async setTremolo(tremolo?: FreqSettings): Promise<void> {
-        this.filters.tremolo = tremolo || null;
-        await this.setFilters(this.filters);
+    public setTremolo(tremolo?: FreqSettings): Promise<void> {
+        return this.setFilters({ tremolo: tremolo || null });
     }
 
     /**
      * Change the vibrato settings applied to the currently playing track
      * @param vibrato An object that conforms to the FreqSettings type that defines an oscillation in pitch
      */
-    public async setVibrato(vibrato?: FreqSettings): Promise<void> {
-        this.filters.vibrato = vibrato || null;
-        await this.setFilters(this.filters);
+    public setVibrato(vibrato?: FreqSettings): Promise<void> {
+        return this.setFilters({ vibrato: vibrato || null });
     }
 
     /**
      * Change the rotation settings applied to the currently playing track
      * @param rotation An object that conforms to the RotationSettings type that defines the frequency of audio rotating round the listener
      */
-    public async setRotation(rotation?: RotationSettings): Promise<void> {
-        this.filters.rotation = rotation || null;
-        await this.setFilters(this.filters);
+    public setRotation(rotation?: RotationSettings): Promise<void> {
+        return this.setFilters({ rotation: rotation || null });
     }
 
     /**
@@ -437,39 +386,32 @@ export class Player extends EventEmitter {
      * @param distortion An object that conforms to DistortionSettings that defines distortions in the audio
      * @returns The current player instance
      */
-    public async setDistortion(distortion: DistortionSettings): Promise<void> {
-        this.filters.distortion = distortion || null;
-        await this.setFilters(this.filters);
+    public setDistortion(distortion?: DistortionSettings): Promise<void> {
+        return this.setFilters({ distortion: distortion || null });
     }
 
     /**
      * Change the channel mix settings applied to the currently playing track
      * @param channelMix An object that conforms to ChannelMixSettings that defines how much the left and right channels affect each other (setting all factors to 0.5 causes both channels to get the same audio)
      */
-    public async setChannelMix(channelMix: ChannelMixSettings): Promise<void> {
-        this.filters.channelMix = channelMix || null;
-        await this.setFilters(this.filters);
+    public setChannelMix(channelMix?: ChannelMixSettings): Promise<void> {
+        return this.setFilters({ channelMix: channelMix || null });
     }
 
     /**
      * Change the low pass settings applied to the currently playing track
      * @param lowPass An object that conforms to LowPassSettings that defines the amount of suppression on higher frequencies
      */
-    public async setLowPass(lowPass: LowPassSettings): Promise<void> {
-        this.filters.lowPass = lowPass || null;
-        await this.setFilters(this.filters);
+    public setLowPass(lowPass?: LowPassSettings): Promise<void> {
+        return this.setFilters({ lowPass: lowPass || null });
     }
 
     /**
      * Change the all filter settings applied to the currently playing track
      * @param filters An object that conforms to FilterOptions that defines all filters to apply/modify
      */
-    public async setFilters(filters: FilterOptions): Promise<void> {
-        this.filters = filters;
-        await this.node.rest.updatePlayer({
-            guildId: this.guildId,
-            playerOptions: { filters }
-        });
+    public setFilters(filters: FilterOptions): Promise<void> {
+        return this.update({ filters });
     }
 
     /**
@@ -493,31 +435,52 @@ export class Player extends EventEmitter {
     /**
      * Resumes the current track
      * @param options An object that conforms to ResumeOptions that specify behavior on resuming
+     * @param noReplace Set it to true if you don't want to replace the currently playing track
      */
-    public async resume(options: ResumeOptions = {}): Promise<void> {
+    public async resume(options: ResumeOptions = {}, noReplace: boolean = false): Promise<void> {
         const data = this.data;
-        if (options.noReplace) data.noReplace = options.noReplace;
-        if (options.startTime) data.playerOptions.position = options.startTime;
-        if (options.endTime) data.playerOptions.position;
-        if (options.pause) data.playerOptions.paused = options.pause;
-        await this.update(data);
+
+        if (typeof options.position === 'number') 
+            data.playerOptions.position = options.position;
+        if (typeof options.endTime === 'number')
+            data.playerOptions.endTime = options.endTime;
+        if (typeof options.paused === 'boolean')
+            data.playerOptions.paused = options.paused;
+        if (typeof options.volume === 'number')
+            data.playerOptions.volume = options.volume;
+
+        await this.update(data.playerOptions, noReplace);
+
         this.emit('resumed', this);
     }
 
     /**
      * If you want to update the whole player yourself, sends raw update player info to lavalink
+     * @param playerOptions Options to update the player data
+     * @param noReplace Set it to true if you don't want to replace the currently playing track
      */
-    public async update(updatePlayer: UpdatePlayerInfo): Promise<void> {
-        const data = { ...updatePlayer, ...{ guildId: this.guildId, sessionId: this.node.sessionId! }};
-        await this.node.rest.updatePlayer(data);
-        if (updatePlayer.playerOptions) {
-            const options = updatePlayer.playerOptions;
-            if (options.encoded) this.track = options.encoded;
-            if (options.position) this.position = options.position;
-            if (options.paused) this.paused = options.paused;
-            if (options.filters) this.filters = options.filters;
-            if (options.volume) this.volume = options.volume;
+    public async update(playerOptions: UpdatePlayerOptions, noReplace: boolean = false): Promise<void> {
+        const data = {
+            guildId: this.guildId,
+            noReplace,
+            playerOptions
         }
+
+        await this.node.rest.updatePlayer(data);
+
+        if (playerOptions.filters) {
+            const filters = { ...this.filters, ...playerOptions.filters };
+            this.filters = filters;
+        }
+
+        if (typeof playerOptions.track !== 'undefined')
+            this.track = playerOptions.track || null;
+        if (typeof playerOptions.paused === 'boolean')
+            this.paused = playerOptions.paused;
+        if (typeof playerOptions.volume === 'number')
+            this.volume = playerOptions.volume;
+        if (typeof playerOptions.position === 'number')
+            this.position = playerOptions.position;
     }
 
     /**

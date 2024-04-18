@@ -203,6 +203,15 @@ export class Shoukaku extends EventEmitter {
     }
 
     /**
+     * Gets an ideal node based on the nodeResolver you provided
+     * @param connection Optional connection class for ideal node selection, if you use it
+     * @returns An ideal node for you to do things with
+     */
+    public getIdealNode(connection?: Connection): Node | undefined {
+        return this.options.nodeResolver(this.nodes, connection);
+    }
+
+    /**
      * Add a Lavalink node to the pool of available nodes
      * @param options.name Name of this node
      * @param options.url URL of Lavalink
@@ -242,7 +251,6 @@ export class Shoukaku extends EventEmitter {
      * @param options.deaf Optional boolean value to specify whether to deafen or undeafen the current bot user
      * @param options.mute Optional boolean value to specify whether to mute or unmute the current bot user
      * @returns The created player
-     * @internal
      */
     public async joinVoiceChannel(options: VoiceChannelOptions): Promise<Player> {
         if (this.connections.has(options.guildId))
@@ -256,7 +264,7 @@ export class Shoukaku extends EventEmitter {
             throw error;
         }
         try {
-            const node = this.options.nodeResolver(this.nodes, connection);
+            const node = this.getIdealNode(connection);
             if (!node)
                 throw new Error('Can\'t find any nodes to connect on');
             const player = this.options.structures.player ? new this.options.structures.player(connection.guildId, node) : new Player(connection.guildId, node);
@@ -279,7 +287,6 @@ export class Shoukaku extends EventEmitter {
      * Leaves a voice channel
      * @param guildId The id of the guild you want to delete
      * @returns The destroyed / disconnected player or undefined if none
-     * @internal
      */
     public async leaveVoiceChannel(guildId: string): Promise<void> {
         const connection = this.connections.get(guildId);
