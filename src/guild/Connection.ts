@@ -30,16 +30,16 @@ export class Connection extends EventEmitter {
      */
     public manager: Shoukaku;
     /**
-     * ID of Guild that contains the connected voice channel
+     * GuildId of the connection that is being managed by this instance
      */
     public guildId: string;
     /**
-     * ID of the connected voice channel
+     * VoiceChannelId of the connection that is being managed by this instance
      */
     public channelId: string|null;
 
     /**
-     * ID of the Shard that contains the guild that contains the connected voice channel
+     * ShardId where this connection sends data on
      */
     public shardId: number;
     /**
@@ -51,11 +51,11 @@ export class Connection extends EventEmitter {
      */
     public deafened: boolean;
     /**
-     * ID of the last channelId connected to
+     * Id of the voice channel where this instance was connected before the current channelId
      */
     public lastChannelId: string|null;
     /**
-     * ID of current session
+     * Id of the currently active voice channel connection
      */
     public sessionId: string|null;
     /**
@@ -82,7 +82,6 @@ export class Connection extends EventEmitter {
      * @param options.channelId ChannelId of voice channel to connect to
      * @param options.deaf Optional boolean value to specify whether to deafen the current bot user
      * @param options.mute Optional boolean value to specify whether to mute the current bot user
-     * @param options.getNode Optional move function for moving players around
      */
     constructor(manager: Shoukaku, options: VoiceChannelOptions) {
         super();
@@ -169,10 +168,10 @@ export class Connection extends EventEmitter {
     }
 
     /**
-     * Update Session ID, Channel ID, Deafen status and Mute status of this instance
+     * Updates SessionId, ChannelId, Deafen and Mute data of this instance
      *
-     * @param options.session_id ID of this session
-     * @param options.channel_id ID of currently connected voice channel
+     * @param options.session_id Id of the current session
+     * @param options.channel_id Id of the connected voice channel
      * @param options.self_deaf Boolean that indicates if the current bot user is deafened or not
      * @param options.self_mute Boolean that indicates if the current bot user is muted or not
      * @internal

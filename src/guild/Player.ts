@@ -7,9 +7,7 @@ import { time } from 'console';
 
 export type TrackEndReason = 'finished' | 'loadFailed' | 'stopped' | 'replaced' | 'cleanup';
 export type PlayerEventType = 'TrackStartEvent' | 'TrackEndEvent' | 'TrackExceptionEvent' | 'TrackStuckEvent' | 'WebSocketClosedEvent';
-
 export type PlayOptions = Omit<UpdatePlayerOptions, 'filters' | 'voice'>;
-
 export type ResumeOptions = Omit<UpdatePlayerOptions, 'track' | 'filters' | 'voice'>;
 
 export interface Band {

@@ -20,11 +20,11 @@ export interface Structures {
 
 export interface NodeOption {
     /**
-     * Name of this node
+     * Name of the Lavalink node
      */
     name: string;
     /**
-     * URL of Lavalink
+     * Lavalink node host and port without any prefix
      */
     url: string;
     /**
@@ -36,7 +36,7 @@ export interface NodeOption {
      */
     secure?: boolean;
     /**
-     * Group of this node
+     * Name of the Lavalink node group
      */
     group?: string;
 }
