@@ -74,9 +74,10 @@ client.on("ready", () => {
 });
 ```
 
-> Join a voice channel, search for a track, play the track, then disconnect after 30 seconds
+> Join a voice channel, search for a track, play the track, then disconnect after the track ends
 
 ```js
+// create a voice connection and player using Shoukaku#joinVoiceChannel
 const player = await shoukaku.joinVoiceChannel({
   guildId: "your_guild_id",
   channelId: "your_channel_id",
@@ -84,12 +85,14 @@ const player = await shoukaku.joinVoiceChannel({
 });
 // player is created, now search for a track
 const result = await player.node.rest.resolve("scsearch:snowhalation");
-if (!result?.tracks.length) return;
+if (!result?.data.length) return;
 const metadata = result.tracks.shift();
 // play the searched track
 await player.playTrack({ track: metadata.encoded });
-// disconnect after 30 seconds
-setTimeout(() => shoukaku.leaveVoiceChannel(player.guildId), 30000).unref();
+// wait for track to end
+await once(player, 'end');
+// leaver the voice channel
+await shoukaku.leaveVoiceChannel(player.guildId);
 ```
 
 > Playing a track and changing a playback option (in this example, volume)
