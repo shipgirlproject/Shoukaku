@@ -21,6 +21,14 @@ const { Shoukaku, Connectors } = require('shoukaku');
 new Shoukaku(new Connectors.OceanicJS(client), servers, options)
 ```
 
+> [Seyfert](https://seyfert-docs.vercel.app/) (0.1.x)
+
+```js
+const { Shoukaku, Connectors } = require('shoukaku');
+new Shoukaku(new Connectors.Seyfert(client), servers, options)
+```
+
+
 > Implement your own 
 
 ## Implementing your own
