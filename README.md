@@ -123,7 +123,7 @@ const player = await shoukaku.joinVoiceChannel({
 });
 ```
 
-> A full bot example can be found at https://github.com/shipgirlproject/Shoukaku?tab=readme-ov-file#implementation-discordjs
+> A full bot example (that dont use timeout to leave the voice channel) can be found at https://github.com/shipgirlproject/Shoukaku?tab=readme-ov-file#full-bot-implementation-of-shoukaku-in-discordjs
 
 ### Shoukaku's options
 
