@@ -267,7 +267,7 @@ export class Player extends EventEmitter {
 
         await this.destroy();
         
-        try {
+        try {   
             this.node = node;
             await this.resume();
             return true;
