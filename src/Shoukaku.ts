@@ -96,48 +96,56 @@ export interface VoiceChannelOptions {
     mute?: boolean;
 }
 
-export interface ShoukakuEvents {
+export declare interface Shoukaku {
     /**
      * Emitted when reconnect tries are occurring and how many tries are left
      * @eventProperty
      */
-    'reconnecting': [name: string, reconnectsLeft: number, reconnectInterval: number];
+    on(event: 'reconnecting', listener: (name: string, reconnectsLeft: number, reconnectInterval: number) => void): this;
     /**
      * Emitted when data useful for debugging is produced
      * @eventProperty
      */
-    'debug': [name: string, info: string];
+    on(event: 'debug', listener: (name: string, info: string) => void): this;
     /**
      * Emitted when an error occurs
      * @eventProperty
      */
-    'error': [name: string, error: Error];
+    on(event: 'error', listener: (name: string, error: Error) => void): this;
     /**
      * Emitted when Shoukaku is ready to receive operations
      * @eventProperty
      */
-    'ready': [name: string, reconnected: boolean];
+    on(event: 'ready', listener: (name: string, reconnected: boolean) => void): this;
     /**
      * Emitted when a websocket connection to Lavalink closes
      * @eventProperty
      */
-    'close': [name: string, code: number, reason: string];
+    on(event: 'close', listener: (name: string, code: number, reason: string) => void): this;
     /**
      * Emitted when a websocket connection to Lavalink disconnects
      * @eventProperty
      */
-    'disconnect': [name: string, count: number];
+    on(event: 'disconnect', listener: (name: string, count: number) => void): this;
     /**
      * Emitted when a raw message is received from Lavalink
      * @eventProperty
      */
-    'raw': [name: string, json: unknown];
-}
-
-export declare interface Shoukaku {
-    on<K extends keyof ShoukakuEvents>(event: K, listener: (...args: ShoukakuEvents[K]) => void): this;
-    once<K extends keyof ShoukakuEvents>(event: K, listener: (...args: ShoukakuEvents[K]) => void): this;
-    off<K extends keyof ShoukakuEvents>(event: K, listener: (...args: ShoukakuEvents[K]) => void): this;
+    on(event: 'raw', listener: (name: string, json: unknown) => void): this;
+    once(event: 'reconnecting', listener: (name: string, reconnectsLeft: number, reconnectInterval: number) => void): this;
+    once(event: 'debug', listener: (name: string, info: string) => void): this;
+    once(event: 'error', listener: (name: string, error: Error) => void): this;
+    once(event: 'ready', listener: (name: string, reconnected: boolean) => void): this;
+    once(event: 'close', listener: (name: string, code: number, reason: string) => void): this;
+    once(event: 'disconnect', listener: (name: string, count: number) => void): this;
+    once(event: 'raw', listener: (name: string, json: unknown) => void): this;
+    off(event: 'reconnecting', listener: (name: string, reconnectsLeft: number, reconnectInterval: number) => void): this;
+    off(event: 'debug', listener: (name: string, info: string) => void): this;
+    off(event: 'error', listener: (name: string, error: Error) => void): this;
+    off(event: 'ready', listener: (name: string, reconnected: boolean) => void): this;
+    off(event: 'close', listener: (name: string, code: number, reason: string) => void): this;
+    off(event: 'disconnect', listener: (name: string, count: number) => void): this;
+    off(event: 'raw', listener: (name: string, json: unknown) => void): this;
 }
 
 /**
