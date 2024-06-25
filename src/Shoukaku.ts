@@ -138,7 +138,7 @@ export declare interface Shoukaku {
     on<K extends keyof ShoukakuEvents>(event: K, listener: (...args: ShoukakuEvents[K]) => void): this;
     once<K extends keyof ShoukakuEvents>(event: K, listener: (...args: ShoukakuEvents[K]) => void): this;
     off<K extends keyof ShoukakuEvents>(event: K, listener: (...args: ShoukakuEvents[K]) => void): this;
-    emit(event: string | symbol, ...args: unknown[]): boolean;
+    emit(event: string | symbol, ...args: any[]): boolean;
 }
 
 /**
