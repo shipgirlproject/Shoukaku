@@ -122,48 +122,56 @@ export interface FilterOptions {
     lowPass?: LowPassSettings|null;
 }
 
-export interface PlayerEvents {
+export declare interface Player {
     /**
      * Emitted when the current playing track ends
      * @eventProperty
      */
-    'end': [reason: TrackEndEvent];
+    on(event: 'end', listener: (reason: TrackEndEvent) => void): this;
     /**
      * Emitted when the current playing track gets stuck due to an error
      * @eventProperty
      */
-    'stuck': [data: TrackStuckEvent];
+    on(event: 'stuck', listener: (data: TrackStuckEvent) => void): this;
     /**
      * Emitted when the current websocket connection is closed
      * @eventProperty
      */
-    'closed': [reason: WebSocketClosedEvent];
+    on(event: 'closed', listener: (reason: WebSocketClosedEvent) => void): this;
     /**
      * Emitted when a new track starts
      * @eventProperty
      */
-    'start': [data: TrackStartEvent];
+    on(event: 'start', listener: (data: TrackStartEvent) => void): this;
     /**
      * Emitted when there is an error caused by the current playing track
      * @eventProperty
      */
-    'exception': [reason: TrackExceptionEvent];
+    on(event: 'exception', listener: (reason: TrackExceptionEvent) => void): this;
     /**
      * Emitted when the library manages to resume the player
      * @eventProperty
      */
-    'resumed': [player: Player];
+    on(event: 'resumed', listener: (player: Player) => void): this;
     /**
      * Emitted when a playerUpdate even is received from Lavalink
      * @eventProperty
      */
-    'update': [data: PlayerUpdate];
-}
-
-export declare interface Player {
-    on<K extends keyof PlayerEvents>(event: K, listener: (...args: PlayerEvents[K]) => void): this;
-    once<K extends keyof PlayerEvents>(event: K, listener: (...args: PlayerEvents[K]) => void): this;
-    off<K extends keyof PlayerEvents>(event: K, listener: (...args: PlayerEvents[K]) => void): this;
+    on(event: 'update', listener: (data: PlayerUpdate) => void): this;
+    once(event: 'end', listener: (reason: TrackEndEvent) => void): this;
+    once(event: 'stuck', listener: (data: TrackStuckEvent) => void): this;
+    once(event: 'closed', listener: (reason: WebSocketClosedEvent) => void): this;
+    once(event: 'start', listener: (data: TrackStartEvent) => void): this;
+    once(event: 'exception', listener: (reason: TrackExceptionEvent) => void): this;
+    once(event: 'resumed', listener: (player: Player) => void): this;
+    once(event: 'update', listener: (data: PlayerUpdate) => void): this;
+    off(event: 'end', listener: (reason: TrackEndEvent) => void): this;
+    off(event: 'stuck', listener: (data: TrackStuckEvent) => void): this;
+    off(event: 'closed', listener: (reason: WebSocketClosedEvent) => void): this;
+    off(event: 'start', listener: (data: TrackStartEvent) => void): this;
+    off(event: 'exception', listener: (reason: TrackExceptionEvent) => void): this;
+    off(event: 'resumed', listener: (player: Player) => void): this;
+    off(event: 'update', listener: (data: PlayerUpdate) => void): this;
 }
 
 /**
