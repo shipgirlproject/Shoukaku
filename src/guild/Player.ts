@@ -122,57 +122,51 @@ export interface FilterOptions {
     lowPass?: LowPassSettings|null;
 }
 
-export declare interface Player {
+export interface PlayerEvents {
     /**
      * Emitted when the current playing track ends
      * @eventProperty
      */
-    on(event: 'end', listener: (reason: TrackEndEvent) => void): this;
+    'end': [reason: TrackEndEvent];
     /**
      * Emitted when the current playing track gets stuck due to an error
      * @eventProperty
      */
-    on(event: 'stuck', listener: (data: TrackStuckEvent) => void): this;
+    'stuck': [data: TrackStuckEvent];
     /**
      * Emitted when the current websocket connection is closed
      * @eventProperty
      */
-    on(event: 'closed', listener: (reason: WebSocketClosedEvent) => void): this;
+    'closed': [reason: WebSocketClosedEvent];
     /**
      * Emitted when a new track starts
      * @eventProperty
      */
-    on(event: 'start', listener: (data: TrackStartEvent) => void): this;
+    'start': [data: TrackStartEvent];
     /**
      * Emitted when there is an error caused by the current playing track
      * @eventProperty
      */
-    on(event: 'exception', listener: (reason: TrackExceptionEvent) => void): this;
+    'exception': [reason: TrackExceptionEvent];
     /**
      * Emitted when the library manages to resume the player
      * @eventProperty
      */
-    on(event: 'resumed', listener: (player: Player) => void): this;
+    'resumed': [player: Player];
     /**
      * Emitted when a playerUpdate even is received from Lavalink
      * @eventProperty
      */
-    on(event: 'update', listener: (data: PlayerUpdate) => void): this;
-    once(event: 'end', listener: (reason: TrackEndEvent) => void): this;
-    once(event: 'stuck', listener: (data: TrackStuckEvent) => void): this;
-    once(event: 'closed', listener: (reason: WebSocketClosedEvent) => void): this;
-    once(event: 'start', listener: (data: TrackStartEvent) => void): this;
-    once(event: 'exception', listener: (reason: TrackExceptionEvent) => void): this;
-    once(event: 'resumed', listener: (player: Player) => void): this;
-    once(event: 'update', listener: (data: PlayerUpdate) => void): this;
-    off(event: 'end', listener: (reason: TrackEndEvent) => void): this;
-    off(event: 'stuck', listener: (data: TrackStuckEvent) => void): this;
-    off(event: 'closed', listener: (reason: WebSocketClosedEvent) => void): this;
-    off(event: 'start', listener: (data: TrackStartEvent) => void): this;
-    off(event: 'exception', listener: (reason: TrackExceptionEvent) => void): this;
-    off(event: 'resumed', listener: (player: Player) => void): this;
-    off(event: 'update', listener: (data: PlayerUpdate) => void): this;
+    'update': [data: PlayerUpdate];
 }
+
+export declare interface Player {
+    on<K extends keyof PlayerEvents>(event: K, listener: (...args: PlayerEvents[K]) => void): this;
+    once<K extends keyof PlayerEvents>(event: K, listener: (...args: PlayerEvents[K]) => void): this;
+    off<K extends keyof PlayerEvents>(event: K, listener: (...args: PlayerEvents[K]) => void): this;
+    emit(event: string | symbol, ...args: unknown[]): boolean;
+}
+
 
 /**
  * Wrapper object around Lavalink
