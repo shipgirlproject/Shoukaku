@@ -138,7 +138,7 @@ export declare interface Shoukaku {
     on<K extends keyof ShoukakuEvents>(event: K, listener: (...args: ShoukakuEvents[K]) => void): this;
     once<K extends keyof ShoukakuEvents>(event: K, listener: (...args: ShoukakuEvents[K]) => void): this;
     off<K extends keyof ShoukakuEvents>(event: K, listener: (...args: ShoukakuEvents[K]) => void): this;
-    emit(event: string | symbol, ...args: any[]): boolean;
+    emit<K extends keyof ShoukakuEvents>(event: K, ...args: ShoukakuEvents[K]): boolean;
 }
 
 /**
@@ -307,6 +307,6 @@ export class Shoukaku extends EventEmitter {
     private clean(node: Node, ...args: unknown[]): void {
         node.removeAllListeners();
         this.nodes.delete(node.name);
-        this.emit('disconnect', node.name, ...args);
+        this.emit('disconnect', node.name, ...args as [any]);
     }
 }
