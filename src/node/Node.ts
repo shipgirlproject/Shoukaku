@@ -70,51 +70,6 @@ export interface ResumableHeaders {
 
 export interface NonResumableHeaders extends Omit<ResumableHeaders, 'Session-Id'> {}
 
-export interface NodeEvents {
-    /**
-     * Emitted when reconnect tries are occurring and how many tries are left
-     * @eventProperty
-     */
-    'reconnecting': [reconnectsLeft: number, reconnectInterval: number];
-    /**
-     * Emitted when data useful for debugging is produced
-     * @eventProperty
-     */
-    'debug': [message: string];
-    /**
-     * Emitted when an error occurs
-     * @eventProperty
-     */
-    'error': [error: Error];
-    /**
-     * Emitted when Shoukaku is ready to receive operations
-     * @eventProperty
-     */
-    'ready': [reconnected: boolean];
-    /**
-     * Emitted when a websocket connection to Lavalink closes
-     * @eventProperty
-     */
-    'close': [code: number, reason: string];
-    /**
-     * Emitted when a websocket connection to Lavalink disconnects
-     * @eventProperty
-     */
-    'disconnect': [count: number];
-    /**
-     * Emitted when a raw message is received from Lavalink
-     * @eventProperty
-     */
-    'raw': [json: unknown];
-}
-
-export declare interface Node {
-    on<K extends keyof NodeEvents>(event: K, listener: (...args: NodeEvents[K]) => void): this;
-    once<K extends keyof NodeEvents>(event: K, listener: (...args: NodeEvents[K]) => void): this;
-    off<K extends keyof NodeEvents>(event: K, listener: (...args: NodeEvents[K]) => void): this;
-    emit<K extends keyof NodeEvents>(event: K, ...args: NodeEvents[K]): boolean;
-}
-
 /**
  * Represents a Lavalink node
  */
@@ -349,7 +304,7 @@ export class Node extends EventEmitter {
      */
     private close(code: number, reason: unknown): void {
         this.emit('debug', `[Socket] <-/-> [${this.name}] : Connection Closed, Code: ${code || 'Unknown Code'}`);
-        this.emit('close', code, reason as string);
+        this.emit('close', code, reason);
         if (this.shouldClean)
             this.clean();
         else
@@ -361,7 +316,7 @@ export class Node extends EventEmitter {
      * @param error error message
      */
     public error(error: Error|unknown): void {
-        this.emit('error', error as Error);
+        this.emit('error', error);
     }
 
     /**
