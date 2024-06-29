@@ -462,6 +462,8 @@ export class Player extends EventEmitter {
 
         await this.node.rest.updatePlayer(data);
 
+        if (!noReplace) this.paused = false
+
         if (playerOptions.filters) {
             const filters = { ...this.filters, ...playerOptions.filters };
             this.filters = filters;
