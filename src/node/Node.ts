@@ -206,7 +206,7 @@ export class Node extends EventEmitter {
             'User-Id': this.manager.id
         };
 
-        if (this.sessionId) headers['Resume-Key'] = this.sessionId;
+        if (this.sessionId) headers['Session-Id'] = this.sessionId;
         this.emit('debug', `[Socket] -> [${this.name}] : Connecting ${this.url}, Version: ${this.version}, Trying to resume? ${!!this.sessionId}`);
         if (!this.initialized) this.initialized = true;
 
