@@ -39,7 +39,7 @@ Refer to [/src/connectors](https://github.com/Deivu/Shoukaku/tree/master/src/con
 
 ### Documentation
 
-https://shoukaku.shipgirl.moe/
+https://guide.shoukaku.shipgirl.moe/
 
 ### Small code snippet examples
 
@@ -74,7 +74,7 @@ client.on("ready", () => {
 });
 ```
 
-> A full bot example can be found at https://github.com/shipgirlproject/Shoukaku?tab=readme-ov-file#full-bot-implementation-of-shoukaku-in-discordjs
+> A full bot example can be found at [Kongou](https://github.com/Deivu/Kongou)
 
 ### Shoukaku's options
 
@@ -103,10 +103,6 @@ client.on("ready", () => {
 ### Other Links
 
 > [Support](https://discord.gg/FVqbtGu) (#Development) | [Lavalink](https://github.com/freyacodes/Lavalink)
-
-### Full bot implementation of Shoukaku in Discord.JS
-
-> [Kongou](https://github.com/Deivu/Kongou)
 
 ### Made with ❤ by
 
