@@ -1,4 +1,4 @@
-import { Node, NodeInfo, NodeStats } from './Node';
+import { Node, NodeInfo, Stats } from './Node';
 import { NodeOption } from '../Shoukaku';
 import { Versions } from '../Constants';
 import { FilterOptions } from '../guild/Player';
@@ -302,7 +302,7 @@ export class Rest {
      * Gets the status of this node
      * @returns Promise that resolves to a node stats response
      */
-    public stats(): Promise<NodeStats | undefined> {
+    public stats(): Promise<Stats | undefined> {
         const options = {
             endpoint: '/stats',
             options: {}

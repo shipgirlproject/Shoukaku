@@ -3,12 +3,18 @@ import { Node } from '../node/Node';
 import { Connection } from './Connection';
 import { OpCodes, State, ShoukakuDefaults } from '../Constants';
 import { Exception, Track, UpdatePlayerInfo, UpdatePlayerOptions } from '../node/Rest';
-import { time } from 'console';
 
 export type TrackEndReason = 'finished' | 'loadFailed' | 'stopped' | 'replaced' | 'cleanup';
-export type PlayerEventType = 'TrackStartEvent' | 'TrackEndEvent' | 'TrackExceptionEvent' | 'TrackStuckEvent' | 'WebSocketClosedEvent';
 export type PlayOptions = Omit<UpdatePlayerOptions, 'filters' | 'voice'>;
 export type ResumeOptions = Omit<UpdatePlayerOptions, 'track' | 'filters' | 'voice'>;
+
+export enum PlayerEventType {
+    TRACK_START_EVENT = 'TrackStartEvent',
+    TRACK_END_EVENT = 'TrackEndEvent',
+    TRACK_EXCEPTION_EVENT = 'TrackExceptionEvent',
+    TRACK_STUCK_EVENT = 'TrackStuckEvent',
+    WEBSOCKET_CLOSED_EVENT = 'WebSocketClosedEvent',
+}
 
 export interface Band {
     band: number;
@@ -61,39 +67,33 @@ export interface LowPassSettings {
 
 export interface PlayerEvent {
     op: OpCodes.EVENT;
-    type: PlayerEventType;
     guildId: string;
 }
 
 export interface TrackStartEvent extends PlayerEvent {
-    type: 'TrackStartEvent';
+    type: PlayerEventType.TRACK_START_EVENT;
     track: Track;
 }
 
 export interface TrackEndEvent extends PlayerEvent {
-    type: 'TrackEndEvent';
+    type: PlayerEventType.TRACK_END_EVENT;
     track: Track;
     reason: TrackEndReason;
 }
 
 export interface TrackStuckEvent extends PlayerEvent {
-    type: 'TrackStuckEvent';
+    type: PlayerEventType.TRACK_STUCK_EVENT;
     track: Track;
     thresholdMs: number;
 }
 
 export interface TrackExceptionEvent extends PlayerEvent {
-    type: 'TrackExceptionEvent';
+    type: PlayerEventType.TRACK_EXCEPTION_EVENT;
     exception: Exception;
 }
 
-export interface TrackStuckEvent extends PlayerEvent {
-    type: 'TrackStuckEvent';
-    thresholdMs: number;
-}
-
 export interface WebSocketClosedEvent extends PlayerEvent {
-    type: 'WebSocketClosedEvent';
+    type: PlayerEventType.WEBSOCKET_CLOSED_EVENT;
     code: number;
     byRemote: boolean;
     reason: string;
@@ -103,8 +103,9 @@ export interface PlayerUpdate {
     op: OpCodes.PLAYER_UPDATE;
     state: {
       connected: boolean;
-      position?: number;
+      position: number;
       time: number;
+      ping: number;
     };
     guildId: string;
 }
@@ -512,7 +513,7 @@ export class Player extends EventEmitter {
     /**
      * Handle player update data
      */
-    public onPlayerUpdate(json: { state: { position: number, ping: number } }): void {
+    public onPlayerUpdate(json: PlayerUpdate): void {
         const { position, ping } = json.state;
         this.position = position;
         this.ping = ping;
@@ -524,7 +525,7 @@ export class Player extends EventEmitter {
      * @param json JSON data from Lavalink
      * @internal
      */
-    public onPlayerEvent(json: { type: string, track: Track }): void {
+    public onPlayerEvent(json: TrackStartEvent|TrackEndEvent|TrackStuckEvent|TrackExceptionEvent|WebSocketClosedEvent): void {
         switch (json.type) {
             case 'TrackStartEvent':
                 if (this.track) this.track = json.track.encoded;
@@ -546,7 +547,7 @@ export class Player extends EventEmitter {
                 this.node.emit(
                     'debug',
                     this.node.name,
-                    `[Player] -> [Node] : Unknown Player Event Type ${json.type} | Guild: ${this.guildId}`
+                    `[Player] -> [Node] : Unknown Player Event Type, Data => ${JSON.stringify(json)}`
                 );
         }
     }

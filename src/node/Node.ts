@@ -4,9 +4,17 @@ import { NodeOption, Shoukaku } from '../Shoukaku';
 import { OpCodes, State, Versions } from '../Constants';
 import { wait } from '../Utils';
 import { Rest } from './Rest';
+import { PlayerUpdate, TrackEndEvent, TrackExceptionEvent, TrackStartEvent, TrackStuckEvent, WebSocketClosedEvent } from '../guild/Player';
 import Websocket from 'ws';
 
-export interface NodeStats {
+export interface Ready {
+    op: OpCodes.READY;
+    resumed: boolean;
+    sessionId: string;
+}
+
+export interface Stats {
+    op: OpCodes.STATS;
     players: number;
     playingPlayers: number;
     memory: {
@@ -28,25 +36,25 @@ export interface NodeStats {
     uptime: number;
 }
 
-type NodeInfoVersion = {
+export type NodeInfoVersion = {
     semver: string;
     major: number;
     minor: number;
     patch: number;
     preRelease?: string;
     build?: string;
-};
+}
 
-type NodeInfoGit = {
+export type NodeInfoGit = {
     branch: string;
     commit: string;
     commitTime: number;
-};
+}
 
-type NodeInfoPlugin = {
+export type NodeInfoPlugin = {
     name: string;
     version: string;
-};
+}
 
 export type NodeInfo = {
     version: NodeInfoVersion;
@@ -57,7 +65,7 @@ export type NodeInfo = {
     sourceManagers: string[];
     filters: string[];
     plugins: NodeInfoPlugin[];
-};
+}
 
 export interface ResumableHeaders {
     [key: string]: string;
@@ -113,7 +121,7 @@ export class Node extends EventEmitter {
     /**
      * Statistics from Lavalink
      */
-    public stats: NodeStats|null;
+    public stats: Stats|null;
     /**
      * Information about lavalink node
     */
@@ -223,16 +231,9 @@ export class Node extends EventEmitter {
      * @param code Status code
      * @param reason Reason for disconnect
      */
-    public disconnect(code: number, reason?:string): void {
-        if (this.destroyed) return;
-
+    public disconnect(code: number, reason?: string): void {
         this.destroyed = true;
-        this.state = State.DISCONNECTING;
-
-        if (this.ws)
-            this.ws.close(code, reason);
-        else
-            this.clean();
+        this.internalDisconnect(code, reason);
     }
 
     /**
@@ -253,8 +254,7 @@ export class Node extends EventEmitter {
      * @internal
      */
     private async message(message: unknown): Promise<void> {
-        if (this.destroyed) return;
-        const json = JSON.parse(message as string);
+        const json: Ready|Stats|PlayerUpdate|TrackStartEvent|TrackEndEvent|TrackStuckEvent|TrackExceptionEvent|WebSocketClosedEvent = JSON.parse(message as string);
         if (!json) return;
         this.emit('raw', json);
         switch(json.op) {
@@ -263,9 +263,16 @@ export class Node extends EventEmitter {
                 this.stats = json;
                 break;
             case OpCodes.READY:
+                if (!json.sessionId) {
+                    this.emit('debug', `[Socket] -> [${this.name}] : No session id found from ready op? disconnecting and reconnecting to avoid issues`);
+                    return this.internalDisconnect(1000);
+                }
+
                 this.sessionId = json.sessionId;
+
                 const players = [ ...this.manager.players.values() ].filter(player => player.node.name === this.name);
                 const resumeByLibrary = this.initialized && (players.length && this.manager.options.resumeByLibrary);
+
                 if (!json.resumed && resumeByLibrary) {
                     try {
                         await this.resumePlayers();
@@ -293,7 +300,7 @@ export class Node extends EventEmitter {
                     player.onPlayerUpdate(json);
                 break;
             default:
-                this.emit('debug', `[Player] -> [Node] : Unknown Message OP ${json.op}`);
+                this.emit('debug', `[Player] -> [Node] : Unknown Message Op, Data => ${JSON.stringify(json)}`);
         }
     }
 
@@ -317,6 +324,21 @@ export class Node extends EventEmitter {
      */
     public error(error: Error|unknown): void {
         this.emit('error', error);
+    }
+
+    /**
+     * Internal disconnect function
+     * @internal
+     */
+    private internalDisconnect(code: number, reason?: string): void {
+        if (this.destroyed) return;
+
+        this.state = State.DISCONNECTING;
+
+        if (this.ws)
+            this.ws.close(code, reason);
+        else
+            this.clean();
     }
 
     /**
