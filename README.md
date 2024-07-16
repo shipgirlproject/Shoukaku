@@ -74,59 +74,7 @@ client.on("ready", () => {
 });
 ```
 
-> Join a voice channel, search for a track, play the track, then disconnect after the track ends
-
-```js
-// create a voice connection and player using Shoukaku#joinVoiceChannel
-const player = await shoukaku.joinVoiceChannel({
-  guildId: "your_guild_id",
-  channelId: "your_channel_id",
-  shardId: 0, // if unsharded it will always be zero (depending on your library implementation)
-});
-// player is created, now search for a track
-const result = await player.node.rest.resolve("scsearch:snowhalation");
-if (!result?.data.length) return;
-const metadata = result.tracks.shift();
-// play the searched track
-await player.playTrack({ track: { encoded: metadata.encoded } });
-// wait for track to end
-await once(player, 'end');
-// leaver the voice channel
-await shoukaku.leaveVoiceChannel(player.guildId);
-```
-
-> Playing a track and changing a playback option (in this example, volume)
-
-```js
-await player.playTrack({ track: { encoded: metadata.encoded } });
-await player.setGlobalVolume(50);
-```
-
-> Updating the whole player if you don\'t want to use my helper functions
-
-```js
-await player.update({ ...playerOptions });
-```
-
-> Setting a custom get node ideal function
-
-```js
-const shoukaku = new Shoukaku(
-  new Connectors.DiscordJS(client),
-  [{ ...yourNodeOptions }],
-  {
-    ...yourShoukakuOptions,
-    nodeResolver: (nodes, connection) => getYourIdealNode(nodes, connection),
-  }
-);
-const player = await shoukaku.joinVoiceChannel({
-  guildId: "your_guild_id",
-  channelId: "your_channel_id",
-  shardId: 0,
-});
-```
-
-> A full bot example (that dont use timeout to leave the voice channel) can be found at https://github.com/shipgirlproject/Shoukaku?tab=readme-ov-file#full-bot-implementation-of-shoukaku-in-discordjs
+> A full bot example can be found at https://github.com/shipgirlproject/Shoukaku?tab=readme-ov-file#full-bot-implementation-of-shoukaku-in-discordjs
 
 ### Shoukaku's options
 
