@@ -52,7 +52,7 @@
     "@typescript-eslint/parser": "^7.14.1",
     "eslint": "^8.56.0",
     "tsup": "^8.1.0",
-    "typedoc": "^0.26.3",
-    "typescript": "^5.5.2"
+    "typedoc": "^0.26.4",
+    "typescript": "^5.5.3"
   }
 }
