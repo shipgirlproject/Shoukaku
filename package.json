@@ -44,7 +44,7 @@
     "ws": "^8.17.1"
   },
   "devDependencies": {
-    "@augu/eslint-config": "^5.2.4",
+    "@augu/eslint-config": "4.0.1",
     "@swc/core": "^1.6.13",
     "@types/node": "^20.14.9",
     "@types/node-fetch": "^2.6.11",
