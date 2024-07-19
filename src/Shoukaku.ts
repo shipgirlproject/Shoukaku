@@ -291,7 +291,7 @@ export class Shoukaku extends EventEmitter {
         if (player) {
             try {
                 await player.destroy();
-            } catch (_) {}
+            } catch (_) { /* empty */ }
             player.clean();
             this.players.delete(guildId);
         }
