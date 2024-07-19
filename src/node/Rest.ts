@@ -1,101 +1,419 @@
 import { Node, NodeInfo, Stats } from './Node';
 import { NodeOption } from '../Shoukaku';
 import { Versions } from '../Constants';
-import { FilterOptions } from '../guild/Player';
+import { FilterOptions, PlayerState } from '../guild/Player';
+import { OmitNested } from '../Utils';
 
-export type Severity = 'common' | 'suspicious' | 'fault';
+/**
+ * Severity of a Lavalink exception
+ * @see https://lavalink.dev/api/websocket.html#severity
+ */
+export enum Severity {
+	/**
+     * Cause is known and expected, indicates that there is nothing wrong with Lavalink
+     */
+	COMMON = 'common',
+	/**
+     * Cause might not be exactly known, but is possibly caused by outside factors, 
+     * for example when an outside service responds in a format Lavalink did not expect
+     */
+	SUSPICIOUS = 'suspicious',
+	/**
+     * Probable cause is an issue with Lavalink or there is no way to tell what the cause might be, 
+     * this is the default level and other levels are used in cases where the thrower has more in-depth knowledge about the error
+     */
+	FAULT = 'fault'
+}
 
+/**
+ * Type of resource loaded / status code
+ * @see https://lavalink.dev/api/rest.html#load-result-type
+ */
 export enum LoadType {
+	/**
+     * A track has been loaded
+     */
 	TRACK = 'track',
+	/**
+     * A playlist has been loaded
+     */
 	PLAYLIST = 'playlist',
+	/**
+     * A search result has been loaded
+     */
 	SEARCH = 'search',
+	/**
+     * There has been no matches for your identifier
+     */
 	EMPTY = 'empty',
+	/**
+     * Loading has failed with an error
+     */
 	ERROR = 'error'
 }
 
+/**
+ * Represents a Lavalink track
+ * @see https://lavalink.dev/api/rest.html#track
+ */
 export interface Track {
+	/**
+     * Base64 encoded track data
+     */
 	encoded: string;
+	/**
+     * Track information
+     * @see https://lavalink.dev/api/rest.html#track-info
+     */
 	info: {
+		/**
+         * Track identifier
+         */
 		identifier: string;
+		/**
+         * Whether the track is seekable
+         */
 		isSeekable: boolean;
+		/**
+         * Track author
+         */
 		author: string;
+		/**
+         * Track length in milliseconds
+         */
 		length: number;
+		/**
+         * Whether the track is a (live)stream
+         */
 		isStream: boolean;
+		/**
+         * Track position in milliseconds
+         */
 		position: number;
+		/**
+         * Track title
+         */
 		title: string;
+		/**
+         * Track uri
+         */
 		uri?: string;
+		/**
+         * Track artwork url
+         */
 		artworkUrl?: string;
+		/**
+         * Track ISRC
+         * @see https://en.wikipedia.org/wiki/International_Standard_Recording_Code
+         */
 		isrc?: string;
+		/**
+         * Track source name
+         */
 		sourceName: string;
 	};
-	pluginInfo: unknown;
+	/**
+     * Additional track info provided by plugins
+     */
+	pluginInfo: Record<string, unknown>;
+	/**
+     * Additional track data provided via the Update Player endpoint
+     * @see https://lavalink.dev/api/rest#update-player
+     */
+	userData: Record<string | number, unknown>;
 }
 
+/**
+ * Represents a Lavalink playlist
+ * @see https://lavalink.dev/api/rest.html#playlist-result-data
+ */
 export interface Playlist {
 	encoded: string;
+	/**
+     * Playlist information
+     * @see https://lavalink.dev/api/rest.html#playlist-info
+     */
 	info: {
+		/**
+         * Name of the playlist
+         */
 		name: string;
+		/**
+         * The selected track of the playlist (-1 if no track is selected)
+         */
 		selectedTrack: number;
 	};
-	pluginInfo: unknown;
+	/**
+     * Additional playlist info provided by plugins
+     */
+	pluginInfo: Record<string, unknown>;
+	/**
+     * Tracks in the playlist
+     * @see https://lavalink.dev/api/rest.html#track
+     */
 	tracks: Track[];
 }
 
+/**
+ * Represents a Lavalink exception (error)
+ */
 export interface Exception {
-	message: string;
+	/**
+     * Message of the exception
+     */
+	message?: string;
+	/**
+     * Severity of the exception
+     * @see https://lavalink.dev/api/websocket.html#severity
+     */
 	severity: Severity;
+	/**
+     * Cause of the exception
+     */
 	cause: string;
 }
 
+/**
+ * Track loading result when a track has been resolved
+ * @see https://lavalink.dev/api/rest.html#track-loading-result
+ */
 export interface TrackResult {
+	/**
+     * Type of the result
+     * @see https://lavalink.dev/api/rest.html#load-result-type
+     */
 	loadType: LoadType.TRACK;
+	/**
+     * Track object with loaded track
+     * @see https://lavalink.dev/api/rest.html#load-result-data
+     */
 	data: Track;
 }
 
+/**
+ * Track loading result when a playlist has been resolved
+ * @see https://lavalink.dev/api/rest.html#track-loading-result
+ */
 export interface PlaylistResult {
+	/**
+     * Type of the result
+     * @see https://lavalink.dev/api/rest.html#load-result-type
+     */
 	loadType: LoadType.PLAYLIST;
+	/**
+     * Playlist object with loaded playlist
+     * @see https://lavalink.dev/api/rest.html#playlist-result-data
+     */
 	data: Playlist;
 }
 
+/**
+ * Track loading result when a search query has been resolved
+ * @see https://lavalink.dev/api/rest.html#track-loading-result
+ */
 export interface SearchResult {
+	/**
+     * Type of the result
+     * @see https://lavalink.dev/api/rest.html#load-result-type
+     */
 	loadType: LoadType.SEARCH;
+	/**
+     * Array of Track objects from the search result
+     * @see https://lavalink.dev/api/rest.html#search-result-data
+     */
 	data: Track[];
 }
 
+/**
+ * Track loading result when there is no result
+ * @see https://lavalink.dev/api/rest.html#track-loading-result
+ */
 export interface EmptyResult {
+	/**
+     * Type of the result
+     * @see https://lavalink.dev/api/rest.html#load-result-type
+     */
 	loadType: LoadType.EMPTY;
-	data: Record<string, never>;
+	/**
+     * Empty object
+     * @see https://lavalink.dev/api/rest.html#empty-result-data
+     */
+	data: {};
 }
 
+/**
+ * Track loading result when an error has occured
+ * @see https://lavalink.dev/api/rest.html#track-loading-result
+ */
 export interface ErrorResult {
+	/**
+     * Type of the result
+     * @see https://lavalink.dev/api/rest.html#load-result-type
+     */
 	loadType: LoadType.ERROR;
+	/**
+     * Exception object with the error
+     * @see https://lavalink.dev/api/rest.html#error-result-data
+     */
 	data: Exception;
 }
 
+/**
+ * All possible responses on the track loading endpoint
+ * @see https://lavalink.dev/api/rest.html#track-loading-result
+ */
 export type LavalinkResponse = TrackResult | PlaylistResult | SearchResult | EmptyResult | ErrorResult;
 
+/**
+ * Type of route planner
+ * @see https://lavalink.dev/api/rest.html#route-planner-types
+ */
+export enum RoutePlannerType {
+	/**
+     * IP address used is switched on ban. Recommended for IPv4 blocks or IPv6 blocks smaller than a /64.
+     */
+	ROTATING_IP_ROUTE_PLANNER = 'RotatingIpRoutePlanner',
+	/**
+     * IP address used is switched on clock update. Use with at least 1 /64 IPv6 block.
+     */
+	NANO_IP_ROUTE_PLANNER = 'NanoIpRoutePlanner',
+	/**
+     * IP address used is switched on clock update, rotates to a different /64 block on ban. Use with at least 2x /64 IPv6 blocks.
+     */
+	ROTATING_NANO_IP_ROUTE_PLANNER = 'RotatingNanoIpRoutePlanner',
+	/**
+     * IP address used is selected at random per request. Recommended for larger IP blocks.
+     */
+	BALANCING_IP_ROUTE_PLANNER = 'BalancingIpRoutePlanner'
+}
+
+/**
+ * Type of IP block
+ * @see https://lavalink.dev/api/rest#ip-block-type
+ */
+export enum IPBlockType {
+	IPV4 = 'Inet4Address',
+	IPV6 = 'Inet6Address'
+}
+
+/**
+ * Failing IP Address
+ * @see https://lavalink.dev/api/rest#failing-address-object
+ */
 export interface Address {
+	/**
+     * Failing IP address
+     */
 	address: string;
+	/**
+     * UNIX timestamp when the IP address failed
+     */
 	failingTimestamp: number;
+	/**
+     * Time when the IP address failed as a pretty string
+     * @see https://docs.oracle.com/javase/8/docs/api/java/util/Date.html#toString--
+     */
 	failingTime: string;
 }
 
-export interface RoutePlanner {
-	class: null | 'RotatingIpRoutePlanner' | 'NanoIpRoutePlanner' | 'RotatingNanoIpRoutePlanner' | 'BalancingIpRoutePlanner';
+/**
+ * All possible keys in RoutePlanner
+ * @see https://lavalink.dev/api/rest.html#routeplanner-api
+ */
+export interface GenericRoutePlanner {
+	/**
+     * Type of route planner
+     * @see https://lavalink.dev/api/rest.html#route-planner-types
+     */
+	class: null | RoutePlannerType;
+	/**
+     * Information about the route planner
+     * @see https://lavalink.dev/api/rest.html#details-object
+     */
 	details: null | {
+		/**
+         * IP block being used
+         * @see https://lavalink.dev/api/rest#ip-block-object
+         */
 		ipBlock: {
-			type: string;
+			/**
+             * Type of IP block
+             * @see https://lavalink.dev/api/rest#ip-block-type
+             */
+			type: IPBlockType;
+			/**
+             * Size of IP block (number of IPs)
+             */
 			size: string;
 		};
+		/**
+         * Array of failing IP addresses
+         * @see https://lavalink.dev/api/rest#failing-address-object
+         */
 		failingAddresses: Address[];
+		/**
+         * Number of IP rotations
+         */
 		rotateIndex: string;
+		/**
+         * Current offset in the IP block
+         */
 		ipIndex: string;
+		/**
+         * Current IP address being used
+         */
 		currentAddress: string;
+		/**
+         * The information in which /64 block IPs are chosen, 
+         * this number increases on each ban
+         */
 		blockIndex: string;
+		/**
+         * Current offset in the IP block
+         */
 		currentAddressIndex: string;
 	};
 }
 
+/**
+ * RoutePlanner response when using RotatingIpRoutePlanner
+ * @see https://lavalink.dev/api/rest.html#details-object
+ */
+export interface RotatingIpRoutePlanner extends OmitNested<GenericRoutePlanner, 'details', 'currentAddressIndex' | 'blockIndex'> {
+	class: RoutePlannerType.ROTATING_IP_ROUTE_PLANNER;
+}
+
+/**
+ * RoutePlanner response when using NanoIpRoutePlanner
+ * @see https://lavalink.dev/api/rest.html#details-object
+ */
+export interface NanoIpRoutePlanner extends OmitNested<GenericRoutePlanner, 'details', 'rotateIndex' | 'ipIndex' | 'currentAddress' | 'blockIndex'> {
+	class: RoutePlannerType.NANO_IP_ROUTE_PLANNER;
+}
+
+/**
+ * RoutePlanner response when using RotatingNanoIpRoutePlanner
+ * @see https://lavalink.dev/api/rest.html#details-object
+ */
+export interface RotatingNanoIpRoutePlanner extends OmitNested<GenericRoutePlanner, 'details', 'rotateIndex' | 'ipIndex' | 'currentAddress'> {
+	class: RoutePlannerType.ROTATING_NANO_IP_ROUTE_PLANNER;
+}
+
+/**
+ * RoutePlanner response when using BalancingIpRoutePlanner
+ * @see https://lavalink.dev/api/rest.html#details-object
+ */
+export interface BalancingIpRoutePlanner extends OmitNested<GenericRoutePlanner, 'details', 'rotateIndex' | 'ipIndex' | 'currentAddress' | 'currentAddressIndex' | 'blockIndex'> {
+	class: RoutePlannerType.BALANCING_IP_ROUTE_PLANNER;
+}
+
+/**
+ * Represents a RoutePlanner from the builtin Lavalink IP rotation extension
+ * @see https://lavalink.dev/api/rest.html#routeplanner-api
+ */
+export type RoutePlanner = RotatingIpRoutePlanner | NanoIpRoutePlanner | RotatingNanoIpRoutePlanner | BalancingIpRoutePlanner;
+
+// TODO: No idea what this is
 export interface LavalinkPlayerVoice {
 	token: string;
 	endpoint: string;
@@ -104,44 +422,150 @@ export interface LavalinkPlayerVoice {
 	ping?: number;
 }
 
-export type LavalinkPlayerVoiceOptions = Omit<LavalinkPlayerVoice, 'connected' | 'ping'>;
+/**
+ * Voice state of player
+ * @see https://lavalink.dev/api/rest.html#voice-state
+ */
+export interface LavalinkPlayerVoiceOptions extends Omit<LavalinkPlayerVoice, 'connected' | 'ping'> {}
 
+/**
+ * Represents a Lavalink player
+ * @see https://lavalink.dev/api/rest.html#player
+ */
 export interface LavalinkPlayer {
+	/**
+     * Guild id of the player
+     */
 	guildId: string;
+	/**
+     * Currently playing track
+     */
 	track?: Track;
+	/**
+     * Volume of the player, range 0-1000, in percentage
+     */
 	volume: number;
+	/**
+     * Whether the player is paused
+     */
 	paused: boolean;
+	/**
+     * State of the player
+     */
+	state: PlayerState;
+	/**
+     * Voice state of the player
+     */
 	voice: LavalinkPlayerVoice;
+	/**
+     * Filters used by the player
+     */
 	filters: FilterOptions;
 }
 
-export interface UpdatePlayerTrackOptions {
-	encoded?: string | null;
-	identifier?: string;
-	userData?: unknown;
+interface GenericUpdatePlayerTrackOptions {
+	/**
+     * Additional track data to be sent back in the track object
+     * @see https://lavalink.dev/api/rest#track
+     */
+	userData?: Record<string | number, unknown>;
 }
 
+interface EncodedUpdatePlayerTrackOptions extends GenericUpdatePlayerTrackOptions {
+	/**
+     * Base64 encoded track to play. null stops the current track
+     */
+	encoded: string | null;
+	identifier?: never;
+}
+
+interface IdentifierUpdatePlayerTrackOptions extends GenericUpdatePlayerTrackOptions {
+	encoded?: never;
+	/**
+     * Identifier of the track to play
+     */
+	identifier: string;
+}
+
+/**
+ * Options for updating/creating the player's track
+ * @see https://lavalink.dev/api/rest.html#update-player-track
+ */
+export type UpdatePlayerTrackOptions = EncodedUpdatePlayerTrackOptions | IdentifierUpdatePlayerTrackOptions;
+
+/**
+ * Options for updating/creating the player
+ * @see https://lavalink.dev/api/rest.html#update-player
+ */
 export interface UpdatePlayerOptions {
+	/**
+     * Specification for a new track to load, as well as user data to set
+     */
 	track?: UpdatePlayerTrackOptions;
+	/**
+     * Track position in milliseconds
+     */
 	position?: number;
+	/**
+     * The track end time in milliseconds (must be > 0). null resets this if it was set previously
+     */
 	endTime?: number;
+	/**
+     * The player volume, in percentage, from 0 to 1000
+     */
 	volume?: number;
+	/**
+     * Whether the player is paused
+     */
 	paused?: boolean;
+	/**
+     * The new filters to apply, this will override all previously applied filters
+     */
 	filters?: FilterOptions;
+	/**
+     * Information required for connecting to Discord
+     */
 	voice?: LavalinkPlayerVoiceOptions;
 }
 
+/**
+ * Options for updating/creating the player for a guild
+ */
 export interface UpdatePlayerInfo {
+	/**
+     * Discord guild ID
+     */
 	guildId: string;
+	/**
+     * Options for updating/creating the player
+     */
 	playerOptions: UpdatePlayerOptions;
+	/**
+     * Whether to replace the current track with the new track, defaults to false
+     */
 	noReplace?: boolean;
 }
 
+/**
+ * Session information
+ * @see https://lavalink.dev/api/rest.html#update-session
+ */
 export interface SessionInfo {
-	resumingKey?: string;
+	// TODO: check why this is here
+	// resumingKey?: string;
+	/**
+     * Whether resuming is enabled for this session or not
+     */
+	resuming: boolean;
+	/**
+     * The timeout in seconds (default is 60s)
+     */
 	timeout: number;
 }
 
+/**
+ * @internal
+ */
 interface FetchOptions {
 	endpoint: string;
 	options: {
@@ -153,6 +577,9 @@ interface FetchOptions {
 	};
 }
 
+/**
+ * @internal
+ */
 interface FinalFetchOptions {
 	method: string;
 	headers: Record<string, string>;
