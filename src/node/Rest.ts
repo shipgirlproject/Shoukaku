@@ -239,7 +239,7 @@ export class Rest {
     }
 
     /**
-     * Gets all the player with the specified sessionId
+     * Gets the player with the specified guildId
      * @returns Promise that resolves to a Lavalink player
      */
     public getPlayer(guildId: string): Promise<LavalinkPlayer | undefined> {
