@@ -9,7 +9,7 @@
 ![NPM](https://img.shields.io/npm/l/shoukaku?style=flat-square)
 
 <p align="center">
-    <img style="max-width: 544px; max-height: 768px", src="https://safe.saya.moe/DUNKJZUS7Nud.jpg"> 
+    <img src="https://safe.saya.moe/DUNKJZUS7Nud.jpg" height=768 width=544> 
 </p>
 
 > Shoukaku, from Azur Lane, drawn by: @hoshimaro15
