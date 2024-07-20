@@ -2,31 +2,31 @@
 
 > A stable and updated wrapper around Lavalink
 
-![Discord](https://img.shields.io/discord/423116740810244097?style=flat-square)(https://discordapp.com/invite/FVqbtGu)
-![npm](https://img.shields.io/npm/v/shoukaku?style=flat-square)(https://www.npmjs.com/package/shoukaku)
+[![Discord](https://img.shields.io/discord/423116740810244097?style=flat-square)](https://discordapp.com/invite/FVqbtGu)
+[![npm](https://img.shields.io/npm/v/shoukaku?style=flat-square)](https://www.npmjs.com/package/shoukaku)
 ![Github Stars](https://img.shields.io/github/stars/Deivu/Shoukaku?style=flat-square)
 ![GitHub issues](https://img.shields.io/github/issues-raw/Deivu/Shoukaku?style=flat-square)
 ![NPM](https://img.shields.io/npm/l/shoukaku?style=flat-square)
 
 <p align="center">
-    <img src="https://safe.saya.moe/DUNKJZUS7Nud.jpg"> 
+    <img style="max-width: 544px; max-height: 768px", src="https://safe.saya.moe/DUNKJZUS7Nud.jpg"> 
 </p>
 
 > Shoukaku, from Azur Lane, drawn by: @hoshimaro15
 
 ### Features
 
-![Uzuki](https://safe.saya.moe/1Yxp4gFKqwY7.webp "Uzuki") Stable
+- Stable
 
-![Uzuki](https://safe.saya.moe/1Yxp4gFKqwY7.webp "Uzuki") Updated
+- Updated
 
-![Uzuki](https://safe.saya.moe/1Yxp4gFKqwY7.webp "Uzuki") Documented
+- Documented
 
-![Uzuki](https://safe.saya.moe/1Yxp4gFKqwY7.webp "Uzuki") Extendable
+- Extendable
 
-![Uzuki](https://safe.saya.moe/1Yxp4gFKqwY7.webp "Uzuki") ESM & CommonJS supported
+- ESM & CommonJS supported
 
-![Uzuki](https://safe.saya.moe/1Yxp4gFKqwY7.webp "Uzuki") Very cute (Very Important)
+- Very cute (Very Important)
 
 ### Documentation
 
@@ -74,9 +74,9 @@ new Shoukaku(new Connectors.DiscordJS(client), Nodes, Options);
 
 ### Other Links
 
-![Uzuki](https://safe.saya.moe/1Yxp4gFKqwY7.webp "Uzuki") [Discord](https://discord.gg/FVqbtGu)
+- [Discord](https://discord.gg/FVqbtGu)
 
-![Uzuki](https://safe.saya.moe/1Yxp4gFKqwY7.webp "Uzuki") [Lavalink]()
+- [Lavalink](https://github.com/lavalink-devs/Lavalink)
 
 ### Made with ❤ by @ichimakase (Saya)
 
