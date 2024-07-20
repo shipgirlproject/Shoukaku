@@ -47,6 +47,7 @@
 ### Configuration Options
 
 ```js
+// Parameters for main class init, Options is the Configuration Options
 new Shoukaku(new Connectors.DiscordJS(client), Nodes, Options);
 ```
 
