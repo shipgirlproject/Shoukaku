@@ -37,7 +37,7 @@ export const ShoukakuDefaults: Required<ShoukakuOptions> = {
     reconnectInterval: 5,
     restTimeout: 60,
     moveOnDisconnect: false,
-    userAgent: `${Info.name}bot/${Info.version} (${Info.repository.url})`,
+    userAgent: 'Discord Bot/unknown (https://github.com/shipgirlproject/Shoukaku.git)',
     structures: {},
     voiceConnectionTimeout: 15,
     nodeResolver: (nodes) => [ ...nodes.values() ]
@@ -45,6 +45,8 @@ export const ShoukakuDefaults: Required<ShoukakuOptions> = {
         .sort((a, b) => a.penalties - b.penalties)
         .shift()
 };
+
+export const ShoukakuClientInfo = `${Info.name}/${Info.version} (${Info.repository.url})`;
 
 export const NodeDefaults: NodeOption = {
     name: 'Default',

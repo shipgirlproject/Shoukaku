@@ -1,7 +1,7 @@
 import { EventEmitter } from 'events';
 import { IncomingMessage } from 'http';
 import { NodeOption, Shoukaku } from '../Shoukaku';
-import { OpCodes, State, Versions } from '../Constants';
+import { OpCodes, ShoukakuClientInfo, State, Versions } from '../Constants';
 import { wait } from '../Utils';
 import { Rest } from './Rest';
 import { PlayerUpdate, TrackEndEvent, TrackExceptionEvent, TrackStartEvent, TrackStuckEvent, WebSocketClosedEvent } from '../guild/Player';
@@ -208,7 +208,7 @@ export class Node extends EventEmitter {
         this.state = State.CONNECTING;
 
         const headers: NonResumableHeaders|ResumableHeaders = {
-            'Client-Name': this.manager.options.userAgent,
+            'Client-Name': ShoukakuClientInfo,
             'User-Agent': this.manager.options.userAgent,
             'Authorization': this.auth,
             'User-Id': this.manager.id
