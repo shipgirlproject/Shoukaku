@@ -6,77 +6,50 @@
 [![npm](https://img.shields.io/npm/v/shoukaku?style=flat-square)](https://www.npmjs.com/package/shoukaku)
 ![Github Stars](https://img.shields.io/github/stars/Deivu/Shoukaku?style=flat-square)
 ![GitHub issues](https://img.shields.io/github/issues-raw/Deivu/Shoukaku?style=flat-square)
-![Snyk Vulnerabilities for npm package](https://img.shields.io/snyk/vulnerabilities/npm/shoukaku?style=flat-square)
 ![NPM](https://img.shields.io/npm/l/shoukaku?style=flat-square)
 
 <p align="center">
-    <img src="https://safe.saya.moe/lhvaWz3iP67f.webp"> 
+    <img src="https://safe.saya.moe/DUNKJZUS7Nud.jpg" height=768 width=544> 
 </p>
 
-> The ShipGirl Project, feat Shoukaku; ⓒ Azur Lane
+> Shoukaku, from Azur Lane, drawn by: @hoshimaro15
 
 ### Features
 
-✅ Stable
+- Stable
 
-✅ Documented
+- Updated
 
-✅ Updated
+- Documented
 
-✅ Extendable
+- Extendable
 
-✅ ESM & CommonJS supported
+- ESM & CommonJS supported
 
-✅ Very cute (Very Important)
-
-### Supported Libraries
-
-Refer to [/src/connectors](https://github.com/Deivu/Shoukaku/tree/master/src/connectors) for list of supported libraries + how to support other libraries
-
-### Installation
-
-> `npm install shoukaku`
+- Very cute (Very Important)
 
 ### Documentation
 
-https://guide.shoukaku.shipgirl.moe/
+> https://guide.shoukaku.shipgirl.moe/
 
-### Small code snippet examples
+### Getting Started
 
-> Initializing the library (Using Connector Discord.JS)
+> https://guide.shoukaku.shipgirl.moe/guides/1-getting-started/
 
-```js
-const { Client } = require("discord.js");
-const { Shoukaku, Connectors } = require("shoukaku");
-const Nodes = [
-  {
-    name: "Localhost",
-    url: "localhost:6969",
-    auth: "re_aoharu",
-  },
-];
-const client = new Client();
-const shoukaku = new Shoukaku(new Connectors.DiscordJS(client), Nodes);
+### Supported Libraries
 
-// Always handle "error" events or your program may crash due to uncaught error
-shoukaku.on("error", (_, error) => console.error(error));
-client.login("token");
+> https://guide.shoukaku.shipgirl.moe/guides/5-connectors/
 
-// If you want shoukaku to be available on client, then bind it to it, here is one example of it
-client.shoukaku = shoukaku;
-```
+### Example Bot
 
-> Never initialize Shoukaku like this, or else she will never initialize, start shoukaku before you call `client.login()`
+> https://github.com/Deivu/Kongou
+
+### Configuration Options
 
 ```js
-client.on("ready", () => {
-  client.shoukaku = new Shoukaku(new Connectors.DiscordJS(client), Nodes);
-});
+// Parameters for main class init, Options is the Configuration Options
+new Shoukaku(new Connectors.DiscordJS(client), Nodes, Options);
 ```
-
-> A full bot example can be found at [Kongou](https://github.com/Deivu/Kongou)
-
-### Shoukaku's options
 
 | Option                 | Type                   | Default  | Description                                                                                      | Notes                    |
 | ---------------------- | ---------------------- | -------- | ------------------------------------------------------------------------------------------------ | ------------------------ |
@@ -92,18 +65,20 @@ client.on("ready", () => {
 | voiceConnectionTimeout | number                 | 15       | Maximum amount of time to wait for a join voice channel command                                  | In seconds               |
 | nodeResolver           | function               | function | Custom node resolver if you want to have your own method of getting the ideal node               |                          |
 
-### 3rd Party Plugins
+### Wrappers
 
 | Name     | Link                                          | Description                                              |
 | -------- | --------------------------------------------- | -------------------------------------------------------- |
 | Kazagumo | [Github](https://github.com/Takiyo0/Kazagumo) | A wrapper for Shoukaku that has an internal queue system |
 
-> Open a PR if you want to add your plugin here
+> Open a pr if you want to add a wrapper here
 
 ### Other Links
 
-> [Support](https://discord.gg/FVqbtGu) (#Development) | [Lavalink](https://github.com/freyacodes/Lavalink)
+- [Discord](https://discord.gg/FVqbtGu)
 
-### Made with ❤ by
+- [Lavalink](https://github.com/lavalink-devs/Lavalink)
 
-> @ichimakase (Saya)
+### Made with ❤ by @ichimakase (Saya)
+
+> The Shipgirl Project
