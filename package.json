@@ -41,18 +41,17 @@
     "url": "https://github.com/shipgirlproject/Shoukaku.git"
   },
   "dependencies": {
-    "ws": "^8.17.1"
+    "ws": "^8.18.0"
   },
   "devDependencies": {
     "@augu/eslint-config": "4.0.1",
-    "@swc/core": "^1.6.13",
-    "@types/node": "^20.14.9",
+    "@types/node": "^20.14.11",
     "@types/node-fetch": "^2.6.11",
-    "@types/ws": "^8.5.10",
-    "@typescript-eslint/eslint-plugin": "^7.14.1",
-    "@typescript-eslint/parser": "^7.14.1",
+    "@types/ws": "^8.5.11",
+    "@typescript-eslint/eslint-plugin": "^7.16.1",
+    "@typescript-eslint/parser": "^7.16.1",
     "eslint": "^8.56.0",
-    "tsup": "^8.1.0",
+    "tsup": "^8.2.0",
     "typedoc": "^0.26.4",
     "typescript": "^5.5.3"
   }
