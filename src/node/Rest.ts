@@ -391,8 +391,14 @@ export class Rest {
         if (!request.ok) {
             const response = await request
                 .json()
-                .catch(() => null);
-            throw new RestError(response as LavalinkRestError);
+                .catch(() => null) as LavalinkRestError | null;
+            throw new RestError(response ?? {
+                timestamp: Date.now(),
+                status: request.status,
+                error: 'Unknown Error',
+                message: 'Unexpected error response from Lavalink server',
+                path: endpoint,
+            });
         }
         try {
             return await request.json() as T;
