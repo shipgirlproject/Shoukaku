@@ -232,7 +232,7 @@ export class Player extends EventEmitter {
             guildId: this.guildId,
             playerOptions: {
                 track: {
-                    encoded: this.track
+                    encoded: this.track,
                 },
                 position: this.position,
                 paused: this.paused,
