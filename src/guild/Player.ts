@@ -272,10 +272,11 @@ export class Player extends EventEmitter {
         if (!lastNode || lastNode.state !== State.CONNECTED)
             lastNode = this.node.manager.getIdealNode(connection);
 
-        if (!opts.force)
+        if (!force) {
             await this.destroy();
-        else
+        } else {
             await this.destroy().catch(() => null);
+        }
 
         try {
             this.node = node;
