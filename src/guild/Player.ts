@@ -249,7 +249,7 @@ export class Player extends EventEmitter {
 
     /**
      * Move player to another node
-     * @param opts An object that conforms to the MoveOptions type
+     * @param name Name of node to move to, or the default ideal node
      * @returns true if the player was moved, false if not
      */
     public async move(name?: string): Promise<boolean> {
