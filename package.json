@@ -45,6 +45,8 @@
   },
   "devDependencies": {
     "@augu/eslint-config": "5.2.4",
+    "@eslint/js": "^9.9.0",
+    "@types/eslint__js": "^8.42.3",
     "@types/node": "^22.2.0",
     "@types/node-fetch": "^2.6.11",
     "@types/ws": "^8.5.12",
@@ -53,6 +55,7 @@
     "eslint": "^9.9.0",
     "tsup": "^8.2.4",
     "typedoc": "^0.26.5",
-    "typescript": "^5.5.4"
+    "typescript": "^5.5.4",
+    "typescript-eslint": "^8.0.1"
   }
 }
