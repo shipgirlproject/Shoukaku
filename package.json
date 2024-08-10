@@ -46,6 +46,7 @@
   "devDependencies": {
     "@augu/eslint-config": "5.2.4",
     "@eslint/js": "^9.9.0",
+    "@stylistic/eslint-plugin": "^2.6.2",
     "@types/eslint__js": "^8.42.3",
     "@types/node": "^22.2.0",
     "@types/node-fetch": "^2.6.11",
