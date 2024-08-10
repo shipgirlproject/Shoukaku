@@ -389,7 +389,6 @@ export class Rest {
             .finally(() => clearTimeout(timeout));
 
         if (!request.ok) {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             const response = await request
                 .json()
                 .catch(() => null) as LavalinkRestError | null;
