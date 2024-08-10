@@ -1,7 +1,7 @@
 import { EventEmitter } from 'events';
 import { Node } from '../node/Node';
 import { Connection } from './Connection';
-import { OpCodes, State, ShoukakuDefaults } from '../Constants';
+import { OpCodes, State } from '../Constants';
 import { Exception, Track, UpdatePlayerInfo, UpdatePlayerOptions } from '../node/Rest';
 
 export type TrackEndReason = 'finished' | 'loadFailed' | 'stopped' | 'replaced' | 'cleanup';
@@ -62,7 +62,7 @@ export interface ChannelMixSettings {
 }
 
 export interface LowPassSettings {
-    smoothing?: number
+    smoothing?: number;
 }
 
 export interface PlayerEvent {
@@ -102,10 +102,10 @@ export interface WebSocketClosedEvent extends PlayerEvent {
 export interface PlayerUpdate {
     op: OpCodes.PLAYER_UPDATE;
     state: {
-      connected: boolean;
-      position: number;
-      time: number;
-      ping: number;
+        connected: boolean;
+        position: number;
+        time: number;
+        ping: number;
     };
     guildId: string;
 }
@@ -113,14 +113,14 @@ export interface PlayerUpdate {
 export interface FilterOptions {
     volume?: number;
     equalizer?: Band[];
-    karaoke?: KaraokeSettings|null;
-    timescale?: TimescaleSettings|null;
-    tremolo?: FreqSettings|null;
-    vibrato?: FreqSettings|null;
-    rotation?: RotationSettings|null;
-    distortion?: DistortionSettings|null;
-    channelMix?: ChannelMixSettings|null;
-    lowPass?: LowPassSettings|null;
+    karaoke?: KaraokeSettings | null;
+    timescale?: TimescaleSettings | null;
+    tremolo?: FreqSettings | null;
+    vibrato?: FreqSettings | null;
+    rotation?: RotationSettings | null;
+    distortion?: DistortionSettings | null;
+    channelMix?: ChannelMixSettings | null;
+    lowPass?: LowPassSettings | null;
 }
 
 export interface PlayerEvents {
@@ -161,7 +161,7 @@ export interface PlayerEvents {
     'update': [data: PlayerUpdate];
 }
 
-export declare interface Player {
+export declare interface IPlayer {
     on<K extends keyof PlayerEvents>(event: K, listener: (...args: PlayerEvents[K]) => void): this;
     once<K extends keyof PlayerEvents>(event: K, listener: (...args: PlayerEvents[K]) => void): this;
     off<K extends keyof PlayerEvents>(event: K, listener: (...args: PlayerEvents[K]) => void): this;
@@ -172,7 +172,7 @@ export declare interface Player {
 /**
  * Wrapper object around Lavalink
  */
-export class Player extends EventEmitter {
+export class Player extends EventEmitter implements IPlayer {
     /**
      * GuildId of this player
      */
@@ -184,7 +184,7 @@ export class Player extends EventEmitter {
     /**
      * Base64 encoded data of the current track
      */
-    public track: string|null;
+    public track: string | null;
     /**
      * Global volume of the player
      */
@@ -227,7 +227,7 @@ export class Player extends EventEmitter {
             guildId: this.guildId,
             playerOptions: {
                 track: { 
-                    encoded: this.track 
+                    encoded: this.track, 
                 },
                 position: this.position,
                 paused: this.paused,
@@ -235,10 +235,10 @@ export class Player extends EventEmitter {
                 voice: {
                     token: connection.serverUpdate!.token,
                     endpoint: connection.serverUpdate!.endpoint,
-                    sessionId: connection.sessionId!
+                    sessionId: connection.sessionId!,
                 },
-                volume: this.volume
-            }
+                volume: this.volume,
+            },
         };
     }
 
@@ -249,7 +249,7 @@ export class Player extends EventEmitter {
      */
     public async move(name?: string): Promise<boolean> {
         const connection = this.node.manager.connections.get(this.guildId);
-        const node = this.node.manager.nodes.get(name!) || this.node.manager.getIdealNode(connection);
+        const node = this.node.manager.nodes.get(name!) ?? this.node.manager.getIdealNode(connection);
 
         if (!node && ![ ...this.node.manager.nodes.values() ].some(node => node.state === State.CONNECTED))
             throw new Error('No available nodes to move to');
@@ -266,7 +266,7 @@ export class Player extends EventEmitter {
             this.node = node;
             await this.resume();
             return true;
-        } catch (error) {
+        } catch {
             this.node = lastNode!;
             await this.resume();
             return false;
@@ -285,7 +285,7 @@ export class Player extends EventEmitter {
      * @param playable Options for playing this track
      * @param noReplace Set it to true if you don't want to replace the currently playing track
      */
-    public playTrack(playerOptions: PlayOptions, noReplace: boolean = false): Promise<void> {
+    public playTrack(playerOptions: PlayOptions, noReplace = false): Promise<void> {
         return this.update(playerOptions, noReplace);
     }
 
@@ -300,7 +300,7 @@ export class Player extends EventEmitter {
      * Pause or unpause the currently playing track
      * @param paused Boolean value to specify whether to pause or unpause the current bot user
      */
-    public setPaused(paused: boolean = true): Promise<void> {
+    public setPaused(paused = true): Promise<void> {
         return this.update({ paused });
     }
 
@@ -324,7 +324,8 @@ export class Player extends EventEmitter {
      * Sets the filter volume of the player
      * @param volume Target volume 0.0-5.0
      */
-    async setFilterVolume(volume: number):  Promise<void> {
+    // eslint-disable-next-line require-await
+    async setFilterVolume(volume: number): Promise<void> {
         return this.setFilters({ volume });
     }
 
@@ -332,6 +333,7 @@ export class Player extends EventEmitter {
      * Change the equalizer settings applied to the currently playing track
      * @param equalizer An array of objects that conforms to the Bands type that define volumes at different frequencies
      */
+    // eslint-disable-next-line require-await
     public async setEqualizer(equalizer: Band[]): Promise<void> {
         return this.setFilters({ equalizer });
     }
@@ -341,7 +343,7 @@ export class Player extends EventEmitter {
      * @param karaoke An object that conforms to the KaraokeSettings type that defines a range of frequencies to mute
      */
     public setKaraoke(karaoke?: KaraokeSettings): Promise<void> {
-        return this.setFilters({ karaoke: karaoke || null });
+        return this.setFilters({ karaoke: karaoke ?? null });
     }
 
     /**
@@ -349,7 +351,7 @@ export class Player extends EventEmitter {
      * @param timescale An object that conforms to the TimescaleSettings type that defines the time signature to play the audio at
      */
     public setTimescale(timescale?: TimescaleSettings): Promise<void> {
-        return this.setFilters({ timescale: timescale || null });
+        return this.setFilters({ timescale: timescale ?? null });
     }
 
     /**
@@ -357,7 +359,7 @@ export class Player extends EventEmitter {
      * @param tremolo An object that conforms to the FreqSettings type that defines an oscillation in volume
      */
     public setTremolo(tremolo?: FreqSettings): Promise<void> {
-        return this.setFilters({ tremolo: tremolo || null });
+        return this.setFilters({ tremolo: tremolo ?? null });
     }
 
     /**
@@ -365,7 +367,7 @@ export class Player extends EventEmitter {
      * @param vibrato An object that conforms to the FreqSettings type that defines an oscillation in pitch
      */
     public setVibrato(vibrato?: FreqSettings): Promise<void> {
-        return this.setFilters({ vibrato: vibrato || null });
+        return this.setFilters({ vibrato: vibrato ?? null });
     }
 
     /**
@@ -373,7 +375,7 @@ export class Player extends EventEmitter {
      * @param rotation An object that conforms to the RotationSettings type that defines the frequency of audio rotating round the listener
      */
     public setRotation(rotation?: RotationSettings): Promise<void> {
-        return this.setFilters({ rotation: rotation || null });
+        return this.setFilters({ rotation: rotation ?? null });
     }
 
     /**
@@ -382,7 +384,7 @@ export class Player extends EventEmitter {
      * @returns The current player instance
      */
     public setDistortion(distortion?: DistortionSettings): Promise<void> {
-        return this.setFilters({ distortion: distortion || null });
+        return this.setFilters({ distortion: distortion ?? null });
     }
 
     /**
@@ -390,7 +392,7 @@ export class Player extends EventEmitter {
      * @param channelMix An object that conforms to ChannelMixSettings that defines how much the left and right channels affect each other (setting all factors to 0.5 causes both channels to get the same audio)
      */
     public setChannelMix(channelMix?: ChannelMixSettings): Promise<void> {
-        return this.setFilters({ channelMix: channelMix || null });
+        return this.setFilters({ channelMix: channelMix ?? null });
     }
 
     /**
@@ -398,7 +400,7 @@ export class Player extends EventEmitter {
      * @param lowPass An object that conforms to LowPassSettings that defines the amount of suppression on higher frequencies
      */
     public setLowPass(lowPass?: LowPassSettings): Promise<void> {
-        return this.setFilters({ lowPass: lowPass || null });
+        return this.setFilters({ lowPass: lowPass ?? null });
     }
 
     /**
@@ -432,7 +434,7 @@ export class Player extends EventEmitter {
      * @param options An object that conforms to ResumeOptions that specify behavior on resuming
      * @param noReplace Set it to true if you don't want to replace the currently playing track
      */
-    public async resume(options: ResumeOptions = {}, noReplace: boolean = false): Promise<void> {
+    public async resume(options: ResumeOptions = {}, noReplace = false): Promise<void> {
         const data = this.data;
 
         if (typeof options.position === 'number') 
@@ -454,16 +456,16 @@ export class Player extends EventEmitter {
      * @param playerOptions Options to update the player data
      * @param noReplace Set it to true if you don't want to replace the currently playing track
      */
-    public async update(playerOptions: UpdatePlayerOptions, noReplace: boolean = false): Promise<void> {
+    public async update(playerOptions: UpdatePlayerOptions, noReplace = false): Promise<void> {
         const data = {
             guildId: this.guildId,
             noReplace,
-            playerOptions
-        }
+            playerOptions,
+        };
 
         await this.node.rest.updatePlayer(data);
 
-        if (!noReplace) this.paused = false
+        if (!noReplace) this.paused = false;
 
         if (playerOptions.filters) {
             const filters = { ...this.filters, ...playerOptions.filters };
@@ -471,7 +473,7 @@ export class Player extends EventEmitter {
         }
 
         if (typeof playerOptions.track !== 'undefined')
-            this.track = playerOptions.track.encoded || null;
+            this.track = playerOptions.track.encoded ?? null;
         if (typeof playerOptions.paused === 'boolean')
             this.paused = playerOptions.paused;
         if (typeof playerOptions.volume === 'number')
@@ -503,9 +505,9 @@ export class Player extends EventEmitter {
                 voice: {
                     token: connection.serverUpdate!.token,
                     endpoint: connection.serverUpdate!.endpoint,
-                    sessionId: connection.sessionId!
-                }
-            }
+                    sessionId: connection.sessionId!,
+                },
+            },
         };
         await this.node.rest.updatePlayer(playerUpdate);
     }
@@ -525,29 +527,29 @@ export class Player extends EventEmitter {
      * @param json JSON data from Lavalink
      * @internal
      */
-    public onPlayerEvent(json: TrackStartEvent|TrackEndEvent|TrackStuckEvent|TrackExceptionEvent|WebSocketClosedEvent): void {
+    public onPlayerEvent(json: TrackStartEvent | TrackEndEvent | TrackStuckEvent | TrackExceptionEvent | WebSocketClosedEvent): void {
         switch (json.type) {
-            case 'TrackStartEvent':
+            case PlayerEventType.TRACK_START_EVENT:
                 if (this.track) this.track = json.track.encoded;
                 this.emit('start', json);
                 break;
-            case 'TrackEndEvent':
+            case PlayerEventType.TRACK_END_EVENT:
                 this.emit('end', json);
                 break;
-            case 'TrackStuckEvent':
+            case PlayerEventType.TRACK_STUCK_EVENT:
                 this.emit('stuck', json);
                 break;
-            case 'TrackExceptionEvent':
+            case PlayerEventType.TRACK_EXCEPTION_EVENT:
                 this.emit('exception', json);
                 break;
-            case 'WebSocketClosedEvent':
+            case PlayerEventType.WEBSOCKET_CLOSED_EVENT:
                 this.emit('closed', json);
                 break;
             default:
                 this.node.emit(
                     'debug',
                     this.node.name,
-                    `[Player] -> [Node] : Unknown Player Event Type, Data => ${JSON.stringify(json)}`
+                    `[Player] -> [Node] : Unknown Player Event Type, Data => ${JSON.stringify(json)}`,
                 );
         }
     }

@@ -10,7 +10,7 @@ export enum LoadType {
     PLAYLIST = 'playlist',
     SEARCH = 'search',
     EMPTY = 'empty',
-    ERROR = 'error'
+    ERROR = 'error',
 }
 
 export interface Track {
@@ -27,7 +27,7 @@ export interface Track {
         artworkUrl?: string;
         isrc?: string;
         sourceName: string;
-    }
+    };
     pluginInfo: unknown;
 }
 
@@ -36,7 +36,7 @@ export interface Playlist {
     info: {
         name: string;
         selectedTrack: number;
-    }
+    };
     pluginInfo: unknown;
     tracks: Track[];
 }
@@ -48,28 +48,28 @@ export interface Exception {
 }
 
 export interface TrackResult {
-    loadType: LoadType.TRACK,
-    data: Track
+    loadType: LoadType.TRACK;
+    data: Track;
 }
 
 export interface PlaylistResult {
-    loadType: LoadType.PLAYLIST,
-    data: Playlist
+    loadType: LoadType.PLAYLIST;
+    data: Playlist;
 }
 
 export interface SearchResult {
-    loadType: LoadType.SEARCH,
-    data: Track[]
+    loadType: LoadType.SEARCH;
+    data: Track[];
 }
 
 export interface EmptyResult {
-    loadType: LoadType.EMPTY,
-    data: {}
+    loadType: LoadType.EMPTY;
+    data: Record<string, never>;
 }
 
 export interface ErrorResult {
-    loadType: LoadType.ERROR,
-    data: Exception
+    loadType: LoadType.ERROR;
+    data: Exception;
 }
 
 export type LavalinkResponse = TrackResult | PlaylistResult | SearchResult | EmptyResult | ErrorResult;
@@ -101,22 +101,22 @@ export interface LavalinkPlayerVoice {
     endpoint: string;
     sessionId: string;
     connected?: boolean;
-    ping?: number
+    ping?: number;
 }
 
-export interface LavalinkPlayerVoiceOptions extends Omit<LavalinkPlayerVoice, 'connected'|'ping'> {}
+export type LavalinkPlayerVoiceOptions = Omit<LavalinkPlayerVoice, 'connected' | 'ping'>;
 
 export interface LavalinkPlayer {
-    guildId: string,
-    track?: Track,
+    guildId: string;
+    track?: Track;
     volume: number;
     paused: boolean;
-    voice: LavalinkPlayerVoice
-    filters: FilterOptions
+    voice: LavalinkPlayerVoice;
+    filters: FilterOptions;
 }
 
 export interface UpdatePlayerTrackOptions {
-    encoded?: string|null;
+    encoded?: string | null;
     identifier?: string;
     userData?: unknown;
 }
@@ -208,7 +208,7 @@ export class Rest {
     public resolve(identifier: string): Promise<LavalinkResponse | undefined> {
         const options = {
             endpoint: '/loadtracks',
-            options: { params: { identifier }}
+            options: { params: { identifier }},
         };
         return this.fetch(options);
     }
@@ -221,7 +221,7 @@ export class Rest {
     public decode(track: string): Promise<Track | undefined> {
         const options = {
             endpoint: '/decodetrack',
-            options: { params: { track }}
+            options: { params: { track }},
         };
         return this.fetch<Track>(options);
     }
@@ -233,7 +233,7 @@ export class Rest {
     public async getPlayers(): Promise<LavalinkPlayer[]> {
         const options = {
             endpoint: `/sessions/${this.sessionId}/players`,
-            options: {}
+            options: {},
         };
         return await this.fetch<LavalinkPlayer[]>(options) ?? [];
     }
@@ -245,7 +245,7 @@ export class Rest {
     public getPlayer(guildId: string): Promise<LavalinkPlayer | undefined> {
         const options = {
             endpoint: `/sessions/${this.sessionId}/players/${guildId}`,
-            options: {}
+            options: {},
         };
         return this.fetch(options);
     }
@@ -260,10 +260,10 @@ export class Rest {
             endpoint: `/sessions/${this.sessionId}/players/${data.guildId}`,
             options: {
                 method: 'PATCH',
-                params: { noReplace: data.noReplace?.toString() || 'false' },
+                params: { noReplace: data.noReplace?.toString() ?? 'false' },
                 headers: { 'Content-Type': 'application/json' },
-                body: data.playerOptions as Record<string, unknown>
-            }
+                body: data.playerOptions as Record<string, unknown>,
+            },
         };
         return this.fetch<LavalinkPlayer>(options);
     }
@@ -275,7 +275,7 @@ export class Rest {
     public async destroyPlayer(guildId: string): Promise<void> {
         const options = {
             endpoint: `/sessions/${this.sessionId}/players/${guildId}`,
-            options: { method: 'DELETE' }
+            options: { method: 'DELETE' },
         };
         await this.fetch(options);
     }
@@ -292,8 +292,8 @@ export class Rest {
             options: {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
-                body: { resuming, timeout }
-            }
+                body: { resuming, timeout },
+            },
         };
         return this.fetch(options);
     }
@@ -305,7 +305,7 @@ export class Rest {
     public stats(): Promise<Stats | undefined> {
         const options = {
             endpoint: '/stats',
-            options: {}
+            options: {},
         };
         return this.fetch(options);
     }
@@ -317,7 +317,7 @@ export class Rest {
     public getRoutePlannerStatus(): Promise<RoutePlanner | undefined> {
         const options = {
             endpoint: '/routeplanner/status',
-            options: {}
+            options: {},
         };
         return this.fetch(options);
     }
@@ -332,8 +332,8 @@ export class Rest {
             options: {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: { address }
-            }
+                body: { address },
+            },
         };
         await this.fetch(options);
     }
@@ -341,12 +341,12 @@ export class Rest {
     /**
      * Get Lavalink info
      */
-    public getLavalinkInfo(): Promise<NodeInfo|undefined> {
+    public getLavalinkInfo(): Promise<NodeInfo | undefined> {
         const options = {
             endpoint: '/info',
             options: {
-                headers: { 'Content-Type': 'application/json' }
-            }
+                headers: { 'Content-Type': 'application/json' },
+            },
         };
         return this.fetch(options);
     }
@@ -362,7 +362,7 @@ export class Rest {
         const { endpoint, options } = fetchOptions;
         let headers = {
             'Authorization': this.auth,
-            'User-Agent': this.node.manager.options.userAgent
+            'User-Agent': this.node.manager.options.userAgent,
         };
 
         if (options.headers) headers = { ...headers, ...options.headers };
@@ -374,12 +374,12 @@ export class Rest {
         const abortController = new AbortController();
         const timeout = setTimeout(() => abortController.abort(), this.node.manager.options.restTimeout * 1000);
 
-        const method = options.method?.toUpperCase() || 'GET';
+        const method = options.method?.toUpperCase() ?? 'GET';
 
         const finalFetchOptions: FinalFetchOptions = {
             method,
             headers,
-            signal: abortController.signal
+            signal: abortController.signal,
         };
 
         if (![ 'GET', 'HEAD' ].includes(method) && options.body)
@@ -389,6 +389,7 @@ export class Rest {
             .finally(() => clearTimeout(timeout));
 
         if (!request.ok) {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             const response = await request
                 .json()
                 .catch(() => null) as LavalinkRestError | null;

@@ -1,6 +1,6 @@
 import { EventEmitter, once } from 'events';
 import { State, VoiceState } from '../Constants';
-import { Shoukaku, VoiceChannelOptions } from '../Shoukaku.js';
+import { Shoukaku, VoiceChannelOptions } from '../Shoukaku';
 
 /**
  * Represents the partial payload from a stateUpdate event
@@ -36,8 +36,7 @@ export class Connection extends EventEmitter {
     /**
      * VoiceChannelId of the connection that is being managed by this instance
      */
-    public channelId: string|null;
-
+    public channelId: string | null;
     /**
      * ShardId where this connection sends data on
      */
@@ -53,23 +52,23 @@ export class Connection extends EventEmitter {
     /**
      * Id of the voice channel where this instance was connected before the current channelId
      */
-    public lastChannelId: string|null;
+    public lastChannelId: string | null;
     /**
      * Id of the currently active voice channel connection
      */
-    public sessionId: string|null;
+    public sessionId: string | null;
     /**
      * Region of connected voice channel
      */
-    public region: string|null;
+    public region: string | null;
     /**
      * Last region of the connected voice channel
      */
-    public lastRegion: string|null;
+    public lastRegion: string | null;
     /**
      * Cached serverUpdate event from Lavalink
      */
-    public serverUpdate: ServerUpdate|null;
+    public serverUpdate: ServerUpdate | null;
     /**
      * Connection state
      */
@@ -149,15 +148,16 @@ export class Connection extends EventEmitter {
         const timeout = setTimeout(() => controller.abort(), this.manager.options.voiceConnectionTimeout * 1000);
 
         try {
-            const [ status ] = await once(this, 'connectionUpdate', { signal: controller.signal });
+            const [ status ] = await once(this, 'connectionUpdate', { signal: controller.signal }) as [ VoiceState ];
             if (status !== VoiceState.SESSION_READY) {
-                switch(status) {
+                switch (status) {
                     case VoiceState.SESSION_ID_MISSING: throw new Error('The voice connection is not established due to missing session id');
                     case VoiceState.SESSION_ENDPOINT_MISSING: throw new Error('The voice connection is not established due to missing connection endpoint');
                 }
             }
             this.state = State.CONNECTED;
-        } catch (error: any) {
+        } catch (e: unknown) {
+            const error = e as Error;
             this.debug(`[Voice] </- [Discord] : Request Connection Failed | Guild: ${this.guildId}`);
             if (error.name === 'AbortError')
                 throw new Error(`The voice connection is not established in ${this.manager.options.voiceConnectionTimeout} seconds`);
@@ -177,8 +177,8 @@ export class Connection extends EventEmitter {
      * @internal
      */
     public setStateUpdate({ session_id, channel_id, self_deaf, self_mute }: StateUpdatePartial): void {
-        this.lastChannelId = this.channelId?.repeat(1) || null;
-        this.channelId = channel_id || null;
+        this.lastChannelId = this.channelId?.repeat(1) ?? null;
+        this.channelId = channel_id ?? null;
 
         if (this.channelId && this.lastChannelId !== this.channelId) {
             this.debug(`[Voice] <- [Discord] : Channel Moved | Old Channel: ${this.channelId} Guild: ${this.guildId}`);
@@ -191,7 +191,7 @@ export class Connection extends EventEmitter {
 
         this.deafened = self_deaf;
         this.muted = self_mute;
-        this.sessionId = session_id || null;
+        this.sessionId = session_id ?? null;
         this.debug(`[Voice] <- [Discord] : State Update Received | Channel: ${this.channelId} Session ID: ${session_id} Guild: ${this.guildId}`);
     }
 
@@ -209,8 +209,8 @@ export class Connection extends EventEmitter {
             return;
         }
 
-        this.lastRegion = this.region?.repeat(1) || null;
-        this.region = data.endpoint.split('.').shift()?.replace(/[0-9]/g, '') || null;
+        this.lastRegion = this.region?.repeat(1) ?? null;
+        this.region = data.endpoint.split('.').shift()?.replace(/[0-9]/g, '') ?? null;
 
         if (this.region && this.lastRegion !== this.region) {
             this.debug(`[Voice] <- [Discord] : Voice Region Moved | Old Region: ${this.lastRegion} New Region: ${this.region} Guild: ${this.guildId}`);
@@ -234,7 +234,7 @@ export class Connection extends EventEmitter {
      * @param data The data to send
      * @internal
      */
-    private send(data: any): void {
+    private send(data: unknown): void {
         this.manager.connector.sendPacket(this.shardId, { op: 4, d: data }, false);
     }
 
