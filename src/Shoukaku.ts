@@ -5,13 +5,13 @@ import { Connector } from './connectors/Connector';
 import { Constructor, mergeDefault } from './Utils';
 import { Player } from './guild/Player';
 import { Rest } from './node/Rest';
-import { Connection } from './guild/Connection.js';
+import { Connection } from './guild/Connection';
 
 export interface Structures {
     /**
      * A custom structure that extends the Rest class
      */
-    rest?:  Constructor<Rest>;
+    rest?: Constructor<Rest>;
     /**
      * A custom structure that extends the Player class
      */
@@ -85,7 +85,7 @@ export interface ShoukakuOptions {
     /**
      * Node Resolver to use if you want to customize it
      */
-    nodeResolver?: (nodes: Map<string, Node>, connection?: Connection) => Node|undefined;
+    nodeResolver?: (nodes: Map<string, Node>, connection?: Connection) => Node | undefined;
 }
 
 export interface VoiceChannelOptions {
@@ -134,17 +134,17 @@ export interface ShoukakuEvents {
     'raw': [name: string, json: unknown];
 }
 
-export declare interface Shoukaku {
+export declare interface IShoukaku {
     on<K extends keyof ShoukakuEvents>(event: K, listener: (...args: ShoukakuEvents[K]) => void): this;
     once<K extends keyof ShoukakuEvents>(event: K, listener: (...args: ShoukakuEvents[K]) => void): this;
     off<K extends keyof ShoukakuEvents>(event: K, listener: (...args: ShoukakuEvents[K]) => void): this;
-    emit(event: string | symbol, ...args: any[]): boolean;
+    emit(event: string | symbol, ...args: unknown[]): boolean;
 }
 
 /**
  * Main Shoukaku class
  */
-export class Shoukaku extends EventEmitter {
+export class Shoukaku extends EventEmitter implements IShoukaku {
     /**
      * Discord library connector
      */
@@ -168,7 +168,7 @@ export class Shoukaku extends EventEmitter {
     /**
      * Shoukaku instance identifier
      */
-    public id: string|null;
+    public id: string | null;
     /**
      * @param connector A Discord library connector
      * @param nodes An array that conforms to the NodeOption type that specifies nodes to connect to
@@ -187,7 +187,7 @@ export class Shoukaku extends EventEmitter {
     constructor(connector: Connector, nodes: NodeOption[], options: ShoukakuOptions = {}) {
         super();
         this.connector = connector.set(this);
-        this.options = mergeDefault(ShoukakuDefaults, options);
+        this.options = mergeDefault<ShoukakuOptions>(ShoukakuDefaults, options);
         this.nodes = new Map();
         this.connections = new Map();
         this.players = new Map();
@@ -214,13 +214,13 @@ export class Shoukaku extends EventEmitter {
      */
     public addNode(options: NodeOption): void {
         const node = new Node(this, options);
-        node.on('debug', (...args) => this.emit('debug', node.name, ...args));
-        node.on('reconnecting', (...args) => this.emit('reconnecting', node.name, ...args));
-        node.on('error', (...args) => this.emit('error', node.name, ...args));
-        node.on('close', (...args) => this.emit('close', node.name, ...args));
-        node.on('ready', (...args) => this.emit('ready', node.name, ...args));
-        node.on('raw', (...args) => this.emit('raw', node.name, ...args));
-        node.once('disconnect', (...args) => this.clean(node, ...args));
+        node.on('debug', (...args: unknown[]) => this.emit('debug', node.name, ...args));
+        node.on('reconnecting', (...args: unknown[]) => this.emit('reconnecting', node.name, ...args));
+        node.on('error', (...args: unknown[]) => this.emit('error', node.name, ...args));
+        node.on('close', (...args: unknown[]) => this.emit('close', node.name, ...args));
+        node.on('ready', (...args: unknown[]) => this.emit('ready', node.name, ...args));
+        node.on('raw', (...args: unknown[]) => this.emit('raw', node.name, ...args));
+        node.once('disconnect', (...args: unknown[]) => this.clean(node, ...args));
         node.connect();
         this.nodes.set(node.name, node);
     }
@@ -263,7 +263,7 @@ export class Shoukaku extends EventEmitter {
             const player = this.options.structures.player ? new this.options.structures.player(connection.guildId, node) : new Player(connection.guildId, node);
             const onUpdate = (state: VoiceState) => {
                 if (state !== VoiceState.SESSION_READY) return;
-                player.sendServerUpdate(connection);
+                void player.sendServerUpdate(connection);
             };
             await player.sendServerUpdate(connection);
             connection.on('connectionUpdate', onUpdate);
@@ -291,7 +291,7 @@ export class Shoukaku extends EventEmitter {
         if (player) {
             try {
                 await player.destroy();
-            } catch (_) { /* empty */ }
+            } catch { /* empty */ }
             player.clean();
             this.players.delete(guildId);
         }

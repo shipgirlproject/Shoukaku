@@ -1,4 +1,4 @@
-export type Constructor<T> = new (...args: any[]) => T;
+export type Constructor<T> = new (...args: unknown[]) => T;
 
 /**
  * Merge the default options to user input
@@ -6,7 +6,8 @@ export type Constructor<T> = new (...args: any[]) => T;
  * @param given User input
  * @returns Merged options
  */
-export function mergeDefault<T extends { [key: string]: any }>(def: T, given: T): Required<T> {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function mergeDefault<T extends Record<string, any>>(def: T, given: T): Required<T> {
     if (!given) return def as Required<T>;
     const defaultKeys: (keyof T)[] = Object.keys(def);
     for (const key in given) {
