@@ -5,6 +5,13 @@ import stylistic from '@stylistic/eslint-plugin';
 import * as augu from '@augu/eslint-config';
 
 export default tseslint.config(
+    {
+        ignores: [
+            'docs/*',
+            'dist/*',
+            'node_modules/*',
+        ],
+    },
     eslint.configs.recommended,
     ...tseslint.configs.recommendedTypeChecked,
     ...tseslint.configs.stylisticTypeChecked,
@@ -12,12 +19,8 @@ export default tseslint.config(
     augu.javascript(),
     // temp disable due to rule move from typescript-eslint (ts) -> stylistic (style)
     // await augu.typescript(),
+    stylistic.configs['disable-legacy'],
     {
-        ignores: [
-            'docs/*',
-            'dist/*',
-            'node_modules/*',
-        ],
         languageOptions: {
             parserOptions: {
                 projectService: true,
