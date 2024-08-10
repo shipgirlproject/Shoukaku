@@ -44,15 +44,15 @@
     "ws": "^8.18.0"
   },
   "devDependencies": {
-    "@augu/eslint-config": "4.0.1",
-    "@types/node": "^20.14.11",
+    "@augu/eslint-config": "5.2.4",
+    "@types/node": "^22.2.0",
     "@types/node-fetch": "^2.6.11",
-    "@types/ws": "^8.5.11",
-    "@typescript-eslint/eslint-plugin": "^7.16.1",
-    "@typescript-eslint/parser": "^7.16.1",
-    "eslint": "^8.56.0",
-    "tsup": "^8.2.0",
-    "typedoc": "^0.26.4",
-    "typescript": "^5.5.3"
+    "@types/ws": "^8.5.12",
+    "@typescript-eslint/eslint-plugin": "^8.0.1",
+    "@typescript-eslint/parser": "^8.0.1",
+    "eslint": "^9.9.0",
+    "tsup": "^8.2.4",
+    "typedoc": "^0.26.5",
+    "typescript": "^5.5.4"
   }
 }
