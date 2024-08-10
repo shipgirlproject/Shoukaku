@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "allowJs": true,
     "module": "node16",
     "moduleResolution": "node16",
     "outDir": "dist",
