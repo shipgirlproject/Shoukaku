@@ -14,9 +14,9 @@ export default tseslint.config(
     // await augu.typescript(),
     {
         ignores: [
-            'docs/',
-            'dist/',
-            'node_modules/',
+            'docs/*',
+            'dist/*',
+            'node_modules/*',
         ],
         languageOptions: {
             parserOptions: {
