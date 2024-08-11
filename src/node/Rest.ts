@@ -10,7 +10,7 @@ export enum LoadType {
     PLAYLIST = 'playlist',
     SEARCH = 'search',
     EMPTY = 'empty',
-    ERROR = 'error',
+    ERROR = 'error'
 }
 
 export interface Track {
@@ -208,7 +208,7 @@ export class Rest {
     public resolve(identifier: string): Promise<LavalinkResponse | undefined> {
         const options = {
             endpoint: '/loadtracks',
-            options: { params: { identifier }},
+            options: { params: { identifier }}
         };
         return this.fetch(options);
     }
@@ -221,7 +221,7 @@ export class Rest {
     public decode(track: string): Promise<Track | undefined> {
         const options = {
             endpoint: '/decodetrack',
-            options: { params: { track }},
+            options: { params: { track }}
         };
         return this.fetch<Track>(options);
     }
@@ -233,7 +233,7 @@ export class Rest {
     public async getPlayers(): Promise<LavalinkPlayer[]> {
         const options = {
             endpoint: `/sessions/${this.sessionId}/players`,
-            options: {},
+            options: {}
         };
         return await this.fetch<LavalinkPlayer[]>(options) ?? [];
     }
@@ -245,7 +245,7 @@ export class Rest {
     public getPlayer(guildId: string): Promise<LavalinkPlayer | undefined> {
         const options = {
             endpoint: `/sessions/${this.sessionId}/players/${guildId}`,
-            options: {},
+            options: {}
         };
         return this.fetch(options);
     }
@@ -262,8 +262,8 @@ export class Rest {
                 method: 'PATCH',
                 params: { noReplace: data.noReplace?.toString() ?? 'false' },
                 headers: { 'Content-Type': 'application/json' },
-                body: data.playerOptions as Record<string, unknown>,
-            },
+                body: data.playerOptions as Record<string, unknown>
+            }
         };
         return this.fetch<LavalinkPlayer>(options);
     }
@@ -275,7 +275,7 @@ export class Rest {
     public async destroyPlayer(guildId: string): Promise<void> {
         const options = {
             endpoint: `/sessions/${this.sessionId}/players/${guildId}`,
-            options: { method: 'DELETE' },
+            options: { method: 'DELETE' }
         };
         await this.fetch(options);
     }
@@ -292,8 +292,8 @@ export class Rest {
             options: {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
-                body: { resuming, timeout },
-            },
+                body: { resuming, timeout }
+            }
         };
         return this.fetch(options);
     }
@@ -305,7 +305,7 @@ export class Rest {
     public stats(): Promise<Stats | undefined> {
         const options = {
             endpoint: '/stats',
-            options: {},
+            options: {}
         };
         return this.fetch(options);
     }
@@ -317,7 +317,7 @@ export class Rest {
     public getRoutePlannerStatus(): Promise<RoutePlanner | undefined> {
         const options = {
             endpoint: '/routeplanner/status',
-            options: {},
+            options: {}
         };
         return this.fetch(options);
     }
@@ -332,8 +332,8 @@ export class Rest {
             options: {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: { address },
-            },
+                body: { address }
+            }
         };
         await this.fetch(options);
     }
@@ -345,8 +345,8 @@ export class Rest {
         const options = {
             endpoint: '/info',
             options: {
-                headers: { 'Content-Type': 'application/json' },
-            },
+                headers: { 'Content-Type': 'application/json' }
+            }
         };
         return this.fetch(options);
     }
@@ -362,7 +362,7 @@ export class Rest {
         const { endpoint, options } = fetchOptions;
         let headers = {
             'Authorization': this.auth,
-            'User-Agent': this.node.manager.options.userAgent,
+            'User-Agent': this.node.manager.options.userAgent
         };
 
         if (options.headers) headers = { ...headers, ...options.headers };
@@ -379,7 +379,7 @@ export class Rest {
         const finalFetchOptions: FinalFetchOptions = {
             method,
             headers,
-            signal: abortController.signal,
+            signal: abortController.signal
         };
 
         if (![ 'GET', 'HEAD' ].includes(method) && options.body)
@@ -397,7 +397,7 @@ export class Rest {
                 status: request.status,
                 error: 'Unknown Error',
                 message: 'Unexpected error response from Lavalink server',
-                path: endpoint,
+                path: endpoint
             });
         }
         try {

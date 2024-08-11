@@ -7,26 +7,26 @@ export enum State {
     CONNECTED,
     RECONNECTING,
     DISCONNECTING,
-    DISCONNECTED,
+    DISCONNECTED
 }
 
 export enum VoiceState {
     SESSION_READY,
     SESSION_ID_MISSING,
     SESSION_ENDPOINT_MISSING,
-    SESSION_FAILED_UPDATE,
+    SESSION_FAILED_UPDATE
 }
 
 export enum OpCodes {
     PLAYER_UPDATE = 'playerUpdate',
     STATS = 'stats',
     EVENT = 'event',
-    READY = 'ready',
+    READY = 'ready'
 }
 
 export const Versions = {
     REST_VERSION: 4,
-    WEBSOCKET_VERSION: 4,
+    WEBSOCKET_VERSION: 4
 };
 
 export const ShoukakuDefaults: Required<ShoukakuOptions> = {
@@ -43,7 +43,7 @@ export const ShoukakuDefaults: Required<ShoukakuOptions> = {
     nodeResolver: (nodes) => [ ...nodes.values() ]
         .filter(node => node.state === State.CONNECTED)
         .sort((a, b) => a.penalties - b.penalties)
-        .shift(),
+        .shift()
 };
 
 export const ShoukakuClientInfo = `${Info.name}/${Info.version} (${Info.repository.url})`;
@@ -53,5 +53,5 @@ export const NodeDefaults: NodeOption = {
     url: '',
     auth: '',
     secure: false,
-    group: undefined,
+    group: undefined
 };
