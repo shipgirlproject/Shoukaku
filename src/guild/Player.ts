@@ -13,7 +13,7 @@ export enum PlayerEventType {
     TRACK_END_EVENT = 'TrackEndEvent',
     TRACK_EXCEPTION_EVENT = 'TrackExceptionEvent',
     TRACK_STUCK_EVENT = 'TrackStuckEvent',
-    WEBSOCKET_CLOSED_EVENT = 'WebSocketClosedEvent',
+    WEBSOCKET_CLOSED_EVENT = 'WebSocketClosedEvent'
 }
 
 export interface Band {
@@ -227,7 +227,7 @@ export class Player extends EventEmitter implements IPlayer {
             guildId: this.guildId,
             playerOptions: {
                 track: { 
-                    encoded: this.track, 
+                    encoded: this.track 
                 },
                 position: this.position,
                 paused: this.paused,
@@ -235,10 +235,10 @@ export class Player extends EventEmitter implements IPlayer {
                 voice: {
                     token: connection.serverUpdate!.token,
                     endpoint: connection.serverUpdate!.endpoint,
-                    sessionId: connection.sessionId!,
+                    sessionId: connection.sessionId!
                 },
-                volume: this.volume,
-            },
+                volume: this.volume
+            }
         };
     }
 
@@ -425,7 +425,7 @@ export class Player extends EventEmitter implements IPlayer {
             rotation: null,
             distortion: null,
             channelMix: null,
-            lowPass: null,
+            lowPass: null
         });
     }
 
@@ -460,7 +460,7 @@ export class Player extends EventEmitter implements IPlayer {
         const data = {
             guildId: this.guildId,
             noReplace,
-            playerOptions,
+            playerOptions
         };
 
         await this.node.rest.updatePlayer(data);
@@ -505,9 +505,9 @@ export class Player extends EventEmitter implements IPlayer {
                 voice: {
                     token: connection.serverUpdate!.token,
                     endpoint: connection.serverUpdate!.endpoint,
-                    sessionId: connection.sessionId!,
-                },
-            },
+                    sessionId: connection.sessionId!
+                }
+            }
         };
         await this.node.rest.updatePlayer(playerUpdate);
     }
@@ -549,7 +549,7 @@ export class Player extends EventEmitter implements IPlayer {
                 this.node.emit(
                     'debug',
                     this.node.name,
-                    `[Player] -> [Node] : Unknown Player Event Type, Data => ${JSON.stringify(json)}`,
+                    `[Player] -> [Node] : Unknown Player Event Type, Data => ${JSON.stringify(json)}`
                 );
         }
     }
