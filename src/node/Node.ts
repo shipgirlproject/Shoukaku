@@ -211,7 +211,7 @@ export class Node extends EventEmitter {
             'Client-Name': ShoukakuClientInfo,
             'User-Agent': this.manager.options.userAgent,
             'Authorization': this.auth,
-            'User-Id': this.manager.id,
+            'User-Id': this.manager.id
         };
 
         if (this.sessionId) headers['Session-Id'] = this.sessionId;
@@ -410,7 +410,7 @@ export class Node extends EventEmitter {
 
         await Promise.allSettled([
             ...playersWithData.map(player => player.resume()),
-            ...playersWithoutData.map(player => this.manager.leaveVoiceChannel(player.guildId)),
+            ...playersWithoutData.map(player => this.manager.leaveVoiceChannel(player.guildId))
         ]);
     }
 
