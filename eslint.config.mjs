@@ -33,7 +33,7 @@ export default tseslint.config(
         rules: {
             '@stylistic/semi': [ 'error' ],
             '@stylistic/member-delimiter-style': [ 'error' ],
-            '@stylistic/indent': [ 'error', 4, { 'SwitchCase': 1 }],
+            '@stylistic/indent': [ 'error', 'tab', { 'SwitchCase': 1 }],
             '@stylistic/space-infix-ops': [ 'error' ],
             '@stylistic/key-spacing': [ 'error', { 'mode': 'strict' }],
             '@stylistic/keyword-spacing': [ 'error' ],
