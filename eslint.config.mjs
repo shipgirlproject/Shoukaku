@@ -9,8 +9,8 @@ export default tseslint.config(
         ignores: [
             'docs/*',
             'dist/*',
-            'node_modules/*',
-        ],
+            'node_modules/*'
+        ]
     },
     eslint.configs.recommended,
     ...tseslint.configs.recommendedTypeChecked,
@@ -24,11 +24,11 @@ export default tseslint.config(
         languageOptions: {
             parserOptions: {
                 projectService: true,
-                tsconfigRootDir: import.meta.dirname,
-            },
+                tsconfigRootDir: import.meta.dirname
+            }
         },
         plugins: {
-            '@stylistic': stylistic,
+            '@stylistic': stylistic
         },
         rules: {
             '@stylistic/semi': [ 'error' ],
@@ -50,7 +50,7 @@ export default tseslint.config(
             '@stylistic/arrow-spacing': 'error',
             '@stylistic/switch-colon-spacing': [ 'error', { 'after': true, 'before': false }],
             'camelcase': 'off',
-            'require-await': 'error',
-        },
-    },
+            'require-await': 'error'
+        }
+    }
 );
