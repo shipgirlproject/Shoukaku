@@ -1,7 +1,6 @@
 .idea
 .gitattributes
 .DS_Store
-.vscode
 node_modules/
 dist/
 package-lock.json
