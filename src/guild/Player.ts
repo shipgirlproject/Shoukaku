@@ -168,7 +168,6 @@ export declare interface IPlayer {
 	emit(event: string | symbol, ...args: unknown[]): boolean;
 }
 
-
 /**
  * Wrapper object around Lavalink
  */
