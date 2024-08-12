@@ -334,7 +334,7 @@ export class Player extends EventEmitter {
      * Sets the filter volume of the player
      * @param volume Target volume 0.0-5.0
      */
-    async setFilterVolume(volume: number):  Promise<void> {
+    public setFilterVolume(volume: number):  Promise<void> {
         return this.setFilters({ volume });
     }
 
@@ -342,7 +342,7 @@ export class Player extends EventEmitter {
      * Change the equalizer settings applied to the currently playing track
      * @param equalizer An array of objects that conforms to the Bands type that define volumes at different frequencies
      */
-    public async setEqualizer(equalizer: Band[]): Promise<void> {
+    public setEqualizer(equalizer: Band[]): Promise<void> {
         return this.setFilters({ equalizer });
     }
 
