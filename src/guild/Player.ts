@@ -266,10 +266,10 @@ export class Player extends EventEmitter implements IPlayer {
 			lastNode = this.node.manager.getIdealNode(connection);
 
 		if (!force) {
-            await this.destroy();
-        } else {
-            await this.destroy().catch(() => null);
-        }
+			await this.destroy();
+		} else {
+			await this.destroy().catch(() => null);
+		}
 
 		try {
 			this.node = node;
