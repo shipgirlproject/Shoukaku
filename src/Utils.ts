@@ -1,36 +1,20 @@
 export type Constructor<T> = new (...args: unknown[]) => T;
 
-export type OmitNested<I extends {}, K extends keyof I, T extends keyof NonNullable<I[K]>> = {
-    [key in keyof I]: key extends K ? Omit<I[key], T> : I[key];
+export type OmitNested<I extends object, K extends keyof I, T extends keyof NonNullable<I[K]>> = {
+	[key in keyof I]: key extends K ? Omit<I[key], T> : I[key];
 };
 
 /**
  * @see https://github.com/microsoft/TypeScript/issues/43505#issuecomment-1686128430
  */
 export type NumericRange<
-    start extends number,
-    end extends number,
-    arr extends unknown[] = [],
-    acc extends number = never,
+	start extends number,
+	end extends number,
+	arr extends unknown[] = [],
+	acc extends number = never
 > = arr['length'] extends end
-    ? acc | start | end
-    : NumericRange<start, end, [...arr, 1], arr[start] extends undefined ? acc : acc | arr['length']>;
-
-export type OmitNested<I extends {}, K extends keyof I, T extends keyof NonNullable<I[K]>> = {
-    [key in keyof I]: key extends K ? Omit<I[key], T> : I[key];
-};
-
-/**
- * @see https://github.com/microsoft/TypeScript/issues/43505#issuecomment-1686128430
- */
-export type NumericRange<
-    start extends number,
-    end extends number,
-    arr extends unknown[] = [],
-    acc extends number = never,
-> = arr['length'] extends end
-    ? acc | start | end
-    : NumericRange<start, end, [...arr, 1], arr[start] extends undefined ? acc : acc | arr['length']>;
+	? acc | start | end
+	: NumericRange<start, end, [...arr, 1], arr[start] extends undefined ? acc : acc | arr['length']>;
 
 /**
  * Merge the default options to user input

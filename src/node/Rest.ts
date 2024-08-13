@@ -238,7 +238,7 @@ export interface EmptyResult {
      * Empty object
      * @see https://lavalink.dev/api/rest.html#empty-result-data
      */
-	data: {};
+	data: Record<never, never>;
 }
 
 /**
@@ -426,7 +426,7 @@ export interface LavalinkPlayerVoice {
  * Voice state of player
  * @see https://lavalink.dev/api/rest.html#voice-state
  */
-export interface LavalinkPlayerVoiceOptions extends Omit<LavalinkPlayerVoice, 'connected' | 'ping'> {}
+export type LavalinkPlayerVoiceOptions = Omit<LavalinkPlayerVoice, 'connected' | 'ping'>;
 
 /**
  * Represents a Lavalink player

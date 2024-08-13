@@ -97,7 +97,7 @@ export interface Stats {
  * @see https://semver.org/spec/v2.0.0.html
  * @see https://lavalink.dev/api/rest.html#version-object
  */
-export type NodeInfoVersion = {
+export interface NodeInfoVersion {
 	/**
      * Full version string
      */
@@ -122,13 +122,13 @@ export type NodeInfoVersion = {
      * Build metadata as a dot separated list of identifiers
      */
 	build?: string;
-};
+}
 
 /**
  * Lavalink Git information
  * @see https://lavalink.dev/api/rest.html#git-object
  */
-export type NodeInfoGit = {
+export interface NodeInfoGit {
 	/**
      * Branch of build
      */
@@ -141,13 +141,13 @@ export type NodeInfoGit = {
      * Millisecond unix timestamp for when the commit was created
      */
 	commitTime: number;
-};
+}
 
 /**
  * Lavalink plugins
  * @see https://lavalink.dev/api/rest.html#plugin-object
  */
-export type NodeInfoPlugin = {
+export interface NodeInfoPlugin {
 	/**
      * Name of the plugin
      */
@@ -156,13 +156,13 @@ export type NodeInfoPlugin = {
      * Version of the plugin
      */
 	version: string;
-};
+}
 
 /**
  * Node information
  * @see https://lavalink.dev/api/rest.html#get-lavalink-info
  */
-export type NodeInfo = {
+export interface NodeInfo {
 	/**
      * Version of this Lavalink server
      */
@@ -195,7 +195,7 @@ export type NodeInfo = {
      * Enabled plugins for this server
      */
 	plugins: NodeInfoPlugin[];
-};
+}
 
 export interface ResumableHeaders {
 	[key: string]: string;
