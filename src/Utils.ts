@@ -4,9 +4,7 @@ export type OmitNested<I extends object, K extends keyof I, T extends keyof NonN
 	[key in keyof I]: key extends K ? Omit<I[key], T> : I[key];
 };
 
-/**
- * @see https://github.com/microsoft/TypeScript/issues/43505#issuecomment-1686128430
- */
+// https://github.com/microsoft/TypeScript/issues/43505#issuecomment-1686128430
 export type NumericRange<
 	start extends number,
 	end extends number,
