@@ -17,8 +17,8 @@ export enum PlayerEventType {
 }
 
 export interface MoveOptions {
-    name?: string;
-    force?: boolean;
+	name?: string;
+	force?: boolean;
 }
 
 export interface Band {
@@ -246,12 +246,12 @@ export class Player extends EventEmitter implements IPlayer {
 		};
 	}
 
-    /**
-     * Move player to another node
-     * @param options.name Name of node to move to, or the default ideal node
-     * @param options.force Force the move and ignore errors when destroying the original player fails (e.g. during Node disconnect)
-     * @returns true if the player was moved, false if not
-     */
+	/**
+	 * Move player to another node
+	 * @param options.name Name of node to move to, or the default ideal node
+	 * @param options.force Force the move and ignore errors when destroying the original player fails (e.g. during Node disconnect)
+	 * @returns true if the player was moved, false if not
+	 */
 	public async move({ name, force }: MoveOptions = {}): Promise<boolean> {
 		const connection = this.node.manager.connections.get(this.guildId);
 		const node = this.node.manager.nodes.get(name!) ?? this.node.manager.getIdealNode(connection);
