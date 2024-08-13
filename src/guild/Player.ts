@@ -16,6 +16,11 @@ export enum PlayerEventType {
 	WEBSOCKET_CLOSED_EVENT = 'WebSocketClosedEvent'
 }
 
+export interface MoveOptions {
+    name?: string;
+    force?: boolean;
+}
+
 export interface Band {
 	band: number;
 	gain: number;
@@ -241,12 +246,13 @@ export class Player extends EventEmitter implements IPlayer {
 		};
 	}
 
-	/**
+    /**
      * Move player to another node
-     * @param name Name of node to move to, or the default ideal node
+     * @param options.name Name of node to move to, or the default ideal node
+     * @param options.force Force the move and ignore errors when destroying the original player fails (e.g. during Node disconnect)
      * @returns true if the player was moved, false if not
      */
-	public async move(name?: string): Promise<boolean> {
+	public async move({ name, force }: MoveOptions = {}): Promise<boolean> {
 		const connection = this.node.manager.connections.get(this.guildId);
 		const node = this.node.manager.nodes.get(name!) ?? this.node.manager.getIdealNode(connection);
 
@@ -259,7 +265,11 @@ export class Player extends EventEmitter implements IPlayer {
 		if (!lastNode || lastNode.state !== State.CONNECTED)
 			lastNode = this.node.manager.getIdealNode(connection);
 
-		await this.destroy();
+		if (!force) {
+            await this.destroy();
+        } else {
+            await this.destroy().catch(() => null);
+        }
 
 		try {
 			this.node = node;
