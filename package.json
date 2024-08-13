@@ -44,20 +44,12 @@
     "ws": "^8.18.0"
   },
   "devDependencies": {
-    "@augu/eslint-config": "5.2.4",
-    "@eslint/js": "^9.9.0",
-    "@shipgirl/eslint-config": "^0.2.0",
-    "@stylistic/eslint-plugin": "^2.6.2",
-    "@types/eslint__js": "^8.42.3",
+    "@shipgirl/eslint-config": "^0.2.1",
     "@types/node": "^22.2.0",
-    "@types/node-fetch": "^2.6.11",
     "@types/ws": "^8.5.12",
-    "@typescript-eslint/eslint-plugin": "^8.0.1",
-    "@typescript-eslint/parser": "^8.0.1",
     "eslint": "^9.9.0",
     "tsup": "^8.2.4",
     "typedoc": "^0.26.5",
-    "typescript": "^5.5.4",
-    "typescript-eslint": "^8.0.1"
+    "typescript": "^5.5.4"
   }
 }
