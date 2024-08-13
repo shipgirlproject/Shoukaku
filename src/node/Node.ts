@@ -1,8 +1,7 @@
-import { EventEmitter } from 'events';
 import { IncomingMessage } from 'http';
-import { NodeOption, Shoukaku } from '../Shoukaku';
+import { NodeOption, Shoukaku, ShoukakuEvents } from '../Shoukaku';
 import { OpCodes, ShoukakuClientInfo, State, Versions } from '../Constants';
-import { wait } from '../Utils';
+import { TypedEventEmitter, wait } from '../Utils';
 import { Rest } from './Rest';
 import { PlayerUpdate, TrackEndEvent, TrackExceptionEvent, TrackStartEvent, TrackStuckEvent, WebSocketClosedEvent } from '../guild/Player';
 import Websocket from 'ws';
@@ -78,10 +77,14 @@ export interface ResumableHeaders {
 
 export type NonResumableHeaders = Omit<ResumableHeaders, 'Session-Id'>;
 
+export type NodeEvents = {
+	[K in keyof ShoukakuEvents]: ShoukakuEvents[K] extends [unknown, ...infer R] ? R : never;
+};
+
 /**
  * Represents a Lavalink node
  */
-export class Node extends EventEmitter {
+export class Node extends TypedEventEmitter<NodeEvents> {
 	/**
      * Shoukaku class
      */
@@ -223,7 +226,7 @@ export class Node extends EventEmitter {
 		this.ws.once('upgrade', response => this.open(response));
 		this.ws.once('close', (...args) => this.close(...args));
 		this.ws.on('error', error => this.error(error));
-		this.ws.on('message', data => void this.message(data).catch(error => this.error(error)));
+		this.ws.on('message', data => void this.message(data).catch(error => this.error(error as Error)));
 	}
 
 	/**
@@ -278,13 +281,13 @@ export class Node extends EventEmitter {
 					try {
 						await this.resumePlayers();
 					} catch (error) {
-						this.error(error);
+						this.error(error as Error);
 					}
 				}
 
 				this.state = State.CONNECTED;
 				this.emit('debug', `[Socket] -> [${this.name}] : Lavalink is ready! | Lavalink resume: ${json.resumed} | Lib resume: ${!!resumeByLibrary}`);
-				this.emit('ready', json.resumed || resumeByLibrary);
+				this.emit('ready', json.resumed || Boolean(resumeByLibrary));
 
 				if (this.manager.options.resume) {
 					await this.rest.updateSession(this.manager.options.resume, this.manager.options.resumeTimeout);
@@ -312,9 +315,9 @@ export class Node extends EventEmitter {
      * @param code Status close
      * @param reason Reason for connection close
      */
-	private close(code: number, reason: unknown): void {
+	private close(code: number, reason: Buffer): void {
 		this.emit('debug', `[Socket] <-/-> [${this.name}] : Connection Closed, Code: ${code || 'Unknown Code'}`);
-		this.emit('close', code, reason);
+		this.emit('close', code, String(reason));
 		if (this.shouldClean)
 			void this.clean();
 		else
@@ -325,8 +328,7 @@ export class Node extends EventEmitter {
      * To emit error events easily
      * @param error error message
      */
-	// eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
-	public error(error: Error | unknown): void {
+	public error(error: Error): void {
 		this.emit('error', error);
 	}
 
@@ -371,7 +373,7 @@ export class Node extends EventEmitter {
 		try {
 			count = await this.movePlayers();
 		} catch (error) {
-			this.error(error);
+			this.error(error as Error);
 		} finally {
 			this.destroy(count);
 		}
