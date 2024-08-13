@@ -1,8 +1,7 @@
-import { EventEmitter } from 'events';
 import { ShoukakuDefaults, VoiceState } from './Constants';
-import { Node } from './node/Node';
+import { Node, NodeEvents } from './node/Node';
 import { Connector } from './connectors/Connector';
-import { Constructor, mergeDefault } from './Utils';
+import { Constructor, mergeDefault, TypedEventEmitter } from './Utils';
 import { Player } from './guild/Player';
 import { Rest } from './node/Rest';
 import { Connection } from './guild/Connection';
@@ -96,7 +95,10 @@ export interface VoiceChannelOptions {
 	mute?: boolean;
 }
 
-export interface ShoukakuEvents {
+// Interfaces are not final, but types are, and therefore has an index signature
+// https://stackoverflow.com/a/64970740
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type ShoukakuEvents = {
 	/**
      * Emitted when reconnect tries are occurring and how many tries are left
      * @eventProperty
@@ -132,19 +134,12 @@ export interface ShoukakuEvents {
      * @eventProperty
      */
 	'raw': [name: string, json: unknown];
-}
-
-export declare interface IShoukaku {
-	on<K extends keyof ShoukakuEvents>(event: K, listener: (...args: ShoukakuEvents[K]) => void): this;
-	once<K extends keyof ShoukakuEvents>(event: K, listener: (...args: ShoukakuEvents[K]) => void): this;
-	off<K extends keyof ShoukakuEvents>(event: K, listener: (...args: ShoukakuEvents[K]) => void): this;
-	emit(event: string | symbol, ...args: unknown[]): boolean;
-}
+};
 
 /**
  * Main Shoukaku class
  */
-export class Shoukaku extends EventEmitter implements IShoukaku {
+export class Shoukaku extends TypedEventEmitter<ShoukakuEvents> {
 	/**
      * Discord library connector
      */
@@ -214,13 +209,13 @@ export class Shoukaku extends EventEmitter implements IShoukaku {
      */
 	public addNode(options: NodeOption): void {
 		const node = new Node(this, options);
-		node.on('debug', (...args: unknown[]) => this.emit('debug', node.name, ...args));
-		node.on('reconnecting', (...args: unknown[]) => this.emit('reconnecting', node.name, ...args));
-		node.on('error', (...args: unknown[]) => this.emit('error', node.name, ...args));
-		node.on('close', (...args: unknown[]) => this.emit('close', node.name, ...args));
-		node.on('ready', (...args: unknown[]) => this.emit('ready', node.name, ...args));
-		node.on('raw', (...args: unknown[]) => this.emit('raw', node.name, ...args));
-		node.once('disconnect', (...args: unknown[]) => this.clean(node, ...args));
+		node.on('debug', (...args) => this.emit('debug', node.name, ...args));
+		node.on('reconnecting', (...args) => this.emit('reconnecting', node.name, ...args));
+		node.on('error', (...args) => this.emit('error', node.name, ...args));
+		node.on('close', (...args) => this.emit('close', node.name, ...args));
+		node.on('ready', (...args) => this.emit('ready', node.name, ...args));
+		node.on('raw', (...args) => this.emit('raw', node.name, ...args));
+		node.once('disconnect', (...args) => this.clean(node, ...args));
 		node.connect();
 		this.nodes.set(node.name, node);
 	}
@@ -304,7 +299,7 @@ export class Shoukaku extends EventEmitter implements IShoukaku {
      * @returns A Lavalink node or undefined
      * @internal
      */
-	private clean(node: Node, ...args: unknown[]): void {
+	private clean(node: Node, ...args: NodeEvents['disconnect']): void {
 		node.removeAllListeners();
 		this.nodes.delete(node.name);
 		this.emit('disconnect', node.name, ...args);
