@@ -225,8 +225,8 @@ export class Player extends EventEmitter implements IPlayer {
 		return {
 			guildId: this.guildId,
 			playerOptions: {
-				track: { 
-					encoded: this.track 
+				track: {
+					encoded: this.track
 				},
 				position: this.position,
 				paused: this.paused,
@@ -260,8 +260,8 @@ export class Player extends EventEmitter implements IPlayer {
 			lastNode = this.node.manager.getIdealNode(connection);
 
 		await this.destroy();
-        
-		try {   
+
+		try {
 			this.node = node;
 			await this.resume();
 			return true;
@@ -323,7 +323,6 @@ export class Player extends EventEmitter implements IPlayer {
      * Sets the filter volume of the player
      * @param volume Target volume 0.0-5.0
      */
-	// eslint-disable-next-line require-await
 	async setFilterVolume(volume: number): Promise<void> {
 		return this.setFilters({ volume });
 	}
@@ -332,7 +331,6 @@ export class Player extends EventEmitter implements IPlayer {
      * Change the equalizer settings applied to the currently playing track
      * @param equalizer An array of objects that conforms to the Bands type that define volumes at different frequencies
      */
-	// eslint-disable-next-line require-await
 	public async setEqualizer(equalizer: Band[]): Promise<void> {
 		return this.setFilters({ equalizer });
 	}
@@ -436,7 +434,7 @@ export class Player extends EventEmitter implements IPlayer {
 	public async resume(options: ResumeOptions = {}, noReplace = false): Promise<void> {
 		const data = this.data;
 
-		if (typeof options.position === 'number') 
+		if (typeof options.position === 'number')
 			data.playerOptions.position = options.position;
 		if (typeof options.endTime === 'number')
 			data.playerOptions.endTime = options.endTime;
