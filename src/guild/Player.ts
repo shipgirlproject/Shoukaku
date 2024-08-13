@@ -539,7 +539,11 @@ export class Player extends TypedEventEmitter<PlayerEvents> {
 				this.emit('closed', json);
 				break;
 			default:
-				this.node.emit('debug', `[Player] -> [Node] : Unknown Player Event Type, Data => ${JSON.stringify(json)}`);
+				this.node.manager.emit(
+					'debug',
+					this.node.name,
+					`[Player] -> [Node] : Unknown Player Event Type, Data => ${JSON.stringify(json)}`
+				);
 		}
 	}
 }
