@@ -177,10 +177,6 @@ export class Rest {
      */
 	protected readonly auth: string;
 	/**
-     * Rest version to use
-     */
-	protected readonly version: string;
-	/**
      * @param node An instance of Node
      * @param options The options to initialize this rest class
      * @param options.name Name of this node
@@ -191,8 +187,7 @@ export class Rest {
      */
 	constructor(node: Node, options: NodeOption) {
 		this.node = node;
-		this.url = `${options.secure ? 'https' : 'http'}://${options.url}`;
-		this.version = `/v${Versions.REST_VERSION}`;
+		this.url = `${options.secure ? 'https' : 'http'}://${options.url}/v${Versions.REST_VERSION}`;
 		this.auth = options.auth;
 	}
 
@@ -367,7 +362,7 @@ export class Rest {
 
 		if (options.headers) headers = { ...headers, ...options.headers };
 
-		const url = new URL(`${this.url}${this.version}${endpoint}`);
+		const url = new URL(`${this.url}${endpoint}`);
 
 		if (options.params) url.search = new URLSearchParams(options.params).toString();
 
