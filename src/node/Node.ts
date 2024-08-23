@@ -275,19 +275,20 @@ export class Node extends TypedEventEmitter<NodeEvents> {
 				this.sessionId = json.sessionId;
 
 				const players = [ ...this.manager.players.values() ].filter(player => player.node.name === this.name);
-				const resumeByLibrary = Boolean(this.initialized && (players.length && this.manager.options.resumeByLibrary));
 
-				if (!json.resumed && resumeByLibrary) {
+				let resumedByLibrary = false;
+				if (!json.resumed && Boolean(this.initialized && (players.length && this.manager.options.resumeByLibrary))) {
 					try {
 						await this.resumePlayers();
+						resumedByLibrary = true;
 					} catch (error) {
 						this.error(error as Error);
 					}
 				}
 
 				this.state = State.CONNECTED;
-				this.emit('debug', `[Socket] -> [${this.name}] : Lavalink is ready! | Lavalink resume: ${json.resumed} | Lib resume: ${resumeByLibrary}`);
-				this.emit('ready', json.resumed, resumeByLibrary);
+				this.emit('debug', `[Socket] -> [${this.name}] : Lavalink is ready! | Lavalink resume: ${json.resumed} | Lib resume: ${resumedByLibrary}`);
+				this.emit('ready', json.resumed, resumedByLibrary);
 
 				if (this.manager.options.resume) {
 					await this.rest.updateSession(this.manager.options.resume, this.manager.options.resumeTimeout);
