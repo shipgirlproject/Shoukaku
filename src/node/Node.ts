@@ -217,7 +217,7 @@ export class Node extends TypedEventEmitter<NodeEvents> {
 		if (!this.initialized)
 			this.initialized = true;
 
-		this.emit('debug', `[Socket] -> [${this.name}] : Connecting ${this.url}...`);
+		this.emit('debug', `[Socket] -> [${this.name}] : Connecting to ${this.url} ...`);
 
 		const url = new URL(this.url);
 		this.ws = new Websocket(url.toString(), { headers } as Websocket.ClientOptions);
