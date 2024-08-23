@@ -245,6 +245,7 @@ export class Node extends TypedEventEmitter<NodeEvents> {
      */
 	private open(response: IncomingMessage): void {
 		const resumed = response.headers['session-resumed'];
+		// eslint-disable-next-line @typescript-eslint/restrict-template-expressions
 		this.emit('debug', `[Socket] <-> [${this.name}] : Connection Handshake Done! ${this.url} | Resumed Header Value: ${resumed}`);
 		this.reconnects = 0;
 		this.state = State.NEARLY;

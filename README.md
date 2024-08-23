@@ -9,10 +9,10 @@
 ![NPM](https://img.shields.io/npm/l/shoukaku?style=flat-square)
 
 <p align="center">
-    <img src="https://safe.saya.moe/DUNKJZUS7Nud.jpg" height=768 width=544> 
+    <img src="https://safe.saya.moe/OlYoY5xxkMLO.png"> 
 </p>
 
-> Shoukaku, from Azur Lane, drawn by: @hoshimaro15
+> Shoukaku, from Azur Lane, drawn by: elfenlied22
 
 ### Features
 
@@ -79,6 +79,6 @@ new Shoukaku(new Connectors.DiscordJS(client), Nodes, Options);
 
 - [Lavalink](https://github.com/lavalink-devs/Lavalink)
 
-### Made with ❤ by @ichimakase (Saya)
+### Code made with ❤ by @ichimakase (Saya)
 
 > The Shipgirl Project
