@@ -1,3 +1,28 @@
+import { EventEmitter } from 'events';
+
+// https://stackoverflow.com/a/67244127
+export abstract class TypedEventEmitter<T extends Record<string, unknown[]>> extends EventEmitter {
+	protected constructor() {
+		super();
+	}
+
+	on<K extends Extract<keyof T, string> | symbol>(eventName: K, listener: (...args: T[Extract<K, string>]) => void): this {
+		return super.on(eventName, listener);
+	}
+
+	once<K extends Extract<keyof T, string> | symbol>(eventName: K, listener: (...args: T[Extract<K, string>]) => void): this {
+		return super.once(eventName, listener);
+	}
+
+	off<K extends Extract<keyof T, string> | symbol>(eventName: K, listener: (...args: T[Extract<K, string>]) => void): this {
+		return super.off(eventName, listener);
+	}
+
+	emit<K extends Extract<keyof T, string> | symbol>(eventName: K, ...args: T[Extract<K, string>]): boolean {
+		return super.emit(eventName, ...args);
+	}
+}
+
 export type Constructor<T> = new (...args: unknown[]) => T;
 
 export type OmitNested<I extends object, K extends keyof I, T extends keyof NonNullable<I[K]>> = {

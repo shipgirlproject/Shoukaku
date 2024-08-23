@@ -1,4 +1,3 @@
-import { EventEmitter } from 'events';
 import { Node } from '../node/Node';
 import { Connection } from './Connection';
 import { OpCodes, State } from '../Constants';
@@ -460,7 +459,10 @@ export interface FilterOptions {
 	pluginFilters?: Record<string, Record<string, unknown>>;
 }
 
-export interface PlayerEvents {
+// Interfaces are not final, but types are, and therefore has an index signature
+// https://stackoverflow.com/a/64970740
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type PlayerEvents = {
 	/**
      * Emitted when the current playing track ends
      * @eventProperty
@@ -496,19 +498,12 @@ export interface PlayerEvents {
      * @eventProperty
      */
 	'update': [data: PlayerUpdate];
-}
-
-export declare interface IPlayer {
-	on<K extends keyof PlayerEvents>(event: K, listener: (...args: PlayerEvents[K]) => void): this;
-	once<K extends keyof PlayerEvents>(event: K, listener: (...args: PlayerEvents[K]) => void): this;
-	off<K extends keyof PlayerEvents>(event: K, listener: (...args: PlayerEvents[K]) => void): this;
-	emit(event: string | symbol, ...args: unknown[]): boolean;
-}
+};
 
 /**
  * Wrapper object around Lavalink
  */
-export class Player extends EventEmitter implements IPlayer {
+export class Player extends TypedEventEmitter<PlayerEvents> {
 	/**
      * GuildId of this player
      */
@@ -880,7 +875,7 @@ export class Player extends EventEmitter implements IPlayer {
 				this.emit('closed', json);
 				break;
 			default:
-				this.node.emit(
+				this.node.manager.emit(
 					'debug',
 					this.node.name,
 					`[Player] -> [Node] : Unknown Player Event Type, Data => ${JSON.stringify(json)}`
