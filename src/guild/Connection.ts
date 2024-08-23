@@ -4,20 +4,43 @@ import { Shoukaku, VoiceChannelOptions } from '../Shoukaku';
 
 /**
  * Represents the partial payload from a stateUpdate event
+ * @see https://discord.com/developers/docs/resources/voice#voice-state-object
  */
 export interface StateUpdatePartial {
+	/**
+     * Channel ID the state update is for
+     */
 	channel_id?: string;
+	/**
+     * Session ID the state update is for
+     */
 	session_id?: string;
+	/**
+     * Whether this user is locally deafened
+     */
 	self_deaf: boolean;
+	/**
+     * Whether this user is locally muted
+     */
 	self_mute: boolean;
 }
 
 /**
  * Represents the payload from a serverUpdate event
+ * @see https://discord.com/developers/docs/topics/gateway-events#voice-server-update
  */
 export interface ServerUpdate {
+	/**
+     * Voice connection token
+     */
 	token: string;
+	/**
+     * Guild this voice server update is for
+     */
 	guild_id: string;
+	/**
+     * Voice server hostname
+     */
 	endpoint: string;
 }
 
