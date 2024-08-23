@@ -118,7 +118,7 @@ export type ShoukakuEvents = {
      * Emitted when Shoukaku is ready to receive operations
      * @eventProperty
      */
-	'ready': [name: string, reconnected: boolean];
+	'ready': [name: string, lavalinkResume: boolean, libraryResume: boolean];
 	/**
      * Emitted when a websocket connection to Lavalink closes
      * @eventProperty
