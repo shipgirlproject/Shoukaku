@@ -1,6 +1,6 @@
 {
   "name": "shoukaku",
-  "version": "4.0.1",
+  "version": "4.1.0",
   "description": "A stable and updated wrapper around Lavalink",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
