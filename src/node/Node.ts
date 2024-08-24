@@ -12,26 +12,32 @@ export interface Ready {
 	sessionId: string;
 }
 
+export interface NodeMemory {
+	reservable: number;
+	used: number;
+	free: number;
+	allocated: number;
+}
+
+export interface NodeFrameStats {
+	sent: number;
+	deficit: number;
+	nulled: number;
+}
+
+export interface NodeCpu {
+	cores: number;
+	systemLoad: number;
+	lavalinkLoad: number;
+}
+
 export interface Stats {
 	op: OpCodes.STATS;
 	players: number;
 	playingPlayers: number;
-	memory: {
-		reservable: number;
-		used: number;
-		free: number;
-		allocated: number;
-	};
-	frameStats?: {
-		sent: number;
-		deficit: number;
-		nulled: number;
-	};
-	cpu: {
-		cores: number;
-		systemLoad: number;
-		lavalinkLoad: number;
-	};
+	memory: NodeMemory;
+	frameStats: NodeFrameStats | null;
+	cpu: NodeCpu;
 	uptime: number;
 }
 
@@ -212,7 +218,7 @@ export class Node extends TypedEventEmitter<NodeEvents> {
 			'User-Id': this.manager.id
 		};
 
-		if (this.sessionId && this.manager.options.resume)
+		if (this.sessionId)
 			headers['Session-Id'] = this.sessionId;
 		if (!this.initialized)
 			this.initialized = true;
@@ -358,9 +364,14 @@ export class Node extends TypedEventEmitter<NodeEvents> {
 		this.ws?.close();
 		this.ws = null;
 		this.state = State.DISCONNECTED;
-		if (!this.shouldClean) return;
-		this.destroyed = true;
-		this.emit('disconnect', count);
+		if (!this.manager.options.resume) {
+			this.sessionId = null;
+		}
+		if (this.shouldClean) {
+			this.destroyed = true;
+			this.sessionId = null;
+			this.emit('disconnect', count);
+		}
 	}
 
 	/**
