@@ -1,8 +1,8 @@
-import {Node} from '../node/Node';
-import {Connection} from './Connection';
-import {OpCodes, State} from '../Constants';
-import {Exception, Track, UpdatePlayerInfo, UpdatePlayerOptions} from '../node/Rest';
-import {TypedEventEmitter} from '../Utils';
+import { Node } from '../node/Node';
+import { Connection } from './Connection';
+import { OpCodes, State } from '../Constants';
+import { Exception, Track, UpdatePlayerInfo, UpdatePlayerOptions } from '../node/Rest';
+import { TypedEventEmitter } from '../Utils';
 
 export type TrackEndReason = 'finished' | 'loadFailed' | 'stopped' | 'replaced' | 'cleanup';
 export type PlayOptions = Omit<UpdatePlayerOptions, 'filters' | 'voice'>;
@@ -243,7 +243,7 @@ export class Player extends TypedEventEmitter<PlayerEvents> {
 		const connection = this.node.manager.connections.get(this.guildId);
 		const node = this.node.manager.nodes.get(name!) ?? this.node.manager.getIdealNode(connection);
 
-		if (!node && ![...this.node.manager.nodes.values()].some(node => node.state === State.CONNECTED))
+		if (!node && ![ ...this.node.manager.nodes.values() ].some(node => node.state === State.CONNECTED))
 			throw new Error('No available nodes to move to');
 
 		if (!node || node.name === this.node.name || node.state !== State.CONNECTED) return false;
@@ -283,7 +283,7 @@ export class Player extends TypedEventEmitter<PlayerEvents> {
 	 * Stop the currently playing track
 	 */
 	public stopTrack(): Promise<void> {
-		return this.update({track: {encoded: null}, position: 0});
+		return this.update({ track: { encoded: null }, position: 0 });
 	}
 
 	/**
@@ -291,7 +291,7 @@ export class Player extends TypedEventEmitter<PlayerEvents> {
 	 * @param paused Boolean value to specify whether to pause or unpause the current bot user
 	 */
 	public setPaused(paused = true): Promise<void> {
-		return this.update({paused});
+		return this.update({ paused });
 	}
 
 	/**
@@ -299,7 +299,7 @@ export class Player extends TypedEventEmitter<PlayerEvents> {
 	 * @param position Position to seek to in milliseconds
 	 */
 	public seekTo(position: number): Promise<void> {
-		return this.update({position});
+		return this.update({ position });
 	}
 
 	/**
@@ -307,7 +307,7 @@ export class Player extends TypedEventEmitter<PlayerEvents> {
 	 * @param volume Target volume 0-1000
 	 */
 	public setGlobalVolume(volume: number): Promise<void> {
-		return this.update({volume});
+		return this.update({ volume });
 	}
 
 	/**
@@ -315,7 +315,7 @@ export class Player extends TypedEventEmitter<PlayerEvents> {
 	 * @param volume Target volume 0.0-5.0
 	 */
 	async setFilterVolume(volume: number): Promise<void> {
-		return this.setFilters({volume});
+		return this.setFilters({ volume });
 	}
 
 	/**
@@ -323,7 +323,7 @@ export class Player extends TypedEventEmitter<PlayerEvents> {
 	 * @param equalizer An array of objects that conforms to the Bands type that define volumes at different frequencies
 	 */
 	public async setEqualizer(equalizer: Band[]): Promise<void> {
-		return this.setFilters({equalizer});
+		return this.setFilters({ equalizer });
 	}
 
 	/**
@@ -331,7 +331,7 @@ export class Player extends TypedEventEmitter<PlayerEvents> {
 	 * @param karaoke An object that conforms to the KaraokeSettings type that defines a range of frequencies to mute
 	 */
 	public setKaraoke(karaoke?: KaraokeSettings): Promise<void> {
-		return this.setFilters({karaoke: karaoke ?? null});
+		return this.setFilters({ karaoke: karaoke ?? null });
 	}
 
 	/**
@@ -339,7 +339,7 @@ export class Player extends TypedEventEmitter<PlayerEvents> {
 	 * @param timescale An object that conforms to the TimescaleSettings type that defines the time signature to play the audio at
 	 */
 	public setTimescale(timescale?: TimescaleSettings): Promise<void> {
-		return this.setFilters({timescale: timescale ?? null});
+		return this.setFilters({ timescale: timescale ?? null });
 	}
 
 	/**
@@ -347,7 +347,7 @@ export class Player extends TypedEventEmitter<PlayerEvents> {
 	 * @param tremolo An object that conforms to the FreqSettings type that defines an oscillation in volume
 	 */
 	public setTremolo(tremolo?: FreqSettings): Promise<void> {
-		return this.setFilters({tremolo: tremolo ?? null});
+		return this.setFilters({ tremolo: tremolo ?? null });
 	}
 
 	/**
@@ -355,7 +355,7 @@ export class Player extends TypedEventEmitter<PlayerEvents> {
 	 * @param vibrato An object that conforms to the FreqSettings type that defines an oscillation in pitch
 	 */
 	public setVibrato(vibrato?: FreqSettings): Promise<void> {
-		return this.setFilters({vibrato: vibrato ?? null});
+		return this.setFilters({ vibrato: vibrato ?? null });
 	}
 
 	/**
@@ -363,7 +363,7 @@ export class Player extends TypedEventEmitter<PlayerEvents> {
 	 * @param rotation An object that conforms to the RotationSettings type that defines the frequency of audio rotating round the listener
 	 */
 	public setRotation(rotation?: RotationSettings): Promise<void> {
-		return this.setFilters({rotation: rotation ?? null});
+		return this.setFilters({ rotation: rotation ?? null });
 	}
 
 	/**
@@ -372,7 +372,7 @@ export class Player extends TypedEventEmitter<PlayerEvents> {
 	 * @returns The current player instance
 	 */
 	public setDistortion(distortion?: DistortionSettings): Promise<void> {
-		return this.setFilters({distortion: distortion ?? null});
+		return this.setFilters({ distortion: distortion ?? null });
 	}
 
 	/**
@@ -380,7 +380,7 @@ export class Player extends TypedEventEmitter<PlayerEvents> {
 	 * @param channelMix An object that conforms to ChannelMixSettings that defines how much the left and right channels affect each other (setting all factors to 0.5 causes both channels to get the same audio)
 	 */
 	public setChannelMix(channelMix?: ChannelMixSettings): Promise<void> {
-		return this.setFilters({channelMix: channelMix ?? null});
+		return this.setFilters({ channelMix: channelMix ?? null });
 	}
 
 	/**
@@ -388,7 +388,7 @@ export class Player extends TypedEventEmitter<PlayerEvents> {
 	 * @param lowPass An object that conforms to LowPassSettings that defines the amount of suppression on higher frequencies
 	 */
 	public setLowPass(lowPass?: LowPassSettings): Promise<void> {
-		return this.setFilters({lowPass: lowPass ?? null});
+		return this.setFilters({ lowPass: lowPass ?? null });
 	}
 
 	/**
@@ -396,7 +396,7 @@ export class Player extends TypedEventEmitter<PlayerEvents> {
 	 * @param filters An object that conforms to FilterOptions that defines all filters to apply/modify
 	 */
 	public setFilters(filters: FilterOptions): Promise<void> {
-		return this.update({filters});
+		return this.update({ filters });
 	}
 
 	/**
@@ -456,7 +456,7 @@ export class Player extends TypedEventEmitter<PlayerEvents> {
 		if (!noReplace) this.paused = false;
 
 		if (playerOptions.filters) {
-			this.filters = {...this.filters, ...playerOptions.filters};
+			this.filters = { ...this.filters, ...playerOptions.filters };
 		}
 
 		if (typeof playerOptions.track !== 'undefined')
@@ -503,7 +503,7 @@ export class Player extends TypedEventEmitter<PlayerEvents> {
 	 * Handle player update data
 	 */
 	public onPlayerUpdate(json: PlayerUpdate): void {
-		const {position, ping} = json.state;
+		const { position, ping } = json.state;
 		this.position = position;
 		this.ping = ping;
 		this.emit('update', json);
