@@ -169,7 +169,7 @@ export class Connection extends EventEmitter {
 
 	/**
      * Updates SessionId, ChannelId, Deafen and Mute data of this instance
-     *
+     * @param options
      * @param options.session_id Id of the current session
      * @param options.channel_id Id of the connected voice channel
      * @param options.self_deaf Boolean that indicates if the current bot user is deafened or not

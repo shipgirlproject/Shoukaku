@@ -200,10 +200,6 @@ export class Player extends TypedEventEmitter<PlayerEvents> {
      * Filters on current track
      */
 	public filters: FilterOptions;
-	/**
-     * @param node An instance of Node (Lavalink API wrapper)
-     * @param connection An instance of connection class
-     */
 	constructor(guildId: string, node: Node) {
 		super();
 		this.guildId = guildId;
@@ -277,8 +273,6 @@ export class Player extends TypedEventEmitter<PlayerEvents> {
 
 	/**
      * Play a new track
-     * @param playable Options for playing this track
-     * @param noReplace Set it to true if you don't want to replace the currently playing track
      */
 	public playTrack(playerOptions: PlayOptions, noReplace = false): Promise<void> {
 		return this.update(playerOptions, noReplace);
@@ -461,8 +455,7 @@ export class Player extends TypedEventEmitter<PlayerEvents> {
 		if (!noReplace) this.paused = false;
 
 		if (playerOptions.filters) {
-			const filters = { ...this.filters, ...playerOptions.filters };
-			this.filters = filters;
+			this.filters = { ...this.filters, ...playerOptions.filters };
 		}
 
 		if (typeof playerOptions.track !== 'undefined')
