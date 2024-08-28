@@ -1,8 +1,8 @@
-import { Node } from '../node/Node';
-import { Connection } from './Connection';
-import { OpCodes, State } from '../Constants';
-import { Exception, Track, UpdatePlayerInfo, UpdatePlayerOptions } from '../node/Rest';
-import { TypedEventEmitter } from '../Utils';
+import {Node} from '../node/Node';
+import {Connection} from './Connection';
+import {OpCodes, State} from '../Constants';
+import {Exception, Track, UpdatePlayerInfo, UpdatePlayerOptions} from '../node/Rest';
+import {TypedEventEmitter} from '../Utils';
 
 export type TrackEndReason = 'finished' | 'loadFailed' | 'stopped' | 'replaced' | 'cleanup';
 export type PlayOptions = Omit<UpdatePlayerOptions, 'filters' | 'voice'>;
@@ -128,39 +128,39 @@ export interface FilterOptions {
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type PlayerEvents = {
 	/**
-     * Emitted when the current playing track ends
-     * @eventProperty
-     */
+	 * Emitted when the current playing track ends
+	 * @eventProperty
+	 */
 	'end': [reason: TrackEndEvent];
 	/**
-     * Emitted when the current playing track gets stuck due to an error
-     * @eventProperty
-     */
+	 * Emitted when the current playing track gets stuck due to an error
+	 * @eventProperty
+	 */
 	'stuck': [data: TrackStuckEvent];
 	/**
-     * Emitted when the current websocket connection is closed
-     * @eventProperty
-     */
+	 * Emitted when the current websocket connection is closed
+	 * @eventProperty
+	 */
 	'closed': [reason: WebSocketClosedEvent];
 	/**
-     * Emitted when a new track starts
-     * @eventProperty
-     */
+	 * Emitted when a new track starts
+	 * @eventProperty
+	 */
 	'start': [data: TrackStartEvent];
 	/**
-     * Emitted when there is an error caused by the current playing track
-     * @eventProperty
-     */
+	 * Emitted when there is an error caused by the current playing track
+	 * @eventProperty
+	 */
 	'exception': [reason: TrackExceptionEvent];
 	/**
-     * Emitted when the library manages to resume the player
-     * @eventProperty
-     */
+	 * Emitted when the library manages to resume the player
+	 * @eventProperty
+	 */
 	'resumed': [player: Player];
 	/**
-     * Emitted when a playerUpdate even is received from Lavalink
-     * @eventProperty
-     */
+	 * Emitted when a playerUpdate even is received from Lavalink
+	 * @eventProperty
+	 */
 	'update': [data: PlayerUpdate];
 };
 
@@ -169,37 +169,38 @@ export type PlayerEvents = {
  */
 export class Player extends TypedEventEmitter<PlayerEvents> {
 	/**
-     * GuildId of this player
-     */
+	 * GuildId of this player
+	 */
 	public readonly guildId: string;
 	/**
-     * Lavalink node this player is connected to
-     */
+	 * Lavalink node this player is connected to
+	 */
 	public node: Node;
 	/**
-     * Base64 encoded data of the current track
-     */
+	 * Base64 encoded data of the current track
+	 */
 	public track: string | null;
 	/**
-     * Global volume of the player
-     */
+	 * Global volume of the player
+	 */
 	public volume: number;
 	/**
-     * Pause status in current player
-     */
+	 * Pause status in current player
+	 */
 	public paused: boolean;
 	/**
-     * Ping represents the number of milliseconds between heartbeat and ack. Could be `-1` if not connected
-     */
+	 * Ping represents the number of milliseconds between heartbeat and ack. Could be `-1` if not connected
+	 */
 	public ping: number;
 	/**
-     * Position in ms of current track
-     */
+	 * Position in ms of current track
+	 */
 	public position: number;
 	/**
-     * Filters on current track
-     */
+	 * Filters on current track
+	 */
 	public filters: FilterOptions;
+
 	constructor(guildId: string, node: Node) {
 		super();
 		this.guildId = guildId;
@@ -234,15 +235,15 @@ export class Player extends TypedEventEmitter<PlayerEvents> {
 	}
 
 	/**
-     * Move player to another node
-     * @param name Name of node to move to, or the default ideal node
-     * @returns true if the player was moved, false if not
-     */
+	 * Move player to another node
+	 * @param name Name of node to move to, or the default ideal node
+	 * @returns true if the player was moved, false if not
+	 */
 	public async move(name?: string): Promise<boolean> {
 		const connection = this.node.manager.connections.get(this.guildId);
 		const node = this.node.manager.nodes.get(name!) ?? this.node.manager.getIdealNode(connection);
 
-		if (!node && ![ ...this.node.manager.nodes.values() ].some(node => node.state === State.CONNECTED))
+		if (!node && ![...this.node.manager.nodes.values()].some(node => node.state === State.CONNECTED))
 			throw new Error('No available nodes to move to');
 
 		if (!node || node.name === this.node.name || node.state !== State.CONNECTED) return false;
@@ -265,142 +266,142 @@ export class Player extends TypedEventEmitter<PlayerEvents> {
 	}
 
 	/**
-     * Destroys the player in remote lavalink side
-     */
+	 * Destroys the player in remote lavalink side
+	 */
 	public async destroy(): Promise<void> {
 		await this.node.rest.destroyPlayer(this.guildId);
 	}
 
 	/**
-     * Play a new track
-     */
+	 * Play a new track
+	 */
 	public playTrack(playerOptions: PlayOptions, noReplace = false): Promise<void> {
 		return this.update(playerOptions, noReplace);
 	}
 
 	/**
-     * Stop the currently playing track
-     */
+	 * Stop the currently playing track
+	 */
 	public stopTrack(): Promise<void> {
-		return this.update({ track: { encoded: null }, position: 0 });
+		return this.update({track: {encoded: null}, position: 0});
 	}
 
 	/**
-     * Pause or unpause the currently playing track
-     * @param paused Boolean value to specify whether to pause or unpause the current bot user
-     */
+	 * Pause or unpause the currently playing track
+	 * @param paused Boolean value to specify whether to pause or unpause the current bot user
+	 */
 	public setPaused(paused = true): Promise<void> {
-		return this.update({ paused });
+		return this.update({paused});
 	}
 
 	/**
-     * Seek to a specific time in the currently playing track
-     * @param position Position to seek to in milliseconds
-     */
+	 * Seek to a specific time in the currently playing track
+	 * @param position Position to seek to in milliseconds
+	 */
 	public seekTo(position: number): Promise<void> {
-		return this.update({ position });
+		return this.update({position});
 	}
 
 	/**
-     * Sets the global volume of the player
-     * @param volume Target volume 0-1000
-     */
+	 * Sets the global volume of the player
+	 * @param volume Target volume 0-1000
+	 */
 	public setGlobalVolume(volume: number): Promise<void> {
-		return this.update({ volume });
+		return this.update({volume});
 	}
 
 	/**
-     * Sets the filter volume of the player
-     * @param volume Target volume 0.0-5.0
-     */
+	 * Sets the filter volume of the player
+	 * @param volume Target volume 0.0-5.0
+	 */
 	async setFilterVolume(volume: number): Promise<void> {
-		return this.setFilters({ volume });
+		return this.setFilters({volume});
 	}
 
 	/**
-     * Change the equalizer settings applied to the currently playing track
-     * @param equalizer An array of objects that conforms to the Bands type that define volumes at different frequencies
-     */
+	 * Change the equalizer settings applied to the currently playing track
+	 * @param equalizer An array of objects that conforms to the Bands type that define volumes at different frequencies
+	 */
 	public async setEqualizer(equalizer: Band[]): Promise<void> {
-		return this.setFilters({ equalizer });
+		return this.setFilters({equalizer});
 	}
 
 	/**
-     * Change the karaoke settings applied to the currently playing track
-     * @param karaoke An object that conforms to the KaraokeSettings type that defines a range of frequencies to mute
-     */
+	 * Change the karaoke settings applied to the currently playing track
+	 * @param karaoke An object that conforms to the KaraokeSettings type that defines a range of frequencies to mute
+	 */
 	public setKaraoke(karaoke?: KaraokeSettings): Promise<void> {
-		return this.setFilters({ karaoke: karaoke ?? null });
+		return this.setFilters({karaoke: karaoke ?? null});
 	}
 
 	/**
-     * Change the timescale settings applied to the currently playing track
-     * @param timescale An object that conforms to the TimescaleSettings type that defines the time signature to play the audio at
-     */
+	 * Change the timescale settings applied to the currently playing track
+	 * @param timescale An object that conforms to the TimescaleSettings type that defines the time signature to play the audio at
+	 */
 	public setTimescale(timescale?: TimescaleSettings): Promise<void> {
-		return this.setFilters({ timescale: timescale ?? null });
+		return this.setFilters({timescale: timescale ?? null});
 	}
 
 	/**
-     * Change the tremolo settings applied to the currently playing track
-     * @param tremolo An object that conforms to the FreqSettings type that defines an oscillation in volume
-     */
+	 * Change the tremolo settings applied to the currently playing track
+	 * @param tremolo An object that conforms to the FreqSettings type that defines an oscillation in volume
+	 */
 	public setTremolo(tremolo?: FreqSettings): Promise<void> {
-		return this.setFilters({ tremolo: tremolo ?? null });
+		return this.setFilters({tremolo: tremolo ?? null});
 	}
 
 	/**
-     * Change the vibrato settings applied to the currently playing track
-     * @param vibrato An object that conforms to the FreqSettings type that defines an oscillation in pitch
-     */
+	 * Change the vibrato settings applied to the currently playing track
+	 * @param vibrato An object that conforms to the FreqSettings type that defines an oscillation in pitch
+	 */
 	public setVibrato(vibrato?: FreqSettings): Promise<void> {
-		return this.setFilters({ vibrato: vibrato ?? null });
+		return this.setFilters({vibrato: vibrato ?? null});
 	}
 
 	/**
-     * Change the rotation settings applied to the currently playing track
-     * @param rotation An object that conforms to the RotationSettings type that defines the frequency of audio rotating round the listener
-     */
+	 * Change the rotation settings applied to the currently playing track
+	 * @param rotation An object that conforms to the RotationSettings type that defines the frequency of audio rotating round the listener
+	 */
 	public setRotation(rotation?: RotationSettings): Promise<void> {
-		return this.setFilters({ rotation: rotation ?? null });
+		return this.setFilters({rotation: rotation ?? null});
 	}
 
 	/**
-     * Change the distortion settings applied to the currently playing track
-     * @param distortion An object that conforms to DistortionSettings that defines distortions in the audio
-     * @returns The current player instance
-     */
+	 * Change the distortion settings applied to the currently playing track
+	 * @param distortion An object that conforms to DistortionSettings that defines distortions in the audio
+	 * @returns The current player instance
+	 */
 	public setDistortion(distortion?: DistortionSettings): Promise<void> {
-		return this.setFilters({ distortion: distortion ?? null });
+		return this.setFilters({distortion: distortion ?? null});
 	}
 
 	/**
-     * Change the channel mix settings applied to the currently playing track
-     * @param channelMix An object that conforms to ChannelMixSettings that defines how much the left and right channels affect each other (setting all factors to 0.5 causes both channels to get the same audio)
-     */
+	 * Change the channel mix settings applied to the currently playing track
+	 * @param channelMix An object that conforms to ChannelMixSettings that defines how much the left and right channels affect each other (setting all factors to 0.5 causes both channels to get the same audio)
+	 */
 	public setChannelMix(channelMix?: ChannelMixSettings): Promise<void> {
-		return this.setFilters({ channelMix: channelMix ?? null });
+		return this.setFilters({channelMix: channelMix ?? null});
 	}
 
 	/**
-     * Change the low pass settings applied to the currently playing track
-     * @param lowPass An object that conforms to LowPassSettings that defines the amount of suppression on higher frequencies
-     */
+	 * Change the low pass settings applied to the currently playing track
+	 * @param lowPass An object that conforms to LowPassSettings that defines the amount of suppression on higher frequencies
+	 */
 	public setLowPass(lowPass?: LowPassSettings): Promise<void> {
-		return this.setFilters({ lowPass: lowPass ?? null });
+		return this.setFilters({lowPass: lowPass ?? null});
 	}
 
 	/**
-     * Change the all filter settings applied to the currently playing track
-     * @param filters An object that conforms to FilterOptions that defines all filters to apply/modify
-     */
+	 * Change the all filter settings applied to the currently playing track
+	 * @param filters An object that conforms to FilterOptions that defines all filters to apply/modify
+	 */
 	public setFilters(filters: FilterOptions): Promise<void> {
-		return this.update({ filters });
+		return this.update({filters});
 	}
 
 	/**
-     * Clear all filters applied to the currently playing track
-     */
+	 * Clear all filters applied to the currently playing track
+	 */
 	public clearFilters(): Promise<void> {
 		return this.setFilters({
 			volume: 1,
@@ -417,10 +418,10 @@ export class Player extends TypedEventEmitter<PlayerEvents> {
 	}
 
 	/**
-     * Resumes the current track
-     * @param options An object that conforms to ResumeOptions that specify behavior on resuming
-     * @param noReplace Set it to true if you don't want to replace the currently playing track
-     */
+	 * Resumes the current track
+	 * @param options An object that conforms to ResumeOptions that specify behavior on resuming
+	 * @param noReplace Set it to true if you don't want to replace the currently playing track
+	 */
 	public async resume(options: ResumeOptions = {}, noReplace = false): Promise<void> {
 		const data = this.data;
 
@@ -439,10 +440,10 @@ export class Player extends TypedEventEmitter<PlayerEvents> {
 	}
 
 	/**
-     * If you want to update the whole player yourself, sends raw update player info to lavalink
-     * @param playerOptions Options to update the player data
-     * @param noReplace Set it to true if you don't want to replace the currently playing track
-     */
+	 * If you want to update the whole player yourself, sends raw update player info to lavalink
+	 * @param playerOptions Options to update the player data
+	 * @param noReplace Set it to true if you don't want to replace the currently playing track
+	 */
 	public async update(playerOptions: UpdatePlayerOptions, noReplace = false): Promise<void> {
 		const data = {
 			guildId: this.guildId,
@@ -455,7 +456,7 @@ export class Player extends TypedEventEmitter<PlayerEvents> {
 		if (!noReplace) this.paused = false;
 
 		if (playerOptions.filters) {
-			this.filters = { ...this.filters, ...playerOptions.filters };
+			this.filters = {...this.filters, ...playerOptions.filters};
 		}
 
 		if (typeof playerOptions.track !== 'undefined')
@@ -469,9 +470,9 @@ export class Player extends TypedEventEmitter<PlayerEvents> {
 	}
 
 	/**
-     * Cleans this player instance
-     * @internal
-     */
+	 * Cleans this player instance
+	 * @internal
+	 */
 	public clean(): void {
 		this.removeAllListeners();
 		this.track = null;
@@ -481,9 +482,9 @@ export class Player extends TypedEventEmitter<PlayerEvents> {
 	}
 
 	/**
-     * Sends server update to lavalink
-     * @internal
-     */
+	 * Sends server update to lavalink
+	 * @internal
+	 */
 	public async sendServerUpdate(connection: Connection): Promise<void> {
 		const playerUpdate = {
 			guildId: this.guildId,
@@ -499,20 +500,20 @@ export class Player extends TypedEventEmitter<PlayerEvents> {
 	}
 
 	/**
-     * Handle player update data
-     */
+	 * Handle player update data
+	 */
 	public onPlayerUpdate(json: PlayerUpdate): void {
-		const { position, ping } = json.state;
+		const {position, ping} = json.state;
 		this.position = position;
 		this.ping = ping;
 		this.emit('update', json);
 	}
 
 	/**
-     * Handle player events received from Lavalink
-     * @param json JSON data from Lavalink
-     * @internal
-     */
+	 * Handle player events received from Lavalink
+	 * @param json JSON data from Lavalink
+	 * @internal
+	 */
 	public onPlayerEvent(json: TrackStartEvent | TrackEndEvent | TrackStuckEvent | TrackExceptionEvent | WebSocketClosedEvent): void {
 		switch (json.type) {
 			case PlayerEventType.TRACK_START_EVENT:
