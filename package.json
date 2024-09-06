@@ -16,7 +16,8 @@
     "build": "npm run build:ts && npm run build:docs",
     "build:ts": "tsup --config tsup-config.json",
     "build:docs": "typedoc --theme default --readme README.md --out docs/ --entryPointStrategy expand src/.",
-    "lint": "eslint .",
+    "lint": "biome lint --write",
+    "format": "biome format --write",
     "prepare": "npm run build:ts"
   },
   "keywords": [
@@ -44,12 +45,11 @@
     "ws": "^8.18.0"
   },
   "devDependencies": {
-    "@shipgirl/eslint-config": "^0.2.2",
-    "@types/node": "^22.2.0",
+    "@biomejs/biome": "^1.8.3",
+    "@types/node": "^22.5.1",
     "@types/ws": "^8.5.12",
-    "eslint": "^9.9.0",
     "tsup": "^8.2.4",
-    "typedoc": "^0.26.5",
+    "typedoc": "^0.26.6",
     "typescript": "^5.5.4"
   }
 }
