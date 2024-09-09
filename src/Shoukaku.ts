@@ -298,12 +298,12 @@ export class Shoukaku extends TypedEventEmitter<ShoukakuEvents> {
 	}
 
 	/**
-     * Leaves current voice channel and joins a new one
-     * @param guildId GuildId in which the ChannelId of the voice channel is located
+	 * Leaves current voice channel and joins a new one
+	 * @param guildId GuildId in which the ChannelId of the voice channel is located
 	 * @param channelId Id of channel to move to
 	 * @throws {@link Error} When guild does not have an existing connection, or could not be moved
-     * @returns The moved player
-     */
+	 * @returns The moved player
+	 */
 	public async moveVoiceChannel(guildId: string, channelId: string) {
 		const connection = this.connections.get(guildId);
 		if (!connection)
