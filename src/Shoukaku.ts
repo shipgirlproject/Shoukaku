@@ -1,7 +1,7 @@
 // eslint-disable-next-line import-x/no-cycle
 import { Connector } from './connectors/Connector';
 // eslint-disable-next-line import-x/no-cycle
-import { ShoukakuDefaults, VoiceState } from './Constants';
+import { ShoukakuDefaults, State, VoiceState } from './Constants';
 // eslint-disable-next-line import-x/no-cycle
 import { Connection } from './guild/Connection';
 // eslint-disable-next-line import-x/no-cycle
@@ -294,6 +294,37 @@ export class Shoukaku extends TypedEventEmitter<ShoukakuEvents> {
 			} catch { /* empty */ }
 			player.clean();
 			this.players.delete(guildId);
+		}
+	}
+
+	/**
+     * Leaves current voice channel and joins a new one
+     * @param guildId GuildId in which the ChannelId of the voice channel is located
+	 * @param channelId Id of channel to move to
+	 * @throws {@link Error} When guild does not have an existing connection, or could not be moved
+     * @returns The moved player
+     */
+	public async moveVoiceChannel(guildId: string, channelId: string) {
+		const connection = this.connections.get(guildId);
+		if (!connection)
+			throw new Error('This guild does not have an existing connection');
+
+		if (connection.channelId === channelId) return;
+
+		try {
+			connection.setStateUpdate({
+				session_id: connection.sessionId!,
+				channel_id: channelId,
+				self_deaf: connection.deafened,
+				self_mute: connection.muted
+			});
+			connection.state = State.RECONNECTING;
+			await connection.connect();
+
+			// player should get updated automagically as connectionUpdate is fired
+			return this.players.get(guildId);
+		} catch (error) {
+			throw new Error(`Could not move to new voice channel with id ${channelId}`, { cause: error });
 		}
 	}
 
