@@ -31,15 +31,16 @@ export type Constructor<T> = new (...args: unknown[]) => T;
  * @param given User input
  * @returns Merged options
  */
-export function mergeDefault<T extends Record<keyof T, T[keyof T]>>(def: T, given: T): Required<T> {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function mergeDefault<T extends Record<string, any>>(def: T, given: T): Required<T> {
 	if (!given) return def as Required<T>;
-	const defaultKeys = Object.keys(def) as (keyof T)[];
+	const defaultKeys: (keyof T)[] = Object.keys(def);
 	for (const key in given) {
 		if (defaultKeys.includes(key)) continue;
 		delete given[key];
 	}
 	for (const key of defaultKeys) {
-		if (def[key] === null || (typeof def[key] === 'string' && (def[key] as string).length === 0)) {
+		if (def[key] === null || (typeof def[key] === 'string' && def[key].length === 0)) {
 			if (!given[key]) throw new Error(`${String(key)} was not found from the given options.`);
 		}
 		if (given[key] === null || given[key] === undefined) given[key] = def[key];
