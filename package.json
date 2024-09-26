@@ -1,6 +1,6 @@
 {
   "name": "shoukaku",
-  "version": "4.1.1",
+  "version": "5.0.0-dev",
   "description": "A stable and updated wrapper around Lavalink",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -15,7 +15,7 @@
   "scripts": {
     "build": "npm run build:ts && npm run build:docs",
     "build:ts": "tsup --config tsup-config.json",
-    "build:docs": "typedoc --theme default --readme README.md --out docs/ --entryPointStrategy expand src/.",
+    "build:docs": "typedoc --theme default --readme TypeDoc.md --name Shoukaku --out docs/ --entryPointStrategy expand src/.",
     "lint": "eslint .",
     "prepare": "npm run build:ts"
   },
@@ -45,11 +45,11 @@
   },
   "devDependencies": {
     "@shipgirl/eslint-config": "^0.2.2",
-    "@types/node": "^22.2.0",
+    "@types/node": "^22.5.5",
     "@types/ws": "^8.5.12",
-    "eslint": "^9.9.0",
-    "tsup": "^8.2.4",
-    "typedoc": "^0.26.5",
-    "typescript": "^5.5.4"
+    "eslint": "^9.10.0",
+    "tsup": "^8.3.0",
+    "typedoc": "^0.26.7",
+    "typescript": "^5.6.2"
   }
 }
