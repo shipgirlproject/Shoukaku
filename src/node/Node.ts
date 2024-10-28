@@ -92,70 +92,70 @@ export type NodeEvents = {
  */
 export class Node extends TypedEventEmitter<NodeEvents> {
 	/**
-     * Shoukaku class
-     */
+	 * Shoukaku class
+	 */
 	public readonly manager: Shoukaku;
 	/**
-     * Lavalink rest API
-     */
+	 * Lavalink rest API
+	 */
 	public readonly rest: Rest;
 	/**
-     * Name of this node
-     */
+	 * Name of this node
+	 */
 	public readonly name: string;
 	/**
-     * Group in which this node is contained
-     */
+	 * Group in which this node is contained
+	 */
 	public readonly group?: string;
 	/**
-     * URL of Lavalink
-     */
+	 * URL of Lavalink
+	 */
 	private readonly url: string;
 	/**
-     * Credentials to access Lavalink
-     */
+	 * Credentials to access Lavalink
+	 */
 	private readonly auth: string;
 	/**
-     * The number of reconnects to Lavalink
-     */
+	 * The number of reconnects to Lavalink
+	 */
 	public reconnects: number;
 	/**
-     * The state of this connection
-     */
+	 * The state of this connection
+	 */
 	public state: State;
 	/**
-     * Statistics from Lavalink
-     */
+	 * Statistics from Lavalink
+	 */
 	public stats: Stats | null;
 	/**
-     * Information about lavalink node
-    */
+	 * Information about lavalink node
+	*/
 	public info: NodeInfo | null;
 	/**
-     * Websocket instance
-     */
+	 * Websocket instance
+	 */
 	public ws: Websocket | null;
 	/**
-     * SessionId of this Lavalink connection (not to be confused with Discord SessionId)
-     */
+	 * SessionId of this Lavalink connection (not to be confused with Discord SessionId)
+	 */
 	public sessionId: string | null;
 	/**
-     * Boolean that represents if the node has initialized once
-     */
+	 * Boolean that represents if the node has initialized once
+	 */
 	protected initialized: boolean;
 	/**
-     * Boolean that represents if this connection is destroyed
-     */
+	 * Boolean that represents if this connection is destroyed
+	 */
 	protected destroyed: boolean;
 	/**
-     * @param manager Shoukaku instance
-     * @param options Options on creating this node
-     * @param options.name Name of this node
-     * @param options.url URL of Lavalink
-     * @param options.auth Credentials to access Lavalnk
-     * @param options.secure Whether to use secure protocols or not
-     * @param options.group Group of this node
-     */
+	 * @param manager Shoukaku instance
+	 * @param options Options on creating this node
+	 * @param options.name Name of this node
+	 * @param options.url URL of Lavalink
+	 * @param options.auth Credentials to access Lavalnk
+	 * @param options.secure Whether to use secure protocols or not
+	 * @param options.group Group of this node
+	 */
 	constructor(manager: Shoukaku, options: NodeOption) {
 		super();
 		this.manager = manager;
@@ -175,10 +175,10 @@ export class Node extends TypedEventEmitter<NodeEvents> {
 	}
 
 	/**
-     * Penalties for load balancing
-     * @returns Penalty score
-     * @internal @readonly
-     */
+	 * Penalties for load balancing
+	 * @returns Penalty score
+	 * @internal @readonly
+	 */
 	get penalties(): number {
 		let penalties = 0;
 		if (!this.stats) return penalties;
@@ -195,16 +195,16 @@ export class Node extends TypedEventEmitter<NodeEvents> {
 	}
 
 	/**
-     * If we should clean this node
-     * @internal @readonly
-     */
+	 * If we should clean this node
+	 * @internal @readonly
+	 */
 	private get shouldClean(): boolean {
 		return this.destroyed || this.reconnects >= this.manager.options.reconnectTries;
 	}
 
 	/**
-     * Connect to Lavalink
-     */
+	 * Connect to Lavalink
+	 */
 	public connect(): void {
 		if (!this.manager.id) throw new Error('Don\'t connect a node when the library is not yet ready');
 		if (this.destroyed) throw new Error('You can\'t re-use the same instance of a node once disconnected, please re-add the node again');
@@ -235,20 +235,20 @@ export class Node extends TypedEventEmitter<NodeEvents> {
 	}
 
 	/**
-     * Disconnect from Lavalink
-     * @param code Status code
-     * @param reason Reason for disconnect
-     */
+	 * Disconnect from Lavalink
+	 * @param code Status code
+	 * @param reason Reason for disconnect
+	 */
 	public disconnect(code: number, reason?: string): void {
 		this.destroyed = true;
 		this.internalDisconnect(code, reason);
 	}
 
 	/**
-     * Handle connection open event from Lavalink
-     * @param response Response from Lavalink
-     * @internal
-     */
+	 * Handle connection open event from Lavalink
+	 * @param response Response from Lavalink
+	 * @internal
+	 */
 	private open(response: IncomingMessage): void {
 		const resumed = response.headers['session-resumed'];
 		// eslint-disable-next-line @typescript-eslint/restrict-template-expressions
@@ -258,10 +258,10 @@ export class Node extends TypedEventEmitter<NodeEvents> {
 	}
 
 	/**
-     * Handle message from Lavalink
-     * @param message JSON message
-     * @internal
-     */
+	 * Handle message from Lavalink
+	 * @param message JSON message
+	 * @internal
+	 */
 	private async message(message: unknown): Promise<void> {
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 		const json: Ready | Stats | PlayerUpdate | TrackStartEvent | TrackEndEvent | TrackStuckEvent | TrackExceptionEvent | WebSocketClosedEvent = JSON.parse(message as string);
@@ -319,10 +319,10 @@ export class Node extends TypedEventEmitter<NodeEvents> {
 	}
 
 	/**
-     * Handle closed event from lavalink
-     * @param code Status close
-     * @param reason Reason for connection close
-     */
+	 * Handle closed event from lavalink
+	 * @param code Status close
+	 * @param reason Reason for connection close
+	 */
 	private close(code: number, reason: Buffer): void {
 		this.emit('debug', `[Socket] <-/-> [${this.name}] : Connection Closed, Code: ${code || 'Unknown Code'}`);
 		this.emit('close', code, String(reason));
@@ -333,17 +333,17 @@ export class Node extends TypedEventEmitter<NodeEvents> {
 	}
 
 	/**
-     * To emit error events easily
-     * @param error error message
-     */
+	 * To emit error events easily
+	 * @param error error message
+	 */
 	public error(error: Error): void {
 		this.emit('error', error);
 	}
 
 	/**
-     * Internal disconnect function
-     * @internal
-     */
+	 * Internal disconnect function
+	 * @internal
+	 */
 	private internalDisconnect(code: number, reason?: string): void {
 		if (this.destroyed) return;
 
@@ -356,9 +356,9 @@ export class Node extends TypedEventEmitter<NodeEvents> {
 	}
 
 	/**
-     * Destroys the websocket connection
-     * @internal
-     */
+	 * Destroys the websocket connection
+	 * @internal
+	 */
 	private destroy(count = 0): void {
 		this.ws?.removeAllListeners();
 		this.ws?.close();
@@ -375,9 +375,9 @@ export class Node extends TypedEventEmitter<NodeEvents> {
 	}
 
 	/**
-     * Cleans and moves players to other nodes if possible
-     * @internal
-     */
+	 * Cleans and moves players to other nodes if possible
+	 * @internal
+	 */
 	private async clean(): Promise<void> {
 		const move = this.manager.options.moveOnDisconnect;
 		if (!move) return this.destroy();
@@ -392,9 +392,9 @@ export class Node extends TypedEventEmitter<NodeEvents> {
 	}
 
 	/**
-     * Reconnect to Lavalink
-     * @internal
-     */
+	 * Reconnect to Lavalink
+	 * @internal
+	 */
 	private async reconnect(): Promise<void> {
 		if (this.state === State.RECONNECTING) return;
 		if (this.state !== State.DISCONNECTED) this.destroy();
@@ -407,9 +407,9 @@ export class Node extends TypedEventEmitter<NodeEvents> {
 	}
 
 	/**
-     * Tries to resume the players internally
-     * @internal
-     */
+	 * Tries to resume the players internally
+	 * @internal
+	 */
 	private async resumePlayers(): Promise<void> {
 		const playersWithData = [];
 		const playersWithoutData = [];
@@ -429,9 +429,9 @@ export class Node extends TypedEventEmitter<NodeEvents> {
 	}
 
 	/**
-     * Tries to move the players to another node
-     * @internal
-     */
+	 * Tries to move the players to another node
+	 * @internal
+	 */
 	private async movePlayers(): Promise<number> {
 		const players = [ ...this.manager.players.values() ];
 		const data = await Promise.allSettled(players.map(player => player.move()));

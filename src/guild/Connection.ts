@@ -26,62 +26,62 @@ export interface ServerUpdate {
  */
 export class Connection extends EventEmitter {
 	/**
-     * The manager where this connection is on
-     */
+	 * The manager where this connection is on
+	 */
 	public manager: Shoukaku;
 	/**
-     * GuildId of the connection that is being managed by this instance
-     */
+	 * GuildId of the connection that is being managed by this instance
+	 */
 	public guildId: string;
 	/**
-     * VoiceChannelId of the connection that is being managed by this instance
-     */
+	 * VoiceChannelId of the connection that is being managed by this instance
+	 */
 	public channelId: string | null;
 	/**
-     * ShardId where this connection sends data on
-     */
+	 * ShardId where this connection sends data on
+	 */
 	public shardId: number;
 	/**
-     * Mute status in connected voice channel
-     */
+	 * Mute status in connected voice channel
+	 */
 	public muted: boolean;
 	/**
-     * Deafen status in connected voice channel
-     */
+	 * Deafen status in connected voice channel
+	 */
 	public deafened: boolean;
 	/**
-     * Id of the voice channel where this instance was connected before the current channelId
-     */
+	 * Id of the voice channel where this instance was connected before the current channelId
+	 */
 	public lastChannelId: string | null;
 	/**
-     * Id of the currently active voice channel connection
-     */
+	 * Id of the currently active voice channel connection
+	 */
 	public sessionId: string | null;
 	/**
-     * Region of connected voice channel
-     */
+	 * Region of connected voice channel
+	 */
 	public region: string | null;
 	/**
-     * Last region of the connected voice channel
-     */
+	 * Last region of the connected voice channel
+	 */
 	public lastRegion: string | null;
 	/**
-     * Cached serverUpdate event from Lavalink
-     */
+	 * Cached serverUpdate event from Lavalink
+	 */
 	public serverUpdate: ServerUpdate | null;
 	/**
-     * Connection state
-     */
+	 * Connection state
+	 */
 	public state: State;
 	/**
-     * @param manager The manager of this connection
-     * @param options The options to pass in connection creation
-     * @param options.guildId GuildId in which voice channel to connect to is located
-     * @param options.shardId ShardId in which the guild exists
-     * @param options.channelId ChannelId of voice channel to connect to
-     * @param options.deaf Optional boolean value to specify whether to deafen the current bot user
-     * @param options.mute Optional boolean value to specify whether to mute the current bot user
-     */
+	 * @param manager The manager of this connection
+	 * @param options The options to pass in connection creation
+	 * @param options.guildId GuildId in which voice channel to connect to is located
+	 * @param options.shardId ShardId in which the guild exists
+	 * @param options.channelId ChannelId of voice channel to connect to
+	 * @param options.deaf Optional boolean value to specify whether to deafen the current bot user
+	 * @param options.mute Optional boolean value to specify whether to mute the current bot user
+	 */
 	constructor(manager: Shoukaku, options: VoiceChannelOptions) {
 		super();
 		this.manager = manager;
@@ -99,29 +99,29 @@ export class Connection extends EventEmitter {
 	}
 
 	/**
-     * Set the deafen status for the current bot user
-     * @param deaf Boolean value to indicate whether to deafen or undeafen
-     * @defaultValue false
-     */
+	 * Set the deafen status for the current bot user
+	 * @param deaf Boolean value to indicate whether to deafen or undeafen
+	 * @defaultValue false
+	 */
 	public setDeaf(deaf = false): void {
 		this.deafened = deaf;
 		this.sendVoiceUpdate();
 	}
 
 	/**
-     * Set the mute status for the current bot user
-     * @param mute Boolean value to indicate whether to mute or unmute
-     * @defaultValue false
-     */
+	 * Set the mute status for the current bot user
+	 * @param mute Boolean value to indicate whether to mute or unmute
+	 * @defaultValue false
+	 */
 	public setMute(mute = false): void {
 		this.muted = mute;
 		this.sendVoiceUpdate();
 	}
 
 	/**
-     * Disconnect the current bot user from the connected voice channel
-     * @internal
-     */
+	 * Disconnect the current bot user from the connected voice channel
+	 * @internal
+	 */
 	public disconnect(): void {
 		if (this.state === State.DISCONNECTED) return;
 		this.channelId = null;
@@ -134,9 +134,9 @@ export class Connection extends EventEmitter {
 	}
 
 	/**
-     * Connect the current bot user to a voice channel
-     * @internal
-     */
+	 * Connect the current bot user to a voice channel
+	 * @internal
+	 */
 	public async connect(): Promise<void> {
 		if (this.state === State.CONNECTING || this.state === State.CONNECTED) return;
 
@@ -168,14 +168,14 @@ export class Connection extends EventEmitter {
 	}
 
 	/**
-     * Updates SessionId, ChannelId, Deafen and Mute data of this instance
-     * @param options
-     * @param options.session_id Id of the current session
-     * @param options.channel_id Id of the connected voice channel
-     * @param options.self_deaf Boolean that indicates if the current bot user is deafened or not
-     * @param options.self_mute Boolean that indicates if the current bot user is muted or not
-     * @internal
-     */
+	 * Updates SessionId, ChannelId, Deafen and Mute data of this instance
+	 * @param options
+	 * @param options.session_id Id of the current session
+	 * @param options.channel_id Id of the connected voice channel
+	 * @param options.self_deaf Boolean that indicates if the current bot user is deafened or not
+	 * @param options.self_mute Boolean that indicates if the current bot user is muted or not
+	 * @internal
+	 */
 	public setStateUpdate({ session_id, channel_id, self_deaf, self_mute }: StateUpdatePartial): void {
 		this.lastChannelId = this.channelId?.repeat(1) ?? null;
 		this.channelId = channel_id ?? null;
@@ -196,9 +196,9 @@ export class Connection extends EventEmitter {
 	}
 
 	/**
-     * Sets the server update data for this connection
-     * @internal
-     */
+	 * Sets the server update data for this connection
+	 * @internal
+	 */
 	public setServerUpdate(data: ServerUpdate): void {
 		if (!data.endpoint) {
 			this.emit('connectionUpdate', VoiceState.SESSION_ENDPOINT_MISSING);
@@ -222,26 +222,26 @@ export class Connection extends EventEmitter {
 	}
 
 	/**
-     * Send voice data to discord
-     * @internal
-     */
+	 * Send voice data to discord
+	 * @internal
+	 */
 	private sendVoiceUpdate() {
 		this.send({ guild_id: this.guildId, channel_id: this.channelId, self_deaf: this.deafened, self_mute: this.muted });
 	}
 
 	/**
-     * Send data to Discord
-     * @param data The data to send
-     * @internal
-     */
+	 * Send data to Discord
+	 * @param data The data to send
+	 * @internal
+	 */
 	private send(data: unknown): void {
 		this.manager.connector.sendPacket(this.shardId, { op: 4, d: data }, false);
 	}
 
 	/**
-     * Emits a debug log
-     * @internal
-     */
+	 * Emits a debug log
+	 * @internal
+	 */
 	private debug(message: string): void {
 		this.manager.emit('debug', this.constructor.name, message);
 	}
