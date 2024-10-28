@@ -404,20 +404,32 @@ export class Rest {
 	}
 }
 
-interface LavalinkRestError {
-	timestamp: number;
-	status: number;
-	error: string;
-	trace?: string;
-	message: string;
-	path: string;
-}
+type LavalinkRestError = Omit<RestError, 'cause' | 'name' | 'stack'>;
 
+/**
+ * Lavalink error response
+ * @see https://lavalink.dev/api/rest.html#error-responses
+ */
 export class RestError extends Error {
+	/**
+	 * Timestamp in milliseconds since the Unix epoch
+	 */
 	public timestamp: number;
+	/**
+	 * HTTP status code
+	 */
 	public status: number;
+	/**
+	 * HTTP status code message
+	 */
 	public error: string;
+	/**
+	 * Stacktrace (sent when trace query parameter is true)
+	 */
 	public trace?: string;
+	/**
+	 * Request path
+	 */
 	public path: string;
 
 	constructor({ timestamp, status, error, trace, message, path }: LavalinkRestError) {
