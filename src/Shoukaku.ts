@@ -1,10 +1,15 @@
-import { ShoukakuDefaults, VoiceState } from './Constants';
-import { Node, NodeEvents } from './node/Node';
+// eslint-disable-next-line import-x/no-cycle
 import { Connector } from './connectors/Connector';
-import { Constructor, mergeDefault, TypedEventEmitter } from './Utils';
-import { Player } from './guild/Player';
-import { Rest } from './node/Rest';
+// eslint-disable-next-line import-x/no-cycle
+import { ShoukakuDefaults, VoiceState } from './Constants';
+// eslint-disable-next-line import-x/no-cycle
 import { Connection } from './guild/Connection';
+// eslint-disable-next-line import-x/no-cycle
+import { Player } from './guild/Player';
+import { Node, NodeEvents } from './node/Node';
+// eslint-disable-next-line import-x/no-cycle
+import { Rest } from './node/Rest';
+import { Constructor, mergeDefault, TypedEventEmitter } from './Utils';
 
 export interface Structures {
 	/**

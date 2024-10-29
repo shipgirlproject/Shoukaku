@@ -1,4 +1,5 @@
 import { EventEmitter, once } from 'events';
+// eslint-disable-next-line import-x/no-cycle
 import { State, VoiceState } from '../Constants';
 import { Shoukaku, VoiceChannelOptions } from '../Shoukaku';
 

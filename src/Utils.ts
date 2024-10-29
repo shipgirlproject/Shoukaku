@@ -1,4 +1,4 @@
-import { EventEmitter } from 'events';
+import { EventEmitter } from 'node:events';
 
 // https://stackoverflow.com/a/67244127
 export abstract class TypedEventEmitter<T extends Record<string, unknown[]>> extends EventEmitter {

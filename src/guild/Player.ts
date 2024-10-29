@@ -1,8 +1,11 @@
-import { Node } from '../node/Node';
-import { Connection } from './Connection';
+// eslint-disable-next-line import-x/no-cycle
 import { OpCodes, State } from '../Constants';
+// eslint-disable-next-line import-x/no-cycle
+import { Node } from '../node/Node';
+// eslint-disable-next-line import-x/no-cycle
 import { Exception, Track, UpdatePlayerInfo, UpdatePlayerOptions } from '../node/Rest';
 import { TypedEventEmitter } from '../Utils';
+import { Connection } from './Connection';
 
 export type TrackEndReason = 'finished' | 'loadFailed' | 'stopped' | 'replaced' | 'cleanup';
 export type PlayOptions = Omit<UpdatePlayerOptions, 'filters' | 'voice'>;

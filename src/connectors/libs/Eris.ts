@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-return, @typescript-eslint/no-explicit-any */
-import { Connector } from '../Connector';
 import { NodeOption } from '../../Shoukaku';
+import { Connector } from '../Connector';
 
 export class Eris extends Connector {
 	// sendPacket is where your library send packets to Discord Gateway
