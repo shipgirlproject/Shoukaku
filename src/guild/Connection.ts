@@ -1,26 +1,54 @@
 import { EventEmitter, once } from 'node:events';
+import * as z from 'zod';
 // eslint-disable-next-line import-x/no-cycle
 import { State, VoiceState } from '../Constants';
 import { Shoukaku, VoiceChannelOptions } from '../Shoukaku';
 
 /**
  * Represents the partial payload from a stateUpdate event
+ * @see https://discord.com/developers/docs/resources/voice#voice-state-object
  */
-export interface StateUpdatePartial {
-	channel_id?: string;
-	session_id?: string;
-	self_deaf: boolean;
-	self_mute: boolean;
-}
+export const StateUpdatePartial = z.object({
+	/**
+	 * Channel ID the state update is for
+	 */
+	channel_id: z.optional(z.string()),
+	/**
+	 * Session ID the state update is for
+	 */
+	session_id: z.optional(z.string()),
+	/**
+	 * Whether this user is locally deafened
+	 */
+	self_deaf: z.boolean(),
+	/**
+	 * Whether this user is locally muted
+	 */
+	self_mute: z.boolean()
+});
+
+export type StateUpdatePartial = z.TypeOf<typeof StateUpdatePartial>;
 
 /**
  * Represents the payload from a serverUpdate event
+ * @see https://discord.com/developers/docs/topics/gateway-events#voice-server-update
  */
-export interface ServerUpdate {
-	token: string;
-	guild_id: string;
-	endpoint: string;
-}
+export const ServerUpdate = z.object({
+	/**
+	 * Voice connection token
+	 */
+	token: z.string(),
+	/**
+	 * Guild this voice server update is for
+	 */
+	guild_id: z.string(),
+	/**
+	 * Voice server hostname
+	 */
+	endpoint: z.string()
+});
+
+export type ServerUpdate = z.TypeOf<typeof ServerUpdate>;
 
 /**
  * Represents a connection to a Discord voice channel
