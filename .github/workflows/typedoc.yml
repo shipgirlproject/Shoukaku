@@ -77,8 +77,8 @@ jobs:
 
       - name: commit
         run: |
-          git config --global user.email "username@users.noreply.github.com"
-          git config --global user.name "Continuous Integration"
+          git config --global user.email "actions-user@users.noreply.github.com"
+          git config --global user.name "GitHub Actions"
           git add .
-          git commit -m "CI updated the documentation"
+          git commit -m "Updated the docs"
           git push
