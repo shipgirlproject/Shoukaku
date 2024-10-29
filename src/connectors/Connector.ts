@@ -5,9 +5,11 @@ import { ServerUpdate, StateUpdatePartial } from '../guild/Connection';
 import { NodeOption, Shoukaku } from '../Shoukaku';
 import { mergeDefault } from '../Utils';
 
+export type AnyFunction = (...args: any[]) => any;
+
 export interface ConnectorMethods {
-	sendPacket: any;
-	getId: any;
+	sendPacket: AnyFunction;
+	getId: AnyFunction;
 }
 
 export const AllowedPackets = [ 'VOICE_STATE_UPDATE', 'VOICE_SERVER_UPDATE' ];
