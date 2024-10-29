@@ -90,7 +90,7 @@ export const Track = z.object({
 		/**
 		 * Track length in milliseconds
 		 */
-		length: z.number().int(),
+		length: z.number().int().min(0),
 		/**
 		 * Whether the track is a livestream
 		 */
@@ -98,7 +98,7 @@ export const Track = z.object({
 		/**
 		 * Current playback time in milliseconds
 		 */
-		position: z.number().int(),
+		position: z.number().int().min(0),
 		/**
 		 * Track title
 		 */
@@ -155,7 +155,7 @@ export const Playlist = z.object({
 		/**
 		 * The selected track of the playlist (-1 if no track is selected)
 		 */
-		selectedTrack: z.number().int()
+		selectedTrack: z.number().int().min(-1)
 	}),
 	/**
 	 * Additional track info provided by plugins
@@ -393,7 +393,7 @@ export const FailingAddress = z.object({
 	/**
 	 * UNIX timestamp when the IP address failed
 	 */
-	failingTimestamp: z.number().int(),
+	failingTimestamp: z.number().int().min(0),
 	/**
 	 * Time when the IP address failed as a pretty string
 	 * @see https://docs.oracle.com/javase/8/docs/api/java/util/Date.html#toString--
@@ -719,11 +719,11 @@ export const UpdatePlayerOptions = z.object({
 	/**
 	 * Track position in milliseconds
 	 */
-	position: z.number().int().optional(),
+	position: z.number().int().min(0).optional(),
 	/**
 	 * The track end time in milliseconds (must be > 0). null resets this if it was set previously
 	 */
-	endTime: z.number().int().nonnegative().nullable().optional(),
+	endTime: z.number().int().min(0).nullable().optional(),
 	/**
 	 * The player volume, in percentage, from 0 to 1000
 	 */
@@ -783,7 +783,7 @@ export const SessionInfo = z.object({
 	/**
 	 * The timeout in seconds (default is 60s)
 	 */
-	timeout: z.number().int()
+	timeout: z.number().int().min(0)
 });
 
 export type SessionInfo = z.TypeOf<typeof SessionInfo>;
