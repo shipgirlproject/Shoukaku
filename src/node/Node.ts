@@ -43,23 +43,23 @@ export const NodeMemory = z.object({
 	 * Reservable memory in bytes
 	 * @see https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Runtime.html#maxMemory()
 	 */
-	reservable: z.number(),
+	reservable: z.number().int().min(0),
 	/**
 	 * Used memory in bytes
 	 * 
 	 * totalMemory() - freeMemory()
 	 */
-	used: z.number(),
+	used: z.number().int().min(0),
 	/**
 	 * Free memory in bytes
 	 * @see https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Runtime.html#freeMemory()
 	 */
-	free: z.number(),
+	free: z.number().int().min(0),
 	/**
 	 * Allocated memory in bytes
 	 * @see https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Runtime.html#totalMemory()
 	 */
-	allocated: z.number()
+	allocated: z.number().int().min(0)
 });
 
 export type NodeMemory = z.TypeOf<typeof NodeMemory>;
@@ -72,7 +72,7 @@ export const NodeFrameStats = z.object({
 	/**
 	 * Number of frames sent to Discord
 	 */
-	sent: z.number(),
+	sent: z.number().int(),
 	/**
 	 * Difference between number of sent frames and expected number of frames
 	 * 
@@ -80,11 +80,11 @@ export const NodeFrameStats = z.object({
 	 * 
 	 * If negative, too many frames were sent, if positive, not enough frames were sent
 	 */
-	deficit: z.number(),
+	deficit: z.number().int(),
 	/**
 	 * Number of frames nulled
 	 */
-	nulled: z.number()
+	nulled: z.number().int()
 });
 
 export type NodeFrameStats = z.TypeOf<typeof NodeFrameStats>;
@@ -126,15 +126,15 @@ export const Stats = z.object({
 	/**
 	 * Number of players connected to node
 	 */
-	players: z.number(),
+	players: z.number().int().min(0),
 	/**
 	 * Number of players playing a track
 	 */
-	playingPlayers: z.number(),
+	playingPlayers: z.number().int().min(0),
 	/**
 	 * Node uptime in milliseconds
 	 */
-	uptime: z.number(),
+	uptime: z.number().int().min(0),
 	/**
 	 * Memory statistics
 	 * @see {@link NodeMemory} representation in Shoukaku
@@ -170,15 +170,15 @@ export const NodeInfoVersion = z.object({
 	/**
 	 * Major version
 	 */
-	major: z.number(),
+	major: z.number().int(),
 	/**
 	 * Minor version
 	 */
-	minor: z.number(),
+	minor: z.number().int(),
 	/**
 	 * Patch version
 	 */
-	patch: z.number(),
+	patch: z.number().int(),
 	/**
 	 * Prerelease version
 	 */
@@ -208,7 +208,7 @@ export const NodeInfoGit = z.object({
 	/**
 	 * UNIX timestamp in miliseconds when Git commit was created
 	 */
-	commitTime: z.number()
+	commitTime: z.number().int().min(0)
 });
 
 export type NodeInfoGit = z.TypeOf<typeof NodeInfoGit>;
@@ -246,7 +246,7 @@ export const NodeInfo = z.object({
 	/**
 	 * UNIX timestamp in miliseconds when Lavalink JAR was built
 	 */
-	buildTime: z.number(),
+	buildTime: z.number().int().min(0),
 	/**
 	 * Lavalink Git information
 	 * @see {@link NodeInfoGit} representation in Shoukaku
