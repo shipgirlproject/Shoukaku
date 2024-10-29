@@ -44,7 +44,7 @@
     "ws": "^8.18.0"
   },
   "devDependencies": {
-    "@shipgirl/eslint-config": "^0.3.0",
+    "@shipgirl/eslint-config": "^0.4.0",
     "@types/node": "^22.8.2",
     "@types/ws": "^8.5.12",
     "eslint": "^9.13.0",
