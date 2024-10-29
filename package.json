@@ -41,11 +41,11 @@
     "url": "https://github.com/shipgirlproject/Shoukaku.git"
   },
   "dependencies": {
-    "@shipgirl/typedoc-plugin-versions": "^0.2.4",
     "ws": "^8.18.0"
   },
   "devDependencies": {
     "@shipgirl/eslint-config": "^0.4.0",
+    "@shipgirl/typedoc-plugin-versions": "^0.2.4",
     "@types/node": "^22.14.1",
     "@types/ws": "^8.18.1",
     "eslint": "^9.25.1",
