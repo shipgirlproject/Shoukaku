@@ -114,7 +114,7 @@ export const Band = z.object({
 	 *
 	 * 14 = 16000 Hz
 	 */
-	band: z.number().min(0).max(14),
+	band: z.number().int().min(0).max(14),
 	/**
 	 * Multiplier for each band. Valid values range from -0.25 to 1.00, 
 	 * where -0.25 means the given band is completely muted, 
@@ -385,7 +385,7 @@ export const TrackStuckEvent = PlayerEvent.extend({
 	/**
 	 * Threshold in milliseconds that was exceeded
 	 */
-	thresholdMs: z.number()
+	thresholdMs: z.number().int()
 });
 
 export type TrackStuckEvent = z.TypeOf<typeof TrackStuckEvent>;
@@ -436,7 +436,7 @@ export const WebSocketClosedEvent = PlayerEvent.extend({
 	 * Discord close event code
 	 * @see https://discord.com/developers/docs/topics/opcodes-and-status-codes#voice-voice-close-event-codes
 	 */
-	code: z.number(),
+	code: z.number().int(),
 	/**
 	 * Whether the connection was closed by Discord
 	 */
@@ -461,15 +461,15 @@ export const PlayerState = z.object({
 	/**
 	 * The position of the track in milliseconds
 	 */
-	position: z.number(),
+	position: z.number().int().min(0),
 	/**
 	 * Unix timestamp in milliseconds
 	 */
-	time: z.number(),
+	time: z.number().int().min(0),
 	/**
 	 * The ping of the node to the Discord voice server in milliseconds (-1 if not connected)
 	 */
-	ping: z.number()
+	ping: z.number().int().min(-1)
 });
 
 export type PlayerState = z.TypeOf<typeof PlayerState>;
