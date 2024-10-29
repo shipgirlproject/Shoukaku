@@ -44,12 +44,12 @@
     "ws": "^8.18.0"
   },
   "devDependencies": {
-    "@shipgirl/eslint-config": "^0.2.2",
-    "@types/node": "^22.5.5",
+    "@shipgirl/eslint-config": "^0.3.0",
+    "@types/node": "^22.8.2",
     "@types/ws": "^8.5.12",
-    "eslint": "^9.10.0",
-    "tsup": "^8.3.0",
-    "typedoc": "^0.26.7",
-    "typescript": "^5.6.2"
+    "eslint": "^9.13.0",
+    "tsup": "^8.3.5",
+    "typedoc": "^0.26.10",
+    "typescript": "^5.6.3"
   }
 }
