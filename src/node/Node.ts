@@ -1,5 +1,6 @@
 import { IncomingMessage } from 'node:http';
 import Websocket from 'ws';
+import * as z from 'zod';
 // eslint-disable-next-line import-x/no-cycle
 import { OpCodes, ShoukakuClientInfo, State, Versions } from '../Constants';
 // eslint-disable-next-line import-x/no-cycle
@@ -9,71 +10,280 @@ import { TypedEventEmitter, wait } from '../Utils';
 // eslint-disable-next-line import-x/no-cycle
 import { Rest } from './Rest';
 
-export interface Ready {
-	op: OpCodes.READY;
-	resumed: boolean;
-	sessionId: string;
-}
+/**
+ * Dispatched by Lavalink upon successful connection and authorization
+ * @see https://lavalink.dev/api/websocket.html#ready-op
+ */
+export const Ready = z.object({
+	/**
+	 * WebSocket OpCode
+	 * @see {@link OpCodes} representation in Shoukaku
+	 * @see https://lavalink.dev/api/websocket.html#op-types
+	 */
+	op: z.literal(OpCodes.enum.READY),
+	/**
+	 * Whether this session was resumed
+	 */
+	resumed: z.boolean(),
+	/**
+	 * The Lavalink session id of this connection (not Discord voice session id)
+	 */
+	sessionId: z.string()
+});
 
-export interface NodeMemory {
-	reservable: number;
-	used: number;
-	free: number;
-	allocated: number;
-}
+export type Ready = z.TypeOf<typeof Ready>;
 
-export interface NodeFrameStats {
-	sent: number;
-	deficit: number;
-	nulled: number;
-}
+/**
+ * Memory statistics
+ * @see https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Runtime.html
+ * @see https://lavalink.dev/api/websocket#memory
+ */
+export const NodeMemory = z.object({
+	/**
+	 * Reservable memory in bytes
+	 * @see https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Runtime.html#maxMemory()
+	 */
+	reservable: z.number(),
+	/**
+	 * Used memory in bytes
+	 * 
+	 * totalMemory() - freeMemory()
+	 */
+	used: z.number(),
+	/**
+	 * Free memory in bytes
+	 * @see https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Runtime.html#freeMemory()
+	 */
+	free: z.number(),
+	/**
+	 * Allocated memory in bytes
+	 * @see https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Runtime.html#totalMemory()
+	 */
+	allocated: z.number()
+});
 
-export interface NodeCpu {
-	cores: number;
-	systemLoad: number;
-	lavalinkLoad: number;
-}
+export type NodeMemory = z.TypeOf<typeof NodeMemory>;
 
-export interface Stats {
-	op: OpCodes.STATS;
-	players: number;
-	playingPlayers: number;
-	memory: NodeMemory;
-	frameStats: NodeFrameStats | null;
-	cpu: NodeCpu;
-	uptime: number;
-}
+/**
+ * Frame statistics
+ * @see https://lavalink.dev/api/websocket#frame-stats
+ */
+export const NodeFrameStats = z.object({
+	/**
+	 * Number of frames sent to Discord
+	 */
+	sent: z.number(),
+	/**
+	 * Difference between number of sent frames and expected number of frames
+	 * 
+	 * Expected amount of frames is 3000 (1 frame every 20 milliseconds)
+	 * 
+	 * If negative, too many frames were sent, if positive, not enough frames were sent
+	 */
+	deficit: z.number(),
+	/**
+	 * Number of frames nulled
+	 */
+	nulled: z.number()
+});
 
-export interface NodeInfoVersion {
-	semver: string;
-	major: number;
-	minor: number;
-	patch: number;
-	preRelease?: string;
-	build?: string;
-}
+export type NodeFrameStats = z.TypeOf<typeof NodeFrameStats>;
 
-export interface NodeInfoGit {
-	branch: string;
-	commit: string;
-	commitTime: number;
-}
+/**
+ * CPU statistics
+ * @see https://lavalink.dev/api/websocket#cpu
+ */
+export const NodeCpu = z.object({
+	/**
+	 * Number of CPU cores available to JVM
+	 * @see https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Runtime.html#availableProcessors()
+	 */
+	cores: z.number(),
+	/**
+	 * Recent system CPU usage from load ticks
+	 * @see https://www.oshi.ooo/oshi-core/apidocs/oshi/hardware/CentralProcessor.html#getSystemCpuLoadBetweenTicks(long%5B%5D)
+	 */
+	systemLoad: z.number(),
+	/**
+	 * Recent Lavalink CPU usage from CPU time per core
+	 */
+	lavalinkLoad: z.number()
+});
 
-export interface NodeInfoPlugin {
-	name: string;
-	version: string;
-}
+export type NodeCpu = z.TypeOf<typeof NodeCpu>;
 
-export interface NodeInfo {
-	version: NodeInfoVersion;
-	buildTime: number;
-	git: NodeInfoGit;
-	jvm: string;
-	lavaplayer: string;
-	sourceManagers: string[];
-	filters: string[];
-	plugins: NodeInfoPlugin[];
-}
+/**
+ * Dispatched by Lavalink every minute when the node sends statistics
+ * @see https://lavalink.dev/api/websocket.html#stats-op
+ */
+export const Stats = z.object({
+	/**
+	 * WebSocket OpCode
+	 * @see {@link OpCodes} representation in Shoukaku
+	 * @see https://lavalink.dev/api/websocket.html#op-types
+	 */
+	op: z.literal(OpCodes.enum.STATS),
+	/**
+	 * Number of players connected to node
+	 */
+	players: z.number(),
+	/**
+	 * Number of players playing a track
+	 */
+	playingPlayers: z.number(),
+	/**
+	 * Node uptime in milliseconds
+	 */
+	uptime: z.number(),
+	/**
+	 * Memory statistics
+	 * @see {@link NodeMemory} representation in Shoukaku
+	 * @see https://lavalink.dev/api/websocket#memory
+	 */
+	memory: NodeMemory,
+	/**
+	 * CPU statistics
+	 * @see {@link NodeCpu} representation in Shoukaku
+	 * @see https://lavalink.dev/api/websocket#cpu
+	 */
+	cpu: NodeCpu,
+	/**
+	 * Frame statistics, null when node has no players or retrieved via /v4/stats endpoint
+	 * @see {@link NodeFrameStats} representation in Shoukaku
+	 * @see https://lavalink.dev/api/websocket#frame-stats
+	 */
+	frameStats: z.optional(NodeFrameStats)
+});
+
+export type Stats = z.TypeOf<typeof Stats>;
+
+/**
+ * Parsed Semantic Versioning 2.0.0
+ * @see https://semver.org/spec/v2.0.0.html
+ * @see https://lavalink.dev/api/rest#version-object
+ */
+export const NodeInfoVersion = z.object({
+	/**
+	 * Full version string
+	 */
+	semver: z.string(),
+	/**
+	 * Major version
+	 */
+	major: z.number(),
+	/**
+	 * Minor version
+	 */
+	minor: z.number(),
+	/**
+	 * Patch version
+	 */
+	patch: z.number(),
+	/**
+	 * Prerelease version
+	 */
+	preRelease: z.optional(z.string()),
+	/**
+	 * Build metadata
+	 */
+	build: z.optional(z.string())
+});
+
+export type NodeInfoVersion = z.TypeOf<typeof NodeInfoVersion>;
+
+/**
+ * Lavalink Git information
+ * @see https://git-scm.com/book/en/v2/Git-Basics-Viewing-the-Commit-History
+ * @see https://lavalink.dev/api/rest#git-object
+ */
+export const NodeInfoGit = z.object({
+	/**
+	 * Git branch
+	 */
+	branch: z.string(),
+	/**
+	 * Git commit hash
+	 */
+	commit: z.string(),
+	/**
+	 * UNIX timestamp in miliseconds when Git commit was created
+	 */
+	commitTime: z.number()
+});
+
+export type NodeInfoGit = z.TypeOf<typeof NodeInfoGit>;
+
+/**
+ * List of available plugins
+ * @see https://lavalink.dev/plugins
+ * @see https://lavalink.dev/api/rest#plugin-object
+ */
+export const NodeInfoPlugin = z.object({
+	/**
+	 * Plugin name
+	 */
+	name: z.string(),
+	/**
+	 * Plugin version
+	 */
+	version: z.string()
+});
+
+export type NodeInfoPlugin = z.TypeOf<typeof NodeInfoPlugin>;
+
+/**
+ * Node information
+ * @see https://lavalink.dev/api/rest.html#info-response
+ */
+export const NodeInfo = z.object({
+	/**
+	 * Lavalink server version
+	 * @see {@link NodeInfoVersion} representation in Shoukaku
+	 * @see https://semver.org/spec/v2.0.0.html
+	 * @see https://lavalink.dev/api/rest.html#version-object
+	 */
+	version: NodeInfoVersion,
+	/**
+	 * UNIX timestamp in miliseconds when Lavalink JAR was built
+	 */
+	buildTime: z.number(),
+	/**
+	 * Lavalink Git information
+	 * @see {@link NodeInfoGit} representation in Shoukaku
+	 * @see https://git-scm.com/book/en/v2/Git-Basics-Viewing-the-Commit-History
+	 * @see https://lavalink.dev/api/rest#git-object
+	 */
+	git: NodeInfoGit,
+	/**
+	 * JVM version string
+	 * @see https://en.wikipedia.org/wiki/Java_version_history#Release_table
+	 */
+	jvm: z.string(),
+	/**
+	 * Lavaplayer version string
+	 * @see https://github.com/lavalink-devs/lavaplayer/releases
+	 */
+	lavaplayer: z.string(),
+	/**
+	 * List of enabled source managers
+	 * @see https://lavalink.dev/configuration/index.html
+	 */
+	sourceManagers: z.array(z.string()),
+	/**
+	 * List of enabled filters
+	 * @see https://lavalink.dev/configuration/index.html
+	 */
+	filters: z.array(z.string()),
+	/**
+	 * List of available plugins
+	 * @see {@link NodeInfoPlugin} representation in Shoukaku
+	 * @see https://lavalink.dev/plugins
+	 * @see https://lavalink.dev/api/rest#plugin-object
+	 */
+	plugins: z.array(NodeInfoPlugin)
+});
+
+export type NodeInfo = z.TypeOf<typeof NodeInfo>;
 
 export interface ResumableHeaders {
 	[key: string]: string;
@@ -271,11 +481,11 @@ export class Node extends TypedEventEmitter<NodeEvents> {
 		if (!json) return;
 		this.emit('raw', json);
 		switch (json.op) {
-			case OpCodes.STATS:
+			case OpCodes.enum.STATS:
 				this.emit('debug', `[Socket] <- [${this.name}] : Node Status Update | Server Load: ${this.penalties}`);
 				this.stats = json;
 				break;
-			case OpCodes.READY: {
+			case OpCodes.enum.READY: {
 				if (!json.sessionId) {
 					this.emit('debug', `[Socket] -> [${this.name}] : No session id found from ready op? disconnecting and reconnecting to avoid issues`);
 					return this.internalDisconnect(1000);
@@ -306,11 +516,11 @@ export class Node extends TypedEventEmitter<NodeEvents> {
 
 				break;
 			}
-			case OpCodes.EVENT:
-			case OpCodes.PLAYER_UPDATE: {
+			case OpCodes.enum.EVENT:
+			case OpCodes.enum.PLAYER_UPDATE: {
 				const player = this.manager.players.get(json.guildId);
 				if (!player) return;
-				if (json.op === OpCodes.EVENT)
+				if (json.op === OpCodes.enum.EVENT)
 					player.onPlayerEvent(json);
 				else
 					player.onPlayerUpdate(json);

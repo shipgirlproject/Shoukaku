@@ -1,3 +1,4 @@
+import * as z from 'zod';
 import Info from '../package.json';
 // eslint-disable-next-line import-x/no-cycle
 import { NodeOption, ShoukakuOptions } from './Shoukaku';
@@ -18,12 +19,20 @@ export enum VoiceState {
 	SESSION_FAILED_UPDATE
 }
 
-export enum OpCodes {
+// export to allow compiler to determine shape
+/**
+ * Websocket operation codes
+ * @see https://lavalink.dev/api/websocket#op-types
+ */
+export enum OpCodesEnum {
 	PLAYER_UPDATE = 'playerUpdate',
 	STATS = 'stats',
 	EVENT = 'event',
 	READY = 'ready'
 }
+
+export const OpCodes = z.nativeEnum(OpCodesEnum);
+export type OpCode = z.TypeOf<typeof OpCodes>;
 
 export const Versions = {
 	REST_VERSION: 4,
