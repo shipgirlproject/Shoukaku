@@ -47,6 +47,10 @@ export interface NodeOption {
 
 export interface ShoukakuOptions {
 	/**
+	 * Whether to validate Lavalink responses (worse performance)
+	 */
+	validate?: boolean;
+	/**
 	 * Whether to resume a connection on disconnect to Lavalink (Server Side) (Note: DOES NOT RESUME WHEN THE LAVALINK SERVER DIES)
 	 */
 	resume?: boolean;
@@ -173,6 +177,7 @@ export class Shoukaku extends TypedEventEmitter<ShoukakuEvents> {
 	 * @param connector A Discord library connector
 	 * @param nodes An array that conforms to the NodeOption type that specifies nodes to connect to
 	 * @param options Options to pass to create this Shoukaku instance
+	 * @param options.validate Whether to validate Lavalink responses (worse performance)
 	 * @param options.resume Whether to resume a connection on disconnect to Lavalink (Server Side) (Note: DOES NOT RESUME WHEN THE LAVALINK SERVER DIES)
 	 * @param options.resumeTimeout Time to wait before lavalink starts to destroy the players of the disconnected client
 	 * @param options.resumeByLibrary Whether to resume the players by doing it in the library side (Client Side) (Note: TRIES TO RESUME REGARDLESS OF WHAT HAPPENED ON A LAVALINK SERVER)

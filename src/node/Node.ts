@@ -308,58 +308,77 @@ export class Node extends TypedEventEmitter<NodeEvents> {
 	 * Shoukaku class
 	 */
 	public readonly manager: Shoukaku;
+
 	/**
 	 * Lavalink rest API
 	 */
 	public readonly rest: Rest;
+
 	/**
 	 * Name of this node
 	 */
 	public readonly name: string;
+
 	/**
 	 * Group in which this node is contained
 	 */
 	public readonly group?: string;
+
 	/**
 	 * URL of Lavalink
 	 */
 	private readonly url: string;
+
 	/**
 	 * Credentials to access Lavalink
 	 */
 	private readonly auth: string;
+
 	/**
 	 * The number of reconnects to Lavalink
 	 */
+
 	public reconnects: number;
 	/**
 	 * The state of this connection
 	 */
 	public state: State;
+
 	/**
 	 * Statistics from Lavalink
 	 */
 	public stats: Stats | null;
+
 	/**
 	 * Information about lavalink node
 	*/
 	public info: NodeInfo | null;
+
 	/**
 	 * Websocket instance
 	 */
 	public ws: Websocket | null;
+
 	/**
 	 * SessionId of this Lavalink connection (not to be confused with Discord SessionId)
 	 */
 	public sessionId: string | null;
+
 	/**
 	 * Boolean that represents if the node has initialized once
 	 */
 	protected initialized: boolean;
+
 	/**
 	 * Boolean that represents if this connection is destroyed
 	 */
 	protected destroyed: boolean;
+
+	/**
+	 * Whether to validate Lavalink responses
+	 */
+	private readonly validate: boolean;
+
 	/**
 	 * @param manager Shoukaku instance
 	 * @param options Options on creating this node
@@ -385,6 +404,7 @@ export class Node extends TypedEventEmitter<NodeEvents> {
 		this.sessionId = null;
 		this.initialized = false;
 		this.destroyed = false;
+		this.validate = this.manager.options.validate;
 	}
 
 	/**
@@ -439,7 +459,7 @@ export class Node extends TypedEventEmitter<NodeEvents> {
 		this.emit('debug', `[Socket] -> [${this.name}] : Connecting to ${this.url} ...`);
 
 		const url = new URL(this.url);
-		this.ws = new Websocket(url.toString(), { headers } as Websocket.ClientOptions);
+		this.ws = new Websocket(url.toString(), { headers });
 
 		this.ws.once('upgrade', response => this.open(response));
 		this.ws.once('close', (...args) => this.close(...args));
@@ -483,20 +503,22 @@ export class Node extends TypedEventEmitter<NodeEvents> {
 		switch (json.op) {
 			case OpCodes.enum.STATS:
 				this.emit('debug', `[Socket] <- [${this.name}] : Node Status Update | Server Load: ${this.penalties}`);
-				this.stats = json;
+				this.stats = this.validate ? Stats.parse(json) : json;
 				break;
 			case OpCodes.enum.READY: {
-				if (!json.sessionId) {
+				const data = this.validate ? Ready.parse(json) : json;
+
+				if (!data.sessionId) {
 					this.emit('debug', `[Socket] -> [${this.name}] : No session id found from ready op? disconnecting and reconnecting to avoid issues`);
 					return this.internalDisconnect(1000);
 				}
 
-				this.sessionId = json.sessionId;
+				this.sessionId = data.sessionId;
 
 				const players = [ ...this.manager.players.values() ].filter(player => player.node.name === this.name);
 
 				let resumedByLibrary = false;
-				if (!json.resumed && Boolean(this.initialized && (players.length && this.manager.options.resumeByLibrary))) {
+				if (!data.resumed && Boolean(this.initialized && (players.length && this.manager.options.resumeByLibrary))) {
 					try {
 						await this.resumePlayers();
 						resumedByLibrary = true;
@@ -506,8 +528,8 @@ export class Node extends TypedEventEmitter<NodeEvents> {
 				}
 
 				this.state = State.CONNECTED;
-				this.emit('debug', `[Socket] -> [${this.name}] : Lavalink is ready! | Lavalink resume: ${json.resumed} | Lib resume: ${resumedByLibrary}`);
-				this.emit('ready', json.resumed, resumedByLibrary);
+				this.emit('debug', `[Socket] -> [${this.name}] : Lavalink is ready! | Lavalink resume: ${data.resumed} | Lib resume: ${resumedByLibrary}`);
+				this.emit('ready', data.resumed, resumedByLibrary);
 
 				if (this.manager.options.resume) {
 					await this.rest.updateSession(this.manager.options.resume, this.manager.options.resumeTimeout);
@@ -518,12 +540,12 @@ export class Node extends TypedEventEmitter<NodeEvents> {
 			}
 			case OpCodes.enum.EVENT:
 			case OpCodes.enum.PLAYER_UPDATE: {
-				const player = this.manager.players.get(json.guildId);
+				const player = 'guildId' in json && this.manager.players.get(json.guildId);
 				if (!player) return;
 				if (json.op === OpCodes.enum.EVENT)
 					player.onPlayerEvent(json);
 				else
-					player.onPlayerUpdate(json);
+					player.onPlayerUpdate(this.validate ? PlayerUpdate.parse(json) : json);
 				break;
 			}
 			default:
