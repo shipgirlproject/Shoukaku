@@ -1,5 +1,4 @@
-import { IncomingMessage } from 'http';
-
+import { IncomingMessage } from 'node:http';
 import Websocket from 'ws';
 // eslint-disable-next-line import-x/no-cycle
 import { OpCodes, ShoukakuClientInfo, State, Versions } from '../Constants';
