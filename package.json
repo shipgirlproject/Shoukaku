@@ -13,6 +13,8 @@
     }
   },
   "scripts": {
+    "test": "vitest",
+    "test:coverage": "vitest run --coverage",
     "build": "npm run build:ts && npm run build:docs",
     "build:ts": "tsup --config tsup-config.json",
     "build:docs": "typedoc",
@@ -47,9 +49,14 @@
     "@shipgirl/eslint-config": "^0.5.0",
     "@types/node": "^25.2.3",
     "@types/ws": "^8.18.1",
+    "@vitest/coverage-v8": "^2.1.4",
     "eslint": "^9.39.2",
+    "msw": "^2.3.0-ws.rc-12",
+    "picocolors": "^1.1.1",
     "tsup": "^8.5.1",
     "typedoc": "^0.28.17",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^2.1.4",
+    "vitest-mock-extended": "^2.0.2"
   }
 }
