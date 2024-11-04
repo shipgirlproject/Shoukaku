@@ -612,34 +612,46 @@ export class Player extends TypedEventEmitter<PlayerEvents> {
 	 * GuildId of this player
 	 */
 	public readonly guildId: string;
+
 	/**
 	 * Lavalink node this player is connected to
 	 */
 	public node: Node;
+
 	/**
 	 * Base64 encoded data of the current track
 	 */
 	public track: string | null;
+
 	/**
 	 * Global volume of the player
 	 */
 	public volume: number;
+
 	/**
 	 * Pause status in current player
 	 */
 	public paused: boolean;
+
 	/**
 	 * Ping represents the number of milliseconds between heartbeat and ack. Could be `-1` if not connected
 	 */
 	public ping: number;
+
 	/**
 	 * Position in ms of current track
 	 */
 	public position: number;
+
 	/**
 	 * Filters on current track
 	 */
 	public filters: FilterOptions;
+
+	/**
+	 * Whether to validate Lavalink responses
+	 */
+	private readonly validate: boolean;
 
 	constructor(guildId: string, node: Node) {
 		super();
@@ -651,6 +663,7 @@ export class Player extends TypedEventEmitter<PlayerEvents> {
 		this.position = 0;
 		this.ping = 0;
 		this.filters = {};
+		this.validate = this.node.manager.options.validate;
 	}
 
 	public get data(): UpdatePlayerInfo {
@@ -943,10 +956,11 @@ export class Player extends TypedEventEmitter<PlayerEvents> {
 	 * Handle player update data
 	 */
 	public onPlayerUpdate(json: PlayerUpdate): void {
-		const { position, ping } = json.state;
+		const data = this.validate ? PlayerUpdate.parse(json) : json;
+		const { position, ping } = data.state;
 		this.position = position;
 		this.ping = ping;
-		this.emit('update', json);
+		this.emit('update', data);
 	}
 
 	/**
@@ -956,21 +970,23 @@ export class Player extends TypedEventEmitter<PlayerEvents> {
 	 */
 	public onPlayerEvent(json: TrackStartEvent | TrackEndEvent | TrackStuckEvent | TrackExceptionEvent | WebSocketClosedEvent): void {
 		switch (json.type) {
-			case PlayerEventType.enum.TRACK_START_EVENT:
-				if (this.track) this.track = json.track.encoded;
-				this.emit('start', json);
+			case PlayerEventType.enum.TRACK_START_EVENT: {
+				const data = this.validate ? TrackStartEvent.parse(json) : json;
+				if (this.track) this.track = data.track.encoded;
+				this.emit('start', data);
 				break;
+			}
 			case PlayerEventType.enum.TRACK_END_EVENT:
-				this.emit('end', json);
+				this.emit('end', this.validate ? TrackEndEvent.parse(json) : json);
 				break;
 			case PlayerEventType.enum.TRACK_STUCK_EVENT:
-				this.emit('stuck', json);
+				this.emit('stuck', this.validate ? TrackStuckEvent.parse(json) : json);
 				break;
 			case PlayerEventType.enum.TRACK_EXCEPTION_EVENT:
-				this.emit('exception', json);
+				this.emit('exception', this.validate ? TrackExceptionEvent.parse(json) : json);
 				break;
 			case PlayerEventType.enum.WEBSOCKET_CLOSED_EVENT:
-				this.emit('closed', json);
+				this.emit('closed', this.validate ? WebSocketClosedEvent.parse(json) : json);
 				break;
 			default:
 				this.node.manager.emit(

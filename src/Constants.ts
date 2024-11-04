@@ -40,6 +40,7 @@ export const Versions = {
 };
 
 export const ShoukakuDefaults: Required<ShoukakuOptions> = {
+	validate: false,
 	resume: false,
 	resumeTimeout: 30,
 	resumeByLibrary: false,
