@@ -1,5 +1,35 @@
 import { EventEmitter } from 'node:events';
 
+export type Extension = Record<string, unknown>;
+export type Plugin<T> = (instance: T) => Extension;
+
+// https://stackoverflow.com/a/58603027
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function withPlugins<TBase extends new (...args: any[]) => any>(Base: TBase) {
+	return class ClassWithPlugins extends Base {
+		static plugins: Plugin<ClassWithPlugins>[];
+		static plugin<T extends Plugin<ClassWithPlugins>>(plugin: T) {
+			const currentPlugins = this.plugins;
+
+			class ExtendedClassWithPlugins extends this {
+				static plugins = currentPlugins.concat(plugin);
+			}
+
+			return ExtendedClassWithPlugins as typeof ExtendedClassWithPlugins & Constructor<ReturnType<T>>;
+		}
+
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		constructor(...args: any[]) {
+			super(args);
+			// https://stackoverflow.com/a/16345172
+			const classConstructor = this.constructor as typeof ClassWithPlugins;
+			classConstructor.plugins.forEach(plugin => {
+				Object.assign(this, plugin(this));
+			});
+		}
+	};
+}
+
 // https://stackoverflow.com/a/67244127
 export abstract class TypedEventEmitter<T extends Record<string, unknown[]>> extends EventEmitter {
 	protected constructor() {
