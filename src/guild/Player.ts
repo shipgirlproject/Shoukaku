@@ -39,7 +39,7 @@ export const TrackEndReason = z.nativeEnum(TrackEndReasonEnum);
 export type TrackEndReason = z.TypeOf<typeof TrackEndReason>;
 
 export type PlayOptions = Omit<UpdatePlayerOptions, 'filters' | 'voice'>;
-export type ResumeOptions = Omit<UpdatePlayerOptions, 'track' | 'filters' | 'voice'>;
+export type ResumeOptions = Omit<UpdatePlayerOptions, 'track' | 'filters' | 'voice'> & { playerState?: UpdatePlayerOptions };
 
 /**
  * Type of event dispatched
@@ -619,36 +619,6 @@ export class Player extends TypedEventEmitter<PlayerEvents> {
 	public node: Node;
 
 	/**
-	 * Base64 encoded data of the current track
-	 */
-	public track: string | null;
-
-	/**
-	 * Global volume of the player
-	 */
-	public volume: number;
-
-	/**
-	 * Pause status in current player
-	 */
-	public paused: boolean;
-
-	/**
-	 * Ping represents the number of milliseconds between heartbeat and ack. Could be `-1` if not connected
-	 */
-	public ping: number;
-
-	/**
-	 * Position in ms of current track
-	 */
-	public position: number;
-
-	/**
-	 * Filters on current track
-	 */
-	public filters: FilterOptions;
-
-	/**
 	 * Whether to validate Lavalink responses
 	 */
 	private readonly validate: boolean;
@@ -657,32 +627,27 @@ export class Player extends TypedEventEmitter<PlayerEvents> {
 		super();
 		this.guildId = guildId;
 		this.node = node;
-		this.track = null;
-		this.volume = 100;
-		this.paused = false;
-		this.position = 0;
-		this.ping = 0;
-		this.filters = {};
 		this.validate = this.node.manager.options.validate;
 	}
 
-	public get data(): UpdatePlayerInfo {
+	public async data(): Promise<UpdatePlayerInfo> {
 		const connection = this.node.manager.connections.get(this.guildId)!;
+		const player = await this.node.rest.getPlayer(this.guildId);
 		return {
 			guildId: this.guildId,
 			playerOptions: {
 				track: {
-					encoded: this.track
+					encoded: player?.track?.encoded ?? null
 				},
-				position: this.position,
-				paused: this.paused,
-				filters: this.filters,
+				position: player?.state.position,
+				paused: player?.paused,
+				filters: player?.filters,
 				voice: {
 					token: connection.serverUpdate!.token,
 					endpoint: connection.serverUpdate!.endpoint,
 					sessionId: connection.sessionId!
 				},
-				volume: this.volume
+				volume: player?.volume
 			}
 		};
 	}
@@ -876,18 +841,20 @@ export class Player extends TypedEventEmitter<PlayerEvents> {
 	 * @param noReplace Set it to true if you don't want to replace the currently playing track
 	 */
 	public async resume(options: ResumeOptions = {}, noReplace = false): Promise<void> {
-		const data = this.data;
+		const data = options.playerState ?? (await this.data()).playerOptions;
+
+		if (!data) throw new Error(`[Player] Unexpected state: Empty player data for guild ${this.guildId}.`);
 
 		if (typeof options.position === 'number')
-			data.playerOptions.position = options.position;
+			data.position = options.position;
 		if (typeof options.endTime === 'number')
-			data.playerOptions.endTime = options.endTime;
+			data.endTime = options.endTime;
 		if (typeof options.paused === 'boolean')
-			data.playerOptions.paused = options.paused;
+			data.paused = options.paused;
 		if (typeof options.volume === 'number')
-			data.playerOptions.volume = options.volume;
+			data.volume = options.volume;
 
-		await this.update(data.playerOptions, noReplace);
+		await this.update(data, noReplace);
 
 		this.emit('resumed', this);
 	}
@@ -905,21 +872,6 @@ export class Player extends TypedEventEmitter<PlayerEvents> {
 		};
 
 		await this.node.rest.updatePlayer(data);
-
-		if (!noReplace) this.paused = false;
-
-		if (playerOptions.filters) {
-			this.filters = { ...this.filters, ...playerOptions.filters };
-		}
-
-		if (typeof playerOptions.track !== 'undefined')
-			this.track = playerOptions.track.encoded ?? null;
-		if (typeof playerOptions.paused === 'boolean')
-			this.paused = playerOptions.paused;
-		if (typeof playerOptions.volume === 'number')
-			this.volume = playerOptions.volume;
-		if (typeof playerOptions.position === 'number')
-			this.position = playerOptions.position;
 	}
 
 	/**
@@ -928,10 +880,6 @@ export class Player extends TypedEventEmitter<PlayerEvents> {
 	 */
 	public clean(): void {
 		this.removeAllListeners();
-		this.track = null;
-		this.volume = 100;
-		this.position = 0;
-		this.filters = {};
 	}
 
 	/**
@@ -957,9 +905,6 @@ export class Player extends TypedEventEmitter<PlayerEvents> {
 	 */
 	public onPlayerUpdate(json: PlayerUpdate): void {
 		const data = this.validate ? PlayerUpdate.parse(json) : json;
-		const { position, ping } = data.state;
-		this.position = position;
-		this.ping = ping;
 		this.emit('update', data);
 	}
 
@@ -972,7 +917,6 @@ export class Player extends TypedEventEmitter<PlayerEvents> {
 		switch (json.type) {
 			case PlayerEventType.enum.TRACK_START_EVENT: {
 				const data = this.validate ? TrackStartEvent.parse(json) : json;
-				if (this.track) this.track = data.track.encoded;
 				this.emit('start', data);
 				break;
 			}
