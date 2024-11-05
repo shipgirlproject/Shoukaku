@@ -204,7 +204,7 @@ export class Rest {
 	public resolve(identifier: string): Promise<LavalinkResponse | undefined> {
 		const options = {
 			endpoint: '/loadtracks',
-			options: { params: { identifier }}
+			options: { params: { identifier } }
 		};
 		return this.fetch(options);
 	}
@@ -217,7 +217,7 @@ export class Rest {
 	public decode(track: string): Promise<Track | undefined> {
 		const options = {
 			endpoint: '/decodetrack',
-			options: { params: { track }}
+			options: { params: { track } }
 		};
 		return this.fetch<Track>(options);
 	}
@@ -378,8 +378,8 @@ export class Rest {
 			signal: abortController.signal
 		};
 
-		if (![ 'GET', 'HEAD' ].includes(method) && options.body)
-			finalFetchOptions.body = JSON.stringify(options.body);
+		if (!['GET', 'HEAD'].includes(method) && options.body)
+			finalFetchOptions.body = JSON.stringify(options.body, this.removeCircularReferences());
 
 		const request = await fetch(url.toString(), finalFetchOptions)
 			.finally(() => clearTimeout(timeout));
@@ -401,6 +401,18 @@ export class Rest {
 		} catch {
 			return;
 		}
+	}
+	private removeCircularReferences() {
+		const seen = new WeakSet();
+		return (key: string, value: unknown) => {
+			if (typeof value === "object" && value !== null) {
+				if (seen.has(value)) {
+					return; // Skip circular reference
+				}
+				seen.add(value);
+			}
+			return value;
+		};
 	}
 }
 
