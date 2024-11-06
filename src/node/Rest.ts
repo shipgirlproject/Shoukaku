@@ -2,6 +2,7 @@
 import { Versions } from '../Constants';
 import { FilterOptions } from '../guild/Player';
 import { NodeOption } from '../Shoukaku';
+import { getCircularReplacer } from '../Utils';
 import { Node, NodeInfo, Stats } from './Node';
 
 export type Severity = 'common' | 'suspicious' | 'fault';
@@ -379,7 +380,7 @@ export class Rest {
 		};
 
 		if (!['GET', 'HEAD'].includes(method) && options.body)
-			finalFetchOptions.body = JSON.stringify(options.body, this.removeCircularReferences());
+			finalFetchOptions.body = JSON.stringify(options.body, getCircularReplacer());
 
 		const request = await fetch(url.toString(), finalFetchOptions)
 			.finally(() => clearTimeout(timeout));
@@ -401,18 +402,6 @@ export class Rest {
 		} catch {
 			return;
 		}
-	}
-	private removeCircularReferences() {
-		const seen = new WeakSet();
-		return (key: string, value: unknown) => {
-			if (typeof value === "object" && value !== null) {
-				if (seen.has(value)) {
-					return; // Skip circular reference
-				}
-				seen.add(value);
-			}
-			return value;
-		};
 	}
 }
 
