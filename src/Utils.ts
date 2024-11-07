@@ -1,11 +1,20 @@
 import { EventEmitter } from 'node:events';
 
+// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type, @typescript-eslint/no-empty-object-type
+interface AnyClass<InstanceType extends {} = {}> extends Function {
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	new(...args: any[]): InstanceType;
+	prototype: InstanceType;
+}
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type AnyFunction = (...args: any) => any;
 export type Extension = Record<string, unknown>;
 export type Plugin<T> = (instance: T) => Extension;
 
+export const definePlugin = <T extends AnyClass, B extends AnyFunction = Plugin<T>>(plugin: B): B => plugin;
+
 // https://stackoverflow.com/a/58603027
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function withPlugins<TBase extends new (...args: any[]) => any>(Base: TBase) {
+export function withPlugins<TBase extends AnyClass>(Base: TBase) {
 	return class ClassWithPlugins extends Base {
 		static plugins: Plugin<ClassWithPlugins>[];
 		static plugin<T extends Plugin<ClassWithPlugins>>(plugin: T) {
