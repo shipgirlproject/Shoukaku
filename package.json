@@ -15,7 +15,7 @@
   "scripts": {
     "build": "npm run build:ts && npm run build:docs",
     "build:ts": "tsup --config tsup-config.json",
-    "build:docs": "typedoc --theme default --readme TypeDoc.md --name Shoukaku --out docs/ --entryPointStrategy expand src/.",
+    "build:docs": "typedoc --theme default --readme TypeDoc.md --name Shoukaku --out docs/ --entryPointStrategy expand --plugin @shipgirl/typedoc-plugin-versions src/.",
     "lint": "eslint .",
     "prepare": "npm run build:ts"
   },
@@ -45,11 +45,12 @@
   },
   "devDependencies": {
     "@shipgirl/eslint-config": "^0.4.0",
-    "@types/node": "^22.8.2",
-    "@types/ws": "^8.5.12",
-    "eslint": "^9.13.0",
+    "@shipgirl/typedoc-plugin-versions": "^0.2.8",
+    "@types/node": "^22.8.7",
+    "@types/ws": "^8.5.13",
+    "eslint": "^9.14.0",
     "tsup": "^8.3.5",
-    "typedoc": "^0.26.10",
+    "typedoc": "^0.26.11",
     "typescript": "^5.6.3"
   }
 }
