@@ -401,7 +401,7 @@ export class Node extends TypedEventEmitter<NodeEvents> {
 		this.stats = null;
 		this.info = null;
 		this.ws = null;
-		this.sessionId = null;
+		this.sessionId = options.sessionId ?? null;
 		this.initialized = false;
 		this.destroyed = false;
 		this.validate = this.manager.options.validate;

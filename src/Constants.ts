@@ -60,9 +60,11 @@ export const ShoukakuDefaults: Required<ShoukakuOptions> = {
 export const ShoukakuClientInfo = `${Info.name}/${Info.version} (${Info.repository.url})`;
 
 export const NodeDefaults: NodeOption = {
-	name: 'Default',
+	// prevent name collisions when no name is provided
+	name: `Node ${Math.random().toString(36).slice(-5)}`,
 	url: '',
 	auth: '',
 	secure: false,
-	group: undefined
+	group: undefined,
+	sessionId: undefined
 };

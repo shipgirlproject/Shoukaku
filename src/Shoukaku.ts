@@ -43,6 +43,10 @@ export interface NodeOption {
 	 * Name of the Lavalink node group
 	 */
 	group?: string;
+	/**
+	 * Pre-existing session (used for resuming)
+	 */
+	sessionId?: string;
 }
 
 export interface ShoukakuOptions {
@@ -197,6 +201,10 @@ export class Shoukaku extends TypedEventEmitter<ShoukakuEvents> {
 		this.connections = new Map();
 		this.players = new Map();
 		this.id = null;
+		// ensure node names are a unique identifier since
+		// duplicates are silently overwritten in a map
+		if (new Set(nodes.map(v => v.name)).size < nodes.length)
+			throw new Error('Node names must be unique');
 		this.connector.listen(nodes);
 	}
 
@@ -239,6 +247,14 @@ export class Shoukaku extends TypedEventEmitter<ShoukakuEvents> {
 		const node = this.nodes.get(name);
 		if (!node) throw new Error('The node name you specified doesn\'t exist');
 		node.disconnect(1000, reason);
+	}
+
+	/**
+	 * Get all sessionIds from all connected Lavalink nodes
+	 * This may be useful for resuming in a new Shoukaku instance
+	 */
+	public getNodeSessions(): Record<string, string | null> {
+		return Object.fromEntries([ ...this.nodes.entries() ].map(([ name, { sessionId }]) => [ name, sessionId ]));
 	}
 
 	/**
