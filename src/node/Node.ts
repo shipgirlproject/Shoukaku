@@ -1,5 +1,4 @@
-import { IncomingMessage } from 'node:http';
-import Websocket from 'ws';
+import { getEventListeners } from 'node:events';
 import * as z from 'zod';
 // eslint-disable-next-line import-x/no-cycle
 import { OpCodes, ShoukakuClientInfo, State, Versions } from '../Constants';
@@ -357,7 +356,7 @@ export class Node extends TypedEventEmitter<NodeEvents> {
 	/**
 	 * Websocket instance
 	 */
-	public ws: Websocket | null;
+	public ws: WebSocket | null;
 
 	/**
 	 * SessionId of this Lavalink connection (not to be confused with Discord SessionId)
@@ -459,12 +458,11 @@ export class Node extends TypedEventEmitter<NodeEvents> {
 		this.emit('debug', `[Socket] -> [${this.name}] : Connecting to ${this.url} ...`);
 
 		const url = new URL(this.url);
-		this.ws = new Websocket(url.toString(), { headers });
-
-		this.ws.once('upgrade', response => this.open(response));
-		this.ws.once('close', (...args) => this.close(...args));
-		this.ws.on('error', error => this.error(error));
-		this.ws.on('message', data => void this.message(data).catch(error => this.error(error as Error)));
+		this.ws = new WebSocket(url.toString(), { headers });
+		this.ws.addEventListener('open', () => this.open(), { once: true });
+		this.ws.addEventListener('close', ({ code, reason }) => this.close(code, reason), { once: true });
+		this.ws.addEventListener('error', ({ error }) => this.error(error));
+		this.ws.addEventListener('message', ({ data }) => void this.message(data).catch(error => this.error(error as Error)));
 	}
 
 	/**
@@ -482,10 +480,8 @@ export class Node extends TypedEventEmitter<NodeEvents> {
 	 * @param response Response from Lavalink
 	 * @internal
 	 */
-	private open(response: IncomingMessage): void {
-		const resumed = response.headers['session-resumed'];
-		// eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-		this.emit('debug', `[Socket] <-> [${this.name}] : Connection Handshake Done! ${this.url} | Resumed Header Value: ${resumed}`);
+	private open(): void {
+		this.emit('debug', `[Socket] <-> [${this.name}] : Connection Handshake Done! ${this.url}`);
 		this.reconnects = 0;
 		this.state = State.NEARLY;
 	}
@@ -558,9 +554,9 @@ export class Node extends TypedEventEmitter<NodeEvents> {
 	 * @param code Status close
 	 * @param reason Reason for connection close
 	 */
-	private close(code: number, reason: Buffer): void {
+	private close(code: number, reason: string): void {
 		this.emit('debug', `[Socket] <-/-> [${this.name}] : Connection Closed, Code: ${code || 'Unknown Code'}`);
-		this.emit('close', code, String(reason));
+		this.emit('close', code, reason);
 		if (this.shouldClean)
 			void this.clean();
 		else
@@ -571,8 +567,8 @@ export class Node extends TypedEventEmitter<NodeEvents> {
 	 * To emit error events easily
 	 * @param error error message
 	 */
-	public error(error: Error): void {
-		this.emit('error', error);
+	public error(error: unknown): void {
+		this.emit('error', error as Error);
 	}
 
 	/**
@@ -595,7 +591,22 @@ export class Node extends TypedEventEmitter<NodeEvents> {
 	 * @internal
 	 */
 	private destroy(count = 0): void {
-		this.ws?.removeAllListeners();
+		if (this.ws) {
+			try {
+				// events with once option set to true are automatically removed
+				// once called so they do not need to be cleaned up here
+				for (const event of [ 'message', 'error' ] as const) {
+					// work around WebSocket type issues
+					const listeners = getEventListeners(this.ws as unknown as EventTarget, event);
+					for (const listener of listeners) {
+						// expects function type instead of "Function" type
+						this.ws.removeEventListener(event, listener as (...args: unknown[]) => void);
+					}
+				}
+			// TODO: find better way to handle failure
+			} catch { /* ignore */ }
+		}
+
 		this.ws?.close();
 		this.ws = null;
 		this.state = State.DISCONNECTED;
