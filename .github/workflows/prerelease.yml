@@ -1,5 +1,12 @@
 name: Prerelease
-on: workflow_dispatch
+
+on:
+  push:
+    branches:
+      - "**"
+    tags:
+      - "!**"
+  pull_request:
 
 jobs:
   publish:
@@ -7,19 +14,17 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      id-token: write
     steps:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
-      - name: Publish to NPM
+      - name: Use Node LTS
         uses: actions/setup-node@v4
-        if: ${{ steps.changelog.outputs.skipped == 'false' }}
         with:
           node-version: lts/*
-          registry-url: https://registry.npmjs.org
-      - run: npm i
-      - run: 'npm version --preid=git --no-git-tag-version 0.0.0-git.$(git rev-parse HEAD)'
-      - run: npm publish --provenance --access public --tag prerelease
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - name: Install Depedencies
+        run: npm ci
+      - name: Publish to pkg.pr.new
+        run: npx pkg-pr-new publish
