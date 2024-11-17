@@ -3,7 +3,8 @@ name: Prerelease
 on:
   push:
     branches:
-      - "**"
+      - "master"
+      - "v[0-9]+"
     tags:
       - "!**"
   pull_request:
