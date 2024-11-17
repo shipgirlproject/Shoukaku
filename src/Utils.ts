@@ -56,3 +56,22 @@ export function mergeDefault<T extends Record<string, any>>(def: T, given: T): R
 export function wait(ms: number): Promise<void> {
 	return new Promise(resolve => setTimeout(resolve, ms));
 }
+
+
+export function getCircularReplacer(): (key: string, value: any) => any {
+	const ancestors: any[] = [];
+	return function (this: any, key: string, value: any): any {
+	  if (typeof value !== "object" || value === null) {
+		return value;
+	  }
+	  while (ancestors.length > 0 && ancestors.at(-1) !== this) {
+		ancestors.pop();
+	  }
+	  if (ancestors.includes(value)) {
+		return "[Circular]";
+	  }
+	  ancestors.push(value);
+	  return value;
+	};
+  }
+  
