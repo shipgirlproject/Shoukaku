@@ -249,14 +249,14 @@ export class Node extends TypedEventEmitter<NodeEvents> {
 	private open(response: IncomingMessage): void {
 		this.reconnects = 0;
 
-		const resumed = response.headers['session-resumed'];
+		const resumed = response.headers['session-resumed'] === 'true';
 
 		if (!resumed) {
 			this.sessionId = null;
 		}
 
 		// eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-		this.emit('debug', `[Socket] <-> [${this.name}] : Connection Handshake Done! ${this.url} | Resumed Header Value: ${resumed}`);
+		this.emit('debug', `[Socket] <-> [${this.name}] : Connection Handshake Done => ${this.url} | Resumed Header Value: ${resumed} | Lavalink Api Version: ${response.headers['lavalink-api-version']}`);
 	}
 
 	/**
