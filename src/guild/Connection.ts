@@ -95,7 +95,7 @@ export class Connection extends EventEmitter {
 		this.region = null;
 		this.lastRegion = null;
 		this.serverUpdate = null;
-		this.state = State.DISCONNECTED;
+		this.state = State.IDLE;
 	}
 
 	/**
@@ -123,13 +123,13 @@ export class Connection extends EventEmitter {
      * @internal
      */
 	public disconnect(): void {
-		if (this.state === State.DISCONNECTED) return;
+		if (this.state === State.IDLE) return;
 		this.channelId = null;
 		this.deafened = false;
 		this.muted = false;
 		this.removeAllListeners();
 		this.sendVoiceUpdate();
-		this.state = State.DISCONNECTED;
+		this.state = State.IDLE;
 		this.debug(`[Voice] -> [Node] & [Discord] : Connection Destroyed | Guild: ${this.guildId}`);
 	}
 
@@ -185,7 +185,7 @@ export class Connection extends EventEmitter {
 		}
 
 		if (!this.channelId) {
-			this.state = State.DISCONNECTED;
+			this.state = State.IDLE;
 			this.debug(`[Voice] <- [Discord] : Channel Disconnected | Guild: ${this.guildId}`);
 		}
 
