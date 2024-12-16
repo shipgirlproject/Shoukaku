@@ -296,12 +296,12 @@ export class Node extends TypedEventEmitter<NodeEvents> {
 					}
 				}
 
-				this.emit('debug', `[Socket] -> [${this.name}] : Lavalink is ready! | Lavalink resume: ${json.resumed} | Lib resume: ${resumedByLibrary}`);
+				this.emit('debug', `[Socket] -> [${this.name}] : Lavalink is ready to communicate !`);
 				this.emit('ready', json.resumed, resumedByLibrary);
 
 				if (this.manager.options.resume) {
 					await this.rest.updateSession(this.manager.options.resume, this.manager.options.resumeTimeout);
-					this.emit('debug', `[Socket] -> [${this.name}] : Resuming configured!`);
+					this.emit('debug', `[Socket] -> [${this.name}] : Resuming configured for this Session Id: ${this.sessionId}`);
 				}
 
 				break;
