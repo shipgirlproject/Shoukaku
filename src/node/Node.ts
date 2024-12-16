@@ -1,8 +1,8 @@
-import {IncomingMessage} from 'http';
-import {NodeOption, Shoukaku, ShoukakuEvents} from '../Shoukaku';
-import {OpCodes, ShoukakuClientInfo, State, Versions} from '../Constants';
-import {TypedEventEmitter, wait} from '../Utils';
-import {Rest} from './Rest';
+import { IncomingMessage } from 'http';
+import { NodeOption, Shoukaku, ShoukakuEvents } from '../Shoukaku';
+import { OpCodes, ShoukakuClientInfo, State, Versions } from '../Constants';
+import { TypedEventEmitter, wait } from '../Utils';
+import { Rest } from './Rest';
 import {
 	PlayerUpdate,
 	TrackEndEvent,
@@ -220,7 +220,7 @@ export class Node extends TypedEventEmitter<NodeEvents> {
 		this.emit('debug', `[Socket] -> [${this.name}] : Connecting to ${this.url} ...`);
 
 		this.ws.once('upgrade', response => this.open(response));
-		this.ws.once('close', (...args) => this.close(...args));
+		this.ws.once('close', (...args) => void this.close(...args));
 		this.ws.on('error', error => this.error(error));
 		this.ws.on('message', data => void this.message(data).catch(error => this.error(error as Error)));
 	}
@@ -238,7 +238,7 @@ export class Node extends TypedEventEmitter<NodeEvents> {
 		if (this.ws)
 			this.ws.close(code, reason);
 		else
-			void this.close(1000, Buffer.from(reason || 'Unknown Reason', 'utf-8'));
+			void this.close(1000, Buffer.from(reason ?? 'Unknown Reason', 'utf-8'));
 	}
 
 	/**
