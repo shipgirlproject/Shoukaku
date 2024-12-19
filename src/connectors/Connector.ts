@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access */
-import { NodeOption, Shoukaku } from '../Shoukaku';
+// eslint-disable-next-line import-x/no-cycle
 import { NodeDefaults } from '../Constants';
-import { mergeDefault } from '../Utils';
 import { ServerUpdate, StateUpdatePartial } from '../guild/Connection';
+import { NodeOption, Shoukaku } from '../Shoukaku';
+import { mergeDefault } from '../Utils';
 
 export interface ConnectorMethods {
 	sendPacket: any;

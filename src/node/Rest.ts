@@ -1,7 +1,8 @@
-import { Node, NodeInfo, Stats } from './Node';
-import { NodeOption } from '../Shoukaku';
+/* eslint-disable import-x/no-cycle */
 import { Versions } from '../Constants';
 import { FilterOptions } from '../guild/Player';
+import { NodeOption } from '../Shoukaku';
+import { Node, NodeInfo, Stats } from './Node';
 
 export type Severity = 'common' | 'suspicious' | 'fault';
 
@@ -165,26 +166,26 @@ interface FinalFetchOptions {
  */
 export class Rest {
 	/**
-     * Node that initialized this instance
-     */
+	 * Node that initialized this instance
+	 */
 	protected readonly node: Node;
 	/**
-     * URL of Lavalink
-     */
+	 * URL of Lavalink
+	 */
 	protected readonly url: string;
 	/**
-     * Credentials to access Lavalink
-     */
+	 * Credentials to access Lavalink
+	 */
 	protected readonly auth: string;
 	/**
-     * @param node An instance of Node
-     * @param options The options to initialize this rest class
-     * @param options.name Name of this node
-     * @param options.url URL of Lavalink
-     * @param options.auth Credentials to access Lavalnk
-     * @param options.secure Weather to use secure protocols or not
-     * @param options.group Group of this node
-     */
+	 * @param node An instance of Node
+	 * @param options The options to initialize this rest class
+	 * @param options.name Name of this node
+	 * @param options.url URL of Lavalink
+	 * @param options.auth Credentials to access Lavalnk
+	 * @param options.secure Weather to use secure protocols or not
+	 * @param options.group Group of this node
+	 */
 	constructor(node: Node, options: NodeOption) {
 		this.node = node;
 		this.url = `${options.secure ? 'https' : 'http'}://${options.url}/v${Versions.REST_VERSION}`;
@@ -196,10 +197,10 @@ export class Rest {
 	}
 
 	/**
-     * Resolve a track
-     * @param identifier Track ID
-     * @returns A promise that resolves to a Lavalink response
-     */
+	 * Resolve a track
+	 * @param identifier Track ID
+	 * @returns A promise that resolves to a Lavalink response
+	 */
 	public resolve(identifier: string): Promise<LavalinkResponse | undefined> {
 		const options = {
 			endpoint: '/loadtracks',
@@ -209,10 +210,10 @@ export class Rest {
 	}
 
 	/**
-     * Decode a track
-     * @param track Encoded track
-     * @returns Promise that resolves to a track
-     */
+	 * Decode a track
+	 * @param track Encoded track
+	 * @returns Promise that resolves to a track
+	 */
 	public decode(track: string): Promise<Track | undefined> {
 		const options = {
 			endpoint: '/decodetrack',
@@ -222,9 +223,9 @@ export class Rest {
 	}
 
 	/**
-     * Gets all the player with the specified sessionId
-     * @returns Promise that resolves to an array of Lavalink players
-     */
+	 * Gets all the player with the specified sessionId
+	 * @returns Promise that resolves to an array of Lavalink players
+	 */
 	public async getPlayers(): Promise<LavalinkPlayer[]> {
 		const options = {
 			endpoint: `/sessions/${this.sessionId}/players`,
@@ -234,9 +235,9 @@ export class Rest {
 	}
 
 	/**
-     * Gets the player with the specified guildId
-     * @returns Promise that resolves to a Lavalink player
-     */
+	 * Gets the player with the specified guildId
+	 * @returns Promise that resolves to a Lavalink player
+	 */
 	public getPlayer(guildId: string): Promise<LavalinkPlayer | undefined> {
 		const options = {
 			endpoint: `/sessions/${this.sessionId}/players/${guildId}`,
@@ -246,10 +247,10 @@ export class Rest {
 	}
 
 	/**
-     * Updates a Lavalink player
-     * @param data SessionId from Discord
-     * @returns Promise that resolves to a Lavalink player
-     */
+	 * Updates a Lavalink player
+	 * @param data SessionId from Discord
+	 * @returns Promise that resolves to a Lavalink player
+	 */
 	public updatePlayer(data: UpdatePlayerInfo): Promise<LavalinkPlayer | undefined> {
 		const options = {
 			endpoint: `/sessions/${this.sessionId}/players/${data.guildId}`,
@@ -264,9 +265,9 @@ export class Rest {
 	}
 
 	/**
-     * Deletes a Lavalink player
-     * @param guildId guildId where this player is
-     */
+	 * Deletes a Lavalink player
+	 * @param guildId guildId where this player is
+	 */
 	public async destroyPlayer(guildId: string): Promise<void> {
 		const options = {
 			endpoint: `/sessions/${this.sessionId}/players/${guildId}`,
@@ -276,11 +277,11 @@ export class Rest {
 	}
 
 	/**
-     * Updates the session with a resume boolean and timeout
-     * @param resuming Whether resuming is enabled for this session or not
-     * @param timeout Timeout to wait for resuming
-     * @returns Promise that resolves to a Lavalink player
-     */
+	 * Updates the session with a resume boolean and timeout
+	 * @param resuming Whether resuming is enabled for this session or not
+	 * @param timeout Timeout to wait for resuming
+	 * @returns Promise that resolves to a Lavalink player
+	 */
 	public updateSession(resuming?: boolean, timeout?: number): Promise<SessionInfo | undefined> {
 		const options = {
 			endpoint: `/sessions/${this.sessionId}`,
@@ -294,9 +295,9 @@ export class Rest {
 	}
 
 	/**
-     * Gets the status of this node
-     * @returns Promise that resolves to a node stats response
-     */
+	 * Gets the status of this node
+	 * @returns Promise that resolves to a node stats response
+	 */
 	public stats(): Promise<Stats | undefined> {
 		const options = {
 			endpoint: '/stats',
@@ -306,9 +307,9 @@ export class Rest {
 	}
 
 	/**
-     * Get routeplanner status from Lavalink
-     * @returns Promise that resolves to a routeplanner response
-     */
+	 * Get routeplanner status from Lavalink
+	 * @returns Promise that resolves to a routeplanner response
+	 */
 	public getRoutePlannerStatus(): Promise<RoutePlanner | undefined> {
 		const options = {
 			endpoint: '/routeplanner/status',
@@ -318,9 +319,9 @@ export class Rest {
 	}
 
 	/**
-     * Release blacklisted IP address into pool of IPs
-     * @param address IP address
-     */
+	 * Release blacklisted IP address into pool of IPs
+	 * @param address IP address
+	 */
 	public async unmarkFailedAddress(address: string): Promise<void> {
 		const options = {
 			endpoint: '/routeplanner/free/address',
@@ -334,8 +335,8 @@ export class Rest {
 	}
 
 	/**
-     * Get Lavalink info
-     */
+	 * Get Lavalink info
+	 */
 	public getLavalinkInfo(): Promise<NodeInfo | undefined> {
 		const options = {
 			endpoint: '/info',
@@ -347,12 +348,12 @@ export class Rest {
 	}
 
 	/**
-     * Make a request to Lavalink
-     * @param fetchOptions.endpoint Lavalink endpoint
-     * @param fetchOptions.options Options passed to fetch
-     * @throws `RestError` when encountering a Lavalink error response
-     * @internal
-     */
+	 * Make a request to Lavalink
+	 * @param fetchOptions.endpoint Lavalink endpoint
+	 * @param fetchOptions.options Options passed to fetch
+	 * @throws `RestError` when encountering a Lavalink error response
+	 * @internal
+	 */
 	protected async fetch<T = unknown>(fetchOptions: FetchOptions) {
 		const { endpoint, options } = fetchOptions;
 		let headers = {
