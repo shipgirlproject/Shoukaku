@@ -318,7 +318,6 @@ export class Shoukaku extends TypedEventEmitter<ShoukakuEvents> {
 				self_deaf: connection.deafened,
 				self_mute: connection.muted
 			});
-			connection.state = State.RECONNECTING;
 			await connection.connect();
 
 			// player should get updated automagically as connectionUpdate is fired
