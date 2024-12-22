@@ -1,7 +1,7 @@
 // eslint-disable-next-line import-x/no-cycle
 import { Connector } from './connectors/Connector';
 // eslint-disable-next-line import-x/no-cycle
-import { ShoukakuDefaults, State, VoiceState } from './Constants';
+import { ShoukakuDefaults, VoiceState } from './Constants';
 // eslint-disable-next-line import-x/no-cycle
 import { Connection } from './guild/Connection';
 // eslint-disable-next-line import-x/no-cycle

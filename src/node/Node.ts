@@ -1,8 +1,8 @@
 import { IncomingMessage } from 'http';
-import { NodeOption, Shoukaku, ShoukakuEvents } from '../Shoukaku';
+import Websocket from 'ws';
+// eslint-disable-next-line import-x/no-cycle
 import { OpCodes, ShoukakuClientInfo, State, Versions } from '../Constants';
-import { TypedEventEmitter, wait } from '../Utils';
-import { Rest } from './Rest';
+// eslint-disable-next-line import-x/no-cycle
 import {
 	PlayerUpdate,
 	TrackEndEvent,
@@ -11,7 +11,10 @@ import {
 	TrackStuckEvent,
 	WebSocketClosedEvent
 } from '../guild/Player';
-import Websocket from 'ws';
+import { NodeOption, Shoukaku, ShoukakuEvents } from '../Shoukaku';
+import { TypedEventEmitter, wait } from '../Utils';
+// eslint-disable-next-line import-x/no-cycle
+import { Rest } from './Rest';
 
 export interface Ready {
 	op: OpCodes.READY;
