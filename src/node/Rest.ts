@@ -2,6 +2,7 @@
 import { Versions } from '../Constants';
 import { FilterOptions } from '../guild/Player';
 import { NodeOption } from '../Shoukaku';
+import { getCircularReplacer } from '../Utils';
 import { Node, NodeInfo, Stats } from './Node';
 
 export type Severity = 'common' | 'suspicious' | 'fault';
@@ -204,7 +205,7 @@ export class Rest {
 	public resolve(identifier: string): Promise<LavalinkResponse | undefined> {
 		const options = {
 			endpoint: '/loadtracks',
-			options: { params: { identifier }}
+			options: { params: { identifier } }
 		};
 		return this.fetch(options);
 	}
@@ -217,7 +218,7 @@ export class Rest {
 	public decode(track: string): Promise<Track | undefined> {
 		const options = {
 			endpoint: '/decodetrack',
-			options: { params: { track }}
+			options: { params: { track } }
 		};
 		return this.fetch<Track>(options);
 	}
@@ -378,8 +379,8 @@ export class Rest {
 			signal: abortController.signal
 		};
 
-		if (![ 'GET', 'HEAD' ].includes(method) && options.body)
-			finalFetchOptions.body = JSON.stringify(options.body);
+		if (!['GET', 'HEAD'].includes(method) && options.body)
+			finalFetchOptions.body = JSON.stringify(options.body, getCircularReplacer());
 
 		const request = await fetch(url.toString(), finalFetchOptions)
 			.finally(() => clearTimeout(timeout));
