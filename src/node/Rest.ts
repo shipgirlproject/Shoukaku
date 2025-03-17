@@ -1,8 +1,7 @@
-/* eslint-disable import-x/no-cycle */
 import { Versions } from '../Constants';
-import { FilterOptions } from '../guild/Player';
-import { NodeOption } from '../Shoukaku';
-import { Node, NodeInfo, Stats } from './Node';
+import type { FilterOptions } from '../guild/Player';
+import type { NodeOption } from '../Shoukaku';
+import type { Node, NodeInfo, Stats } from './Node';
 
 export type Severity = 'common' | 'suspicious' | 'fault';
 

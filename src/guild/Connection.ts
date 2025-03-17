@@ -1,6 +1,6 @@
-import type { Shoukaku, VoiceChannelOptions } from '../Shoukaku';
 import { EventEmitter, once } from 'node:events';
-import { State, VoiceState } from '../Constants'
+import { State, VoiceState } from '../Constants';
+import type { Shoukaku, VoiceChannelOptions } from '../Shoukaku';
 
 /**
  * Represents the partial payload from a stateUpdate event

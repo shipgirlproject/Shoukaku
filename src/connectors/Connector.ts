@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access */
+import { NodeDefaults } from '../Constants';
 import type { ServerUpdate, StateUpdatePartial } from '../guild/Connection';
 import type { NodeOption, Shoukaku } from '../Shoukaku';
-import { NodeDefaults } from '../Constants';
 import { mergeDefault } from '../Utils';
 
 export interface ConnectorMethods {

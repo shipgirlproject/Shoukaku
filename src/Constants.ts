@@ -1,5 +1,5 @@
-import type { NodeOption, ShoukakuOptions } from './Shoukaku';
 import Info from '../package.json';
+import type { NodeOption, ShoukakuOptions } from './Shoukaku';
 
 export enum State {
 	CONNECTING,

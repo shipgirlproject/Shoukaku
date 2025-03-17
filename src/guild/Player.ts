@@ -1,6 +1,6 @@
+import { OpCodes, State } from '../Constants';
 import type { Node } from '../node/Node';
 import type { Exception, Track, UpdatePlayerInfo, UpdatePlayerOptions } from '../node/Rest';
-import { OpCodes, State } from '../Constants';
 import { TypedEventEmitter } from '../Utils';
 import { Connection } from './Connection';
 

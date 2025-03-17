@@ -1,9 +1,9 @@
 import type { Connector } from './connectors/Connector';
-import type { Rest } from './node/Rest';
 import { ShoukakuDefaults, VoiceState } from './Constants';
 import { Connection } from './guild/Connection';
 import { Player } from './guild/Player';
 import { Node, NodeEvents } from './node/Node';
+import type { Rest } from './node/Rest';
 import { Constructor, mergeDefault, TypedEventEmitter } from './Utils';
 
 export interface Structures {
