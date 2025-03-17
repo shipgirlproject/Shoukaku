@@ -1,6 +1,5 @@
+import type { NodeOption, ShoukakuOptions } from './Shoukaku';
 import Info from '../package.json';
-// eslint-disable-next-line import-x/no-cycle
-import { NodeOption, ShoukakuOptions } from './Shoukaku';
 
 export enum State {
 	CONNECTING,

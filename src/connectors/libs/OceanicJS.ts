@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-return, @typescript-eslint/no-explicit-any */
-import { NodeOption } from '../../Shoukaku';
+import type { NodeOption } from '../../Shoukaku';
 import { Connector } from '../Connector';
 
 export class OceanicJS extends Connector {

@@ -1,7 +1,6 @@
+import type { Shoukaku, VoiceChannelOptions } from '../Shoukaku';
 import { EventEmitter, once } from 'node:events';
-// eslint-disable-next-line import-x/no-cycle
-import { State, VoiceState } from '../Constants';
-import { Shoukaku, VoiceChannelOptions } from '../Shoukaku';
+import { State, VoiceState } from '../Constants'
 
 /**
  * Represents the partial payload from a stateUpdate event
