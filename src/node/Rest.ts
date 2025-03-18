@@ -395,6 +395,9 @@ export class Rest {
 				path: endpoint
 			});
 		}
+		if (request.status === 204) {
+			return;
+		}
 		try {
 			return await request.json() as T;
 		} catch {
