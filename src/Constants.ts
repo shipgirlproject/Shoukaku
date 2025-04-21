@@ -10,11 +10,10 @@ export const Versions = {
 export const ShoukakuDefaults: Required<OptionalOptions> = {
 	resume: false,
 	resumeTimeout: 30,
-	resumeByLibrary: false,
 	reconnectTries: 3,
 	reconnectInterval: 5,
 	restTimeout: 60,
-	moveOnDisconnect: false,
+	moveOnDisconnect: true,
 	userAgent: 'Discord Bot/unknown (https://github.com/shipgirlproject/Shoukaku.git)',
 	structures: {},
 	voiceConnectionTimeout: 15,

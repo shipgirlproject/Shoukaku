@@ -74,10 +74,6 @@ export interface OptionalOptions {
 	 */
 	resumeTimeout?: number;
 	/**
-	 * Whether to resume the players by doing it in the library side (Client Side) (Note: TRIES TO RESUME REGARDLESS OF WHAT HAPPENED ON A LAVALINK SERVER)
-	 */
-	resumeByLibrary?: boolean;
-	/**
 	 * Number of times to try and reconnect to Lavalink before giving up
 	 */
 	reconnectTries?: number;
@@ -112,6 +108,7 @@ export interface OptionalOptions {
 }
 
 export interface VoiceChannelOptions {
+	node: Node;
 	guildId: string;
 	shardId: number;
 	channelId: string;
@@ -329,14 +326,8 @@ export class Shoukaku extends TypedEventEmitter<Events, ShoukakuEvents> {
 			this.deleteConnection(options.guildId);
 		};
 
-		const node = this.getIdealNode(connection);
-		if (!node) {
-			cleanup();
-			throw new Error('Can\'t find any nodes to connect on');
-		}
-
 		try {
-			await node.rest.updatePlayer(options.guildId, {
+			await options.node.rest.updatePlayer(options.guildId, {
 				voice: {
 					token: connection.serverUpdate!.token,
 					endpoint: connection.serverUpdate!.endpoint,
@@ -348,9 +339,9 @@ export class Shoukaku extends TypedEventEmitter<Events, ShoukakuEvents> {
 			throw error;
 		}
 
-		node.addConnection(connection);
+		options.node.addConnection(connection);
 
-		return this.options.structures.player ? new this.options.structures.player(connection.guildId, node) : new Player(connection.guildId, new WeakRef(connection));
+		return this.options.structures.player ? new this.options.structures.player(connection.guildId, connection) : new Player(connection.guildId, new WeakRef(connection));
 	}
 
 	/**

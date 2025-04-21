@@ -28,11 +28,13 @@
 
 - Very cute (Very Important)
 
-> Warning: ⚠️ If you are looking for Stable Branch, Look at the v4 Branch of the Library. Master is v5 bleeding edge 
+> Warning: ⚠️ If you are looking for stable release => https://github.com/shipgirlproject/Shoukaku/tree/v4
 
-> Info: ℹ️ v5 maybe is the last breaking change library wise unless Lavalink makes a change in it's core api
+> Info: ℹ️ Last v4 commit in master if you insist on using master => https://github.com/shipgirlproject/Shoukaku/commit/5c0be0eb0dab8dfd840fd0b3290d03fb841f0615
 
-### Getting Started
+> Info: ℹ️ The next version (v5) can be the last breaking change library wise unless Lavalink makes a change in it's core api
+
+### Getting Started (Using Discord.JS and a very long example code)
 
 ```js
 import { Client } from 'discord.js';
@@ -52,26 +54,91 @@ const requiredOptions = {
 };
 
 // see below for more info
-const optionalOptions = {
-    userAgent: "Rio/1.0.0"
-};
+const optionalOptions = {};
 
 const shoukaku = new Shoukaku(requiredOptions, optionalOptions);
 
+const caches = new Map();
+
+// always log error to avoid unhandled errors
 shoukaku.on(Events.Error, console.error);
 
-shoukaku.on(Events.Disconnect, node => {
-    shoukaku.connections
-        .filter(c => node.connections.has(c))
-        .forEach(c => c.disconnect());
+// any of the ff: TrackStartEvent | TrackEndEvent | TrackStuckEvent | TrackExceptionEvent | WebSocketClosedEvent
+shoukaku.on(Events.PlayerEvent, event => {
+    const cache = caches.get(event.guildId);
+    
+    if (event.type === PlayerEventType.TrackStartEvent) {
+        player.channel
+            .send(`Now playing: ${event.track.info.title}`)
+            .catch(console.error);
+    }
+    
+    if (event.type === PlayerEventType.WebsocketClosedEvent) {
+        shoukaku.leaveVoiceChannel(event.guildId);
+        caches.delete(event.guildId);
+    }
+    
+    console.log(`An event occured at guild id: ${event.guildId} data => ${JSON.stringify(event)}`)
 });
 
+// in an event of disconnection, if moveOnDisconnect is enabled, shoukaku will automatically handle node moving but disconnect players that aren't moved
+// hence you need to compare your own cache and shoukaku.connection cache, and remove players that dont exist on your cache.
+// lucky for you if you use my basic wrapper around player, you can just check if connection prop exists!
+shoukaku.on(Events.Disconnect, () => {
+    for (const cache of caches) {
+        if (!cache.player.connection.deref())
+            caches.delete(cache.player.guildId);
+    }
+});
+
+// you need to call connect for shoukaku to connect the nodes before you try anything
 shoukaku.connect();
 
-client.login(env.TOKEN);
+client.login(process.env.TOKEN);
+
+client.on("message", async message => {
+    if (message.content.startsWith("!play")) {
+        const input = message.content.split(" ")[1];
+
+        if (!input)
+            return message.channel.send("No track to load");
+
+        if (!message.member.voice.channelId)
+            return message.channel.send("Not in a voice channel");
+
+        const node = shoukaku.getIdealNode();
+        
+        if (!node)
+            return message.channel.send("No nodes available");
+
+        const track = await node.rest.resolve(input);
+
+        const player = await shoukaku.joinVoiceChannel({
+            node,
+            guildId: message.guild.id,
+            shardId: message.guild.shardId,
+            channelId: message.member.voice.channelId
+        });
+
+        caches.set(message.guild.id, { channel: message.channel, player });
+
+        return player.playTrack({
+            track: {
+                encoded: track.data.encoded
+            }
+        });
+    }
+    
+    if (message.content.startsWith("!stop")) {
+        shoukaku.leaveVoiceChannel(message.guild.id);
+
+        return message.channel.send("Ok!");
+    }
+});
 ```
 
-> https://github.com/Deivu/Kongou
+> More examples coming soon!
+
 ### Required Configuration Options
 | Option                 | Type                   | Description                                                     |                                 
 | ---------------------- | ---------------------- | --------------------------------------------------------------- | 
@@ -81,18 +148,18 @@ client.login(env.TOKEN);
 
 ### Optional Configuration Options
 
-| Option                 | Type                   | Default  | Description                                                                                      | Notes                    |
-| ---------------------- | ---------------------- | -------- | ------------------------------------------------------------------------------------------------ | ------------------------ |
-| resume                 | boolean                | false    | If you want to enable resuming when your connection when your connection to lavalink disconnects |                          |
-| resumeTimeout          | number                 | 30       | Timeout before lavalink destroys the players on a disconnect                                     | In seconds               |
-| reconnectTries         | number                 | 3        | Number of tries to reconnect to lavalink before disconnecting                                    |                          |
-| reconnectDelay         | number                 | 5        | Timeout between reconnects                                                                       | In seconds               |
-| restTimeout            | number                 | 60       | Maximum amount of time to wait for rest lavalink api requests                                    | In seconds               |
-| moveOnDisconnect       | boolean                | false    | Whether to move players to a different lavalink node when a node disconnects                     |                          |
-| userAgent              | string                 | (auto)   | Changes the user-agent used for lavalink requests                                                | Not recommeded to change |
-| structures             | Object{rest?, player?} | {}       | Custom structures for shoukaku to use                                                            |                          |
-| voiceConnectionTimeout | number                 | 15       | Maximum amount of time to wait for a join voice channel command                                  | In seconds               |
-| nodeResolver           | function               | function | Custom node resolver if you want to have your own method of getting the ideal node               |                          |
+| Option                 | Type                   | Default  | Description                                                                                      | Notes                                                           |
+| ---------------------- | ---------------------- | -------- | ------------------------------------------------------------------------------------------------ |-----------------------------------------------------------------|
+| resume                 | boolean                | false    | If you want to enable resuming when your connection when your connection to lavalink disconnects |                                                                 |
+| resumeTimeout          | number                 | 30       | Timeout before lavalink destroys the players on a disconnect                                     | In seconds                                                      |
+| reconnectTries         | number                 | 3        | Number of tries to reconnect to lavalink before disconnecting                                    |                                                                 |
+| reconnectDelay         | number                 | 5        | Timeout between reconnects                                                                       | In seconds                                                      |
+| restTimeout            | number                 | 60       | Maximum amount of time to wait for rest lavalink api requests                                    | In seconds                                                      |
+| moveOnDisconnect       | boolean                | false    | Whether to move players to a different lavalink node when a node disconnects                     | Set this to false if you want to clean the connections yourself |
+| userAgent              | string                 | (auto)   | Changes the user-agent used for lavalink requests                                                | Not recommeded to change                                        |
+| structures             | Object{rest?, player?} | {}       | Custom structures for shoukaku to use                                                            |                                                                 |
+| voiceConnectionTimeout | number                 | 15       | Maximum amount of time to wait for a join voice channel command                                  | In seconds                                                      |
+| nodeResolver           | function               | function | Custom node resolver if you want to have your own method of getting the ideal node               |                                                                 |
 
 ### Wrappers
 
