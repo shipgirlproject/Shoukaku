@@ -1,5 +1,6 @@
 import { EventEmitter, once } from 'node:events';
 import { Events, ConnectionState, VoiceState } from '../model/Library';
+import { Node } from '../node/Node';
 import type { Shoukaku, VoiceChannelOptions } from '../Shoukaku';
 
 /**
@@ -86,6 +87,11 @@ export class Connection extends EventEmitter {
 		this.region = null;
 		this.serverUpdate = null;
 		this.state = ConnectionState.Disconnected;
+	}
+
+	public getNode(): Node | undefined {
+		return this.manager.nodes
+			.find(node => node.hasConnection(this));
 	}
 
 	/**
@@ -206,13 +212,13 @@ export class Connection extends EventEmitter {
 	public setServerUpdate(data: ServerUpdate): void {
 		if (!data.endpoint) {
 			this.debug(`[Voice] <- [Discord] : Received a voice server update without an endpoint! Data => ${JSON.stringify(data)}`);
-			this.emit('connectionUpdate', VoiceState.SessionEndpointMissing);
-			return;
+
+			return void this.emit('connectionUpdate', VoiceState.SessionEndpointMissing);
 		}
 		if (!this.sessionId) {
 			this.debug(`[Voice] <- [Discord] : Received a voice server update without an session id! Data => ${JSON.stringify(data)}`);
-			this.emit('connectionUpdate', VoiceState.SessionIdMissing);
-			return;
+
+			return void this.emit('connectionUpdate', VoiceState.SessionIdMissing);
 		}
 
 		const region = data.endpoint.split('.').shift()?.replace(/[0-9]/g, '');
@@ -225,13 +231,17 @@ export class Connection extends EventEmitter {
 
 		this.serverUpdate = data;
 
-		this.emit('connectionUpdate', VoiceState.SessionReady);
-
 		this.debug(`[Voice] <- [Discord] : Server Update Received | Server: ${this.region} Guild: ${this.guildId}`);
 
-		const node = this.manager.nodes.find(n => n.connections.has(this));
+		if (this.state !== ConnectionState.Connected) {
+			return void this.emit('connectionUpdate', VoiceState.SessionReady);
+		}
 
-		node?.rest
+		const node = this.getNode();
+
+		if (!node) return;
+
+		node.rest
 			.updatePlayer(this.guildId, {
 				voice: {
 					token: data.token,
@@ -253,6 +263,7 @@ export class Connection extends EventEmitter {
 	/**
 	 * Send data to Discord
 	 * @param data The data to send
+	 * @private
 	 * @internal
 	 */
 	private send(data: unknown): void {
@@ -261,6 +272,7 @@ export class Connection extends EventEmitter {
 
 	/**
 	 * Emits a debug log
+	 * @private
 	 * @internal
 	 */
 	private debug(message: string): void {

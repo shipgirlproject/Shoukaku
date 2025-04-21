@@ -225,7 +225,7 @@ export class Shoukaku extends TypedEventEmitter<Events, ShoukakuEvents> {
 	public getPlayerCount(): number {
 		let players = 0;
 		for (const node of this.nodes.values()) {
-			players += node.stats?.playingPlayers ?? 0;
+			players += node.stats?.players ?? 0;
 		}
 		return players;
 	}
@@ -348,9 +348,9 @@ export class Shoukaku extends TypedEventEmitter<Events, ShoukakuEvents> {
 			throw error;
 		}
 
-		node.connections.add(connection);
+		node.addConnection(connection);
 
-		return this.options.structures.player ? new this.options.structures.player(connection.guildId, node) : new Player(connection.guildId, node);
+		return this.options.structures.player ? new this.options.structures.player(connection.guildId, node) : new Player(connection.guildId, new WeakRef(connection));
 	}
 
 	/**

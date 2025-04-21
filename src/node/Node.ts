@@ -53,10 +53,6 @@ export class Node {
      */
 	public state: ConnectionState;
 	/**
-	 * Connections that are currently reachable
-	 */
-	public connections: WeakSet<Connection>;
-	/**
 	 * The number of reconnects to Lavalink
 	 */
 	public reconnects: number;
@@ -75,7 +71,11 @@ export class Node {
 	/**
 	 * Websocket instance
 	 */
-	private ws: Websocket | null;
+	#ws: Websocket | null;
+	/**
+	 * Connections that are referenced by this node
+	 */
+	#connections: WeakSet<Connection>;
 
 	/**
      * @param manager Shoukaku instance
@@ -94,20 +94,20 @@ export class Node {
 		this.auth = options.auth;
 		this.url = `${options.secure ? 'wss' : 'ws'}://${options.url}/v${Versions.WEBSOCKET_VERSION}/websocket`;
 		this.state = ConnectionState.Disconnected;
-		this.connections = new WeakSet();
 		this.reconnects = 0;
 		this.stats = null;
 		this.info = null;
 		this.sessionId = null;
-		this.ws = null;
+		this.#ws = null;
+		this.#connections = new WeakSet();
 	}
 
 	/**
      * Penalties for load balancing
      * @returns Penalty score
-     * @internal @readonly
+     * @readonly
      */
-	get penalties(): number {
+	public get penalties(): number {
 		let penalties = 0;
 		if (!this.stats) return penalties;
 
@@ -123,7 +123,35 @@ export class Node {
 	}
 
 	/**
+	 * Node connections
+	 * @returns An array of connections being referenced by this node
+	 * @readonly
+	 * @internal
+	 */
+	public get connections(): Connection[] {
+		return this.manager.connections.filter(connection => this.#connections.has(connection));
+	}
+
+	/**
+	 * Checks if a node has a connection in this node
+	 * @returns If a connection is bound in this node
+	 * @internal
+	 */
+	public hasConnection(connection: Connection): boolean {
+		return this.#connections.has(connection);
+	}
+
+	/**
+	 * Adds a connection to this node
+	 * @internal
+	 */
+	public addConnection(connection: Connection): void {
+		this.#connections.add(connection);
+	}
+
+	/**
      * Connect to Lavalink
+	 * @internal
      */
 	public async connect(): Promise<void>{
 		if (this.state !== ConnectionState.Disconnected) return;
@@ -176,7 +204,7 @@ export class Node {
 
 		for (; this.reconnects < this.manager.options.reconnectTries; this.reconnects++) {
 			try {
-				this.ws = await create_connection();
+				this.#ws = await create_connection();
 			} catch (err) {
 				this.manager.emit(Events.Debug, `[Socket] -> [${this.name}] : Reconnecting in ${this.manager.options.reconnectInterval} seconds. ${this.manager.options.reconnectTries - this.reconnects} tries left`);
 				await wait(this.manager.options.reconnectInterval * 1000);
@@ -188,18 +216,22 @@ export class Node {
 
 		if (error!) {
 			this.state = ConnectionState.Disconnected;
+
+			await this.handleOnDisconnect();
+
 			throw error;
 		}
 
-		this.ws!.once('close', (...args) => void this.close(...args).catch(error => this.error(error as Error)));
-		this.ws!.on('message', data => void this.message(data).catch(error => this.error(error as Error)));
-		this.ws!.on('error', error => this.error(error));
+		this.#ws!.once('close', (...args) => void this.close(...args).catch(error => this.error(error as Error)));
+		this.#ws!.on('message', data => void this.message(data).catch(error => this.error(error as Error)));
+		this.#ws!.on('error', error => this.error(error));
 	}
 
 	/**
      * Disconnect from Lavalink
      * @param code Status code
      * @param reason Reason for disconnect
+	 * @internal
      */
 	public destroy(code: number, reason?: string): void {
 		void this.close(code, Buffer.from(reason ?? 'Unknown Reason', 'utf-8'), true);
@@ -208,6 +240,7 @@ export class Node {
 	/**
      * Handle message from Lavalink
      * @param message JSON message
+	 * @private
      * @internal
      */
 	private async message(message: unknown): Promise<void> {
@@ -219,6 +252,7 @@ export class Node {
 		switch (json.op) {
 			case LavalinkOpCodes.Stats:
 				this.manager.emit(Events.Debug, `[Socket] <- [${this.name}] : Node Status Update | Server Load: ${this.penalties}`);
+
 				this.stats = json;
 				break;
 			case LavalinkOpCodes.Ready: {
@@ -228,7 +262,7 @@ export class Node {
 
 					this.manager.emit(Events.Debug, `[Socket] -> [${this.name}] : No session id found from ready op? disconnecting and reconnecting to avoid issues`);
 
-					return this.ws!.close(1000, 'No session-id found upon firing ready event');
+					return this.close(1000, Buffer.from('No session-id found upon firing ready event', 'utf-8'), false);
 				}
 
 				this.sessionId = json.sessionId;
@@ -263,6 +297,8 @@ export class Node {
      * @param code Status close
      * @param reason Reason for connection close
 	 * @param destroy If we should not try to connect again
+	 * @private
+	 * @internal
      */
 	private async close(code: number, reason: Buffer, destroy = false): Promise<void> {
 		if (this.state === ConnectionState.Disconnected) return;
@@ -273,9 +309,9 @@ export class Node {
 
 		this.manager.emit(Events.Close, this,code, String(reason));
 
-		this.ws?.removeAllListeners();
-		this.ws?.terminate();
-		this.ws = null;
+		this.#ws?.removeAllListeners();
+		this.#ws?.terminate();
+		this.#ws = null;
 
 		if (!this.manager.options.resume) {
 			this.sessionId = null;
@@ -284,22 +320,53 @@ export class Node {
 		this.state = ConnectionState.Disconnected;
 
 		if (destroy) {
+			await this.handleOnDisconnect();
 			return void this.manager.emit(Events.Disconnect, this);
 		}
 
-		try {
-			await this.connect();
-		} catch (error) {
-			this.error(error as Error);
-			this.manager.emit(Events.Disconnect, this);
-		}
+		await this.connect();
+	}
+
+	/**
+	 * @private
+	 * @internal
+	 */
+	private async handleOnDisconnect(): Promise<void> {
+		const connections = this.connections.map(async connection => {
+			this.#connections.delete(connection);
+
+			if (!this.manager.options.moveOnDisconnect) return;
+
+			const node = this.manager.getIdealNode(connection);
+
+			if (!node || !connection.serverUpdate || !connection.sessionId) {
+				return void connection.disconnect();
+			}
+
+			try {
+				await node.rest.updatePlayer(connection.guildId, {
+					voice: {
+						sessionId: connection.sessionId,
+						endpoint: connection.serverUpdate.endpoint,
+						token: connection.serverUpdate.token
+					}
+				});
+				// eslint-disable-next-line @typescript-eslint/no-unused-vars
+			} catch (_) {
+				return void connection.disconnect();
+			}
+		});
+
+		await Promise.allSettled(connections);
 	}
 
 	/**
      * To emit error events easily
      * @param error error message
+	 * @private
+	 * @internal
      */
-	public error(error: Error): void {
+	private error(error: Error): void {
 		this.manager.emit(Events.Error, this, error);
 	}
 }

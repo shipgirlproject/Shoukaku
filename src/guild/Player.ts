@@ -10,10 +10,9 @@ import type {
 	RotationSettings,
 	TimescaleSettings
 } from '../model/Player';
-import { LavalinkPlayer, UpdatePlayerOptions } from '../model/Rest';
+import type { LavalinkPlayer, UpdatePlayerOptions } from '../model/Rest';
 import type { Node } from '../node/Node';
-
-import { Connection } from './Connection';
+import type { Connection } from './Connection';
 
 /**
  * Wrapper object around Lavalink
@@ -26,11 +25,21 @@ export class Player {
 	/**
 	 * Lavalink node this player is connected to
 	 */
-	public node: Node;
+	public connection: WeakRef<Connection>;
 
-	constructor(guildId: string, node: Node) {
+	constructor(guildId: string, connection: WeakRef<Connection>) {
 		this.guildId = guildId;
-		this.node = node;
+		this.connection = connection;
+	}
+
+	get node(): Node {
+		const node = this.connection.deref()?.getNode();
+
+		if (!node) {
+			throw new Error('Missing node');
+		}
+
+		return node;
 	}
 
 	/**

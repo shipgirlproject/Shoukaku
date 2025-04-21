@@ -36,7 +36,7 @@
 
 ```js
 import { Client } from 'discord.js';
-import { Shoukaku, createDiscordJSOptions } from 'shoukaku';
+import { Shoukaku, Events, createDiscordJSOptions } from 'shoukaku';
 
 const client = new Client();
 
@@ -47,7 +47,7 @@ const requiredOptions = {
         name: "Local",
         url: "127.0.0.1:8080",
         auth: "Something is rising and it's the Shield Hero"
-    }]
+    }],
     connectionOptions: createDiscordJsOptions(client)
 };
 
@@ -57,6 +57,14 @@ const optionalOptions = {
 };
 
 const shoukaku = new Shoukaku(requiredOptions, optionalOptions);
+
+shoukaku.on(Events.Error, console.error);
+
+shoukaku.on(Events.Disconnect, node => {
+    shoukaku.connections
+        .filter(c => node.connections.has(c))
+        .forEach(c => c.disconnect());
+});
 
 shoukaku.connect();
 
