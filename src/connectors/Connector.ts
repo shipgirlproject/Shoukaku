@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access */
 import { NodeDefaults } from '../Constants';
 import type { ServerUpdate, StateUpdatePartial } from '../guild/Connection';
+import { Events } from '../model/Library';
 import type { NodeOption, Shoukaku } from '../Shoukaku';
 import { mergeDefault } from '../Utils';
 
@@ -27,7 +28,10 @@ export abstract class Connector {
 
 	protected ready(nodes: NodeOption[]): void {
 		this.manager!.id = this.getId();
-		for (const node of nodes) this.manager!.addNode(mergeDefault(NodeDefaults, node));
+		for (const node of nodes) {
+			this.manager!.addNode(mergeDefault(NodeDefaults, node))
+				.catch(error => this.manager!.emit(Events.Error, node, error as Error));
+		}
 	}
 
 	protected raw(packet: any): void {

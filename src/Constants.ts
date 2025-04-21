@@ -1,26 +1,6 @@
 import Info from '../package.json';
+import { ConnectionState } from './model/Library';
 import type { NodeOption, ShoukakuOptions } from './Shoukaku';
-
-export enum State {
-	CONNECTING,
-	CONNECTED,
-	DISCONNECTING,
-	IDLE
-}
-
-export enum VoiceState {
-	SESSION_READY,
-	SESSION_ID_MISSING,
-	SESSION_ENDPOINT_MISSING,
-	SESSION_FAILED_UPDATE
-}
-
-export enum OpCodes {
-	PLAYER_UPDATE = 'playerUpdate',
-	STATS = 'stats',
-	EVENT = 'event',
-	READY = 'ready'
-}
 
 export const Versions = {
 	REST_VERSION: 4,
@@ -39,7 +19,7 @@ export const ShoukakuDefaults: Required<ShoukakuOptions> = {
 	structures: {},
 	voiceConnectionTimeout: 15,
 	nodeResolver: (nodes) => [ ...nodes.values() ]
-		.filter(node => node.state === State.CONNECTED)
+		.filter(node => node.state === ConnectionState.Connected)
 		.sort((a, b) => a.penalties - b.penalties)
 		.shift()
 };

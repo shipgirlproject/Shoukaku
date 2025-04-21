@@ -1,5 +1,5 @@
 import { EventEmitter, once } from 'node:events';
-import { State, VoiceState } from '../Constants';
+import { Events, ConnectionState, VoiceState } from '../model/Library';
 import type { Shoukaku, VoiceChannelOptions } from '../Shoukaku';
 
 /**
@@ -50,7 +50,7 @@ export class Connection extends EventEmitter {
 	 */
 	public deafened: boolean;
 	/**
-	 * Id of the voice channel where this instance was connected before the current channelId
+	 * Voice Channel Id where this instance was connected before the current channelId
 	 */
 	public lastChannelId: string | null;
 	/**
@@ -72,7 +72,7 @@ export class Connection extends EventEmitter {
 	/**
 	 * Connection state
 	 */
-	public state: State;
+	public state: ConnectionState;
 	/**
 	 * @param manager The manager of this connection
 	 * @param options The options to pass in connection creation
@@ -95,12 +95,12 @@ export class Connection extends EventEmitter {
 		this.region = null;
 		this.lastRegion = null;
 		this.serverUpdate = null;
-		this.state = State.IDLE;
+		this.state = ConnectionState.Disconnected;
 	}
 
 	/**
 	 * Set the deafen status for the current bot user
-	 * @param deaf Boolean value to indicate whether to deafen or undeafen
+	 * @param deaf Boolean value to indicate whether to deafen or un-deafen
 	 * @defaultValue false
 	 */
 	public setDeaf(deaf = false): void {
@@ -123,13 +123,17 @@ export class Connection extends EventEmitter {
 	 * @internal
 	 */
 	public disconnect(): void {
-		if (this.state === State.IDLE) return;
+		if (this.state === ConnectionState.Disconnected) return;
+
 		this.channelId = null;
 		this.deafened = false;
 		this.muted = false;
+
 		this.removeAllListeners();
 		this.sendVoiceUpdate();
-		this.state = State.IDLE;
+
+		this.state = ConnectionState.Disconnected;
+
 		this.debug(`[Voice] -> [Node] & [Discord] : Connection Destroyed | Guild: ${this.guildId}`);
 	}
 
@@ -138,10 +142,12 @@ export class Connection extends EventEmitter {
 	 * @internal
 	 */
 	public async connect(): Promise<void> {
-		if (this.state === State.CONNECTING || this.state === State.CONNECTED) return;
+		if (this.state !== ConnectionState.Disconnected) return;
 
-		this.state = State.CONNECTING;
+		this.state = ConnectionState.Connecting;
+
 		this.sendVoiceUpdate();
+
 		this.debug(`[Voice] -> [Discord] : Requesting Connection | Guild: ${this.guildId}`);
 
 		const controller = new AbortController();
@@ -149,18 +155,25 @@ export class Connection extends EventEmitter {
 
 		try {
 			const [ status ] = await once(this, 'connectionUpdate', { signal: controller.signal }) as [ VoiceState ];
-			if (status !== VoiceState.SESSION_READY) {
+
+			if (status !== VoiceState.SessionReady) {
 				switch (status) {
-					case VoiceState.SESSION_ID_MISSING: throw new Error('The voice connection is not established due to missing session id');
-					case VoiceState.SESSION_ENDPOINT_MISSING: throw new Error('The voice connection is not established due to missing connection endpoint');
+					case VoiceState.SessionIdMissing: throw new Error('The voice connection is not established due to missing session id');
+					case VoiceState.SessionEndpointMissing: throw new Error('The voice connection is not established due to missing connection endpoint');
 				}
 			}
-			this.state = State.CONNECTED;
+
+			this.state = ConnectionState.Connected;
 		} catch (e: unknown) {
+			this.state = ConnectionState.Disconnected;
+
 			const error = e as Error;
+
 			this.debug(`[Voice] </- [Discord] : Request Connection Failed | Guild: ${this.guildId}`);
+
 			if (error.name === 'AbortError')
 				throw new Error(`The voice connection is not established in ${this.manager.options.voiceConnectionTimeout} seconds`);
+
 			throw error;
 		} finally {
 			clearTimeout(timeout);
@@ -185,13 +198,14 @@ export class Connection extends EventEmitter {
 		}
 
 		if (!this.channelId) {
-			this.state = State.IDLE;
+			this.state = ConnectionState.Disconnected;
 			this.debug(`[Voice] <- [Discord] : Channel Disconnected | Guild: ${this.guildId}`);
 		}
 
 		this.deafened = self_deaf;
 		this.muted = self_mute;
 		this.sessionId = session_id ?? null;
+
 		this.debug(`[Voice] <- [Discord] : State Update Received | Channel: ${this.channelId} Session ID: ${session_id} Guild: ${this.guildId}`);
 	}
 
@@ -201,11 +215,13 @@ export class Connection extends EventEmitter {
 	 */
 	public setServerUpdate(data: ServerUpdate): void {
 		if (!data.endpoint) {
-			this.emit('connectionUpdate', VoiceState.SESSION_ENDPOINT_MISSING);
+			this.debug(`[Voice] <- [Discord] : Received a voice server update without an endpoint! Data => ${JSON.stringify(data)}`);
+			this.emit('connectionUpdate', VoiceState.SessionEndpointMissing);
 			return;
 		}
 		if (!this.sessionId) {
-			this.emit('connectionUpdate', VoiceState.SESSION_ID_MISSING);
+			this.debug(`[Voice] <- [Discord] : Received a voice server update without an session id! Data => ${JSON.stringify(data)}`);
+			this.emit('connectionUpdate', VoiceState.SessionIdMissing);
 			return;
 		}
 
@@ -217,7 +233,9 @@ export class Connection extends EventEmitter {
 		}
 
 		this.serverUpdate = data;
-		this.emit('connectionUpdate', VoiceState.SESSION_READY);
+
+		this.emit('connectionUpdate', VoiceState.SessionReady);
+
 		this.debug(`[Voice] <- [Discord] : Server Update Received | Server: ${this.region} Guild: ${this.guildId}`);
 	}
 
@@ -225,7 +243,7 @@ export class Connection extends EventEmitter {
 	 * Send voice data to discord
 	 * @internal
 	 */
-	private sendVoiceUpdate() {
+	public sendVoiceUpdate() {
 		this.send({ guild_id: this.guildId, channel_id: this.channelId, self_deaf: this.deafened, self_mute: this.muted });
 	}
 
@@ -243,6 +261,6 @@ export class Connection extends EventEmitter {
 	 * @internal
 	 */
 	private debug(message: string): void {
-		this.manager.emit('debug', this.constructor.name, message);
+		this.manager.emit(Events.Debug, message);
 	}
 }

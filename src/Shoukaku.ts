@@ -1,8 +1,17 @@
 import type { Connector } from './connectors/Connector';
-import { ShoukakuDefaults, VoiceState } from './Constants';
+import { ShoukakuDefaults } from './Constants';
 import { Connection } from './guild/Connection';
 import { Player } from './guild/Player';
-import { Node, NodeEvents } from './node/Node';
+import type { Events } from './model/Library';
+import {
+	PlayerUpdate,
+	TrackEndEvent,
+	TrackExceptionEvent,
+	TrackStartEvent,
+	TrackStuckEvent,
+	WebSocketClosedEvent
+} from './model/Player';
+import { Node } from './node/Node';
 import type { Rest } from './node/Rest';
 import { Constructor, mergeDefault, TypedEventEmitter } from './Utils';
 
@@ -103,43 +112,48 @@ export type ShoukakuEvents = {
 	 * Emitted when reconnect tries are occurring and how many tries are left
 	 * @eventProperty
 	 */
-	'reconnecting': [name: string, reconnectsLeft: number, reconnectInterval: number];
+	[Events.Reconnecting]: [node: Node, reconnectsLeft: number, reconnectInterval: number];
 	/**
 	 * Emitted when data useful for debugging is produced
 	 * @eventProperty
 	 */
-	'debug': [name: string, info: string];
+	[Events.Debug]: [info: string];
 	/**
 	 * Emitted when an error occurs
 	 * @eventProperty
 	 */
-	'error': [name: string, error: Error];
+	[Events.Error]: [node: Node | NodeOption, error: Error];
 	/**
 	 * Emitted when Shoukaku is ready to receive operations
 	 * @eventProperty
 	 */
-	'ready': [name: string, lavalinkResume: boolean, libraryResume: boolean];
+	[Events.Ready]: [node: Node, lavalinkResume: boolean];
 	/**
-	 * Emitted when a websocket connection to Lavalink closes
+	 * Emitted when a websocket connection to Lavalink is closed
 	 * @eventProperty
 	 */
-	'close': [name: string, code: number, reason: string];
+	[Events.Close]: [node: Node, code: number, reason: string];
 	/**
-	 * Emitted when a websocket connection to Lavalink disconnects
+	 * Emitted when a websocket connection to Lavalink is Disconnected
 	 * @eventProperty
 	 */
-	'disconnect': [name: string, count: number];
+	[Events.Disconnect]: [node: Node];
 	/**
-	 * Emitted when a raw message is received from Lavalink
+	 * Emitted when a player update event was received from lavalink
 	 * @eventProperty
 	 */
-	'raw': [name: string, json: unknown];
+	[Events.PlayerUpdate]: [node: Node, data: PlayerUpdate];
+	/**
+	 * Emitted when a player event was received from lavalink
+	 * @eventProperty
+	 */
+	[Events.PlayerEvent]: [node: Node, data: TrackStartEvent | TrackEndEvent | TrackStuckEvent | TrackExceptionEvent | WebSocketClosedEvent];
 };
 
 /**
  * Main Shoukaku class
  */
-export class Shoukaku extends TypedEventEmitter<ShoukakuEvents> {
+export class Shoukaku extends TypedEventEmitter<Events, ShoukakuEvents> {
 	/**
 	 * Discord library connector
 	 */
@@ -156,10 +170,6 @@ export class Shoukaku extends TypedEventEmitter<ShoukakuEvents> {
 	 * Voice connections being handled
 	 */
 	public readonly connections: Map<string, Connection>;
-	/**
-	 * Players being handled
-	 */
-	public readonly players: Map<string, Player>;
 	/**
 	 * Shoukaku instance identifier
 	 */
@@ -185,9 +195,31 @@ export class Shoukaku extends TypedEventEmitter<ShoukakuEvents> {
 		this.options = mergeDefault<ShoukakuOptions>(ShoukakuDefaults, options);
 		this.nodes = new Map();
 		this.connections = new Map();
-		this.players = new Map();
 		this.id = null;
 		this.connector.listen(nodes);
+	}
+
+	/**
+	 * @returns The amount of cached player count
+	 */
+	public getPlayerCount(): number {
+		let players = 0;
+		for (const node of this.nodes.values()) {
+			players += node.stats?.playingPlayers ?? 0;
+		}
+		return players;
+	}
+
+	/**
+	 * @returns The latest player count being handled
+	 */
+	public async fetchPlayerCount(): Promise<number> {
+		let players = 0;
+		for (const node of this.nodes.values()) {
+			const player = await node.rest.getPlayers();
+			players += player.length;
+		}
+		return players;
 	}
 
 	/**
@@ -207,16 +239,11 @@ export class Shoukaku extends TypedEventEmitter<ShoukakuEvents> {
 	 * @param options.secure Whether to use secure protocols or not
 	 * @param options.group Group of this node
 	 */
-	public addNode(options: NodeOption): void {
+	public async addNode(options: NodeOption): Promise<void> {
 		const node = new Node(this, options);
-		node.on('debug', (...args) => this.emit('debug', node.name, ...args));
-		node.on('reconnecting', (...args) => this.emit('reconnecting', node.name, ...args));
-		node.on('error', (...args) => this.emit('error', node.name, ...args));
-		node.on('close', (...args) => this.emit('close', node.name, ...args));
-		node.on('ready', (...args) => this.emit('ready', node.name, ...args));
-		node.on('raw', (...args) => this.emit('raw', node.name, ...args));
-		node.once('disconnect', (...args) => this.clean(node, ...args));
-		node.connect();
+
+		await node.connect();
+
 		this.nodes.set(node.name, node);
 	}
 
@@ -227,8 +254,11 @@ export class Shoukaku extends TypedEventEmitter<ShoukakuEvents> {
 	 */
 	public removeNode(name: string, reason = 'Remove node executed'): void {
 		const node = this.nodes.get(name);
-		if (!node) throw new Error('The node name you specified doesn\'t exist');
-		node.disconnect(1000, reason);
+
+		if (!node)
+			throw new Error('The node name you specified doesn\'t exist');
+
+		node.destroy(1000, reason);
 	}
 
 	/**
@@ -243,32 +273,43 @@ export class Shoukaku extends TypedEventEmitter<ShoukakuEvents> {
 	public async joinVoiceChannel(options: VoiceChannelOptions): Promise<Player> {
 		if (this.connections.has(options.guildId))
 			throw new Error('This guild already have an existing connection');
+
 		const connection = new Connection(this, options);
+
 		this.connections.set(connection.guildId, connection);
+
 		try {
 			await connection.connect();
 		} catch (error) {
 			this.connections.delete(options.guildId);
 			throw error;
 		}
-		try {
-			const node = this.getIdealNode(connection);
-			if (!node)
-				throw new Error('Can\'t find any nodes to connect on');
-			const player = this.options.structures.player ? new this.options.structures.player(connection.guildId, node) : new Player(connection.guildId, node);
-			const onUpdate = (state: VoiceState) => {
-				if (state !== VoiceState.SESSION_READY) return;
-				void player.sendServerUpdate(connection);
-			};
-			await player.sendServerUpdate(connection);
-			connection.on('connectionUpdate', onUpdate);
-			this.players.set(player.guildId, player);
-			return player;
-		} catch (error) {
+
+		const cleanup = () => {
 			connection.disconnect();
 			this.connections.delete(options.guildId);
+		};
+
+		const node = this.getIdealNode(connection);
+		if (!node) {
+			cleanup();
+			throw new Error('Can\'t find any nodes to connect on');
+		}
+
+		try {
+			await node.rest.updatePlayer(options.guildId, {
+				voice: {
+					token: connection.serverUpdate!.token,
+					endpoint: connection.serverUpdate!.endpoint,
+					sessionId: connection.sessionId!
+				}
+			});
+		} catch (error) {
+			cleanup();
 			throw error;
 		}
+
+		return this.options.structures.player ? new this.options.structures.player(connection.guildId, node) : new Player(connection.guildId, node);
 	}
 
 	/**
@@ -276,20 +317,10 @@ export class Shoukaku extends TypedEventEmitter<ShoukakuEvents> {
 	 * @param guildId The id of the guild you want to delete
 	 * @returns The destroyed / disconnected player or undefined if none
 	 */
-	public async leaveVoiceChannel(guildId: string): Promise<void> {
+	public leaveVoiceChannel(guildId: string): void {
 		const connection = this.connections.get(guildId);
-		if (connection) {
-			connection.disconnect();
-			this.connections.delete(guildId);
-		}
-		const player = this.players.get(guildId);
-		if (player) {
-			try {
-				await player.destroy();
-			} catch { /* empty */ }
-			player.clean();
-			this.players.delete(guildId);
-		}
+		connection?.disconnect();
+		this.connections.delete(guildId);
 	}
 
 	/**
@@ -299,39 +330,21 @@ export class Shoukaku extends TypedEventEmitter<ShoukakuEvents> {
 	 * @throws {@link Error} When guild does not have an existing connection, or could not be moved
 	 * @returns The moved player
 	 */
-	public async moveVoiceChannel(guildId: string, channelId: string) {
+	public moveVoiceChannel(guildId: string, channelId: string) {
 		const connection = this.connections.get(guildId);
+
 		if (!connection)
 			throw new Error('This guild does not have an existing connection');
 
 		if (connection.channelId === channelId) return;
 
-		try {
-			connection.setStateUpdate({
-				session_id: connection.sessionId!,
-				channel_id: channelId,
-				self_deaf: connection.deafened,
-				self_mute: connection.muted
-			});
-			await connection.connect();
+		connection.setStateUpdate({
+			session_id: connection.sessionId!,
+			channel_id: channelId,
+			self_deaf: connection.deafened,
+			self_mute: connection.muted
+		});
 
-			// player should get updated automagically as connectionUpdate is fired
-			return this.players.get(guildId);
-		} catch (error) {
-			throw new Error(`Could not move to new voice channel with id ${channelId}`, { cause: error });
-		}
-	}
-
-	/**
-	 * Cleans the disconnected lavalink node
-	 * @param node The node to clean
-	 * @param args Additional arguments for Shoukaku to emit
-	 * @returns A Lavalink node or undefined
-	 * @internal
-	 */
-	private clean(node: Node, ...args: NodeEvents['disconnect']): void {
-		node.removeAllListeners();
-		this.nodes.delete(node.name);
-		this.emit('disconnect', node.name, ...args);
+		connection.sendVoiceUpdate();
 	}
 }
