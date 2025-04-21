@@ -1,16 +1,10 @@
 import Websocket from 'ws';
 import { ShoukakuClientInfo, Versions } from '../Constants';
+import { Connection } from '../guild/Connection';
 import { ConnectionState, Events } from '../model/Library';
 import { LavalinkOpCodes } from '../model/Node';
 import type { NodeInfo, Ready, Stats } from '../model/Node';
-import type {
-	PlayerUpdate,
-	TrackEndEvent,
-	TrackExceptionEvent,
-	TrackStartEvent,
-	TrackStuckEvent,
-	WebSocketClosedEvent
-} from '../model/Player';
+import type { PlayerUpdate, TrackEndEvent, TrackExceptionEvent, TrackStartEvent, TrackStuckEvent, WebSocketClosedEvent } from '../model/Player';
 import type { NodeOption, Shoukaku } from '../Shoukaku';
 import { wait } from '../Utils';
 import { Rest } from './Rest';
@@ -59,6 +53,10 @@ export class Node {
      */
 	public state: ConnectionState;
 	/**
+	 * Connections that are currently reachable
+	 */
+	public connections: WeakSet<Connection>;
+	/**
 	 * The number of reconnects to Lavalink
 	 */
 	public reconnects: number;
@@ -96,6 +94,7 @@ export class Node {
 		this.auth = options.auth;
 		this.url = `${options.secure ? 'wss' : 'ws'}://${options.url}/v${Versions.WEBSOCKET_VERSION}/websocket`;
 		this.state = ConnectionState.Disconnected;
+		this.connections = new WeakSet();
 		this.reconnects = 0;
 		this.stats = null;
 		this.info = null;
@@ -203,7 +202,7 @@ export class Node {
      * @param reason Reason for disconnect
      */
 	public destroy(code: number, reason?: string): void {
-		void this.close(1000, Buffer.from(reason ?? 'Unknown Reason', 'utf-8'), true);
+		void this.close(code, Buffer.from(reason ?? 'Unknown Reason', 'utf-8'), true);
 	}
 
 	/**

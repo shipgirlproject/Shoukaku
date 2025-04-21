@@ -53,15 +53,15 @@ export interface RequiredOptions {
 	/**
 	 * The user id of the bot where this client will connect on
 	 */
-	userId: string,
+	userId: string;
 	/**
 	 * List of lavalink nodes to use
 	 */
-	nodes: NodeOption[],
+	nodes: NodeOption[];
 	/**
 	 * Library connector for Discord Websocket
 	 */
-	connectorOptions: ConnectorOptions
+	connectorOptions: ConnectorOptions;
 }
 
 export interface OptionalOptions {
@@ -205,7 +205,6 @@ export class Shoukaku extends TypedEventEmitter<Events, ShoukakuEvents> {
 	 * @param optional.userAgent User Agent to use when making requests to Lavalink
 	 * @param optional.structures Custom structures for shoukaku to use
 	 * @param optional.nodeResolver Used if you have custom lavalink node resolving
-	 * @param nodes An array that conforms to the NodeOption type that specifies nodes to connect to
 	 */
 	constructor(required: RequiredOptions, optional: OptionalOptions = {}) {
 		super();
@@ -349,6 +348,8 @@ export class Shoukaku extends TypedEventEmitter<Events, ShoukakuEvents> {
 			throw error;
 		}
 
+		node.connections.add(connection);
+
 		return this.options.structures.player ? new this.options.structures.player(connection.guildId, node) : new Player(connection.guildId, node);
 	}
 
@@ -360,7 +361,7 @@ export class Shoukaku extends TypedEventEmitter<Events, ShoukakuEvents> {
 	public leaveVoiceChannel(guildId: string): void {
 		const connection = this.connections.find(conn => conn.guildId === guildId);
 		connection?.disconnect();
-		
+
 		this.deleteConnection(guildId);
 	}
 
@@ -389,7 +390,12 @@ export class Shoukaku extends TypedEventEmitter<Events, ShoukakuEvents> {
 		connection.sendVoiceUpdate();
 	}
 
-	private deleteConnection(guildId: string): Connection | undefined {
+	/**
+	 * Deletes a connection from array
+	 * @param guildId
+	 * @internal
+	 */
+	public deleteConnection(guildId: string): Connection | undefined {
 		const index = this.connections.findIndex(conn => conn.guildId === guildId);
 
 		if (index === -1) return;

@@ -50,10 +50,6 @@ export class Connection extends EventEmitter {
 	 */
 	public deafened: boolean;
 	/**
-	 * Voice Channel Id where this instance was connected before the current channelId
-	 */
-	public lastChannelId: string | null;
-	/**
 	 * Id of the currently active voice channel connection
 	 */
 	public sessionId: string | null;
@@ -61,10 +57,6 @@ export class Connection extends EventEmitter {
 	 * Region of connected voice channel
 	 */
 	public region: string | null;
-	/**
-	 * Last region of the connected voice channel
-	 */
-	public lastRegion: string | null;
 	/**
 	 * Cached serverUpdate event from Lavalink
 	 */
@@ -90,10 +82,8 @@ export class Connection extends EventEmitter {
 		this.shardId = options.shardId;
 		this.muted = options.mute ?? false;
 		this.deafened = options.deaf ?? false;
-		this.lastChannelId = null;
 		this.sessionId = null;
 		this.region = null;
-		this.lastRegion = null;
 		this.serverUpdate = null;
 		this.state = ConnectionState.Disconnected;
 	}
@@ -190,16 +180,16 @@ export class Connection extends EventEmitter {
 	 * @internal
 	 */
 	public setStateUpdate({ session_id, channel_id, self_deaf, self_mute }: StateUpdatePartial): void {
-		this.lastChannelId = this.channelId?.repeat(1) ?? null;
-		this.channelId = channel_id ?? null;
-
-		if (this.channelId && this.lastChannelId !== this.channelId) {
+		if (channel_id && channel_id !== this.channelId) {
 			this.debug(`[Voice] <- [Discord] : Channel Moved | Old Channel: ${this.channelId} Guild: ${this.guildId}`);
 		}
+
+		this.channelId = channel_id ?? null;
 
 		if (!this.channelId) {
 			this.state = ConnectionState.Disconnected;
 			this.debug(`[Voice] <- [Discord] : Channel Disconnected | Guild: ${this.guildId}`);
+			this.manager.deleteConnection(this.guildId);
 		}
 
 		this.deafened = self_deaf;
@@ -225,18 +215,31 @@ export class Connection extends EventEmitter {
 			return;
 		}
 
-		this.lastRegion = this.region?.repeat(1) ?? null;
-		this.region = data.endpoint.split('.').shift()?.replace(/[0-9]/g, '') ?? null;
+		const region = data.endpoint.split('.').shift()?.replace(/[0-9]/g, '');
 
-		if (this.region && this.lastRegion !== this.region) {
-			this.debug(`[Voice] <- [Discord] : Voice Region Moved | Old Region: ${this.lastRegion} New Region: ${this.region} Guild: ${this.guildId}`);
+		if (region !== this.region) {
+			this.debug(`[Voice] <- [Discord] : Voice Region Moved | Old Region: ${this.region} New Region: ${region} Guild: ${this.guildId}`);
 		}
+
+		this.region = region ?? null;
 
 		this.serverUpdate = data;
 
 		this.emit('connectionUpdate', VoiceState.SessionReady);
 
 		this.debug(`[Voice] <- [Discord] : Server Update Received | Server: ${this.region} Guild: ${this.guildId}`);
+
+		const node = this.manager.nodes.find(n => n.connections.has(this));
+
+		node?.rest
+			.updatePlayer(this.guildId, {
+				voice: {
+					token: data.token,
+					endpoint: data.endpoint,
+					sessionId: this.sessionId
+				}
+			})
+			.catch(() => null);
 	}
 
 	/**

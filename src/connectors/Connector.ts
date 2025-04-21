@@ -2,9 +2,9 @@ import type { ServerUpdate, StateUpdatePartial } from '../guild/Connection';
 import type { Shoukaku } from '../Shoukaku';
 
 export interface ConnectorOptions {
-	client: unknown,
-	sendPacket: (client: unknown, shardId: number, payload: unknown) => void
-	listenEvent: (client: unknown, handler: (packet: any) => void) => void
+	client: unknown;
+	sendPacket: (client: unknown, shardId: number, payload: unknown) => void;
+	listenEvent: (client: unknown, handler: (packet: any) => void) => void;
 }
 
 export const AllowedPackets = [ 'VOICE_STATE_UPDATE', 'VOICE_SERVER_UPDATE' ];
@@ -35,7 +35,7 @@ export class Connector {
 		const userId = packet.d.user_id as string;
 
 		if (userId !== this.manager.userId) return;
-		
+
 		connection.setStateUpdate(packet.d as StateUpdatePartial);
 	}
 
@@ -55,9 +55,9 @@ export function createDiscordJSOptions(client: unknown): ConnectorOptions {
 			return client.ws.shards.get(shardId)?.send(payload, false);
 		},
 		listenEvent: (client: any, handler) => {
-			return void client.on('raw', handler)
+			return void client.on('raw', handler);
 		}
-	}
+	};
 }
 
 /**
@@ -71,9 +71,9 @@ export function createErisOptions(client: unknown): ConnectorOptions {
 			return client.shards.get(shardId)?.sendWS(payload.op, payload.d, false);
 		},
 		listenEvent: (client: any, handler) => {
-			return void client.on('rawWS', handler)
+			return void client.on('rawWS', handler);
 		}
-	}
+	};
 }
 
 /**
@@ -89,7 +89,7 @@ export function createOceanicOptions(client: unknown): ConnectorOptions {
 		listenEvent: (client: any, handler) => {
 			return void client.on('packet', handler);
 		}
-	}
+	};
 }
 
 /**
@@ -108,5 +108,5 @@ export function createSeyfertOptions(client: unknown): ConnectorOptions {
 				run: handler
 			};
 		}
-	}
+	};
 }

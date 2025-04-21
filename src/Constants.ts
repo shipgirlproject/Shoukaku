@@ -1,13 +1,13 @@
 import Info from '../package.json';
 import { ConnectionState } from './model/Library';
-import type { NodeOption, ShoukakuOptions } from './Shoukaku';
+import type { NodeOption, OptionalOptions } from './Shoukaku';
 
 export const Versions = {
 	REST_VERSION: 4,
 	WEBSOCKET_VERSION: 4
 };
 
-export const ShoukakuDefaults: Required<ShoukakuOptions> = {
+export const ShoukakuDefaults: Required<OptionalOptions> = {
 	resume: false,
 	resumeTimeout: 30,
 	resumeByLibrary: false,
