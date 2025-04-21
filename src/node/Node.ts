@@ -1,6 +1,6 @@
 import Websocket from 'ws';
 import { ShoukakuClientInfo, Versions } from '../Constants';
-import { Connection } from '../guild/Connection';
+import type { Connection } from '../guild/Connection';
 import { ConnectionState, Events } from '../model/Library';
 import { LavalinkOpCodes } from '../model/Node';
 import type { NodeInfo, Ready, Stats } from '../model/Node';

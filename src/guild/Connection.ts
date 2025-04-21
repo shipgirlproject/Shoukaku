@@ -1,6 +1,6 @@
 import { EventEmitter, once } from 'node:events';
 import { Events, ConnectionState, VoiceState } from '../model/Library';
-import { Node } from '../node/Node';
+import type { Node } from '../node/Node';
 import type { Shoukaku, VoiceChannelOptions } from '../Shoukaku';
 
 /**
