@@ -1,6 +1,6 @@
 ## Shoukaku
 
-> A stable and updated wrapper around Lavalink
+> A low level Node.JS Library around Lavalink
 
 [![Discord](https://img.shields.io/discord/423116740810244097?style=flat-square)](https://discordapp.com/invite/FVqbtGu)
 [![npm](https://img.shields.io/npm/v/shoukaku?style=flat-square)](https://www.npmjs.com/package/shoukaku)
@@ -9,10 +9,10 @@
 ![NPM](https://img.shields.io/npm/l/shoukaku?style=flat-square)
 
 <p align="center">
-    <img src="https://safe.saya.moe/OlYoY5xxkMLO.png"> 
+    <img src="https://azurlane.netojuu.com/images/thumb/d/dc/ShoukakuWeddingWithoutBG.png/767px-ShoukakuWeddingWithoutBG.png"> 
 </p>
 
-> Shoukaku, from Azur Lane, drawn by: elfenlied22
+> Artwork from Azur Lane
 
 ### Features
 
@@ -27,6 +27,9 @@
 - ESM & CommonJS supported
 
 - Very cute (Very Important)
+
+> Warning: ⚠️ If you are looking for Stable Branch, Look at the V4 Branch of the Library. Master is bleeding edge 
+> Info: ℹ️ v5 maybe is the last breaking change library wise unless Lavalink makes a change in it's core api
 
 ### Documentation
 
