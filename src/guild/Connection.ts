@@ -253,7 +253,7 @@ export class Connection extends EventEmitter {
 	 * @internal
 	 */
 	private send(data: unknown): void {
-		this.manager.connector.sendPacket(this.shardId, { op: 4, d: data }, false);
+		this.manager.connector.sendPacket(this.shardId, { op: 4, d: data });
 	}
 
 	/**

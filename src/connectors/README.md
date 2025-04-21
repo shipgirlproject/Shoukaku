@@ -1,13 +1,48 @@
-## Supported Libs
+## In order to use Shoukaku, you need to provide any class that extends Connector. Here are some examples
 
-> [Discord.JS](https://discord.js.org/#/) (v13.x.x & 14.x.x)
+> [Discord.JS](https://discord.js.org/#/)
 
 ```js
-const { Shoukaku, Connectors } = require('shoukaku');
-new Shoukaku(new Connectors.DiscordJS(client), servers, options);
+import { Shoukaku, Connector } from 'shoukaku';
+import { Client } from 'discord.js';
+
+// Lavalink servers array
+const nodes = [];
+// Shoukaku options
+const options = {};
+
+const client = new Client();
+
+const shoukaku = new Shoukaku(, [], {});
+
+shoukaku.connect();
+client.login(token);
 ```
 
-> [Eris](https://abal.moe/Eris/) (0.15.x / 0.16.x / 0.17.x)
+> [Eris](https://abal.moe/Eris/)
+
+```js
+import { Shoukaku, Connector } from 'shoukaku';
+import { Client, } from 'discord.js';
+
+class DiscordJsConnector extends Connector<Client> {
+	public sendPacket(shardId: number, payload: any, important: boolean): void {
+		return this.client.ws.shards.get(shardId)?.send(payload, important);
+	}
+}
+
+// Lavalink servers array
+const nodes = [];
+// Shoukaku options
+const options = {};
+
+const client = new Client();
+
+const shoukaku = new Shoukaku(new DiscordJsConnector(client), [], {});
+
+shoukaku.connect();
+client.login(token);
+```
 
 ```js
 const { Shoukaku, Connectors } = require('shoukaku');

@@ -1,4 +1,4 @@
-import type { Connector } from './connectors/Connector';
+import { Connector, ConnectorOptions } from './connectors/Connector';
 import { ShoukakuDefaults } from './Constants';
 import { Connection } from './guild/Connection';
 import { Player } from './guild/Player';
@@ -49,7 +49,22 @@ export interface NodeOption {
 	group?: string;
 }
 
-export interface ShoukakuOptions {
+export interface RequiredOptions {
+	/**
+	 * The user id of the bot where this client will connect on
+	 */
+	userId: string,
+	/**
+	 * List of lavalink nodes to use
+	 */
+	nodes: NodeOption[],
+	/**
+	 * Library connector for Discord Websocket
+	 */
+	connectorOptions: ConnectorOptions
+}
+
+export interface OptionalOptions {
 	/**
 	 * Whether to resume a connection on disconnect to Lavalink (Server Side) (Note: DOES NOT RESUME WHEN THE LAVALINK SERVER DIES)
 	 */
@@ -161,7 +176,7 @@ export class Shoukaku extends TypedEventEmitter<Events, ShoukakuEvents> {
 	/**
 	 * Shoukaku options
 	 */
-	public readonly options: Required<ShoukakuOptions>;
+	public readonly options: Required<OptionalOptions>;
 	/**
 	 * Connected Lavalink nodes
 	 */
@@ -171,32 +186,38 @@ export class Shoukaku extends TypedEventEmitter<Events, ShoukakuEvents> {
 	 */
 	public readonly connections: Map<string, Connection>;
 	/**
-	 * Shoukaku instance identifier
+	 * The user id of the user this instance is using
 	 */
-	public id: string | null;
+	public readonly userId: string;
 	/**
-	 * @param connector A Discord library connector
+	 * @param required Required options for shoukaku to function
+	 * @param required.userId The user id of the user this instance will connect to
+	 * @param required.nodes List of initial nodes that the library will try to connect to
+	 * @param required.connectorOptions Options of the connector to communicate with Discord Websocket
+	 * @param optional Optional options to pass to create this Shoukaku instance
+	 * @param optional.resume Whether to resume a connection on disconnect to Lavalink (Server Side) (Note: DOES NOT RESUME WHEN THE LAVALINK SERVER DIES)
+	 * @param optional.resumeTimeout Time to wait before lavalink starts to destroy the players of the disconnected client
+	 * @param optional.resumeByLibrary Whether to resume the players by doing it in the library side (Client Side) (Note: TRIES TO RESUME REGARDLESS OF WHAT HAPPENED ON A LAVALINK SERVER)
+	 * @param optional.reconnectTries Number of times to try and reconnect to Lavalink before giving up
+	 * @param optional.reconnectInterval Timeout before trying to reconnect
+	 * @param optional.restTimeout Time to wait for a response from the Lavalink REST API before giving up
+	 * @param optional.moveOnDisconnect Whether to move players to a different Lavalink node when a node disconnects
+	 * @param optional.userAgent User Agent to use when making requests to Lavalink
+	 * @param optional.structures Custom structures for shoukaku to use
+	 * @param optional.nodeResolver Used if you have custom lavalink node resolving
 	 * @param nodes An array that conforms to the NodeOption type that specifies nodes to connect to
-	 * @param options Options to pass to create this Shoukaku instance
-	 * @param options.resume Whether to resume a connection on disconnect to Lavalink (Server Side) (Note: DOES NOT RESUME WHEN THE LAVALINK SERVER DIES)
-	 * @param options.resumeTimeout Time to wait before lavalink starts to destroy the players of the disconnected client
-	 * @param options.resumeByLibrary Whether to resume the players by doing it in the library side (Client Side) (Note: TRIES TO RESUME REGARDLESS OF WHAT HAPPENED ON A LAVALINK SERVER)
-	 * @param options.reconnectTries Number of times to try and reconnect to Lavalink before giving up
-	 * @param options.reconnectInterval Timeout before trying to reconnect
-	 * @param options.restTimeout Time to wait for a response from the Lavalink REST API before giving up
-	 * @param options.moveOnDisconnect Whether to move players to a different Lavalink node when a node disconnects
-	 * @param options.userAgent User Agent to use when making requests to Lavalink
-	 * @param options.structures Custom structures for shoukaku to use
-	 * @param options.nodeResolver Used if you have custom lavalink node resolving
 	 */
-	constructor(connector: Connector, nodes: NodeOption[], options: ShoukakuOptions = {}) {
+	constructor(required: RequiredOptions, optional: OptionalOptions = {}) {
 		super();
-		this.connector = connector.set(this);
-		this.options = mergeDefault<ShoukakuOptions>(ShoukakuDefaults, options);
+		this.connector = new Connector(this, required.connectorOptions);
+		this.options = mergeDefault<OptionalOptions>(ShoukakuDefaults, optional);
 		this.nodes = new Map();
 		this.connections = new Map();
-		this.id = null;
-		this.connector.listen(nodes);
+		this.userId = required.userId;
+
+		for (const option of required.nodes) {
+			this.nodes.set(option.name, new Node(this, option));
+		}
 	}
 
 	/**

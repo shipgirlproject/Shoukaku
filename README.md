@@ -28,40 +28,57 @@
 
 - Very cute (Very Important)
 
-> Warning: ⚠️ If you are looking for Stable Branch, Look at the V4 Branch of the Library. Master is V5 bleeding edge 
+> Warning: ⚠️ If you are looking for Stable Branch, Look at the v4 Branch of the Library. Master is v5 bleeding edge 
 
 > Info: ℹ️ v5 maybe is the last breaking change library wise unless Lavalink makes a change in it's core api
 
-### Documentation
-
-> https://guide.shoukaku.shipgirl.moe/
-
 ### Getting Started
 
-> https://guide.shoukaku.shipgirl.moe/guides/1-getting-started/
+```js
+import { Client } from 'discord.js';
+import { Shoukaku, createDiscordJSOptions } from 'shoukaku';
 
-### Supported Libraries
+const client = new Client();
 
-> https://guide.shoukaku.shipgirl.moe/guides/5-connectors/
+// see below for more info
+const requiredOptions = {
+    userId: "12345678901234567890",
+    nodes: [{
+        name: "Local",
+        url: "127.0.0.1:8080",
+        auth: "Something is rising and it's the Shield Hero"
+    }]
+    connectionOptions: createDiscordJsOptions(client)
+};
 
-### Example Bot
+// see below for more info
+const optionalOptions = {
+    userAgent: "Rio/1.0.0"
+};
+
+const shoukaku = new Shoukaku(requiredOptions, optionalOptions);
+
+shoukaku.connect();
+
+client.login(env.TOKEN);
+```
 
 > https://github.com/Deivu/Kongou
+### Required Configuration Options
+| Option                 | Type                   | Description                                                     |                                 
+| ---------------------- | ---------------------- | --------------------------------------------------------------- | 
+| userId                 | string                 | The user id (bot) that shoukaku will use to connect             |                          
+| nodes                  | NodeOption[]           | List of initial nodes to use                                    |
+| connectionOptions      | ConnectorOptions       | Connector options Shoukaku will use to connect, see above       |
 
-### Configuration Options
-
-```js
-// Parameters for main class init, Options is the Configuration Options
-new Shoukaku(new Connectors.DiscordJS(client), Nodes, Options);
-```
+### Optional Configuration Options
 
 | Option                 | Type                   | Default  | Description                                                                                      | Notes                    |
 | ---------------------- | ---------------------- | -------- | ------------------------------------------------------------------------------------------------ | ------------------------ |
 | resume                 | boolean                | false    | If you want to enable resuming when your connection when your connection to lavalink disconnects |                          |
 | resumeTimeout          | number                 | 30       | Timeout before lavalink destroys the players on a disconnect                                     | In seconds               |
-| resumeByLibrary        | boolean                | false    | If you want to force resume players no matter what even if it's not resumable by lavalink        |                          |
 | reconnectTries         | number                 | 3        | Number of tries to reconnect to lavalink before disconnecting                                    |                          |
-| reconnectInterval      | number                 | 5        | Timeout between reconnects                                                                       | In seconds               |
+| reconnectDelay         | number                 | 5        | Timeout between reconnects                                                                       | In seconds               |
 | restTimeout            | number                 | 60       | Maximum amount of time to wait for rest lavalink api requests                                    | In seconds               |
 | moveOnDisconnect       | boolean                | false    | Whether to move players to a different lavalink node when a node disconnects                     |                          |
 | userAgent              | string                 | (auto)   | Changes the user-agent used for lavalink requests                                                | Not recommeded to change |
