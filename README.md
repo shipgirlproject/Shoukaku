@@ -38,7 +38,7 @@
 
 ```js
 import { Client } from 'discord.js';
-import { Shoukaku, Events, createDiscordJSOptions } from 'shoukaku';
+import { Shoukaku, Player, Events, createDiscordJSOptions } from 'shoukaku';
 
 const client = new Client();
 
@@ -113,12 +113,15 @@ client.on("message", async message => {
 
         const track = await node.rest.resolve(input);
 
-        const player = await shoukaku.joinVoiceChannel({
+        const connection = await shoukaku.joinVoiceChannel({
             node,
             guildId: message.guild.id,
             shardId: message.guild.shardId,
             channelId: message.member.voice.channelId
         });
+
+        // You now create your own player class! This is a basic wrapper around "player" and you can use it as basis for yours
+        const player = new Player(connection);
 
         caches.set(message.guild.id, { channel: message.channel, player });
 

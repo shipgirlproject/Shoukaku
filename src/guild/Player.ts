@@ -27,8 +27,9 @@ export class Player {
 	 */
 	public connection: WeakRef<Connection>;
 
-	constructor(guildId: string, connection: WeakRef<Connection>) {
-		this.guildId = guildId;
+	constructor(connection: WeakRef<Connection>) {
+		if (!connection.deref()) throw new Error('The referenced connection is already destroyed');
+		this.guildId = connection.deref()!.guildId;
 		this.connection = connection;
 	}
 
@@ -36,7 +37,7 @@ export class Player {
 		const node = this.connection.deref()?.getNode();
 
 		if (!node) {
-			throw new Error('Missing node');
+			throw new Error('The referenced connection is already destroyed');
 		}
 
 		return node;

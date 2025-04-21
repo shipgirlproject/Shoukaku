@@ -1,5 +1,5 @@
 import { EventEmitter, once } from 'node:events';
-import { Events, ConnectionState, VoiceState } from '../model/Library';
+import { ConnectionState, Events, VoiceState } from '../model/Library';
 import type { Node } from '../node/Node';
 import type { Shoukaku, VoiceChannelOptions } from '../Shoukaku';
 
@@ -91,7 +91,7 @@ export class Connection extends EventEmitter {
 
 	public getNode(): Node | undefined {
 		return this.manager.nodes
-			.find(node => node.hasConnection(this));
+			.find(node => node.connections.has(this));
 	}
 
 	/**
@@ -195,7 +195,7 @@ export class Connection extends EventEmitter {
 		if (!this.channelId) {
 			this.state = ConnectionState.Disconnected;
 			this.debug(`[Voice] <- [Discord] : Channel Disconnected | Guild: ${this.guildId}`);
-			this.manager.deleteConnection(this.guildId);
+			this.manager.leaveVoiceChannel(this.guildId);
 		}
 
 		this.deafened = self_deaf;

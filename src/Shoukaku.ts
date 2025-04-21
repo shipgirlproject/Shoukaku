@@ -1,7 +1,6 @@
 import { Connector, ConnectorOptions } from './connectors/Connector';
 import { ShoukakuDefaults } from './Constants';
 import { Connection } from './guild/Connection';
-import { Player } from './guild/Player';
 import type { Events } from './model/Library';
 import {
 	PlayerUpdate,
@@ -20,10 +19,6 @@ export interface Structures {
 	 * A custom structure that extends the Rest class
 	 */
 	rest?: Constructor<Rest>;
-	/**
-	 * A custom structure that extends the Player class
-	 */
-	player?: Constructor<Player>;
 }
 
 export interface NodeOption {
@@ -304,9 +299,9 @@ export class Shoukaku extends TypedEventEmitter<Events, ShoukakuEvents> {
 	 * @param options.channelId ChannelId of the voice channel you want to connect to
 	 * @param options.deaf Optional boolean value to specify whether to deafen or undeafen the current bot user
 	 * @param options.mute Optional boolean value to specify whether to mute or unmute the current bot user
-	 * @returns The created player
+	 * @returns A weak reference to the connection, where you can create a new basic player by passing it to the class
 	 */
-	public async joinVoiceChannel(options: VoiceChannelOptions): Promise<Player> {
+	public async joinVoiceChannel(options: VoiceChannelOptions): Promise<WeakRef<Connection>> {
 		if (this.connections.some(conn => conn.guildId === options.guildId))
 			throw new Error('This guild already have an existing connection');
 
@@ -339,9 +334,9 @@ export class Shoukaku extends TypedEventEmitter<Events, ShoukakuEvents> {
 			throw error;
 		}
 
-		options.node.addConnection(connection);
+		options.node.connections.add(connection);
 
-		return this.options.structures.player ? new this.options.structures.player(connection.guildId, connection) : new Player(connection.guildId, new WeakRef(connection));
+		return new WeakRef(connection);
 	}
 
 	/**
@@ -385,8 +380,9 @@ export class Shoukaku extends TypedEventEmitter<Events, ShoukakuEvents> {
 	 * Deletes a connection from array
 	 * @param guildId
 	 * @internal
+	 * @private
 	 */
-	public deleteConnection(guildId: string): Connection | undefined {
+	private deleteConnection(guildId: string): Connection | undefined {
 		const index = this.connections.findIndex(conn => conn.guildId === guildId);
 
 		if (index === -1) return;

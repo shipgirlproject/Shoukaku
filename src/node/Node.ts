@@ -2,9 +2,16 @@ import Websocket from 'ws';
 import { ShoukakuClientInfo, Versions } from '../Constants';
 import type { Connection } from '../guild/Connection';
 import { ConnectionState, Events } from '../model/Library';
-import { LavalinkOpCodes } from '../model/Node';
 import type { NodeInfo, Ready, Stats } from '../model/Node';
-import type { PlayerUpdate, TrackEndEvent, TrackExceptionEvent, TrackStartEvent, TrackStuckEvent, WebSocketClosedEvent } from '../model/Player';
+import { LavalinkOpCodes } from '../model/Node';
+import type {
+	PlayerUpdate,
+	TrackEndEvent,
+	TrackExceptionEvent,
+	TrackStartEvent,
+	TrackStuckEvent,
+	WebSocketClosedEvent
+} from '../model/Player';
 import type { NodeOption, Shoukaku } from '../Shoukaku';
 import { wait } from '../Utils';
 import { Rest } from './Rest';
@@ -50,33 +57,39 @@ export class Node {
 	private readonly auth: string;
 	/**
      * The state of this connection
+	 * @readonly
      */
 	public state: ConnectionState;
 	/**
 	 * The number of reconnects to Lavalink
+	 * @readonly
 	 */
 	public reconnects: number;
 	/**
      * Statistics from Lavalink
+	 * @readonly
      */
 	public stats: Stats | null;
 	/**
      * Information about lavalink node
+	 * @readonly
     */
 	public info: NodeInfo | null;
 	/**
      * SessionId of this Lavalink connection (not to be confused with Discord SessionId)
+	 * @readonly
      */
 	public sessionId: string | null;
 	/**
+	 * Connections that are referenced by this node
+	 * @internal
+	 */
+	public connections: WeakSet<Connection>;
+	/**
 	 * Websocket instance
+	 * @private
 	 */
 	#ws: Websocket | null;
-	/**
-	 * Connections that are referenced by this node
-	 */
-	#connections: WeakSet<Connection>;
-
 	/**
      * @param manager Shoukaku instance
      * @param options Options on creating this node
@@ -98,8 +111,8 @@ export class Node {
 		this.stats = null;
 		this.info = null;
 		this.sessionId = null;
+		this.connections = new WeakSet();
 		this.#ws = null;
-		this.#connections = new WeakSet();
 	}
 
 	/**
@@ -123,30 +136,13 @@ export class Node {
 	}
 
 	/**
-	 * Node connections
+	 * Node connections, this exists because weaksets can't be iterated on
 	 * @returns An array of connections being referenced by this node
 	 * @readonly
 	 * @internal
 	 */
-	public get connections(): Connection[] {
-		return this.manager.connections.filter(connection => this.#connections.has(connection));
-	}
-
-	/**
-	 * Checks if a node has a connection in this node
-	 * @returns If a connection is bound in this node
-	 * @internal
-	 */
-	public hasConnection(connection: Connection): boolean {
-		return this.#connections.has(connection);
-	}
-
-	/**
-	 * Adds a connection to this node
-	 * @internal
-	 */
-	public addConnection(connection: Connection): void {
-		this.#connections.add(connection);
+	public get mappedConnections(): Connection[] {
+		return this.manager.connections.filter(connection => this.connections.has(connection));
 	}
 
 	/**
@@ -332,8 +328,8 @@ export class Node {
 	 * @internal
 	 */
 	private async handleOnDisconnect(): Promise<void> {
-		const connections = this.connections.map(async connection => {
-			this.#connections.delete(connection);
+		const connections = this.mappedConnections.map(async connection => {
+			this.connections.delete(connection);
 
 			if (!this.manager.options.moveOnDisconnect) return;
 
