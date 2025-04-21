@@ -28,7 +28,8 @@
 
 - Very cute (Very Important)
 
-> Warning: ⚠️ If you are looking for Stable Branch, Look at the V4 Branch of the Library. Master is bleeding edge 
+> Warning: ⚠️ If you are looking for Stable Branch, Look at the V4 Branch of the Library. Master is V5 bleeding edge 
+
 > Info: ℹ️ v5 maybe is the last breaking change library wise unless Lavalink makes a change in it's core api
 
 ### Documentation
