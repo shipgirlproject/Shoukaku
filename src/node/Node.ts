@@ -127,8 +127,6 @@ export class Node {
      * Connect to Lavalink
      */
 	public async connect(): Promise<void>{
-		if (!this.manager.id) throw new Error('UserId missing, probably your connector is misconfigured?');
-
 		if (this.state !== ConnectionState.Disconnected) return;
 
 		this.state = ConnectionState.Connecting;
@@ -137,7 +135,7 @@ export class Node {
 			'Client-Name': ShoukakuClientInfo,
 			'User-Agent': this.manager.options.userAgent,
 			'Authorization': this.auth,
-			'User-Id': this.manager.id
+			'User-Id': this.manager.userId
 		};
 
 		if (this.sessionId) {

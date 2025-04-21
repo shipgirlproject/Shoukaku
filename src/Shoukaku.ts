@@ -108,7 +108,7 @@ export interface OptionalOptions {
 	/**
 	 * Node Resolver to use if you want to customize it
 	 */
-	nodeResolver?: (nodes: Map<string, Node>, connection?: Connection) => Node | undefined;
+	nodeResolver?: (nodes: Node[], connection?: Connection) => Node | undefined;
 }
 
 export interface VoiceChannelOptions {
@@ -180,11 +180,11 @@ export class Shoukaku extends TypedEventEmitter<Events, ShoukakuEvents> {
 	/**
 	 * Connected Lavalink nodes
 	 */
-	public readonly nodes: Map<string, Node>;
+	public readonly nodes: Node[];
 	/**
 	 * Voice connections being handled
 	 */
-	public readonly connections: Map<string, Connection>;
+	public readonly connections: Connection[];
 	/**
 	 * The user id of the user this instance is using
 	 */
@@ -211,12 +211,12 @@ export class Shoukaku extends TypedEventEmitter<Events, ShoukakuEvents> {
 		super();
 		this.connector = new Connector(this, required.connectorOptions);
 		this.options = mergeDefault<OptionalOptions>(ShoukakuDefaults, optional);
-		this.nodes = new Map();
-		this.connections = new Map();
+		this.nodes = [];
+		this.connections = [];
 		this.userId = required.userId;
 
 		for (const option of required.nodes) {
-			this.nodes.set(option.name, new Node(this, option));
+			this.nodes.push(new Node(this, option));
 		}
 	}
 
@@ -253,7 +253,24 @@ export class Shoukaku extends TypedEventEmitter<Events, ShoukakuEvents> {
 	}
 
 	/**
-	 * Add a Lavalink node to the pool of available nodes
+	 * Connects every node that shoukaku manages if it's disconnected
+	 */
+	public async connect(): Promise<void> {
+		await Promise.all(this.nodes.map(node => node.connect()));
+	}
+
+	/**
+	 * Connects a specific node shoukaku manages if it's disconnected
+	 * @param name Node name to connect
+	 */
+	public async connectNodeNamed(name: string): Promise<void> {
+		const node = this.nodes.find(n => n.name === name);
+
+		await node?.connect();
+	}
+
+	/**
+	 * Add a Lavalink node to the pool of available nodes then tries to connect it
 	 * @param options.name Name of this node
 	 * @param options.url URL of Lavalink
 	 * @param options.auth Credentials to access Lavalnk
@@ -265,7 +282,7 @@ export class Shoukaku extends TypedEventEmitter<Events, ShoukakuEvents> {
 
 		await node.connect();
 
-		this.nodes.set(node.name, node);
+		this.nodes.push(node);
 	}
 
 	/**
@@ -274,12 +291,14 @@ export class Shoukaku extends TypedEventEmitter<Events, ShoukakuEvents> {
 	 * @param reason Reason of removing the node
 	 */
 	public removeNode(name: string, reason = 'Remove node executed'): void {
-		const node = this.nodes.get(name);
+		const index = this.nodes.findIndex(n => n.name === name);
 
-		if (!node)
+		if (index === -1)
 			throw new Error('The node name you specified doesn\'t exist');
 
-		node.destroy(1000, reason);
+		const node = this.nodes.splice(index, 1)[0];
+
+		node?.destroy(1000, reason);
 	}
 
 	/**
@@ -292,23 +311,23 @@ export class Shoukaku extends TypedEventEmitter<Events, ShoukakuEvents> {
 	 * @returns The created player
 	 */
 	public async joinVoiceChannel(options: VoiceChannelOptions): Promise<Player> {
-		if (this.connections.has(options.guildId))
+		if (this.connections.some(conn => conn.guildId === options.guildId))
 			throw new Error('This guild already have an existing connection');
 
 		const connection = new Connection(this, options);
 
-		this.connections.set(connection.guildId, connection);
+		this.connections.push(connection);
 
 		try {
 			await connection.connect();
 		} catch (error) {
-			this.connections.delete(options.guildId);
+			this.deleteConnection(options.guildId);
 			throw error;
 		}
 
 		const cleanup = () => {
 			connection.disconnect();
-			this.connections.delete(options.guildId);
+			this.deleteConnection(options.guildId);
 		};
 
 		const node = this.getIdealNode(connection);
@@ -339,9 +358,10 @@ export class Shoukaku extends TypedEventEmitter<Events, ShoukakuEvents> {
 	 * @returns The destroyed / disconnected player or undefined if none
 	 */
 	public leaveVoiceChannel(guildId: string): void {
-		const connection = this.connections.get(guildId);
+		const connection = this.connections.find(conn => conn.guildId === guildId);
 		connection?.disconnect();
-		this.connections.delete(guildId);
+		
+		this.deleteConnection(guildId);
 	}
 
 	/**
@@ -352,7 +372,7 @@ export class Shoukaku extends TypedEventEmitter<Events, ShoukakuEvents> {
 	 * @returns The moved player
 	 */
 	public moveVoiceChannel(guildId: string, channelId: string) {
-		const connection = this.connections.get(guildId);
+		const connection = this.connections.find(conn => conn.guildId === guildId);
 
 		if (!connection)
 			throw new Error('This guild does not have an existing connection');
@@ -367,5 +387,13 @@ export class Shoukaku extends TypedEventEmitter<Events, ShoukakuEvents> {
 		});
 
 		connection.sendVoiceUpdate();
+	}
+
+	private deleteConnection(guildId: string): Connection | undefined {
+		const index = this.connections.findIndex(conn => conn.guildId === guildId);
+
+		if (index === -1) return;
+
+		return this.connections.splice(index, 1)[0];
 	}
 }

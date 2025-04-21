@@ -26,7 +26,7 @@ export class Connector {
 		if (!AllowedPackets.includes(packet.t as string)) return;
 
 		const guildId = packet.d.guild_id as string;
-		const connection = this.manager.connections.get(guildId);
+		const connection = this.manager.connections.find(conn => conn.guildId === guildId);
 
 		if (!connection) return;
 
