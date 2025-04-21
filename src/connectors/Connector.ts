@@ -1,3 +1,9 @@
+/* eslint-disable @typescript-eslint/unbound-method           */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access  */
+/* eslint-disable @typescript-eslint/no-explicit-any          */
+/* eslint-disable @typescript-eslint/no-unsafe-call           */
+/* eslint-disable @typescript-eslint/no-unsafe-return         */
+
 import type { ServerUpdate, StateUpdatePartial } from '../guild/Connection';
 import type { Shoukaku } from '../Shoukaku';
 
@@ -18,7 +24,6 @@ export class Connector {
 	constructor(manager: Shoukaku, options: ConnectorOptions) {
 		this.manager = manager;
 		this.options = options;
-
 		this.options.listenEvent(options.client, this.handleRaw);
 	}
 
@@ -62,7 +67,7 @@ export function createDiscordJSOptions(client: unknown): ConnectorOptions {
 
 /**
  * @param client Eris client
- * Creates a Eris Connector option
+ * Creates an Eris Connector option
  */
 export function createErisOptions(client: unknown): ConnectorOptions {
 	return {
