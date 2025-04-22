@@ -280,7 +280,7 @@ export class Rest {
 			});
 		}
 
-		if (request.body) return undefined;
+		if (!request.body) return undefined;
 
 		return await request.json() as T;
 	}
