@@ -103,12 +103,12 @@ export interface OptionalOptions {
 }
 
 export interface VoiceChannelOptions {
-	node: Node;
 	guildId: string;
 	shardId: number;
 	channelId: string;
 	deaf?: boolean;
 	mute?: boolean;
+	node?: Node;
 }
 
 // Interfaces are not final, but types are, and therefore has an index signature
@@ -321,8 +321,15 @@ export class Shoukaku extends TypedEventEmitter<Events, ShoukakuEvents> {
 			this.deleteConnection(options.guildId);
 		};
 
+		const node = options.node ?? this.getIdealNode(connection);
+
+		if (!node) {
+			cleanup();
+			throw new Error('No nodes available to connect to');
+		}
+
 		try {
-			await options.node.rest.updatePlayer(options.guildId, {
+			await node.rest.updatePlayer(options.guildId, {
 				voice: {
 					token: connection.serverUpdate!.token,
 					endpoint: connection.serverUpdate!.endpoint,
@@ -334,7 +341,7 @@ export class Shoukaku extends TypedEventEmitter<Events, ShoukakuEvents> {
 			throw error;
 		}
 
-		options.node.connections.add(connection);
+		node.connections.add(connection);
 
 		return new WeakRef(connection);
 	}
