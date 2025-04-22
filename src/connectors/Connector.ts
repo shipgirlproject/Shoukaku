@@ -24,7 +24,7 @@ export class Connector {
 	constructor(manager: Shoukaku, options: ConnectorOptions) {
 		this.manager = manager;
 		this.options = options;
-		this.options.listenEvent(options.client, this.handleRaw);
+		this.options.listenEvent(options.client, this.handleRaw.bind(this));
 	}
 
 	private handleRaw(packet: any): void {
