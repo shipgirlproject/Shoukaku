@@ -3,11 +3,11 @@ import type { FilterOptions } from './Player';
 export type Severity = 'common' | 'suspicious' | 'fault';
 
 export enum LoadType {
-	TRACK = 'track',
-	PLAYLIST = 'playlist',
-	SEARCH = 'search',
-	EMPTY = 'empty',
-	ERROR = 'error'
+	Track = 'track',
+	Playlist = 'playlist',
+	Search = 'search',
+	Empty = 'empty',
+	Error = 'error'
 }
 
 export interface Track {
@@ -45,27 +45,27 @@ export interface Exception {
 }
 
 export interface TrackResult {
-	loadType: LoadType.TRACK;
+	loadType: LoadType.Track;
 	data: Track;
 }
 
 export interface PlaylistResult {
-	loadType: LoadType.PLAYLIST;
+	loadType: LoadType.Playlist;
 	data: Playlist;
 }
 
 export interface SearchResult {
-	loadType: LoadType.SEARCH;
+	loadType: LoadType.Search;
 	data: Track[];
 }
 
 export interface EmptyResult {
-	loadType: LoadType.EMPTY;
+	loadType: LoadType.Empty;
 	data: Record<string, never>;
 }
 
 export interface ErrorResult {
-	loadType: LoadType.ERROR;
+	loadType: LoadType.Error;
 	data: Exception;
 }
 
