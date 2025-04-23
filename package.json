@@ -15,7 +15,7 @@
   "scripts": {
     "build": "npm run build:ts && npm run build:docs",
     "build:ts": "tsup --config tsup-config.json",
-    "build:docs": "typedoc --theme default --readme README.md --out docs/ --entryPointStrategy expand src/.",
+    "build:docs": "typedoc",
     "lint": "eslint .",
     "prepare": "npm run build:ts"
   },
