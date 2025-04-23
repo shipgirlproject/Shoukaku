@@ -1,0 +1,25 @@
+{
+	"$schema": "https://typedoc.org/schema.json",
+	"logLevel": "Verbose",
+	"entryPointStrategy": "expand",
+	"entryPoints": ["src/."],
+	"out": "docs/",
+	"name": "Shoukaku",
+	"hostedBaseUrl": "https://shoukaku.shipgirl.moe",
+	"theme": "default",
+	"readme": "docsrc/index.md",
+	"externalPattern": ["**/node_modules/**"],
+	"projectDocuments": [
+		"docsrc/guide.md",
+	],
+	
+	"highlightLanguages": [
+		"console",
+		"javascript",
+		"typescript",
+		"diff",
+	],
+	"navigationLinks": {
+		"GitHub": "https://github.com/shipgirlproject/shoukaku",
+	},
+}
