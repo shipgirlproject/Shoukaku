@@ -8,6 +8,7 @@ export enum ConnectionState {
 export enum VoiceState {
 	SessionReady,
 	SessionIdMissing,
+	AbortError,
 	SessionEndpointMissing,
 	SessionFailedUpdate
 }

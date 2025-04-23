@@ -1,4 +1,5 @@
 import { EventEmitter, once } from 'node:events';
+import { ConnectionError, ConnectionConnectTimeout } from '../model/Errors';
 import { ConnectionState, Events, VoiceState } from '../model/Library';
 import type { Node } from '../node/Node';
 import type { Shoukaku, VoiceChannelOptions } from '../Shoukaku';
@@ -152,12 +153,8 @@ export class Connection extends EventEmitter {
 		try {
 			const [ status ] = await once(this, 'connectionUpdate', { signal: controller.signal }) as [ VoiceState ];
 
-			if (status !== VoiceState.SessionReady) {
-				switch (status) {
-					case VoiceState.SessionIdMissing: throw new Error('The voice connection is not established due to missing session id');
-					case VoiceState.SessionEndpointMissing: throw new Error('The voice connection is not established due to missing connection endpoint');
-				}
-			}
+			if (status !== VoiceState.SessionReady)
+				throw new ConnectionError(status);
 
 			this.state = ConnectionState.Connected;
 		} catch (e: unknown) {
@@ -168,7 +165,7 @@ export class Connection extends EventEmitter {
 			this.debug(`[Voice] </- [Discord] : Request Connection Failed | Guild: ${this.guildId}`);
 
 			if (error.name === 'AbortError')
-				throw new Error(`The voice connection is not established in ${this.manager.options.voiceConnectionTimeout} seconds`);
+				throw new ConnectionConnectTimeout(this.manager.options.voiceConnectionTimeout);
 
 			throw error;
 		} finally {

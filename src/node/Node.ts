@@ -169,7 +169,7 @@ export class Node {
 
 		this.manager.emit(Events.Debug, `[Socket] -> [${this.name}] : Connecting to ${this.url} ...`);
 
-		const create_connection = () => {
+		const createConnection = () => {
 			const url = new URL(this.url);
 
 			const server = new Websocket(url.toString(), { headers } as Websocket.ClientOptions);
@@ -200,7 +200,7 @@ export class Node {
 
 		for (; this.reconnects < this.manager.options.reconnectTries; this.reconnects++) {
 			try {
-				this.#ws = await create_connection();
+				this.#ws = await createConnection();
 			} catch (err) {
 				this.manager.emit(Events.Debug, `[Socket] -> [${this.name}] : Reconnecting in ${this.manager.options.reconnectInterval} seconds. ${this.manager.options.reconnectTries - this.reconnects} tries left`);
 				await wait(this.manager.options.reconnectInterval * 1000);

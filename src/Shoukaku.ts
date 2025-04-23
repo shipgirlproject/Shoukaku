@@ -1,6 +1,7 @@
 import { Connector, ConnectorOptions } from './connectors/Connector';
 import { ShoukakuDefaults } from './Constants';
 import { Connection } from './guild/Connection';
+import { ShoukakuError } from './model/Errors';
 import type { Events } from './model/Library';
 import {
 	PlayerUpdate,
@@ -285,7 +286,7 @@ export class Shoukaku extends TypedEventEmitter<Events, ShoukakuEvents> {
 		const index = this.nodes.findIndex(n => n.name === name);
 
 		if (index === -1)
-			throw new Error('The node name you specified doesn\'t exist');
+			throw new ShoukakuError<{ name: string; available: string[] }>({ name, available: this.nodes.map(node => node.name) }, 'The node you are disconnecting from don\'t exist');
 
 		const node = this.nodes.splice(index, 1)[0];
 
@@ -303,7 +304,7 @@ export class Shoukaku extends TypedEventEmitter<Events, ShoukakuEvents> {
 	 */
 	public async joinVoiceChannel(options: VoiceChannelOptions): Promise<WeakRef<Connection>> {
 		if (this.connections.some(conn => conn.guildId === options.guildId))
-			throw new Error('This guild already have an existing connection');
+			throw new ShoukakuError<VoiceChannelOptions>(options, 'This guild you are connecting to already have an existing connection');
 
 		const connection = new Connection(this, options);
 
@@ -325,7 +326,7 @@ export class Shoukaku extends TypedEventEmitter<Events, ShoukakuEvents> {
 
 		if (!node) {
 			cleanup();
-			throw new Error('No nodes available to connect to');
+			throw new ShoukakuError<VoiceChannelOptions>(options, 'There\'s no node available to connect to');
 		}
 
 		try {
@@ -369,7 +370,7 @@ export class Shoukaku extends TypedEventEmitter<Events, ShoukakuEvents> {
 		const connection = this.connections.find(conn => conn.guildId === guildId);
 
 		if (!connection)
-			throw new Error('This guild does not have an existing connection');
+			throw new ShoukakuError<{ guildId: string; channelId: string }>({ guildId, channelId }, 'This guild don\'t have an existing connection');
 
 		if (connection.channelId === channelId) return;
 

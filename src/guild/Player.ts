@@ -1,3 +1,4 @@
+import { PlayerDerefError } from '../model/Errors';
 import type {
 	Band,
 	ChannelMixSettings,
@@ -28,7 +29,7 @@ export class Player {
 	public connection: WeakRef<Connection>;
 
 	constructor(connection: WeakRef<Connection>) {
-		if (!connection.deref()) throw new Error('The referenced connection is already destroyed');
+		if (!connection.deref()) throw new PlayerDerefError('Unknown');
 		this.guildId = connection.deref()!.guildId;
 		this.connection = connection;
 	}
@@ -37,10 +38,17 @@ export class Player {
 		const node = this.connection.deref()?.getNode();
 
 		if (!node) {
-			throw new Error('The referenced connection is already destroyed');
+			throw new PlayerDerefError(this.guildId);
 		}
 
 		return node;
+	}
+
+	/**
+	 * Gets the current player info from lavalink
+	 */
+	public getData(): Promise<LavalinkPlayer> {
+		return this.node.rest.getPlayer(this.guildId);
 	}
 
 	/**

@@ -1,4 +1,5 @@
 import { EventEmitter } from 'node:events';
+import { MergeError, UnexpectedError } from './model/Errors';
 
 // https://stackoverflow.com/a/67244127
 export abstract class TypedEventEmitter<E extends string | symbol, T extends Record<E, unknown[]>> extends EventEmitter {
@@ -41,7 +42,7 @@ export function mergeDefault<T extends Record<string, any>>(def: T, given: T): R
 	}
 	for (const key of defaultKeys) {
 		if (def[key] === null || (typeof def[key] === 'string' && def[key].length === 0)) {
-			if (!given[key]) throw new Error(`${String(key)} was not found from the given options.`);
+			if (!given[key]) throw new MergeError<T>(String(key), given);
 		}
 		if (given[key] === null || given[key] === undefined) given[key] = def[key];
 	}
@@ -59,7 +60,7 @@ export function wait(ms: number): Promise<void> {
 
 export function validate<T>(value: T | undefined): T {
 	if (typeof value === 'undefined') {
-		throw new Error('Unexpected null or undefined value');
+		throw new UnexpectedError();
 	}
 
 	return value;
