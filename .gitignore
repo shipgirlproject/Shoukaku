@@ -9,4 +9,3 @@ yarn.lock
 yarn-debug.log*
 yarn-error.log*
 **.tgz
-docs
