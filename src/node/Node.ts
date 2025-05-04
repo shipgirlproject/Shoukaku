@@ -201,6 +201,7 @@ export class Node {
 		for (; this.reconnects < this.manager.options.reconnectTries; this.reconnects++) {
 			try {
 				this.#ws = await createConnection();
+				break;
 			} catch (err) {
 				this.manager.emit(Events.Debug, `[Socket] -> [${this.name}] : Reconnecting in ${this.manager.options.reconnectInterval} seconds. ${this.manager.options.reconnectTries - this.reconnects} tries left`);
 				await wait(this.manager.options.reconnectInterval * 1000);
