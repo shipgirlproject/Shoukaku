@@ -41,16 +41,16 @@
     "url": "https://github.com/shipgirlproject/Shoukaku.git"
   },
   "dependencies": {
-    "ws": "^8.18.0"
+    "ws": "^8.18.2"
   },
   "devDependencies": {
     "@shipgirl/eslint-config": "^0.4.0",
-    "@types/node": "^22.14.1",
+    "@types/node": "^22.15.29",
     "@types/ws": "^8.18.1",
-    "eslint": "^9.25.1",
-    "pkg-pr-new": "^0.0.42",
-    "tsup": "^8.4.0",
-    "typedoc": "^0.28.3",
+    "eslint": "^9.28.0",
+    "pkg-pr-new": "^0.0.51",
+    "tsup": "^8.5.0",
+    "typedoc": "^0.28.5",
     "typescript": "^5.8.3"
   }
 }
