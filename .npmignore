@@ -5,6 +5,7 @@
 .gitignore
 assets/
 docs/
+docsrc/
 src/
 index.ts
 tsconfig.json
