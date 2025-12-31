@@ -51,7 +51,7 @@ new Shoukaku(new Connectors.DiscordJS(client), Nodes, Options);
 
 | Option                 | Type                   | Default  | Description                                                                                      | Notes                    |
 | ---------------------- | ---------------------- | -------- | ------------------------------------------------------------------------------------------------ | ------------------------ |
-| resume                 | boolean                | false    | If you want to enable resuming when your connection when your connection to lavalink disconnects |                          |
+| resume                 | boolean                | false    | If you want to enable resuming when your connection to lavalink disconnects |                          |
 | resumeTimeout          | number                 | 30       | Timeout before lavalink destroys the players on a disconnect                                     | In seconds               |
 | resumeByLibrary        | boolean                | false    | If you want to force resume players no matter what even if it's not resumable by lavalink        |                          |
 | reconnectTries         | number                 | 3        | Number of tries to reconnect to lavalink before disconnecting                                    |                          |
