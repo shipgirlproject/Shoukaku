@@ -1,4 +1,5 @@
 import { EventEmitter } from 'node:events';
+// import { Rest } from './node/Rest';
 
 // https://stackoverflow.com/a/67244127
 export abstract class TypedEventEmitter<T extends Record<string, unknown[]>> extends EventEmitter {
@@ -56,3 +57,23 @@ export function mergeDefault<T extends Record<string, any>>(def: T, given: T): R
 export function wait(ms: number): Promise<void> {
 	return new Promise(resolve => setTimeout(resolve, ms));
 }
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type Head<T extends any[]> = Required<T> extends [ ...infer R, unknown ] ? R : never;
+
+// type GenericConstructor<T = object> = new (...args: unknown[]) => T;
+// type ConstrainedRestBase = GenericConstructor<Rest>;
+
+// export type ExtendRestFns = Record<string, (this: Rest, ...args: unknown[]) => unknown>;
+
+// export function extendRest(extensions: ExtendRestFns) {
+// 	return class extends Rest {
+// 		constructor(...args: ConstructorParameters<typeof Rest>) {
+// 			super(...args);
+// 			for (const [ name, func ] of Object.entries(extensions)) {
+// 				// @ts-expect-error dynamic assignment
+// 				this[name] = func.bind(this);
+// 			}
+// 		}
+// 	};
+// }
