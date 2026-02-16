@@ -1,6 +1,7 @@
 import { Versions } from '../Constants';
 import type { FilterOptions } from '../guild/Player';
 import type { NodeOption } from '../Shoukaku';
+import { HintedString } from '../Utils';
 import type { Node, NodeInfo, Stats } from './Node';
 
 export type Severity = 'common' | 'suspicious' | 'fault';
@@ -162,6 +163,260 @@ interface FinalFetchOptions {
 }
 
 /**
+ * Inject headers and params globally to a RestClient instance
+ */
+export interface RestMiddleware {
+	readonly headers?: RestEndpoint['headers'];
+	readonly params?: RestEndpoint['params'];
+}
+
+/**
+ * Routes should implement this interface to use with fetch function
+ */
+export interface RestEndpoint {
+	/**
+	 * Lavalink endpoint
+	 */
+	readonly endpoint: string;
+	/**
+	 * HTTP request headers
+	 */
+	readonly headers?: Record<string, string>;
+	/**
+	 * URL params
+	 */
+	readonly params?: Record<string, string>;
+	/**
+	 * HTTP request method
+	 */
+	readonly method?: HintedString<'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH'>;
+	/**
+	 * JSON body to send with 
+	 */
+	readonly body?: Record<string, unknown>;
+	/**
+	 * This hack is to work around TypeScript types not existing at runtime.
+	 * We can specify the return type of the endpoint in the fetch function here.
+	 * 
+	 * @example
+	 * This function is never actually called, so the implementation can be simply:
+	 * ```
+	 * R = (response: unknown) => response as LavalinkResponse;
+	 * ```
+	 */
+	R(response: unknown): unknown;
+};
+
+export class NoopMiddleware implements RestMiddleware {}
+
+/**
+ * Exendable generic REST client to make requests to Lavalink
+ */
+export class RestClient<T extends RestMiddleware = NoopMiddleware> {
+	protected readonly middleware: T;
+	protected readonly auth: string;
+	protected readonly userAgent: string;
+	protected readonly baseUrl: string;
+	protected readonly restTimeout: number;
+
+	/**
+	 * @param auth Credentials to access Lavalnk
+	 * @param userAgent User Agent to use when making requests to Lavalink
+	 * @param baseUrl URL of Lavalink
+	 * @param restTimeout Time to wait for a response from the Lavalink REST API before giving up
+	 * @param middleware Inject headers and params globally, see {@link RestMiddleware}
+	 */
+	constructor(
+		auth: string,
+		userAgent: string,
+		baseUrl: string,
+		restTimeout: number,
+		middleware: T = new NoopMiddleware() as T
+	) {
+		this.auth = auth;
+		this.userAgent = userAgent;
+		this.baseUrl = baseUrl;
+		this.restTimeout = restTimeout;
+		this.middleware = middleware;
+		return this as RestClient<typeof middleware>;
+	}
+
+	/**
+	 * Fetch data from endpoint based on config {@link RestEndpoint} and middleware
+	 * @param endpoint Endpoint config (see {@link RestEndpoint})
+	 * @returns Response as specified by endpoint's `R` function
+	 * @throws {@link RestError} from Lavalink error response
+	 * @throws {@link DeserializationError} when parsing response as JSON fails
+	 */
+	async fetch<
+		E extends RestEndpoint,
+		R = ReturnType<E['R']>
+	>(endpoint: E): Promise<R | undefined> {
+		const headers = {
+			'Authorization': this.auth,
+			'User-Agent': this.userAgent,
+			...(this.middleware.headers ?? {}),
+			...(endpoint.headers ?? {})
+		};
+
+		const url = new URL(`${this.baseUrl}${endpoint.endpoint}`);
+
+		const searchParams = {
+			...(this.middleware.params ?? {}),
+			...(endpoint.params ?? {})
+		};
+
+		url.search = new URLSearchParams(searchParams).toString();
+
+		const abortController = new AbortController();
+		const timeout = setTimeout(() => abortController.abort(), this.restTimeout * 1000);
+
+		const method = endpoint.method?.toUpperCase() ?? 'GET';
+
+		const finalFetchOptions: FinalFetchOptions = {
+			method,
+			headers,
+			signal: abortController.signal
+		};
+
+		if (![ 'GET', 'HEAD' ].includes(method) && endpoint.body)
+			finalFetchOptions.body = JSON.stringify(endpoint.body);
+
+		const request = await fetch(url.toString(), finalFetchOptions)
+			.finally(() => clearTimeout(timeout));
+
+		if (!request.ok) {
+			const response = await request
+				.json()
+				.catch(() => null) as LavalinkRestError | null;
+
+			throw new RestError(response ?? {
+				timestamp: Date.now(),
+				status: request.status,
+				error: 'Unknown Error',
+				message: 'Unexpected error response from Lavalink server',
+				path: endpoint.endpoint
+			});
+		}
+
+		try {
+			return await request.json() as R;
+		} catch (e) {
+			// TODO: disscuss if we should ignore this error since the original Rest#fetch ignored it
+			throw new DeserializationError(e);
+		}
+
+	}
+}
+
+export const r = <T>(response: unknown) => response as T;
+
+export class ResolveEndpoint implements RestEndpoint {
+	constructor (public readonly identifier: string) {}
+
+	readonly endpoint = '/loadtracks';
+	readonly params = { identifier: this.identifier };
+
+	R = r<LavalinkResponse>;
+}
+
+export class DecodeEndpoint implements RestEndpoint {
+	constructor (public readonly track: string) {}
+
+	readonly endpoint = '/decodetrack';
+	readonly params = { track: this.track };
+
+	R = r<Track>;
+}
+
+export class GetPlayersEndpoint implements RestEndpoint {
+	constructor (public readonly sessionId: string) {}
+
+	readonly endpoint = `/sessions/${this.sessionId}/players`;
+
+	R = r<LavalinkPlayer[]>;
+}
+
+export class GetPlayerEndpoint implements RestEndpoint {
+	constructor (public readonly sessionId: string, public readonly guildId: string) {}
+
+	readonly endpoint = `/sessions/${this.sessionId}/players/${this.guildId}`;
+
+	R = r<LavalinkPlayer>;
+}
+
+export class UpdatePlayerEndpoint implements RestEndpoint {
+	constructor (public readonly sessionId: string, public readonly data: UpdatePlayerInfo) {}
+
+	readonly endpoint = `/sessions/${this.sessionId}/players/${this.data.guildId}`;
+
+	readonly method = 'PATCH';
+	readonly params = { noReplace: this.data.noReplace?.toString() ?? 'false' };
+	readonly headers = { 'Content-Type': 'application/json' };
+	readonly body = this.data.playerOptions as Record<string, unknown>;
+
+	R = r<LavalinkPlayer>;
+}
+
+export class DestroyPlayerEndpoint implements RestEndpoint {
+	constructor (public readonly sessionId: string, public readonly guildId: string) {}
+
+	readonly endpoint = `/sessions/${this.sessionId}/players/${this.guildId}`;
+
+	readonly method = 'DELETE';
+
+	R = r<void>;
+}
+
+export class UpdateSessionEndpoint implements RestEndpoint {
+	constructor (
+		public readonly sessionId: string,
+		public readonly resuming?: boolean,
+		public readonly timeout?: number
+	) {}
+
+	readonly endpoint = `/sessions/${this.sessionId}`;
+
+	readonly method = 'PATCH';
+	readonly headers = { 'Content-Type': 'application/json' };
+	readonly body = { resuming: this.resuming, timeout: this.timeout };
+
+	R = r<SessionInfo>;
+}
+
+export class StatsEndpoint implements RestEndpoint {
+	readonly endpoint = '/stats';
+
+	R = r<Stats>;
+}
+
+export class RoutePlannerStatusEndpoint implements RestEndpoint {
+	readonly endpoint = '/routeplanner/status';
+
+	R = r<RoutePlanner>;
+}
+
+export class UnmarkFailedAddressEndpoint implements RestEndpoint {
+	constructor (public readonly address: string) {}
+
+	readonly endpoint = '/routeplanner/free/address';
+
+	readonly method = 'POST';
+	readonly headers = { 'Content-Type': 'application/json' };
+	readonly body = { address: this.address };
+
+	R = r<void>;
+}
+
+export class LavalinkInfoEndpoint implements RestEndpoint {
+	readonly endpoint = '/info';
+
+	readonly headers = { 'Content-Type': 'application/json' };
+
+	R = r<NodeInfo>;
+}
+
+/**
  * Wrapper around Lavalink REST API
  */
 export class Rest {
@@ -178,6 +433,10 @@ export class Rest {
 	 */
 	protected readonly auth: string;
 	/**
+	 * Client to make request to Lavalink
+	 */
+	protected readonly client: RestClient;
+	/**
 	 * @param node An instance of Node
 	 * @param options The options to initialize this rest class
 	 * @param options.name Name of this node
@@ -190,6 +449,12 @@ export class Rest {
 		this.node = node;
 		this.url = `${options.secure ? 'https' : 'http'}://${options.url}/v${Versions.REST_VERSION}`;
 		this.auth = options.auth;
+		this.client = new RestClient(
+			this.auth,
+			this.node.manager.options.userAgent,
+			this.url,
+			this.node.manager.options.restTimeout
+		);
 	}
 
 	protected get sessionId(): string {
@@ -202,11 +467,7 @@ export class Rest {
 	 * @returns A promise that resolves to a Lavalink response
 	 */
 	public resolve(identifier: string): Promise<LavalinkResponse | undefined> {
-		const options = {
-			endpoint: '/loadtracks',
-			options: { params: { identifier }}
-		};
-		return this.fetch(options);
+		return this.client.fetch(new ResolveEndpoint(identifier));
 	}
 
 	/**
@@ -215,23 +476,15 @@ export class Rest {
 	 * @returns Promise that resolves to a track
 	 */
 	public decode(track: string): Promise<Track | undefined> {
-		const options = {
-			endpoint: '/decodetrack',
-			options: { params: { track }}
-		};
-		return this.fetch<Track>(options);
+		return this.client.fetch(new DecodeEndpoint(track));
 	}
 
 	/**
 	 * Gets all the player with the specified sessionId
 	 * @returns Promise that resolves to an array of Lavalink players
 	 */
-	public async getPlayers(): Promise<LavalinkPlayer[]> {
-		const options = {
-			endpoint: `/sessions/${this.sessionId}/players`,
-			options: {}
-		};
-		return await this.fetch<LavalinkPlayer[]>(options) ?? [];
+	public async getPlayers(): Promise<LavalinkPlayer[] | undefined> {
+		return this.client.fetch(new GetPlayersEndpoint(this.sessionId));
 	}
 
 	/**
@@ -239,11 +492,7 @@ export class Rest {
 	 * @returns Promise that resolves to a Lavalink player
 	 */
 	public getPlayer(guildId: string): Promise<LavalinkPlayer | undefined> {
-		const options = {
-			endpoint: `/sessions/${this.sessionId}/players/${guildId}`,
-			options: {}
-		};
-		return this.fetch(options);
+		return this.client.fetch(new GetPlayerEndpoint(this.sessionId, guildId));
 	}
 
 	/**
@@ -252,16 +501,7 @@ export class Rest {
 	 * @returns Promise that resolves to a Lavalink player
 	 */
 	public updatePlayer(data: UpdatePlayerInfo): Promise<LavalinkPlayer | undefined> {
-		const options = {
-			endpoint: `/sessions/${this.sessionId}/players/${data.guildId}`,
-			options: {
-				method: 'PATCH',
-				params: { noReplace: data.noReplace?.toString() ?? 'false' },
-				headers: { 'Content-Type': 'application/json' },
-				body: data.playerOptions as Record<string, unknown>
-			}
-		};
-		return this.fetch<LavalinkPlayer>(options);
+		return this.client.fetch(new UpdatePlayerEndpoint(this.sessionId, data));
 	}
 
 	/**
@@ -269,11 +509,7 @@ export class Rest {
 	 * @param guildId guildId where this player is
 	 */
 	public async destroyPlayer(guildId: string): Promise<void> {
-		const options = {
-			endpoint: `/sessions/${this.sessionId}/players/${guildId}`,
-			options: { method: 'DELETE' }
-		};
-		await this.fetch(options);
+		return this.client.fetch(new DestroyPlayerEndpoint(this.sessionId, guildId));
 	}
 
 	/**
@@ -283,15 +519,7 @@ export class Rest {
 	 * @returns Promise that resolves to a Lavalink player
 	 */
 	public updateSession(resuming?: boolean, timeout?: number): Promise<SessionInfo | undefined> {
-		const options = {
-			endpoint: `/sessions/${this.sessionId}`,
-			options: {
-				method: 'PATCH',
-				headers: { 'Content-Type': 'application/json' },
-				body: { resuming, timeout }
-			}
-		};
-		return this.fetch(options);
+		return this.client.fetch(new UpdateSessionEndpoint(this.sessionId, resuming, timeout));
 	}
 
 	/**
@@ -299,11 +527,7 @@ export class Rest {
 	 * @returns Promise that resolves to a node stats response
 	 */
 	public stats(): Promise<Stats | undefined> {
-		const options = {
-			endpoint: '/stats',
-			options: {}
-		};
-		return this.fetch(options);
+		return this.client.fetch(new StatsEndpoint());
 	}
 
 	/**
@@ -311,11 +535,7 @@ export class Rest {
 	 * @returns Promise that resolves to a routeplanner response
 	 */
 	public getRoutePlannerStatus(): Promise<RoutePlanner | undefined> {
-		const options = {
-			endpoint: '/routeplanner/status',
-			options: {}
-		};
-		return this.fetch(options);
+		return this.client.fetch(new RoutePlannerStatusEndpoint());
 	}
 
 	/**
@@ -323,28 +543,14 @@ export class Rest {
 	 * @param address IP address
 	 */
 	public async unmarkFailedAddress(address: string): Promise<void> {
-		const options = {
-			endpoint: '/routeplanner/free/address',
-			options: {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: { address }
-			}
-		};
-		await this.fetch(options);
+		return this.client.fetch(new UnmarkFailedAddressEndpoint(address));
 	}
 
 	/**
 	 * Get Lavalink info
 	 */
 	public getLavalinkInfo(): Promise<NodeInfo | undefined> {
-		const options = {
-			endpoint: '/info',
-			options: {
-				headers: { 'Content-Type': 'application/json' }
-			}
-		};
-		return this.fetch(options);
+		return this.client.fetch(new LavalinkInfoEndpoint());
 	}
 
 	/**
@@ -352,55 +558,20 @@ export class Rest {
 	 * @param fetchOptions.endpoint Lavalink endpoint
 	 * @param fetchOptions.options Options passed to fetch
 	 * @throws `RestError` when encountering a Lavalink error response
+	 * @deprecated Use this.client.fetch() instead, see {@link RestClient#fetch}
 	 * @internal
 	 */
 	protected async fetch<T = unknown>(fetchOptions: FetchOptions) {
-		const { endpoint, options } = fetchOptions;
-		let headers = {
-			'Authorization': this.auth,
-			'User-Agent': this.node.manager.options.userAgent
-		};
+		return this.client.fetch(new class implements RestEndpoint {
+			readonly endpoint = fetchOptions.endpoint;
 
-		if (options.headers) headers = { ...headers, ...options.headers };
+			readonly method = fetchOptions.options.method;
+			readonly headers = fetchOptions.options.headers;
+			readonly params = fetchOptions.options.params;
+			readonly body = fetchOptions.options.body;
 
-		const url = new URL(`${this.url}${endpoint}`);
-
-		if (options.params) url.search = new URLSearchParams(options.params).toString();
-
-		const abortController = new AbortController();
-		const timeout = setTimeout(() => abortController.abort(), this.node.manager.options.restTimeout * 1000);
-
-		const method = options.method?.toUpperCase() ?? 'GET';
-
-		const finalFetchOptions: FinalFetchOptions = {
-			method,
-			headers,
-			signal: abortController.signal
-		};
-
-		if (![ 'GET', 'HEAD' ].includes(method) && options.body)
-			finalFetchOptions.body = JSON.stringify(options.body);
-
-		const request = await fetch(url.toString(), finalFetchOptions)
-			.finally(() => clearTimeout(timeout));
-
-		if (!request.ok) {
-			const response = await request
-				.json()
-				.catch(() => null) as LavalinkRestError | null;
-			throw new RestError(response ?? {
-				timestamp: Date.now(),
-				status: request.status,
-				error: 'Unknown Error',
-				message: 'Unexpected error response from Lavalink server',
-				path: endpoint
-			});
-		}
-		try {
-			return await request.json() as T;
-		} catch {
-			return;
-		}
+			R = r<T>;
+		});
 	}
 }
 
@@ -429,6 +600,14 @@ export class RestError extends Error {
 		this.trace = trace;
 		this.message = message;
 		this.path = path;
+		Object.setPrototypeOf(this, new.target.prototype);
+	}
+}
+
+export class DeserializationError extends Error {
+	constructor(cause: unknown) {
+		super('Failed to deserialize Lavalink response: invalid JSON', { cause });
+		this.name = 'DeserializationError';
 		Object.setPrototypeOf(this, new.target.prototype);
 	}
 }
