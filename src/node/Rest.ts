@@ -162,6 +162,12 @@ interface FinalFetchOptions {
 	body?: string;
 }
 
+type FnOrVal<T> = T | (() => T);
+
+function fnOrVal<T>(input?: T | (() => T)): T | undefined {
+	return typeof input === 'function' ? (input as () => T)?.() : input;
+}
+
 /**
  * Inject headers and params globally to a RestClient instance
  */
@@ -172,28 +178,30 @@ export interface RestMiddleware {
 
 /**
  * Routes should implement this interface to use with fetch function
+ * 
+ * Properties can be a value, or a function that returns a value to access `this`
  */
 export interface RestEndpoint {
 	/**
 	 * Lavalink endpoint
 	 */
-	readonly endpoint: string;
-	/**
-	 * HTTP request headers
-	 */
-	readonly headers?: Record<string, string>;
-	/**
-	 * URL params
-	 */
-	readonly params?: Record<string, string>;
+	readonly endpoint: FnOrVal<string>;
 	/**
 	 * HTTP request method
 	 */
 	readonly method?: HintedString<'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH'>;
 	/**
-	 * JSON body to send with 
+	 * HTTP request headers
 	 */
-	readonly body?: Record<string, unknown>;
+	readonly headers?: FnOrVal<Record<string, string>>;
+	/**
+	 * URL params
+	 */
+	readonly params?: FnOrVal<Record<string, string>>;
+	/**
+	 * JSON body to send with
+	 */
+	readonly body?: FnOrVal<Record<string, unknown>>;
 	/**
 	 * This hack is to work around TypeScript types not existing at runtime.
 	 * We can specify the return type of the endpoint in the fetch function here.
@@ -255,15 +263,17 @@ export class RestClient<T extends RestMiddleware = NoopMiddleware> {
 		const headers = {
 			'Authorization': this.auth,
 			'User-Agent': this.userAgent,
-			...(this.middleware.headers ?? {}),
-			...(endpoint.headers ?? {})
+			...(fnOrVal(this.middleware.headers) ?? {}),
+			...(fnOrVal(endpoint.headers) ?? {})
 		};
 
-		const url = new URL(`${this.baseUrl}${endpoint.endpoint}`);
+		const path = fnOrVal(endpoint.endpoint)!;
+
+		const url = new URL(`${this.baseUrl}${path}`);
 
 		const searchParams = {
-			...(this.middleware.params ?? {}),
-			...(endpoint.params ?? {})
+			...(fnOrVal(this.middleware.params) ?? {}),
+			...(fnOrVal(endpoint.params) ?? {})
 		};
 
 		url.search = new URLSearchParams(searchParams).toString();
@@ -279,8 +289,10 @@ export class RestClient<T extends RestMiddleware = NoopMiddleware> {
 			signal: abortController.signal
 		};
 
-		if (![ 'GET', 'HEAD' ].includes(method) && endpoint.body)
-			finalFetchOptions.body = JSON.stringify(endpoint.body);
+		const body = fnOrVal(endpoint.body);
+
+		if (![ 'GET', 'HEAD' ].includes(method) && body)
+			finalFetchOptions.body = JSON.stringify(body);
 
 		const request = await fetch(url.toString(), finalFetchOptions)
 			.finally(() => clearTimeout(timeout));
@@ -295,7 +307,7 @@ export class RestClient<T extends RestMiddleware = NoopMiddleware> {
 				status: request.status,
 				error: 'Unknown Error',
 				message: 'Unexpected error response from Lavalink server',
-				path: endpoint.endpoint
+				path: path
 			});
 		}
 
@@ -315,7 +327,7 @@ export class ResolveEndpoint implements RestEndpoint {
 	constructor (public readonly identifier: string) {}
 
 	readonly endpoint = '/loadtracks';
-	readonly params = { identifier: this.identifier };
+	readonly params = () => ({ identifier: this.identifier });
 
 	R = r<LavalinkResponse>;
 }
@@ -324,7 +336,7 @@ export class DecodeEndpoint implements RestEndpoint {
 	constructor (public readonly track: string) {}
 
 	readonly endpoint = '/decodetrack';
-	readonly params = { track: this.track };
+	readonly params = () => ({ track: this.track });
 
 	R = r<Track>;
 }
@@ -332,7 +344,7 @@ export class DecodeEndpoint implements RestEndpoint {
 export class GetPlayersEndpoint implements RestEndpoint {
 	constructor (public readonly sessionId: string) {}
 
-	readonly endpoint = `/sessions/${this.sessionId}/players`;
+	readonly endpoint = () => `/sessions/${this.sessionId}/players`;
 
 	R = r<LavalinkPlayer[]>;
 }
@@ -340,7 +352,7 @@ export class GetPlayersEndpoint implements RestEndpoint {
 export class GetPlayerEndpoint implements RestEndpoint {
 	constructor (public readonly sessionId: string, public readonly guildId: string) {}
 
-	readonly endpoint = `/sessions/${this.sessionId}/players/${this.guildId}`;
+	readonly endpoint = () => `/sessions/${this.sessionId}/players/${this.guildId}`;
 
 	R = r<LavalinkPlayer>;
 }
@@ -348,12 +360,12 @@ export class GetPlayerEndpoint implements RestEndpoint {
 export class UpdatePlayerEndpoint implements RestEndpoint {
 	constructor (public readonly sessionId: string, public readonly data: UpdatePlayerInfo) {}
 
-	readonly endpoint = `/sessions/${this.sessionId}/players/${this.data.guildId}`;
+	readonly endpoint = () => `/sessions/${this.sessionId}/players/${this.data.guildId}`;
 
 	readonly method = 'PATCH';
-	readonly params = { noReplace: this.data.noReplace?.toString() ?? 'false' };
+	readonly params = () => ({ noReplace: this.data.noReplace?.toString() ?? 'false' });
 	readonly headers = { 'Content-Type': 'application/json' };
-	readonly body = this.data.playerOptions as Record<string, unknown>;
+	readonly body = () => this.data.playerOptions as Record<string, unknown>;
 
 	R = r<LavalinkPlayer>;
 }
@@ -361,7 +373,7 @@ export class UpdatePlayerEndpoint implements RestEndpoint {
 export class DestroyPlayerEndpoint implements RestEndpoint {
 	constructor (public readonly sessionId: string, public readonly guildId: string) {}
 
-	readonly endpoint = `/sessions/${this.sessionId}/players/${this.guildId}`;
+	readonly endpoint = () => `/sessions/${this.sessionId}/players/${this.guildId}`;
 
 	readonly method = 'DELETE';
 
@@ -375,11 +387,11 @@ export class UpdateSessionEndpoint implements RestEndpoint {
 		public readonly timeout?: number
 	) {}
 
-	readonly endpoint = `/sessions/${this.sessionId}`;
+	readonly endpoint = () => `/sessions/${this.sessionId}`;
 
 	readonly method = 'PATCH';
 	readonly headers = { 'Content-Type': 'application/json' };
-	readonly body = { resuming: this.resuming, timeout: this.timeout };
+	readonly body = () => ({ resuming: this.resuming, timeout: this.timeout });
 
 	R = r<SessionInfo>;
 }
@@ -403,7 +415,7 @@ export class UnmarkFailedAddressEndpoint implements RestEndpoint {
 
 	readonly method = 'POST';
 	readonly headers = { 'Content-Type': 'application/json' };
-	readonly body = { address: this.address };
+	readonly body = () => ({ address: this.address });
 
 	R = r<void>;
 }
