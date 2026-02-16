@@ -1,7 +1,6 @@
 import { Versions } from '../Constants';
 import type { FilterOptions } from '../guild/Player';
 import type { NodeOption } from '../Shoukaku';
-import { Head } from '../Utils';
 import type { Node, NodeInfo, Stats } from './Node';
 
 export type Severity = 'common' | 'suspicious' | 'fault';
@@ -162,21 +161,10 @@ interface FinalFetchOptions {
 	body?: string;
 }
 
-export interface PluginConfig {
-	serverPlugin: string;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	function: (rest: Rest, ...args: any[]) => unknown;
-}
-
-// https://stackoverflow.com/a/58764959
-type OmitRestArg<F extends PluginConfig['function']> = F extends (rest: Rest, ...args: infer P) => infer R ? (...args: P) => R : never;
-
-export type Plugins = Record<string, PluginConfig>;
-
 /**
  * Wrapper around Lavalink REST API
  */
-export class Rest<TPlugins extends Plugins = {}> {
+export class Rest {
 	/**
 	 * Node that initialized this instance
 	 */
@@ -189,9 +177,6 @@ export class Rest<TPlugins extends Plugins = {}> {
 	 * Credentials to access Lavalink
 	 */
 	protected readonly auth: string;
-
-	protected readonly plugins: TPlugins = {} as TPlugins;
-
 	/**
 	 * @param node An instance of Node
 	 * @param options The options to initialize this rest class
@@ -201,36 +186,10 @@ export class Rest<TPlugins extends Plugins = {}> {
 	 * @param options.secure Weather to use secure protocols or not
 	 * @param options.group Group of this node
 	 */
-	constructor(node: Node, options: NodeOption, plugins?: Plugins) {
+	constructor(node: Node, options: NodeOption) {
 		this.node = node;
 		this.url = `${options.secure ? 'https' : 'http'}://${options.url}/v${Versions.REST_VERSION}`;
 		this.auth = options.auth;
-		(this.plugins as Plugins) = plugins ?? {};
-		return this as Rest<TPlugins & (typeof plugins extends Plugins ? typeof plugins : {})>;
-	}
-
-	static extend(plugins: (PluginConfig & { name: string })[]) {
-		const pluginsObj = Object.fromEntries(plugins?.map(({ name, ...config }) => [ name, { ...config }]));
-		return class extends Rest {
-			constructor(...args: Head<ConstructorParameters<typeof Rest>>) {
-				super(...args, pluginsObj);
-			}
-		};
-	}
-
-	// extend<TName extends string, TPluginConfig extends PluginConfig>(
-	// 	name: TName,
-	// 	pluginConfig: TPluginConfig
-	// ): Rest<TPlugins & Record<TName, TPluginConfig>> {
-	// 	(this.plugins as Plugins)[name] = pluginConfig;
-	// 	return this as unknown as Rest<TPlugins & Record<TName, TPluginConfig>>;
-	// }
-
-	plugin<TPlugin extends keyof TPlugins>(
-		name: TPlugin,
-		...args: Parameters<OmitRestArg<TPlugins[TPlugin]['function']>>
-	): ReturnType<TPlugins[TPlugin]['function']> {
-		return this.plugins[name].function(this, ...args) as ReturnType<TPlugins[TPlugin]['function']>;
 	}
 
 	protected get sessionId(): string {
