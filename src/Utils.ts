@@ -56,3 +56,6 @@ export function mergeDefault<T extends Record<string, any>>(def: T, given: T): R
 export function wait(ms: number): Promise<void> {
 	return new Promise(resolve => setTimeout(resolve, ms));
 }
+
+// https://stackoverflow.com/a/73753173
+export type HintedString<KnownValues extends string> = (string & {}) | KnownValues;
