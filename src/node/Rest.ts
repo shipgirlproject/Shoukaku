@@ -221,12 +221,6 @@ export class NoopMiddleware implements RestMiddleware {}
  * Exendable generic REST client to make requests to Lavalink
  */
 export class RestClient<T extends RestMiddleware = NoopMiddleware> {
-	protected readonly middleware: T;
-	protected readonly auth: string;
-	protected readonly userAgent: string;
-	protected readonly baseUrl: string;
-	protected readonly restTimeout: number;
-
 	/**
 	 * @param auth Credentials to access Lavalnk
 	 * @param userAgent User Agent to use when making requests to Lavalink
@@ -235,17 +229,12 @@ export class RestClient<T extends RestMiddleware = NoopMiddleware> {
 	 * @param middleware Inject headers and params globally, see {@link RestMiddleware}
 	 */
 	constructor(
-		auth: string,
-		userAgent: string,
-		baseUrl: string,
-		restTimeout: number,
-		middleware: T = new NoopMiddleware() as T
+		protected readonly auth: string,
+		protected readonly userAgent: string,
+		protected readonly baseUrl: string,
+		protected readonly restTimeout: number,
+		protected readonly middleware: T = new NoopMiddleware() as T
 	) {
-		this.auth = auth;
-		this.userAgent = userAgent;
-		this.baseUrl = baseUrl;
-		this.restTimeout = restTimeout;
-		this.middleware = middleware;
 		return this as RestClient<typeof middleware>;
 	}
 
