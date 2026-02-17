@@ -12,7 +12,7 @@
 	"projectDocuments": [
 		"docsrc/guide.md",
 	],
-	
+	"plugin": ["@shipgirl/typedoc-plugin-versions"],
 	"highlightLanguages": [
 		"console",
 		"javascript",
