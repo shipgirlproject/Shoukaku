@@ -303,7 +303,6 @@ export class RestClient<T extends RestMiddleware = NoopMiddleware> {
 		try {
 			return await request.json() as R;
 		} catch (e) {
-			// TODO: disscuss if we should ignore this error since the original Rest#fetch ignored it
 			throw new DeserializationError(e);
 		}
 
