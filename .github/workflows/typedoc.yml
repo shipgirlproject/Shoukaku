@@ -20,7 +20,7 @@ jobs:
             tar -cvf documentation.tar ./docs
 
       - name: create a document artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
             name: documentation
             path: documentation.tar
@@ -30,11 +30,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout src
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - run: mkdir -p ./docs
       - name: Download the existing documents artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: documentation
       - run: tar -xf documentation.tar ./docs -C ./docs
@@ -54,7 +54,7 @@ jobs:
         run: tar -cvf newdocumentation.tar ./docs
 
       - name: create a new document artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: newdocumentation
           path: newdocumentation.tar
@@ -64,13 +64,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: checkout the typedoc repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: typedoc
 
       - run: mkdir -p ./docs
       - name: Download the new documents artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: newdocumentation
       - run: tar -xf newdocumentation.tar ./docs -C ./docs
