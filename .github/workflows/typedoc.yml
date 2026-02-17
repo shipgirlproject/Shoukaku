@@ -12,18 +12,18 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
         with:
-            ref: typedoc
+          ref: typedoc
 
       - name: tar the existing docs
         run: |
-            mkdir -p ./docs
-            tar -cvf documentation.tar ./docs
+          mkdir -p ./docs
+          tar -cvf documentation.tar ./docs
 
       - name: create a document artifact
         uses: actions/upload-artifact@v6
         with:
-            name: documentation
-            path: documentation.tar
+          name: documentation
+          path: documentation.tar
 
   build: # builds the distribution and then the documentation
     needs: get_history
