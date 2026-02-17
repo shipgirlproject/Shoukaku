@@ -1,16 +1,15 @@
 import { LavalinkPlayer, RoutePlanner, SessionInfo } from '../../src/node/Rest';
 
 export const routePlannerResponse: () => RoutePlanner = () => ({
-	// @ts-expect-error enums
 	'class': 'RotatingNanoIpRoutePlanner',
 	'details': {
 		'ipBlock': {
-			// @ts-expect-error enums
 			'type': 'Inet6Address',
 			'size': '1208925819614629174706176'
 		},
 		'failingAddresses': [
 			{
+				// @ts-expect-error types are probably wrong(?)
 				'failingAddress': '/1.0.0.0',
 				'failingTimestamp': 1573520707545,
 				'failingTime': 'Mon Nov 11 20:05:07 EST 2019'
