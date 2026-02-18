@@ -41,6 +41,7 @@
     "url": "https://github.com/shipgirlproject/Shoukaku.git"
   },
   "dependencies": {
+    "compare-versions": "^6.1.1",
     "ws": "^8.19.0"
   },
   "devDependencies": {
