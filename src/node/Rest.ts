@@ -1,8 +1,9 @@
 import { Versions } from '../Constants';
 import type { FilterOptions } from '../guild/Player';
 import type { NodeOption } from '../Shoukaku';
-import { HintedString } from '../Utils';
-import type { Node, NodeInfo, Stats } from './Node';
+import { validatePluginRequirement } from '../Utils';
+import type { HintedString, PluginRequirement } from '../Utils';
+import type { Node, NodeInfo, NodeInfoPlugin, Stats } from './Node';
 
 export type Severity = 'common' | 'suspicious' | 'fault';
 
@@ -182,6 +183,11 @@ export interface RestMiddleware {
  * Properties can be a value, or a function that returns a value to access `this`
  */
 export interface RestEndpoint {
+	// TODO: do we even need this? RestError 404/400 would also indicate missing/wrong version of plugin
+	/**
+	 * Plugin required by endpoint
+	 */
+	readonly pluginRequired?: PluginRequirement;
 	/**
 	 * Lavalink endpoint
 	 */
@@ -226,6 +232,7 @@ export class RestClient<T extends RestMiddleware = NoopMiddleware> {
 	 * @param userAgent User Agent to use when making requests to Lavalink
 	 * @param baseUrl URL of Lavalink
 	 * @param restTimeout Time to wait for a response from the Lavalink REST API before giving up
+	 * @param nodePlugins Plugins enabled on Lavalink node
 	 * @param middleware Inject headers and params globally, see {@link RestMiddleware}
 	 */
 	constructor(
@@ -233,6 +240,7 @@ export class RestClient<T extends RestMiddleware = NoopMiddleware> {
 		protected readonly userAgent: string,
 		protected readonly baseUrl: string,
 		protected readonly restTimeout: number,
+		protected readonly nodePlugins?: NodeInfoPlugin[],
 		protected readonly middleware: T = new NoopMiddleware() as T
 	) {
 		return this as RestClient<typeof middleware>;
@@ -244,19 +252,24 @@ export class RestClient<T extends RestMiddleware = NoopMiddleware> {
 	 * @returns Response as specified by endpoint's `R` function
 	 * @throws {@link RestError} from Lavalink error response
 	 * @throws {@link DeserializationError} when parsing response as JSON fails
+	 * @throws {@link PluginError} when plugin required by endpoint is not satisfied by plugins on this node
 	 */
 	async fetch<
 		E extends RestEndpoint,
 		R = ReturnType<E['R']>
 	>(endpoint: E): Promise<R | undefined> {
+		const path = fnOrVal(endpoint.endpoint)!;
+
+		// TODO: should we cache the plugin check somehow?
+		if (endpoint.pluginRequired)
+			validatePluginRequirement(`endpoint ${path}`, endpoint.pluginRequired, this.nodePlugins);
+
 		const headers = {
 			'Authorization': this.auth,
 			'User-Agent': this.userAgent,
 			...(fnOrVal(this.middleware.headers) ?? {}),
 			...(fnOrVal(endpoint.headers) ?? {})
 		};
-
-		const path = fnOrVal(endpoint.endpoint)!;
 
 		const url = new URL(`${this.baseUrl}${path}`);
 

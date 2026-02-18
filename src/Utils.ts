@@ -1,4 +1,6 @@
 import { EventEmitter } from 'node:events';
+import { satisfies, validateStrict } from 'compare-versions';
+import type { NodeInfoPlugin } from './node/Node';
 
 // https://stackoverflow.com/a/67244127
 export abstract class TypedEventEmitter<T extends Record<string, unknown[]>> extends EventEmitter {
@@ -59,3 +61,46 @@ export function wait(ms: number): Promise<void> {
 
 // https://stackoverflow.com/a/73753173
 export type HintedString<KnownValues extends string> = (string & {}) | KnownValues;
+
+export interface PluginRequirement{
+	/**
+	 * Name of plugin required
+	 */
+	readonly name: string;
+	/**
+	 * Version of plugin required, any string or npm style semver range
+	 * @see https://semver.npmjs.com/#syntax-examples
+	 */
+	readonly version: string;
+}
+
+export class PluginError extends Error {
+	constructor(
+		readonly requiredFor: string,
+		readonly required: PluginRequirement,
+		readonly found?: NodeInfoPlugin
+	) {
+		super(`Plugin ${required.name}@${required.version} is required for ${requiredFor}, but ${found ? `found ${found.name}@${found.version}` : 'was not found'}`);
+		this.name = 'PluginError';
+		Object.setPrototypeOf(this, new.target.prototype);
+	}
+}
+
+/**
+ * Validate if plugins present in node meets specified plugin requirements
+ * @param requiredFor specifies what requires the plugin
+ * @param required plugin requirements
+ * @param nodePlugins plugins present in node
+ * @throws {@link PluginError} when plugin is not found or does not satisfy version
+ * @internal
+ */
+export function validatePluginRequirement(requiredFor: string, required: PluginRequirement, nodePlugins?: NodeInfoPlugin[]) {
+	const found = nodePlugins?.find((p => p.name === required.name));
+
+	const isValid = !!found
+	    && (validateStrict(required.version)
+	    	? satisfies(found.version, required.version)
+	    	: found?.version === required.version);
+
+	if (!isValid) throw new PluginError(requiredFor, required, found);
+}
