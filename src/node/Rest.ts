@@ -175,6 +175,34 @@ export interface RestMiddleware {
  * Routes should implement this interface to use with fetch function
  * 
  * Properties can be a value, or a function that returns a value to access `this`
+ * 
+ * @example
+ * Example with [LavaSearch](https://github.com/topi314/LavaSearch) `/loadsearch` endpoint
+ * ```
+ *	export class LoadSearchEndpoint implements RestEndpoint {
+ *		constructor(public readonly query: string, public readonly types: string) {}
+ *
+ *		public readonly pluginRequired = {
+ *			name: 'lavasearch-plugin',
+ *			version: '^1.0.0'
+ *		};
+ *
+ *		public readonly endpoint = '/loadsearch';
+ *		public readonly params = () => ({ query: this.query, types: this.types });
+ *
+ *		public readonly R = t<{
+ *			tracks?: Track[];
+ *			albums?: Playlist[];
+ *			artists?: Playlist[];
+ *			playlists?: Playlist[];
+ *			texts?: {
+ *				text: string;
+ *				plugin: Record<string, unknown>;
+ *			};
+ *			plugin: Record<string, unknown>;
+ *		}>;
+ *	}
+ * ```
  */
 export interface RestEndpoint {
 	// TODO: do we even need this? RestError 404/400 would also indicate missing/wrong version of plugin
@@ -187,7 +215,7 @@ export interface RestEndpoint {
 	 */
 	readonly endpoint: FnOrVal<string>;
 	/**
-	 * HTTP request method
+	 * HTTP request method, `GET` by default
 	 */
 	readonly method?: HintedString<'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH'>;
 	/**
