@@ -1,7 +1,7 @@
 import { OpCodes, State } from '../Constants';
 import type { Node } from '../node/Node';
 import type { Exception, Track, UpdatePlayerInfo, UpdatePlayerOptions } from '../node/Rest';
-import { TypedEventEmitter } from '../Utils';
+import { PluginRequirement, TypedEventEmitter, validatePluginRequirement } from '../Utils';
 import { Connection } from './Connection';
 
 export type TrackEndReason = 'finished' | 'loadFailed' | 'stopped' | 'replaced' | 'cleanup';
@@ -121,6 +121,8 @@ export interface FilterOptions {
 	distortion?: DistortionSettings | null;
 	channelMix?: ChannelMixSettings | null;
 	lowPass?: LowPassSettings | null;
+	// TODO: check this, im assuming null unsets everything?
+	pluginFilters?: Record<string, unknown> | null;
 }
 
 // Interfaces are not final, but types are, and therefore has an index signature
@@ -163,6 +165,41 @@ export type PlayerEvents = {
 	 */
 	'update': [data: PlayerUpdate];
 };
+
+/**
+ * Plugin filters should implement this interface to use with {@link Player#setPluginFilter}
+ * 
+ * @example
+ * Example with [LavaDSPX](https://github.com/Devoxin/LavaDSPX-Plugin) `high-pass` filter
+ * ```
+ *	export class LavaDSPXHighPass implements PluginFilter {
+ *		public readonly pluginRequired = {
+ *			name: 'lavadspx-plugin',
+ *			version: '^0.0.5'
+ *		};
+ *		public readonly name = 'high-pass';
+ *		public readonly D = t<{
+ *			cutoffFrequency: number;
+ *			boostFactor: number;
+ *		}>;
+ *	}
+ * ```
+ */
+export interface PluginFilter {
+	/**
+	 * Plugin required by filter
+	 */
+	readonly pluginRequired?: PluginRequirement;
+	/**
+	 * Name of filter
+	 */
+	readonly name: string;
+	/**
+	 * This hack is to work around TypeScript types not existing at runtime.
+	 * We can specify the filter data type here.
+	 */
+	readonly D: (data: unknown) => unknown;
+}
 
 /**
  * Wrapper object around Lavalink
@@ -393,6 +430,37 @@ export class Player extends TypedEventEmitter<PlayerEvents> {
 	}
 
 	/**
+	 * Get the value of a plugin defined filter
+	 * @param filter Plugin filter config (see {@link PluginFilter})
+	 * @returns Filter object as specified by the `D` function
+	 */
+	public getPluginFilter<
+		F extends PluginFilter,
+		D = PluginFilter['D']
+	>(filter: F): D | undefined {
+		// TODO: should we check for plugins here? we shouldn't need to since it returns undefined
+		return this.filters.pluginFilters?.[filter.name] as D;
+	}
+
+	/**
+	 * Set a plugin defined filter
+	 * @param filter Plugin filter config (see {@link PluginFilter})
+	 * @param data Filter object as specified by the `D` function
+	 * @throws {@link PluginError} when plugin required by the filter is not satisfied by plugins on this node
+	 */
+	public async setPluginFilter<
+		F extends PluginFilter,
+		D = PluginFilter['D']
+	>(filter: F, data?: D): Promise<void> {
+		// TODO: should we check for plugins (name, version) or the filters list instead?
+		// TODO: should we cache the plugin check somehow?
+		if (filter.pluginRequired)
+			validatePluginRequirement(`filter ${filter.name}`, filter.pluginRequired, await this.node.rest.client._getNodePlugins());
+
+		return this.setFilters({ pluginFilters: { [filter.name]: data ?? null }});
+	}
+
+	/**
 	 * Change the all filter settings applied to the currently playing track
 	 * @param filters An object that conforms to FilterOptions that defines all filters to apply/modify
 	 */
@@ -414,7 +482,8 @@ export class Player extends TypedEventEmitter<PlayerEvents> {
 			rotation: null,
 			distortion: null,
 			channelMix: null,
-			lowPass: null
+			lowPass: null,
+			pluginFilters: null
 		});
 	}
 
