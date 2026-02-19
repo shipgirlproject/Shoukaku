@@ -583,14 +583,14 @@ export class Rest {
 	 */
 	protected async fetch<T = unknown>(fetchOptions: FetchOptions) {
 		return this.client.fetch(new class implements RestEndpoint {
-			readonly endpoint = fetchOptions.endpoint;
+			public readonly endpoint = fetchOptions.endpoint;
 
-			readonly method = fetchOptions.options.method;
-			readonly headers = fetchOptions.options.headers;
-			readonly params = fetchOptions.options.params;
-			readonly body = fetchOptions.options.body;
+			public readonly method = fetchOptions.options.method;
+			public readonly headers = fetchOptions.options.headers;
+			public readonly params = fetchOptions.options.params;
+			public readonly body = fetchOptions.options.body;
 
-			R = t<T>;
+			public R = t<T>;
 		});
 	}
 }
