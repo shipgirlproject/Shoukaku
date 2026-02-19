@@ -64,9 +64,24 @@ export type HintedString<KnownValues extends string> = (string & {}) | KnownValu
 
 /**
  * Utility for specifying types in generic interfaces, workaround for TypeScript types not existing at runtime
- * @typeParam T Type
+ * @typeParam T Type of value
  */
 export const t = <T>(type: unknown) => type as T;
+
+/**
+ * Function that returns a value or value
+ * @typeParam T Type of value
+ */
+export type FnOrVal<T> = T | (() => T);
+
+/**
+ * Get the value from a {@link FnOrVal}
+ * @param input Input function or value
+ * @returns Value as specified by T, you must explicitly assert non-optional values are not `undefined` since properties may be optional
+ */
+export function fnOrVal<T>(input?: FnOrVal<T>): T | undefined {
+	return typeof input === 'function' ? (input as () => T)?.() : input;
+}
 
 export interface PluginRequirement{
 	/**
