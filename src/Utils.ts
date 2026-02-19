@@ -62,6 +62,12 @@ export function wait(ms: number): Promise<void> {
 // https://stackoverflow.com/a/73753173
 export type HintedString<KnownValues extends string> = (string & {}) | KnownValues;
 
+/**
+ * Utility for specifying types in generic interfaces, workaround for TypeScript types not existing at runtime
+ * @typeParam T Type
+ */
+export const t = <T>(type: unknown) => type as T;
+
 export interface PluginRequirement{
 	/**
 	 * Name of plugin required
