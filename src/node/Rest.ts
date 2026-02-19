@@ -263,7 +263,7 @@ export class RestClient<T extends RestMiddleware = NoopMiddleware> {
 	 * @throws {@link DeserializationError} when parsing response as JSON fails
 	 * @throws {@link PluginError} when plugin required by endpoint is not satisfied by plugins on this node
 	 */
-	async fetch<
+	public async fetch<
 		E extends RestEndpoint,
 		R = ReturnType<E['R']>
 	>(endpoint: E): Promise<R | undefined> {
@@ -336,58 +336,58 @@ export const r = <T>(response: unknown) => response as T;
 export class ResolveEndpoint implements RestEndpoint {
 	constructor (public readonly identifier: string) {}
 
-	readonly endpoint = '/loadtracks';
-	readonly params = () => ({ identifier: this.identifier });
+	public readonly endpoint = '/loadtracks';
+	public readonly params = () => ({ identifier: this.identifier });
 
-	R = r<LavalinkResponse>;
+	public R = r<LavalinkResponse>;
 }
 
 export class DecodeEndpoint implements RestEndpoint {
 	constructor (public readonly track: string) {}
 
-	readonly endpoint = '/decodetrack';
-	readonly params = () => ({ track: this.track });
+	public readonly endpoint = '/decodetrack';
+	public readonly params = () => ({ track: this.track });
 
-	R = r<Track>;
+	public R = r<Track>;
 }
 
 export class GetPlayersEndpoint implements RestEndpoint {
 	constructor (public readonly sessionId: string) {}
 
-	readonly endpoint = () => `/sessions/${this.sessionId}/players`;
+	public readonly endpoint = () => `/sessions/${this.sessionId}/players`;
 
-	R = r<LavalinkPlayer[]>;
+	public R = r<LavalinkPlayer[]>;
 }
 
 export class GetPlayerEndpoint implements RestEndpoint {
 	constructor (public readonly sessionId: string, public readonly guildId: string) {}
 
-	readonly endpoint = () => `/sessions/${this.sessionId}/players/${this.guildId}`;
+	public readonly endpoint = () => `/sessions/${this.sessionId}/players/${this.guildId}`;
 
-	R = r<LavalinkPlayer>;
+	public R = r<LavalinkPlayer>;
 }
 
 export class UpdatePlayerEndpoint implements RestEndpoint {
 	constructor (public readonly sessionId: string, public readonly data: UpdatePlayerInfo) {}
 
-	readonly endpoint = () => `/sessions/${this.sessionId}/players/${this.data.guildId}`;
+	public readonly endpoint = () => `/sessions/${this.sessionId}/players/${this.data.guildId}`;
 
-	readonly method = 'PATCH';
-	readonly params = () => ({ noReplace: this.data.noReplace?.toString() ?? 'false' });
-	readonly headers = { 'Content-Type': 'application/json' };
-	readonly body = () => this.data.playerOptions as Record<string, unknown>;
+	public readonly method = 'PATCH';
+	public readonly params = () => ({ noReplace: this.data.noReplace?.toString() ?? 'false' });
+	public readonly headers = { 'Content-Type': 'application/json' };
+	public readonly body = () => this.data.playerOptions as Record<string, unknown>;
 
-	R = r<LavalinkPlayer>;
+	public R = r<LavalinkPlayer>;
 }
 
 export class DestroyPlayerEndpoint implements RestEndpoint {
 	constructor (public readonly sessionId: string, public readonly guildId: string) {}
 
-	readonly endpoint = () => `/sessions/${this.sessionId}/players/${this.guildId}`;
+	public readonly endpoint = () => `/sessions/${this.sessionId}/players/${this.guildId}`;
 
-	readonly method = 'DELETE';
+	public readonly method = 'DELETE';
 
-	R = r<void>;
+	public R = r<void>;
 }
 
 export class UpdateSessionEndpoint implements RestEndpoint {
@@ -397,45 +397,45 @@ export class UpdateSessionEndpoint implements RestEndpoint {
 		public readonly timeout?: number
 	) {}
 
-	readonly endpoint = () => `/sessions/${this.sessionId}`;
+	public readonly endpoint = () => `/sessions/${this.sessionId}`;
 
-	readonly method = 'PATCH';
-	readonly headers = { 'Content-Type': 'application/json' };
-	readonly body = () => ({ resuming: this.resuming, timeout: this.timeout });
+	public readonly method = 'PATCH';
+	public readonly headers = { 'Content-Type': 'application/json' };
+	public readonly body = () => ({ resuming: this.resuming, timeout: this.timeout });
 
-	R = r<SessionInfo>;
+	public R = r<SessionInfo>;
 }
 
 export class StatsEndpoint implements RestEndpoint {
-	readonly endpoint = '/stats';
+	public readonly endpoint = '/stats';
 
-	R = r<Stats>;
+	public R = r<Stats>;
 }
 
 export class RoutePlannerStatusEndpoint implements RestEndpoint {
-	readonly endpoint = '/routeplanner/status';
+	public readonly endpoint = '/routeplanner/status';
 
-	R = r<RoutePlanner>;
+	public R = r<RoutePlanner>;
 }
 
 export class UnmarkFailedAddressEndpoint implements RestEndpoint {
 	constructor (public readonly address: string) {}
 
-	readonly endpoint = '/routeplanner/free/address';
+	public readonly endpoint = '/routeplanner/free/address';
 
-	readonly method = 'POST';
-	readonly headers = { 'Content-Type': 'application/json' };
-	readonly body = () => ({ address: this.address });
+	public readonly method = 'POST';
+	public readonly headers = { 'Content-Type': 'application/json' };
+	public readonly body = () => ({ address: this.address });
 
-	R = r<void>;
+	public R = r<void>;
 }
 
 export class LavalinkInfoEndpoint implements RestEndpoint {
-	readonly endpoint = '/info';
+	public readonly endpoint = '/info';
 
-	readonly headers = { 'Content-Type': 'application/json' };
+	public readonly headers = { 'Content-Type': 'application/json' };
 
-	R = r<NodeInfo>;
+	public R = r<NodeInfo>;
 }
 
 /**
