@@ -1,8 +1,8 @@
 import { Versions } from '../Constants';
 import type { FilterOptions } from '../guild/Player';
 import type { NodeOption } from '../Shoukaku';
-import { t, validatePluginRequirement } from '../Utils';
-import type { HintedString, PluginRequirement } from '../Utils';
+import { fnOrVal, t, validatePluginRequirement } from '../Utils';
+import type { FnOrVal, HintedString, PluginRequirement } from '../Utils';
 import type { Node, NodeInfo, NodeInfoPlugin, Stats } from './Node';
 
 export type Severity = 'common' | 'suspicious' | 'fault';
@@ -163,12 +163,6 @@ interface FinalFetchOptions {
 	body?: string;
 }
 
-type FnOrVal<T> = T | (() => T);
-
-function fnOrVal<T>(input?: T | (() => T)): T | undefined {
-	return typeof input === 'function' ? (input as () => T)?.() : input;
-}
-
 /**
  * Inject headers and params globally to a RestClient instance
  */
@@ -199,15 +193,15 @@ export interface RestEndpoint {
 	/**
 	 * HTTP request headers
 	 */
-	readonly headers?: FnOrVal<Record<string, string>>;
+	readonly headers?: FnOrVal<Record<string, string> | undefined>;
 	/**
 	 * URL params
 	 */
-	readonly params?: FnOrVal<Record<string, string>>;
+	readonly params?: FnOrVal<Record<string, string> | undefined>;
 	/**
 	 * JSON body to send with
 	 */
-	readonly body?: FnOrVal<Record<string, unknown>>;
+	readonly body?: FnOrVal<Record<string, unknown> | undefined>;
 	/**
 	 * This hack is to work around TypeScript types not existing at runtime.
 	 * We can specify the return type of the endpoint in the fetch function here.
