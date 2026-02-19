@@ -221,7 +221,7 @@ export class NoopMiddleware implements RestMiddleware {}
  * Exendable generic REST client to make requests to Lavalink
  */
 export class RestClient<T extends RestMiddleware = NoopMiddleware> {
-	protected _nodePlugins?: NodeInfoPlugin[];
+	protected nodePlugins?: NodeInfoPlugin[];
 
 	/**
 	 * @param auth Credentials to access Lavalnk
@@ -240,13 +240,18 @@ export class RestClient<T extends RestMiddleware = NoopMiddleware> {
 		return this as RestClient<typeof middleware>;
 	}
 
-	private async getNodePlugins() {
-		if (!this._nodePlugins) {
+	/**
+	 * Get a list of plugins available on this node, you should use {@link Rest#getLavalinkInfo} instead
+	 * @returns A list of plugins
+	 * @internal
+	 */
+	public async _getNodePlugins() {
+		if (!this.nodePlugins) {
 			const info = await this.fetch(new LavalinkInfoEndpoint());
-			this._nodePlugins = info?.plugins ?? [];
+			this.nodePlugins = info?.plugins ?? [];
 		}
 
-		return this._nodePlugins;
+		return this.nodePlugins;
 	}
 
 	/**
@@ -265,7 +270,7 @@ export class RestClient<T extends RestMiddleware = NoopMiddleware> {
 
 		// TODO: should we cache the plugin check somehow?
 		if (endpoint.pluginRequired)
-			validatePluginRequirement(`endpoint ${path}`, endpoint.pluginRequired, await this.getNodePlugins());
+			validatePluginRequirement(`endpoint ${path}`, endpoint.pluginRequired, await this._getNodePlugins());
 
 		const headers = {
 			'Authorization': this.auth,
@@ -449,7 +454,7 @@ export class Rest {
 	/**
 	 * Client to make request to Lavalink
 	 */
-	protected readonly client: RestClient;
+	public readonly client: RestClient;
 	/**
 	 * @param node An instance of Node
 	 * @param options The options to initialize this rest class
