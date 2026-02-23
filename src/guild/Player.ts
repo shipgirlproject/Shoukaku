@@ -455,7 +455,7 @@ export class Player extends TypedEventEmitter<PlayerEvents> {
 	 */
 	public getPluginFilter<
 		F extends PluginFilter,
-		D = F['D']
+		D = ReturnType<F['D']>
 	>(filter: F): D | undefined {
 		// TODO: should we check for plugins here? we shouldn't need to since it returns undefined
 		return this.filters.pluginFilters?.[filter.name] as D;
@@ -469,7 +469,7 @@ export class Player extends TypedEventEmitter<PlayerEvents> {
 	 */
 	public async setPluginFilter<
 		F extends PluginFilter,
-		D = F['D']
+		D = ReturnType<F['D']>
 	>(filter: F, data?: D): Promise<void> {
 		// TODO: should we check for plugins (name, version) or the filters list instead?
 		// TODO: should we cache the plugin check somehow?
@@ -642,7 +642,7 @@ export class Player extends TypedEventEmitter<PlayerEvents> {
 
 	public onPluginEvent<
 		E extends PluginEvent,
-		D = E['D'] & PlayerEvent & { type: E['name'] }
+		D = ReturnType<E['D']> & PlayerEvent & { type: E['name'] }
 	>(plugin: PluginEvent, callback: (data: D) => void) {
 		// TODO: insert plugin check here maybe? but its async
 
