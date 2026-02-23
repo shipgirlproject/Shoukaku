@@ -1,5 +1,3 @@
-import { IncomingMessage } from 'http';
-import Websocket from 'ws';
 import { OpCodes, ShoukakuClientInfo, State, Versions } from '../Constants';
 import type {
 	PlayerUpdate,
@@ -141,7 +139,11 @@ export class Node extends TypedEventEmitter<NodeEvents> {
 	/**
      * Websocket instance
      */
-	public ws: Websocket | null;
+	public ws: WebSocket | null;
+	/**
+	 * AbortController for WebSocket events
+	 */
+	public wsEventController: AbortController | null;
 	/**
      * SessionId of this Lavalink connection (not to be confused with Discord SessionId)
      */
@@ -169,6 +171,7 @@ export class Node extends TypedEventEmitter<NodeEvents> {
 		this.stats = null;
 		this.info = null;
 		this.ws = null;
+		this.wsEventController = null;
 		this.sessionId = null;
 	}
 
@@ -223,24 +226,30 @@ export class Node extends TypedEventEmitter<NodeEvents> {
 		const createConnection = () => {
 			const url = new URL(this.url);
 
-			const server = new Websocket(url.toString(), { headers } as Websocket.ClientOptions);
+			const server = new WebSocket(url.toString(), { headers });
 
-			server.once('upgrade', response => this.open(response));
-			server.on('message', data => void this.message(data).catch(error => this.error(error as Error)));
-			server.on('error', error => this.error(error));
+			this.wsEventController = new AbortController();
+			const { signal } = this.wsEventController;
 
-			return new Promise<Websocket>((resolve, reject) => {
+			server.addEventListener('message', ({ data }) => void this.message(data).catch(error => this.error(error as Error)), { signal });
+			server.addEventListener('error', ({ error }: { error: Error }) => this.error(error), { signal });
+
+			return new Promise<WebSocket>((resolve, reject) => {
 				const onOpen = () => {
-					server.removeListener('close', onClose);
+					this.reconnects = 0;
+					this.emit('debug', `[Socket] <-> [${this.name}] : Connection Handshake Done => ${this.url}`);
+
+					server.removeEventListener('close', onClose);
 					resolve(server);
 				};
 				const onClose = () => {
-					server.removeListener('open', onOpen);
-					server.removeAllListeners();
+					server.removeEventListener('open', onOpen);
+					this.wsEventController!.abort();
+
 					reject(new Error('Websocket closed before a connection was established'));
 				};
-				server.once('open', onOpen);
-				server.once('close', onClose);
+				server.addEventListener('open', onOpen, { once: true });
+				server.addEventListener('close', onClose, { once: true });
 			});
 		};
 
@@ -270,7 +279,7 @@ export class Node extends TypedEventEmitter<NodeEvents> {
 			throw connectError;
 		}
 
-		this.ws!.once('close', (...args) => void this.close(...args));
+		this.ws!.addEventListener('close', ({ code, reason }) => void this.close(code, reason), { signal: this.wsEventController?.signal });
 	}
 
 	/**
@@ -286,25 +295,7 @@ export class Node extends TypedEventEmitter<NodeEvents> {
 		if (this.ws)
 			this.ws.close(code, reason);
 		else
-			void this.close(1000, Buffer.from(reason ?? 'Unknown Reason', 'utf-8'));
-	}
-
-	/**
-     * Handle connection open event from Lavalink
-     * @param response Response from Lavalink
-     * @internal
-     */
-	private open(response: IncomingMessage): void {
-		this.reconnects = 0;
-
-		const resumed = response.headers['session-resumed'] === 'true';
-
-		if (!resumed) {
-			this.sessionId = null;
-		}
-
-		// eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-		this.emit('debug', `[Socket] <-> [${this.name}] : Connection Handshake Done => ${this.url} | Resumed Header Value: ${resumed} | Lavalink Api Version: ${response.headers['lavalink-api-version']}`);
+			void this.close(1000, reason ?? 'Unknown Reason');
 	}
 
 	/**
@@ -323,6 +314,13 @@ export class Node extends TypedEventEmitter<NodeEvents> {
 				this.stats = json;
 				break;
 			case OpCodes.READY: {
+				// this was set on ws upgrade before
+				if (!json.resumed) {
+					this.sessionId = null;
+				}
+
+				this.emit('debug', `[Socket] -> [${this.name}] : Resumed Value: ${json.resumed}`);
+
 				this.state = State.CONNECTED;
 
 				if (!json.sessionId) {
@@ -374,8 +372,8 @@ export class Node extends TypedEventEmitter<NodeEvents> {
      * @param code Status close
      * @param reason Reason for connection close
      */
-	private async close(code: number, reason: Buffer): Promise<void> {
-		this.emit('close', code, String(reason));
+	private async close(code: number, reason: string): Promise<void> {
+		this.emit('close', code, reason);
 		this.emit('debug', `[Socket] <-/-> [${this.name}] : Connection Closed, Code: ${code || 'Unknown Code'}`);
 
 		this.state = State.DISCONNECTING;
@@ -428,7 +426,8 @@ export class Node extends TypedEventEmitter<NodeEvents> {
 	}
 
 	private cleanupWebsocket(): void {
-		this.ws?.removeAllListeners();
+		this.wsEventController?.abort();
+		this.wsEventController = null;
 		this.ws?.close();
 		this.ws = null;
 	}
