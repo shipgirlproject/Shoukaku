@@ -10,6 +10,9 @@ title: Getting Started
 > Shoukaku does not work correctly the Bun runtime due to the dependency on [`ws`](https://github.com/websockets/ws).
 > Bun patches `ws` with its own implementation, which does not implement all `ws` events. See [this issue](https://github.com/oven-sh/bun/issues/5951) for more information.
 
+> [!warning]
+> You must use Lavalink version [`4.2.0`](https://github.com/lavalink-devs/Lavalink/blob/feature/dave/docs/changelog/v4.md?rgh-link-date=2026-02-23T12%3A16%3A13.000Z#v420) or above for [DAVE](https://docs.discord.com/developers/topics/voice-connections#end-to-end-encryption-dave-protocol) support.
+
 Shoukaku is a stable, powerful and updated wrapper around [Lavalink](https://lavalink.dev/). It is Discord library agnostic, and can add support for new Discord libraries using connectors.
 
 ## Set up Shoukaku
