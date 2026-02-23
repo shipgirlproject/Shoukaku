@@ -201,6 +201,22 @@ export interface PluginFilter {
 	readonly D: (data: unknown) => unknown;
 }
 
+export interface PluginEvent {
+	/**
+	 * Plugin required by event
+	 */
+	readonly pluginRequired?: PluginRequirement;
+	/**
+	 * Name of event
+	 */
+	readonly name: string;
+	/**
+	 * This hack is to work around TypeScript types not existing at runtime.
+	 * We can specify the filter data type here.
+	 */
+	readonly D: (data: unknown) => unknown;
+}
+
 /**
  * Wrapper object around Lavalink
  */
@@ -237,6 +253,9 @@ export class Player extends TypedEventEmitter<PlayerEvents> {
 	 * Filters on current track
 	 */
 	public filters: FilterOptions;
+
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	private pluginEvents: Record<string, Array<(data: any) => void> | undefined> = {};
 
 	constructor(guildId: string, node: Node) {
 		super();
@@ -549,6 +568,7 @@ export class Player extends TypedEventEmitter<PlayerEvents> {
 		this.volume = 100;
 		this.position = 0;
 		this.filters = {};
+		this.pluginEvents = {};
 	}
 
 	/**
@@ -604,11 +624,29 @@ export class Player extends TypedEventEmitter<PlayerEvents> {
 				this.emit('closed', json);
 				break;
 			default:
-				this.node.manager.emit(
-					'debug',
-					this.node.name,
-					`[Player] -> [Node] : Unknown Player Event Type, Data => ${JSON.stringify(json)}`
-				);
+				if ((json as { type: string }).type in this.pluginEvents) {
+					for (const callback of this.pluginEvents[(json as { type: string }).type]!) {
+						try {
+							callback(json);
+						} catch { /* empty */ }
+					}
+				} else {
+					this.node.manager.emit(
+						'debug',
+						this.node.name,
+						`[Player] -> [Node] : Unknown Player Event Type, Data => ${JSON.stringify(json)}`
+					);
+				}
 		}
+	}
+
+	public onPluginEvent<
+		E extends PluginEvent,
+		D = E['D'] & PlayerEvent & { type: E['name'] }
+	>(plugin: PluginEvent, callback: (data: D) => void) {
+		// TODO: insert plugin check here maybe? but its async
+
+		this.pluginEvents[plugin.name] ??= [];
+		this.pluginEvents[plugin.name]?.push(callback);
 	}
 }
