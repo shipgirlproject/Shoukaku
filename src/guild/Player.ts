@@ -198,7 +198,7 @@ export interface PluginFilter {
 	 * This hack is to work around TypeScript types not existing at runtime.
 	 * We can specify the filter data type here.
 	 */
-	readonly D: (data: unknown) => unknown;
+	readonly T: (data: unknown) => unknown;
 }
 
 export interface PluginEvent {
@@ -214,7 +214,7 @@ export interface PluginEvent {
 	 * This hack is to work around TypeScript types not existing at runtime.
 	 * We can specify the filter data type here.
 	 */
-	readonly D: (data: unknown) => unknown;
+	readonly T: (data: unknown) => unknown;
 }
 
 /**
@@ -455,7 +455,7 @@ export class Player extends TypedEventEmitter<PlayerEvents> {
 	 */
 	public getPluginFilter<
 		F extends PluginFilter,
-		D = ReturnType<F['D']>
+		D = ReturnType<F['T']>
 	>(filter: F): D | undefined {
 		// TODO: should we check for plugins here? we shouldn't need to since it returns undefined
 		return this.filters.pluginFilters?.[filter.name] as D;
@@ -469,7 +469,7 @@ export class Player extends TypedEventEmitter<PlayerEvents> {
 	 */
 	public async setPluginFilter<
 		F extends PluginFilter,
-		D = ReturnType<F['D']>
+		D = ReturnType<F['T']>
 	>(filter: F, data?: D): Promise<void> {
 		// TODO: should we check for plugins (name, version) or the filters list instead?
 		// TODO: should we cache the plugin check somehow?
@@ -642,7 +642,7 @@ export class Player extends TypedEventEmitter<PlayerEvents> {
 
 	public onPluginEvent<
 		E extends PluginEvent,
-		D = ReturnType<E['D']> & PlayerEvent & { type: E['name'] }
+		D = ReturnType<E['T']> & PlayerEvent & { type: E['name'] }
 	>(plugin: PluginEvent, callback: (data: D) => void) {
 		// TODO: insert plugin check here maybe? but its async
 
