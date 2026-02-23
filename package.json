@@ -31,8 +31,8 @@
     "weeb-library"
   ],
   "engines": {
-    "node": ">=18.0.0",
-    "npm": ">=7.0.0"
+    "node": ">=22.4.0",
+    "npm": ">=10.0.0"
   },
   "author": "Saya",
   "license": "MIT",
