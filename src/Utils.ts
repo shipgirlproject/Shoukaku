@@ -65,12 +65,50 @@ export type HintedString<KnownValues extends string> = (string & {}) | KnownValu
 /**
  * Utility for specifying types in generic interfaces, workaround for TypeScript types not existing at runtime
  * @typeParam T Type of value
+ * @internal
  */
 export const t = <T>(type: unknown) => type as T;
 
 /**
+ * @internal
+ */
+export type TFn = (type: unknown) => unknown;
+
+/**
+ * @internal
+ */
+export interface TField {
+	/**
+	 * This hack is to work around TypeScript types not existing at runtime.
+	 * We can specify the return type here.
+	 * 
+	 * @example
+	 * This function is never actually called, so the implementation can be simply:
+	 * ```
+	 * T = (response: unknown) => response as LavalinkResponse;
+	 * ```
+	 * 
+	 * @example
+	 * Or using the `t` utility function
+	 * ```
+	 * import { t } from 'shoukaku';
+	 * 
+	 * T = t<LavalinkResponse>;
+	 * ```
+	 */
+	readonly T: TFn;
+};
+
+/**
+ * Get the type specified in the T field
+ * @internal
+ */
+export type TReturnType<T extends TField> = ReturnType<T['T']>;
+
+/**
  * Function that returns a value or value
  * @typeParam T Type of value
+ * @internal
  */
 export type FnOrVal<T> = T | (() => T);
 
@@ -78,12 +116,13 @@ export type FnOrVal<T> = T | (() => T);
  * Get the value from a {@link FnOrVal}
  * @param input Input function or value
  * @returns Value as specified by T, you must explicitly assert non-optional values are not `undefined` since properties may be optional
+ * @internal
  */
 export function fnOrVal<T>(input?: FnOrVal<T>): T | undefined {
 	return typeof input === 'function' ? (input as () => T)?.() : input;
 }
 
-export interface PluginRequirement{
+export interface PluginRequirement {
 	/**
 	 * Name of plugin required
 	 */
