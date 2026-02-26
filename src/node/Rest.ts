@@ -2,7 +2,7 @@ import { Versions } from '../Constants';
 import type { FilterOptions } from '../guild/Player';
 import type { NodeOption } from '../Shoukaku';
 import { fnOrVal, t, validatePluginRequirement } from '../Utils';
-import type { FnOrVal, HintedString, PluginRequirement } from '../Utils';
+import type { FnOrVal, HintedString, PluginRequirement, TField, TReturnType } from '../Utils';
 import type { Node, NodeInfo, NodeInfoPlugin, Stats } from './Node';
 
 export type Severity = 'common' | 'suspicious' | 'fault';
@@ -204,7 +204,7 @@ export interface RestMiddleware {
  *	}
  * ```
  */
-export interface RestEndpoint {
+export interface RestEndpoint extends TField {
 	// TODO: do we even need this? RestError 404/400 would also indicate missing/wrong version of plugin
 	/**
 	 * Plugin required by endpoint
@@ -230,17 +230,6 @@ export interface RestEndpoint {
 	 * JSON body to send with
 	 */
 	readonly body?: FnOrVal<Record<string, unknown> | undefined>;
-	/**
-	 * This hack is to work around TypeScript types not existing at runtime.
-	 * We can specify the return type of the endpoint in the fetch function here.
-	 * 
-	 * @example
-	 * This function is never actually called, so the implementation can be simply:
-	 * ```
-	 * R = (response: unknown) => response as LavalinkResponse;
-	 * ```
-	 */
-	readonly T: (response: unknown) => unknown;
 };
 
 export class NoopMiddleware implements RestMiddleware {}
@@ -292,7 +281,7 @@ export class RestClient<T extends RestMiddleware = NoopMiddleware> {
 	 */
 	public async fetch<
 		E extends RestEndpoint,
-		R = ReturnType<E['T']>
+		R = TReturnType<E>
 	>(endpoint: E): Promise<R | undefined> {
 		const path = fnOrVal(endpoint.endpoint)!;
 

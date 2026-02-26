@@ -1,7 +1,7 @@
 import { OpCodes, State } from '../Constants';
 import type { Node } from '../node/Node';
 import type { Exception, Track, UpdatePlayerInfo, UpdatePlayerOptions } from '../node/Rest';
-import { PluginRequirement, TypedEventEmitter, validatePluginRequirement } from '../Utils';
+import { PluginRequirement, TField, TReturnType, TypedEventEmitter, validatePluginRequirement } from '../Utils';
 import { Connection } from './Connection';
 
 export type TrackEndReason = 'finished' | 'loadFailed' | 'stopped' | 'replaced' | 'cleanup';
@@ -185,7 +185,7 @@ export type PlayerEvents = {
  *	}
  * ```
  */
-export interface PluginFilter {
+export interface PluginFilter extends TField {
 	/**
 	 * Plugin required by filter
 	 */
@@ -194,14 +194,9 @@ export interface PluginFilter {
 	 * Name of filter
 	 */
 	readonly name: string;
-	/**
-	 * This hack is to work around TypeScript types not existing at runtime.
-	 * We can specify the filter data type here.
-	 */
-	readonly T: (data: unknown) => unknown;
 }
 
-export interface PluginEvent {
+export interface PluginEvent extends TField {
 	/**
 	 * Plugin required by event
 	 */
@@ -210,11 +205,6 @@ export interface PluginEvent {
 	 * Name of event
 	 */
 	readonly name: string;
-	/**
-	 * This hack is to work around TypeScript types not existing at runtime.
-	 * We can specify the filter data type here.
-	 */
-	readonly T: (data: unknown) => unknown;
 }
 
 /**
@@ -455,7 +445,7 @@ export class Player extends TypedEventEmitter<PlayerEvents> {
 	 */
 	public getPluginFilter<
 		F extends PluginFilter,
-		D = ReturnType<F['T']>
+		D = TReturnType<F>
 	>(filter: F): D | undefined {
 		// TODO: should we check for plugins here? we shouldn't need to since it returns undefined
 		return this.filters.pluginFilters?.[filter.name] as D;
@@ -469,7 +459,7 @@ export class Player extends TypedEventEmitter<PlayerEvents> {
 	 */
 	public async setPluginFilter<
 		F extends PluginFilter,
-		D = ReturnType<F['T']>
+		D = TReturnType<F>
 	>(filter: F, data?: D): Promise<void> {
 		// TODO: should we check for plugins (name, version) or the filters list instead?
 		// TODO: should we cache the plugin check somehow?
@@ -649,7 +639,7 @@ export class Player extends TypedEventEmitter<PlayerEvents> {
 
 	public onPluginEvent<
 		E extends PluginEvent,
-		D = ReturnType<E['T']> & PlayerEvent & { type: E['name'] }
+		D = TReturnType<E> & PlayerEvent & { type: E['name'] }
 	>(plugin: PluginEvent, callback: (data: D) => void) {
 		// TODO: insert plugin check here maybe? but its async
 		// plugin event callback is never called if LL does not
