@@ -292,10 +292,23 @@ export interface RoutePlanner {
 }
 
 export interface LavalinkPlayerVoice {
+	/**
+	 * Discord voice token to authenticate with
+	 */
 	token: string;
+	/**
+	 * Discord voice endpoint to connect to
+	 */
 	endpoint: string;
+	/**
+	 * Discord voice session id to authenticate with
+	 */
 	sessionId: string;
+	/**
+	 * Discord voice channel id
+	 */
 	channelId?: string;
+	// idk why these two are here?
 	connected?: boolean;
 	ping?: number;
 }
