@@ -623,12 +623,18 @@ export class Player extends TypedEventEmitter<PlayerEvents> {
 			case PlayerEventType.WEBSOCKET_CLOSED_EVENT:
 				this.emit('closed', json);
 				break;
-			default:
-				if ((json as { type: string }).type in this.pluginEvents) {
-					for (const callback of this.pluginEvents[(json as { type: string }).type]!) {
+			default: {
+				// TODO: fix types for json
+				const { type } = json as { type: string };
+				if (type in this.pluginEvents) {
+					// these run sequentially in unknown order (bad?)
+					// TODO: should we check if this.pluginEvents[type] is interable? will throw TypeError
+					for (const callback of this.pluginEvents[type]!) {
 						try {
 							callback(json);
-						} catch { /* empty */ }
+						} catch {
+							// TODO: should we rethrow error here?
+						}
 					}
 				} else {
 					this.node.manager.emit(
@@ -637,6 +643,7 @@ export class Player extends TypedEventEmitter<PlayerEvents> {
 						`[Player] -> [Node] : Unknown Player Event Type, Data => ${JSON.stringify(json)}`
 					);
 				}
+			}
 		}
 	}
 
@@ -645,6 +652,8 @@ export class Player extends TypedEventEmitter<PlayerEvents> {
 		D = ReturnType<E['T']> & PlayerEvent & { type: E['name'] }
 	>(plugin: PluginEvent, callback: (data: D) => void) {
 		// TODO: insert plugin check here maybe? but its async
+		// plugin event callback is never called if LL does not
+		// send event so may cause confusion
 
 		this.pluginEvents[plugin.name] ??= [];
 		this.pluginEvents[plugin.name]?.push(callback);
