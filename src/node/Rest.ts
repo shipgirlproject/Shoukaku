@@ -205,7 +205,6 @@ export interface RestMiddleware {
  * ```
  */
 export interface RestEndpoint extends TField {
-	// TODO: do we even need this? RestError 404/400 would also indicate missing/wrong version of plugin
 	/**
 	 * Plugin required by endpoint
 	 */
@@ -238,13 +237,12 @@ export class NoopMiddleware implements RestMiddleware {}
  * Exendable generic REST client to make requests to Lavalink
  */
 export class RestClient<T extends RestMiddleware = NoopMiddleware> {
-	protected nodePlugins?: NodeInfoPlugin[];
-
 	/**
 	 * @param auth Credentials to access Lavalnk
 	 * @param userAgent User Agent to use when making requests to Lavalink
 	 * @param baseUrl URL of Lavalink
 	 * @param restTimeout Time to wait for a response from the Lavalink REST API before giving up
+	 * @param nodePlugins Plugins available on this node
 	 * @param middleware Inject headers and params globally, see {@link RestMiddleware}
 	 */
 	constructor(
@@ -252,6 +250,7 @@ export class RestClient<T extends RestMiddleware = NoopMiddleware> {
 		protected readonly userAgent: string,
 		protected readonly baseUrl: string,
 		protected readonly restTimeout: number,
+		protected nodePlugins: NodeInfoPlugin[] | null = null,
 		protected readonly middleware: T = new NoopMiddleware() as T
 	) {
 		return this as RestClient<typeof middleware>;
@@ -489,7 +488,9 @@ export class Rest {
 			this.auth,
 			this.node.manager.options.userAgent,
 			this.url,
-			this.node.manager.options.restTimeout
+			this.node.manager.options.restTimeout,
+			// TODO: figure out if this is ever populated since Node#info is never reassigned from null
+			this.node.info?.plugins
 		);
 	}
 
