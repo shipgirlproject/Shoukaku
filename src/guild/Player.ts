@@ -196,6 +196,33 @@ export interface PluginFilter extends TField {
 	readonly name: string;
 }
 
+/**
+ * Plugin events should implement this interface to use with {@link Player#onPluginEvent}
+ * 
+ * @example
+ * Example with [LavaLyrics](https://github.com/topi314/LavaLyrics) `LyricsLineEvent` event
+ * ```
+ *	export class LyricsLineEvent implements PluginEvent {
+ *		public readonly pluginRequired = {
+ *			name: 'lavalyrics-plugin',
+ *			version: '^1.1.0'
+ *		};
+ * 
+ *		public readonly name = 'LyricsLineEvent';
+ * 
+ *		public readonly T = t<{
+ *			lineIndex: number;
+ *			line: {
+ *				timestamp: number;
+ *				duration?: number;
+ *				line: string;
+ *				plugin: unknown;
+ *			};
+ *			skipped: boolean;
+ *		}>;
+ *	}
+ *	```
+ */
 export interface PluginEvent extends TField {
 	/**
 	 * Plugin required by event
