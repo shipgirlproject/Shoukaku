@@ -136,9 +136,9 @@ export interface PluginRequirement {
 
 export class PluginError extends Error {
 	constructor(
-		readonly requiredFor: string,
-		readonly required: PluginRequirement,
-		readonly found?: NodeInfoPlugin
+		public readonly requiredFor: string,
+		public readonly required: PluginRequirement,
+		public readonly found?: NodeInfoPlugin
 	) {
 		super(`Plugin ${required.name}@${required.version} is required for ${requiredFor}, but ${found ? `found ${found.name}@${found.version}` : 'was not found'}`);
 		this.name = 'PluginError';
