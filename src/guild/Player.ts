@@ -178,7 +178,7 @@ export type PlayerEvents = {
  *			version: '^0.0.5'
  *		};
  *		public readonly name = 'high-pass';
- *		public readonly D = t<{
+ *		public readonly T = t<{
  *			cutoffFrequency: number;
  *			boostFactor: number;
  *		}>;
