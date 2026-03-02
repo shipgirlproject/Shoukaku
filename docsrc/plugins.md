@@ -82,13 +82,34 @@ A plugin filter is passed to `<Player>.getPluginFilter` and `<Player>.setPluginF
 
 You can also directly manipulate `<Player>.filters.pluginFilters` ***without*** type safety (not recommended).
 
-## Plugin WS Events
+## Plugin Events
 Plugin events must implement the `PluginEvent` interface with the following properties:
 - `pluginRequired`: plugin requirement
 - `name`: name of event
 - `T`: type of event object
 
-TODO: ADD EXAMPLE
+Example with [LavaLyrics](https://github.com/topi314/LavaLyrics) `LyricsLineEvent` event
+```ts
+export class LyricsLineEvent implements PluginEvent {
+	public readonly pluginRequired = {
+		name: 'lavalyrics-plugin',
+		version: '^1.1.0'
+	};
+
+	public readonly name = 'LyricsLineEvent';
+
+	public readonly T = t<{
+		lineIndex: number;
+		line: {
+			timestamp: number;
+			duration?: number;
+			line: string;
+			plugin: unknown;
+		};
+		skipped: boolean;
+	}>;
+}
+```
 
 A plugin event is passed to `onPluginEvent` with a callback. Multiple callbacks for the same event is executed sequentially in unknown order.
 
