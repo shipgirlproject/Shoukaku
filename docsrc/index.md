@@ -11,6 +11,10 @@ Automatically generated documentation for the *latest commit* on the ***master**
 
 API Documentation for specific versions and additional usage information can be found on the [guide](https://guide.shoukaku.shipgirl.moe/).
 
+> [!warning]
+> You must use Shoukaku version `4.3.0` or above to support Lavalink version `4.2.0` or above.
+> Check which version of Shoukaku is installed by running `npm ls shoukaku`.
+
 <p align="center">
     <img src="https://azurlane.netojuu.com/images/thumb/d/dc/ShoukakuWeddingWithoutBG.png/767px-ShoukakuWeddingWithoutBG.png"> 
 </p>
