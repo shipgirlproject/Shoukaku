@@ -1,7 +1,7 @@
 import { OpCodes, State } from '../Constants';
 import type { Node } from '../node/Node';
 import type { Exception, Track, UpdatePlayerInfo, UpdatePlayerOptions } from '../node/Rest';
-import { TypedEventEmitter } from '../Utils';
+import { PluginRequirement, TField, TReturnType, TypedEventEmitter, validatePluginRequirement } from '../Utils';
 import { Connection } from './Connection';
 
 export type TrackEndReason = 'finished' | 'loadFailed' | 'stopped' | 'replaced' | 'cleanup';
@@ -121,6 +121,8 @@ export interface FilterOptions {
 	distortion?: DistortionSettings | null;
 	channelMix?: ChannelMixSettings | null;
 	lowPass?: LowPassSettings | null;
+	// TODO: check this, im assuming null unsets everything?
+	pluginFilters?: Record<string, unknown> | null;
 }
 
 // Interfaces are not final, but types are, and therefore has an index signature
@@ -165,6 +167,74 @@ export type PlayerEvents = {
 };
 
 /**
+ * Plugin filters should implement this interface to use with {@link Player#setPluginFilter}
+ * 
+ * @example
+ * Example with [LavaDSPX](https://github.com/Devoxin/LavaDSPX-Plugin) `high-pass` filter
+ * ```
+ *	export class LavaDSPXHighPass implements PluginFilter {
+ *		public readonly pluginRequired = {
+ *			name: 'lavadspx-plugin',
+ *			version: '^0.0.5'
+ *		};
+ *		public readonly name = 'high-pass';
+ *		public readonly T = t<{
+ *			cutoffFrequency: number;
+ *			boostFactor: number;
+ *		}>;
+ *	}
+ * ```
+ */
+export interface PluginFilter extends TField {
+	/**
+	 * Plugin required by filter
+	 */
+	readonly pluginRequired?: PluginRequirement;
+	/**
+	 * Name of filter
+	 */
+	readonly name: string;
+}
+
+/**
+ * Plugin events should implement this interface to use with {@link Player#onPluginEvent}
+ * 
+ * @example
+ * Example with [LavaLyrics](https://github.com/topi314/LavaLyrics) `LyricsLineEvent` event
+ * ```
+ *	export class LyricsLineEvent implements PluginEvent {
+ *		public readonly pluginRequired = {
+ *			name: 'lavalyrics-plugin',
+ *			version: '^1.1.0'
+ *		};
+ * 
+ *		public readonly name = 'LyricsLineEvent';
+ * 
+ *		public readonly T = t<{
+ *			lineIndex: number;
+ *			line: {
+ *				timestamp: number;
+ *				duration?: number;
+ *				line: string;
+ *				plugin: unknown;
+ *			};
+ *			skipped: boolean;
+ *		}>;
+ *	}
+ *	```
+ */
+export interface PluginEvent extends TField {
+	/**
+	 * Plugin required by event
+	 */
+	readonly pluginRequired?: PluginRequirement;
+	/**
+	 * Name of event
+	 */
+	readonly name: string;
+}
+
+/**
  * Wrapper object around Lavalink
  */
 export class Player extends TypedEventEmitter<PlayerEvents> {
@@ -200,6 +270,9 @@ export class Player extends TypedEventEmitter<PlayerEvents> {
 	 * Filters on current track
 	 */
 	public filters: FilterOptions;
+
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	private pluginEvents: Record<string, Array<(data: any) => void> | undefined> = {};
 
 	constructor(guildId: string, node: Node) {
 		super();
@@ -393,6 +466,37 @@ export class Player extends TypedEventEmitter<PlayerEvents> {
 	}
 
 	/**
+	 * Get the value of a plugin defined filter
+	 * @param filter Plugin filter config (see {@link PluginFilter})
+	 * @returns Filter object as specified by the `D` function
+	 */
+	public getPluginFilter<
+		F extends PluginFilter,
+		D = TReturnType<F>
+	>(filter: F): D | undefined {
+		// TODO: should we check for plugins here? we shouldn't need to since it returns undefined
+		return this.filters.pluginFilters?.[filter.name] as D;
+	}
+
+	/**
+	 * Set a plugin defined filter
+	 * @param filter Plugin filter config (see {@link PluginFilter})
+	 * @param data Filter object as specified by the `D` function
+	 * @throws {@link PluginError} when plugin required by the filter is not satisfied by plugins on this node
+	 */
+	public async setPluginFilter<
+		F extends PluginFilter,
+		D = TReturnType<F>
+	>(filter: F, data?: D): Promise<void> {
+		// TODO: should we check for plugins (name, version) or the filters list instead?
+		// TODO: should we cache the plugin check somehow?
+		if (filter.pluginRequired)
+			validatePluginRequirement(`filter ${filter.name}`, filter.pluginRequired, await this.node.rest.client._getNodePlugins());
+
+		return this.setFilters({ pluginFilters: { [filter.name]: data ?? null }});
+	}
+
+	/**
 	 * Change the all filter settings applied to the currently playing track
 	 * @param filters An object that conforms to FilterOptions that defines all filters to apply/modify
 	 */
@@ -414,7 +518,8 @@ export class Player extends TypedEventEmitter<PlayerEvents> {
 			rotation: null,
 			distortion: null,
 			channelMix: null,
-			lowPass: null
+			lowPass: null,
+			pluginFilters: null
 		});
 	}
 
@@ -480,6 +585,7 @@ export class Player extends TypedEventEmitter<PlayerEvents> {
 		this.volume = 100;
 		this.position = 0;
 		this.filters = {};
+		this.pluginEvents = {};
 	}
 
 	/**
@@ -534,12 +640,39 @@ export class Player extends TypedEventEmitter<PlayerEvents> {
 			case PlayerEventType.WEBSOCKET_CLOSED_EVENT:
 				this.emit('closed', json);
 				break;
-			default:
-				this.node.manager.emit(
-					'debug',
-					this.node.name,
-					`[Player] -> [Node] : Unknown Player Event Type, Data => ${JSON.stringify(json)}`
-				);
+			default: {
+				// TODO: fix types for json
+				const { type } = json as { type: string };
+				if (type in this.pluginEvents) {
+					// these run sequentially in unknown order (bad?)
+					// TODO: should we check if this.pluginEvents[type] is interable? will throw TypeError
+					for (const callback of this.pluginEvents[type]!) {
+						try {
+							callback(json);
+						} catch {
+							// TODO: should we rethrow error here?
+						}
+					}
+				} else {
+					this.node.manager.emit(
+						'debug',
+						this.node.name,
+						`[Player] -> [Node] : Unknown Player Event Type, Data => ${JSON.stringify(json)}`
+					);
+				}
+			}
 		}
+	}
+
+	public onPluginEvent<
+		E extends PluginEvent,
+		D = TReturnType<E> & PlayerEvent & { type: E['name'] }
+	>(plugin: PluginEvent, callback: (data: D) => void) {
+		// TODO: insert plugin check here maybe? but its async
+		// plugin event callback is never called if LL does not
+		// send event so may cause confusion
+
+		this.pluginEvents[plugin.name] ??= [];
+		this.pluginEvents[plugin.name]?.push(callback);
 	}
 }
