@@ -31,8 +31,8 @@
     "weeb-library"
   ],
   "engines": {
-    "node": ">=18.0.0",
-    "npm": ">=7.0.0"
+    "node": ">=22.4.0",
+    "npm": ">=10.0.0"
   },
   "author": "Saya",
   "license": "MIT",
@@ -40,13 +40,9 @@
     "type": "git",
     "url": "https://github.com/shipgirlproject/Shoukaku.git"
   },
-  "dependencies": {
-    "ws": "^8.19.0"
-  },
   "devDependencies": {
     "@shipgirl/eslint-config": "^0.5.0",
     "@types/node": "^25.2.3",
-    "@types/ws": "^8.18.1",
     "eslint": "^9.39.2",
     "tsup": "^8.5.1",
     "typedoc": "^0.28.17",
