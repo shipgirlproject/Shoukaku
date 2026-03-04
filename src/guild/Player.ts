@@ -4,122 +4,411 @@ import type { Exception, Track, UpdatePlayerInfo, UpdatePlayerOptions } from '..
 import { TypedEventEmitter } from '../Utils';
 import { Connection } from './Connection';
 
+/**
+ * Why the track ended
+ * @see https://lavalink.dev/api/websocket#track-end-reason
+ */
 export type TrackEndReason = 'finished' | 'loadFailed' | 'stopped' | 'replaced' | 'cleanup';
 export type PlayOptions = Omit<UpdatePlayerOptions, 'filters' | 'voice'>;
 export type ResumeOptions = Omit<UpdatePlayerOptions, 'track' | 'filters' | 'voice'>;
 
+/**
+ * Type of event dispatched
+ * @see https://lavalink.dev/api/websocket#event-types
+ */
 export enum PlayerEventType {
+	/**
+     * Dispatched when a track starts playing
+     */
 	TRACK_START_EVENT = 'TrackStartEvent',
+	/**
+     * Dispatched when a track ends
+     */
 	TRACK_END_EVENT = 'TrackEndEvent',
+	/**
+     * Dispatched when a track throws an exception
+     */
 	TRACK_EXCEPTION_EVENT = 'TrackExceptionEvent',
+	/**
+     * Dispatched when a track gets stuck while playing
+     */
 	TRACK_STUCK_EVENT = 'TrackStuckEvent',
+	/**
+     * Dispatched when the websocket connection to Discord voice servers is closed
+     */
 	WEBSOCKET_CLOSED_EVENT = 'WebSocketClosedEvent'
 }
 
+/**
+ * Equalizer configuration for each band
+ * @see https://lavalink.dev/api/rest.html#equalizer
+ */
 export interface Band {
+	/**
+     * The band, there are 15 bands (`0`-`14`) that can be changed
+     *
+     * `0` = 25 Hz
+     *
+     * `1` = 40 Hz
+     *
+     * `2` = 63 Hz
+     *
+     * `3` = 100 Hz
+     *
+     * `4` = 160 Hz
+     *
+     * `5` = 250 Hz
+     *
+     * `6` = 400 Hz
+     *
+     * `7` = 630 Hz
+     *
+     * `8` = 1000 Hz
+     *
+     * `9` = 1600 Hz
+     *
+     * `10` = 2500 Hz
+     *
+     * `11` = 4000 Hz
+     *
+     * `12` = 6300 Hz
+     *
+     * `13` = 10000 Hz
+     *
+     * `14` = 16000 Hz
+     */
 	band: number;
+	/**
+     * Multiplier for each band. Valid values range from `-0.25` to `1.0`, 
+     * where `-0.25` means the given band is completely muted, 
+     * and `0.25` means it is doubled. It can also chanege volume of output.
+     */
 	gain: number;
 }
 
+/**
+ * Uses equalization to eliminate part of a band, usually targeting vocals
+ * @see https://lavalink.dev/api/rest.html#karaoke
+ */
 export interface KaraokeSettings {
+	/**
+     * Level, minimum `0` and maximum `1.0` where `0.0` is no effect and `1.0` is full effect
+     */
 	level?: number;
+	/**
+     * Mono level, minimum `0` and maximum `1.0` where `0.0` is no effect and `1.0` is full effect
+     */
 	monoLevel?: number;
+	/**
+     * Filter band (in Hz)
+     */
 	filterBand?: number;
+	/**
+     * Filter width
+     */
 	filterWidth?: number;
 }
 
+/**
+ * Changes the speed, pitch, and rate
+ * @see https://lavalink.dev/api/rest.html#timescale
+ */
 export interface TimescaleSettings {
+	/**
+     * Playback speed, minimum `0.0`, default `1.0`
+    */
 	speed?: number;
+	/**
+     * Pitch, minimum `0.0`, default `1.0`
+    */
 	pitch?: number;
+	/**
+     * Rate, minimum `0.0`, default `1.0`
+    */
 	rate?: number;
 }
 
+/**
+ * Controls tremolo or vibrato
+ * @see https://lavalink.dev/api/rest.html#tremolo
+ * @see https://lavalink.dev/api/rest.html#vibrato
+ */
 export interface FreqSettings {
+	/**
+     * Frequency, minimum `0.0` (and maximum `14.0` for vibrato)
+     */
 	frequency?: number;
+	/**
+     * Tremolo/vibrato depth, minimum `0.0`, maximum `1.0`
+     */
 	depth?: number;
 }
 
+/**
+ * Rotates the sound around the stereo channels/user headphones (aka Audio Panning)
+ * @see https://lavalink.dev/api/rest.html#rotation
+ */
 export interface RotationSettings {
+	/**
+     * Frequency of the audio rotating around the listener in Hz
+     */
 	rotationHz?: number;
 }
 
+/**
+ * Distortion effect
+ * @see https://lavalink.dev/api/rest.html#distortion
+ * @see https://github.com/lavalink-devs/lavadsp/blob/master/src/main/java/com/github/natanbc/lavadsp/distortion/DistortionConverter.java#L62
+ */
 export interface DistortionSettings {
+	/**
+     * Sine offset
+     */
 	sinOffset?: number;
+	/**
+     * Sine scale (multiplier)
+     */
 	sinScale?: number;
+	/**
+     * Cosine offset
+     */
 	cosOffset?: number;
+	/**
+     * Cosine scale (multiplier)
+     */
 	cosScale?: number;
+	/**
+     * Tangent offset
+     */
 	tanOffset?: number;
+	/**
+     * Tangent scale (multiplier)
+     */
 	tanScale?: number;
+	/**
+     * Input offset
+     */
 	offset?: number;
+	/**
+     * Input scale (multiplier)
+     */
 	scale?: number;
 }
 
+/**
+ * Mixes both channels (left and right), with a configurable factor 
+ * on how much each channel affects the other, setting all factors `0.5` 
+ * means both channels get the same audio
+ * @see https://lavalink.dev/api/rest.html#channel-mix
+ */
 export interface ChannelMixSettings {
+	/**
+     * Left to left channel mix factor, minimum `0.0`, maximum `1.0`
+     */
 	leftToLeft?: number;
+	/**
+     * Left to right channel mix factor, minimum `0.0`, maximum `1.0`
+     */
 	leftToRight?: number;
+	/**
+     * Right to left channel mix factor, minimum `0.0`, maximum `1.0`
+     */
 	rightToLeft?: number;
+	/**
+     * Right to right channel mix factor, minimum `0.0`, maximum `1.0`
+     */
 	rightToRight?: number;
 }
 
+/**
+ * Higher frequencies get suppressed, while lower frequencies pass 
+ * through this filter, thus the name low pass, any smoothing values 
+ * equal to or less than `1.0` will disable the filter
+ * @see https://lavalink.dev/api/rest.html#low-pass
+ */
 export interface LowPassSettings {
+	/**
+     * Smoothing factor, minimum `1.0`, values less than `1.0` disables the filter
+     */
 	smoothing?: number;
 }
 
+/**
+ * Server dispatched an event
+ * @see https://lavalink.dev/api/websocket.html#event-op
+ */
 export interface PlayerEvent {
+	/**
+     * Type of event
+     */
 	op: OpCodes.EVENT;
+	/**
+     * Discord guild id
+     */
 	guildId: string;
 }
 
+/**
+ * Dispatched when a track starts playing
+ * @see https://lavalink.dev/api/websocket.html#trackstartevent
+ */
 export interface TrackStartEvent extends PlayerEvent {
 	type: PlayerEventType.TRACK_START_EVENT;
+	/**
+     * Track that started playing
+     */
 	track: Track;
 }
 
+/**
+ * Dispatched when a track ends
+ * @see https://lavalink.dev/api/websocket.html#trackendevent
+ */
 export interface TrackEndEvent extends PlayerEvent {
 	type: PlayerEventType.TRACK_END_EVENT;
+	/**
+     * Track that ended playing
+     */
 	track: Track;
+	/**
+     * Why the track ended
+     */
 	reason: TrackEndReason;
 }
 
+/**
+ * Dispatched when a track gets stuck while playing
+ * @see https://lavalink.dev/api/websocket#trackstuckevent
+ */
 export interface TrackStuckEvent extends PlayerEvent {
 	type: PlayerEventType.TRACK_STUCK_EVENT;
+	/**
+     * Track that got stuck
+     */
 	track: Track;
+	/**
+     * Threshold in milliseconds that was exceeded
+     */
 	thresholdMs: number;
 }
 
+/**
+ * Dispatched when a track throws an exception
+ * @see https://lavalink.dev/api/websocket#trackexceptionevent
+ */
 export interface TrackExceptionEvent extends PlayerEvent {
 	type: PlayerEventType.TRACK_EXCEPTION_EVENT;
+	/**
+     * The track that threw the exception
+     */
+	track: Track;
+	/**
+     * The occurred exception
+     */
 	exception: Exception;
 }
 
+/**
+ * Dispatched when an audio WebSocket (to Discord) is closed, this can 
+ * happen for various reasons (normal and abnormal), e.g. when using 
+ * an expired voice server update, 4xxx codes are usually bad
+ * @see https://lavalink.dev/api/websocket#websocketclosedevent
+ * @see https://discord.com/developers/docs/topics/opcodes-and-status-codes#voice-voice-close-event-codes
+ */
 export interface WebSocketClosedEvent extends PlayerEvent {
 	type: PlayerEventType.WEBSOCKET_CLOSED_EVENT;
+	/**
+     * Discord close event code
+     * @see https://discord.com/developers/docs/topics/opcodes-and-status-codes#voice-voice-close-event-codes
+     */
 	code: number;
+	/**
+     * Whether the connection was closed by Discord
+     */
 	byRemote: boolean;
+	/**
+     * Why the connection was closed
+     */
 	reason: string;
 }
 
+/**
+ * Dispatched by Lavalink at configured interval with the current state of the player
+ * @see https://lavalink.dev/api/websocket#player-update-op
+ */
 export interface PlayerUpdate {
 	op: OpCodes.PLAYER_UPDATE;
+	/**
+     * State of player
+     */
 	state: {
+		/**
+		 * Whether Lavalink is connected to the voice gateway
+		 */
 		connected: boolean;
+		/**
+		 * The position of the track in milliseconds
+		 */
 		position: number;
+		/**
+		 * Unix timestamp in milliseconds
+		 */
 		time: number;
+		/**
+		 * The ping of the node to the Discord voice server in milliseconds (`-1` if not connected)
+		 */
 		ping: number;
 	};
+	/**
+     * Guild id of the player
+     */
 	guildId: string;
 }
 
+/**
+ * Lavalink filters
+ * @see https://lavalink.dev/api/rest.html#filters
+ */
 export interface FilterOptions {
+	/**
+     * Adjusts the player volume from `0.0` to `5.0`, where `1.0` is `100%`. Values >1.0 may cause clipping
+     */
 	volume?: number;
+	/**
+     * Adjusts 15 different bands
+     */
 	equalizer?: Band[];
+	/**
+     * Eliminates part of a band, usually targeting vocals
+     */
 	karaoke?: KaraokeSettings | null;
+	/**
+     * Changes the speed, pitch, and rate
+     */
 	timescale?: TimescaleSettings | null;
+	/**
+     * Creates a shuddering effect, where the volume quickly oscillates
+     */
 	tremolo?: FreqSettings | null;
+	/**
+     * Creates a shuddering effect, where the pitch quickly oscillates
+     */
 	vibrato?: FreqSettings | null;
+	/**
+     * Rotates the audio around the stereo channels/user headphones (aka Audio Panning)
+     */
 	rotation?: RotationSettings | null;
+	/**
+     * Distorts the audio
+     */
 	distortion?: DistortionSettings | null;
+	/**
+     * Mixes both channels (left and right)
+     */
 	channelMix?: ChannelMixSettings | null;
+	/**
+     * Filters higher frequencies
+     */
 	lowPass?: LowPassSettings | null;
 }
 

@@ -13,22 +13,55 @@ import type { NodeOption, Shoukaku, ShoukakuEvents } from '../Shoukaku';
 import { TypedEventEmitter, wait } from '../Utils';
 import { Rest } from './Rest';
 
+/**
+ * Dispatched by Lavalink upon successful connection and authorization
+ * @see https://lavalink.dev/api/websocket.html#ready-op
+ */
 export interface Ready {
 	op: OpCodes.READY;
+	/**
+     * Whether this session was resumed
+     */
 	resumed: boolean;
+	/**
+     * The Lavalink session ID of this connection (not to be confused with a Discord voice session id)
+     */
 	sessionId: string;
 }
 
 export interface NodeMemory {
+	/**
+	 * Amount of reservable memory in bytes
+	 */
 	reservable: number;
+	/**
+	 * Amount of used memory in bytes
+	 */
 	used: number;
+	/**
+	 * Amount of free memory in bytes
+	 */
 	free: number;
+	/**
+	 * Amount of reservable memory in bytes
+	 */
 	allocated: number;
 }
 
 export interface NodeFrameStats {
+	/**
+	 * Amount of frames sent to Discord
+	 */
 	sent: number;
+	/**
+	 * Difference between sent frames and the expected amount of frames, the expected 
+	 * amount of frames is 3000 (1 every 20 ms) per player, a negative deficit means 
+	 * too many frames were sent, a positive deficit means not enough frames were sent
+	 */
 	deficit: number;
+	/**
+	 * Amount of frames that were nulled
+	 */
 	nulled: number;
 }
 
@@ -38,44 +71,140 @@ export interface NodeCpu {
 	lavalinkLoad: number;
 }
 
+/**
+ * Statistics for Lavalink Node
+ * @see https://lavalink.dev/api/websocket.html#stats-object
+ */
 export interface Stats {
 	op: OpCodes.STATS;
+	/**
+     * Amount of players connected to the node
+     */
 	players: number;
+	/**
+     * Amount of players playing a track
+     */
 	playingPlayers: number;
+	/**
+     * Memory statistics
+     */
 	memory: NodeMemory;
+	/**
+     * Frame statistics, null if the node has no players
+     */
 	frameStats: NodeFrameStats | null;
+	/**
+     * CPU statistics
+     */
 	cpu: NodeCpu;
+	/**
+     * Uptime of the node in milliseconds
+     */
 	uptime: number;
 }
 
+/**
+ * Parsed Semantic Versioning 2.0.0
+ * @see https://semver.org/spec/v2.0.0.html
+ * @see https://lavalink.dev/api/rest.html#version-object
+ */
 export interface NodeInfoVersion {
+	/**
+     * Full version string
+     */
 	semver: string;
+	/**
+     * Major version
+     */
 	major: number;
+	/**
+     * Minor version
+     */
 	minor: number;
+	/**
+     * Patch version
+     */
 	patch: number;
+	/**
+     * Pre-release version as a dot separated list of identifiers
+     */
 	preRelease?: string;
+	/**
+     * Build metadata as a dot separated list of identifiers
+     */
 	build?: string;
 }
 
+/**
+ * Lavalink Git information
+ * @see https://lavalink.dev/api/rest.html#git-object
+ */
 export interface NodeInfoGit {
+	/**
+     * Branch of build
+     */
 	branch: string;
+	/**
+     * Commit hash of build
+     */
 	commit: string;
+	/**
+     * Millisecond unix timestamp for when the commit was created
+     */
 	commitTime: number;
 }
 
+/**
+ * Lavalink plugins
+ * @see https://lavalink.dev/api/rest.html#plugin-object
+ */
 export interface NodeInfoPlugin {
+	/**
+     * Name of the plugin
+     */
 	name: string;
+	/**
+     * Version of the plugin
+     */
 	version: string;
 }
 
+/**
+ * Node information
+ * @see https://lavalink.dev/api/rest.html#get-lavalink-info
+ */
 export interface NodeInfo {
+	/**
+     * Version of this Lavalink server
+     */
 	version: NodeInfoVersion;
+	/**
+     * Millisecond unix timestamp when the Lavalink JAR was built
+     */
 	buildTime: number;
+	/**
+     * Git information of this Lavalink server
+     */
 	git: NodeInfoGit;
+	/**
+     * JVM version this Lavalink server runs on
+     */
 	jvm: string;
+	/**
+     * Lavaplayer version being used by this server
+     */
 	lavaplayer: string;
+	/**
+     * Enabled source managers for this server
+     */
 	sourceManagers: string[];
+	/**
+     * Enabled filters for this server
+     */
 	filters: string[];
+	/**
+     * Enabled plugins for this server
+     */
 	plugins: NodeInfoPlugin[];
 }
 
