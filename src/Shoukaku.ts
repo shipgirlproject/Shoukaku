@@ -38,6 +38,10 @@ export interface NodeOption {
      * Name of the Lavalink node group
      */
 	group?: string;
+	/**
+     * The region of this Lavalink node (e.g., 'us-east', 'europe', 'japan')
+     */
+	region?: string;
 }
 
 export interface ShoukakuOptions {
@@ -95,44 +99,13 @@ export interface VoiceChannelOptions {
 	mute?: boolean;
 }
 
-// Interfaces are not final, but types are, and therefore has an index signature
-// https://stackoverflow.com/a/64970740
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type ShoukakuEvents = {
-	/**
-     * Emitted when reconnect tries are occurring and how many tries are left
-     * @eventProperty
-     */
 	'reconnecting': [name: string, reconnectsLeft: number, reconnectInterval: number];
-	/**
-     * Emitted when data useful for debugging is produced
-     * @eventProperty
-     */
 	'debug': [name: string, info: string];
-	/**
-     * Emitted when an error occurs
-     * @eventProperty
-     */
 	'error': [name: string, error: Error];
-	/**
-     * Emitted when Shoukaku is ready to receive operations
-     * @eventProperty
-     */
 	'ready': [name: string, lavalinkResume: boolean, libraryResume: boolean];
-	/**
-     * Emitted when a websocket connection to Lavalink closes
-     * @eventProperty
-     */
 	'close': [name: string, code: number, reason: string];
-	/**
-     * Emitted when a websocket connection to Lavalink disconnects
-     * @eventProperty
-     */
 	'disconnect': [name: string, count: number];
-	/**
-     * Emitted when a raw message is received from Lavalink
-     * @eventProperty
-     */
 	'raw': [name: string, json: unknown];
 };
 
@@ -140,45 +113,13 @@ export type ShoukakuEvents = {
  * Main Shoukaku class
  */
 export class Shoukaku extends TypedEventEmitter<ShoukakuEvents> {
-	/**
-     * Discord library connector
-     */
 	public readonly connector: Connector;
-	/**
-     * Shoukaku options
-     */
 	public readonly options: Required<ShoukakuOptions>;
-	/**
-     * Connected Lavalink nodes
-     */
 	public readonly nodes: Map<string, Node>;
-	/**
-     * Voice connections being handled
-     */
 	public readonly connections: Map<string, Connection>;
-	/**
-     * Players being handled
-     */
 	public readonly players: Map<string, Player>;
-	/**
-     * Shoukaku instance identifier
-     */
 	public id: string | null;
-	/**
-     * @param connector A Discord library connector
-     * @param nodes An array that conforms to the NodeOption type that specifies nodes to connect to
-     * @param options Options to pass to create this Shoukaku instance
-     * @param options.resume Whether to resume a connection on disconnect to Lavalink (Server Side) (Note: DOES NOT RESUME WHEN THE LAVALINK SERVER DIES)
-     * @param options.resumeTimeout Time to wait before lavalink starts to destroy the players of the disconnected client
-     * @param options.resumeByLibrary Whether to resume the players by doing it in the library side (Client Side) (Note: TRIES TO RESUME REGARDLESS OF WHAT HAPPENED ON A LAVALINK SERVER)
-     * @param options.reconnectTries Number of times to try and reconnect to Lavalink before giving up
-     * @param options.reconnectInterval Timeout before trying to reconnect
-     * @param options.restTimeout Time to wait for a response from the Lavalink REST API before giving up
-     * @param options.moveOnDisconnect Whether to move players to a different Lavalink node when a node disconnects
-     * @param options.userAgent User Agent to use when making requests to Lavalink
-     * @param options.structures Custom structures for shoukaku to use
-     * @param options.nodeResolver Used if you have custom lavalink node resolving
-     */
+
 	constructor(connector: Connector, nodes: NodeOption[], options: ShoukakuOptions = {}) {
 		super();
 		this.connector = connector.set(this);
@@ -190,23 +131,10 @@ export class Shoukaku extends TypedEventEmitter<ShoukakuEvents> {
 		this.connector.listen(nodes);
 	}
 
-	/**
-     * Gets an ideal node based on the nodeResolver you provided
-     * @param connection Optional connection class for ideal node selection, if you use it
-     * @returns An ideal node for you to do things with
-     */
 	public getIdealNode(connection?: Connection): Node | undefined {
 		return this.options.nodeResolver(this.nodes, connection);
 	}
 
-	/**
-     * Add a Lavalink node to the pool of available nodes
-     * @param options.name Name of this node
-     * @param options.url URL of Lavalink
-     * @param options.auth Credentials to access Lavalink
-     * @param options.secure Whether to use secure protocols or not
-     * @param options.group Group of this node
-     */
 	public addNode(options: NodeOption): void {
 		const node = new Node(this, options);
 		node.on('debug', (...args) => this.emit('debug', node.name, ...args));
@@ -220,11 +148,6 @@ export class Shoukaku extends TypedEventEmitter<ShoukakuEvents> {
 		this.nodes.set(node.name, node);
 	}
 
-	/**
-     * Remove a Lavalink node from the pool of available nodes
-     * @param name Name of the node
-     * @param reason Reason of removing the node
-     */
 	public removeNode(name: string, reason = 'Remove node executed'): void {
 		const node = this.nodes.get(name);
 		if (!node) throw new Error('The node name you specified doesn\'t exist');
@@ -232,15 +155,6 @@ export class Shoukaku extends TypedEventEmitter<ShoukakuEvents> {
 		this.nodes.delete(name);
 	}
 
-	/**
-     * Joins a voice channel
-     * @param options.guildId GuildId in which the ChannelId of the voice channel is located
-     * @param options.shardId ShardId to track where this should send on sharded websockets, put 0 if you are unsharded
-     * @param options.channelId ChannelId of the voice channel you want to connect to
-     * @param options.deaf Optional boolean value to specify whether to deafen or undeafen the current bot user
-     * @param options.mute Optional boolean value to specify whether to mute or unmute the current bot user
-     * @returns The created player
-     */
 	public async joinVoiceChannel(options: VoiceChannelOptions): Promise<Player> {
 		if (this.connections.has(options.guildId))
 			throw new Error('This guild already have an existing connection');
@@ -272,11 +186,6 @@ export class Shoukaku extends TypedEventEmitter<ShoukakuEvents> {
 		}
 	}
 
-	/**
-     * Leaves a voice channel
-     * @param guildId The id of the guild you want to delete
-     * @returns The destroyed / disconnected player or undefined if none
-     */
 	public async leaveVoiceChannel(guildId: string): Promise<void> {
 		const connection = this.connections.get(guildId);
 		if (connection) {
