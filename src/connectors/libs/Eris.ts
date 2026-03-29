@@ -13,8 +13,13 @@ export class Eris extends Connector {
 	}
 	// Listen attaches the event listener to the library you are using
 	public listen(nodes: NodeOption[]): void {
+		// by the time the code initialises shoukaku the ready event has been most likely already fired (if any sharding library is used)
+		if (this.client.ready){
+			this.ready(nodes);
+		} else {
 		// Only attach to ready event once, refer to your library for its ready event
-		this.client.once('ready', () => this.ready(nodes));
+			this.client.once('ready', () => this.ready(nodes));
+		}
 		// Attach to the raw websocket event, this event must be 1:1 on spec with dapi (most libs implement this)
 		this.client.on('rawWS', (packet: any) => this.raw(packet));
 	}
