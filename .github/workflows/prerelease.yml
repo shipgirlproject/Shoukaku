@@ -13,19 +13,25 @@ jobs:
   publish:
     name: Publish Prerelease
     runs-on: ubuntu-latest
+
     permissions:
       contents: read
+
     steps:
       - uses: actions/checkout@v6
         with:
           persist-credentials: false
+
       - name: Use Node LTS
         uses: actions/setup-node@v6
         with:
           node-version: lts/*
-          cache: npm
-          cache-dependency-path: package-lock.json
-      - name: Install Depedencies
-        run: npm ci
+          cache: pnpm
+
+      - uses: pnpm/action-setup@v6
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
       - name: Publish to pkg.pr.new
-        run: npx pkg-pr-new publish
+        run: pnpm dlx pkg-pr-new publish
