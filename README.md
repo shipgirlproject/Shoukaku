@@ -49,19 +49,19 @@
 new Shoukaku(new Connectors.DiscordJS(client), Nodes, Options);
 ```
 
-| Option                 | Type                   | Default  | Description                                                                                      | Notes                    |
-| ---------------------- | ---------------------- | -------- | ------------------------------------------------------------------------------------------------ | ------------------------ |
-| resume                 | boolean                | false    | If you want to enable resuming when your connection to lavalink disconnects |                          |
-| resumeTimeout          | number                 | 30       | Timeout before lavalink destroys the players on a disconnect                                     | In seconds               |
-| resumeByLibrary        | boolean                | false    | If you want to force resume players no matter what even if it's not resumable by lavalink        |                          |
-| reconnectTries         | number                 | 3        | Number of tries to reconnect to lavalink before disconnecting                                    |                          |
-| reconnectInterval      | number                 | 5        | Timeout between reconnects                                                                       | In seconds               |
-| restTimeout            | number                 | 60       | Maximum amount of time to wait for rest lavalink api requests                                    | In seconds               |
-| moveOnDisconnect       | boolean                | false    | Whether to move players to a different lavalink node when a node disconnects                     |                          |
-| userAgent              | string                 | (auto)   | Changes the user-agent used for lavalink requests                                                | Not recommeded to change |
-| structures             | Object{rest?, player?} | {}       | Custom structures for shoukaku to use                                                            |                          |
-| voiceConnectionTimeout | number                 | 15       | Maximum amount of time to wait for a join voice channel command                                  | In seconds               |
-| nodeResolver           | function               | function | Custom node resolver if you want to have your own method of getting the ideal node               |                          |
+| Option                 | Type                   | Default  | Description                                                                               | Notes                    |
+| ---------------------- | ---------------------- | -------- | ----------------------------------------------------------------------------------------- | ------------------------ |
+| resume                 | boolean                | false    | If you want to enable resuming when your connection to lavalink disconnects               |                          |
+| resumeTimeout          | number                 | 30       | Timeout before lavalink destroys the players on a disconnect                              | In seconds               |
+| resumeByLibrary        | boolean                | false    | If you want to force resume players no matter what even if it's not resumable by lavalink |                          |
+| reconnectTries         | number                 | 3        | Number of tries to reconnect to lavalink before disconnecting                             |                          |
+| reconnectInterval      | number                 | 5        | Timeout between reconnects                                                                | In seconds               |
+| restTimeout            | number                 | 60       | Maximum amount of time to wait for rest lavalink api requests                             | In seconds               |
+| moveOnDisconnect       | boolean                | false    | Whether to move players to a different lavalink node when a node disconnects              |                          |
+| userAgent              | string                 | (auto)   | Changes the user-agent used for lavalink requests                                         | Not recommeded to change |
+| structures             | Object{rest?, player?} | {}       | Custom structures for shoukaku to use                                                     |                          |
+| voiceConnectionTimeout | number                 | 15       | Maximum amount of time to wait for a join voice channel command                           | In seconds               |
+| nodeResolver           | function               | function | Custom node resolver if you want to have your own method of getting the ideal node        |                          |
 
 ### Wrappers
 

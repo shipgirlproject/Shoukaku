@@ -4,7 +4,6 @@
 node_modules/
 dist/
 docs/
-pnpm-lock.yaml
 yarn.lock
 yarn-debug.log*
 yarn-error.log*
