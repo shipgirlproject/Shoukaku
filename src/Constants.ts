@@ -1,30 +1,30 @@
-import Info from '../package.json';
-import type { NodeOption, ShoukakuOptions } from './Shoukaku';
+import Info from "../package.json";
+import type { NodeOption, ShoukakuOptions } from "./Shoukaku.js";
 
 export enum State {
 	CONNECTING,
 	CONNECTED,
 	DISCONNECTING,
-	DISCONNECTED
+	DISCONNECTED,
 }
 
 export enum VoiceState {
 	SESSION_READY,
 	SESSION_ID_MISSING,
 	SESSION_ENDPOINT_MISSING,
-	SESSION_FAILED_UPDATE
+	SESSION_FAILED_UPDATE,
 }
 
 export enum OpCodes {
-	PLAYER_UPDATE = 'playerUpdate',
-	STATS = 'stats',
-	EVENT = 'event',
-	READY = 'ready'
+	EVENT = "event",
+	PLAYER_UPDATE = "playerUpdate",
+	READY = "ready",
+	STATS = "stats",
 }
 
 export const Versions = {
 	REST_VERSION: 4,
-	WEBSOCKET_VERSION: 4
+	WEBSOCKET_VERSION: 4,
 };
 
 export const ShoukakuDefaults: Required<ShoukakuOptions> = {
@@ -35,21 +35,22 @@ export const ShoukakuDefaults: Required<ShoukakuOptions> = {
 	reconnectInterval: 5,
 	restTimeout: 60,
 	moveOnDisconnect: false,
-	userAgent: 'Discord Bot/unknown (https://github.com/shipgirlproject/Shoukaku.git)',
+	userAgent: "Discord Bot/unknown (https://github.com/shipgirlproject/Shoukaku.git)",
 	structures: {},
 	voiceConnectionTimeout: 15,
-	nodeResolver: (nodes) => [ ...nodes.values() ]
-		.filter(node => node.state === State.CONNECTED)
-		.sort((a, b) => a.penalties - b.penalties)
-		.shift()
+	nodeResolver: (nodes) =>
+		[...nodes.values()]
+			.filter((node) => node.state === State.CONNECTED)
+			.sort((a, b) => a.penalties - b.penalties)
+			.shift(),
 };
 
 export const ShoukakuClientInfo = `${Info.name}/${Info.version} (${Info.repository.url})`;
 
 export const NodeDefaults: NodeOption = {
-	name: 'Default',
-	url: '',
-	auth: '',
+	name: "Default",
+	url: "",
+	auth: "",
 	secure: false,
-	group: undefined
+	group: undefined,
 };
