@@ -198,7 +198,7 @@ export class Connection extends EventEmitter {
 		this.channelId = channel_id ?? null;
 
 		if (this.channelId && this.lastChannelId !== this.channelId) {
-			this.debug(`[Voice] <- [Discord] : Channel Moved | Old Channel: ${this.channelId} Guild: ${this.guildId}`);
+			this.debug(`[Voice] <- [Discord] : Channel Moved | Old Channel: ${this.lastChannelId} Guild: ${this.guildId}`);
 		}
 
 		if (!this.channelId) {
