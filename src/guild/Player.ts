@@ -273,15 +273,43 @@ export class Player extends TypedEventEmitter<PlayerEvents> {
 			lastNode = this.node.manager.getIdealNode(connection);
 		}
 
-		await this.destroy();
+		try {
+			await this.destroy();
+		} catch (error) {
+			this.node.manager.emit(
+				"debug",
+				this.node.name,
+				`[Player] -> [Move] : destroy() on old node failed, continuing move anyway: ${(error as Error).message}`,
+			);
+		}
 
 		try {
 			this.node = node;
 			await this.resume();
 			return true;
-		} catch {
-			this.node = lastNode!;
-			await this.resume();
+		} catch (error) {
+			this.node.manager.emit(
+				"debug",
+				node.name,
+				`[Player] -> [Move] : resume() on new node failed: ${(error as Error).message}`,
+			);
+
+			if (!lastNode) {
+				return false;
+			}
+
+			this.node = lastNode;
+
+			try {
+				await this.resume();
+			} catch (fallbackError) {
+				this.node.manager.emit(
+					"debug",
+					lastNode.name,
+					`[Player] -> [Move] : fallback resume() also failed: ${(fallbackError as Error).message}`,
+				);
+			}
+
 			return false;
 		}
 	}
