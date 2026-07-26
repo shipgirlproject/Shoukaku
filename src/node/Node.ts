@@ -249,6 +249,7 @@ export class Node extends TypedEventEmitter<NodeEvents> {
 		for (this.reconnects = 0; this.reconnects < this.manager.options.reconnectTries; this.reconnects++) {
 			try {
 				this.ws = await createConnection();
+				connectError = undefined;
 				break;
 			} catch (error) {
 				this.emit('reconnecting', this.manager.options.reconnectTries - this.reconnects, this.manager.options.reconnectInterval);
