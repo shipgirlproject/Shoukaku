@@ -1,58 +1,84 @@
-import { EventEmitter } from 'node:events';
+import { EventEmitter } from "node:events";
+import { setTimeout } from "node:timers";
 
 // https://stackoverflow.com/a/67244127
-export abstract class TypedEventEmitter<T extends Record<string, unknown[]>> extends EventEmitter {
-	protected constructor() {
+export abstract class TypedEventEmitter<TEvents extends Record<string, unknown[]>> extends EventEmitter {
+	public constructor() {
 		super();
 	}
 
-	on<K extends Extract<keyof T, string> | symbol>(eventName: K, listener: (...args: T[Extract<K, string>]) => void): this {
+	public override on<TEvent extends Extract<keyof TEvents, string> | symbol>(
+		eventName: TEvent,
+		listener: (...args: TEvents[Extract<TEvent, string>]) => void,
+	): this {
 		return super.on(eventName, listener);
 	}
 
-	once<K extends Extract<keyof T, string> | symbol>(eventName: K, listener: (...args: T[Extract<K, string>]) => void): this {
+	public override once<TEvent extends Extract<keyof TEvents, string> | symbol>(
+		eventName: TEvent,
+		listener: (...args: TEvents[Extract<TEvent, string>]) => void,
+	): this {
 		return super.once(eventName, listener);
 	}
 
-	off<K extends Extract<keyof T, string> | symbol>(eventName: K, listener: (...args: T[Extract<K, string>]) => void): this {
+	public override off<TEvent extends Extract<keyof TEvents, string> | symbol>(
+		eventName: TEvent,
+		listener: (...args: TEvents[Extract<TEvent, string>]) => void,
+	): this {
 		return super.off(eventName, listener);
 	}
 
-	emit<K extends Extract<keyof T, string> | symbol>(eventName: K, ...args: T[Extract<K, string>]): boolean {
+	public override emit<TEvent extends Extract<keyof TEvents, string> | symbol>(
+		eventName: TEvent,
+		...args: TEvents[Extract<TEvent, string>]
+	): boolean {
 		return super.emit(eventName, ...args);
 	}
 }
 
-export type Constructor<T> = new (...args: unknown[]) => T;
+export type Constructor<TInstance> = new (...args: unknown[]) => TInstance;
 
 /**
  * Merge the default options to user input
- * @param def Default options
- * @param given User input
+ *
+ * @param def - Default options
+ * @param given - User input
  * @returns Merged options
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function mergeDefault<T extends Record<string, any>>(def: T, given: T): Required<T> {
-	if (!given) return def as Required<T>;
-	const defaultKeys: Array<keyof T> = Object.keys(def);
-	for (const key in given) {
-		if (defaultKeys.includes(key)) continue;
-		delete given[key];
+
+export function mergeDefault<TOptions extends Record<string, any>>(def: TOptions, given: TOptions): Required<TOptions> {
+	if (!given) {
+		return def as Required<TOptions>;
 	}
+
+	const defaultKeys: (keyof TOptions)[] = Object.keys(def);
+	const filtered: TOptions = {} as TOptions;
+
 	for (const key of defaultKeys) {
-		if (def[key] === null || (typeof def[key] === 'string' && def[key].length === 0)) {
-			if (!given[key]) throw new Error(`${String(key)} was not found from the given options.`);
+		if (key in given) {
+			filtered[key] = given[key];
 		}
-		given[key] ??= def[key];
 	}
-	return given as Required<T>;
+
+	for (const key of defaultKeys) {
+		if ((def[key] === null || (typeof def[key] === "string" && def[key].length === 0)) && !filtered[key]) {
+			throw new Error(`${String(key)} was not found from the given options.`);
+		}
+
+		filtered[key] ??= def[key];
+	}
+
+	return filtered as Required<TOptions>;
 }
 
 /**
  * Wait for a specific amount of time (timeout)
- * @param ms Time to wait in milliseconds
+ *
+ * @param ms - Time to wait in milliseconds
  * @returns A promise that resolves in x seconds
  */
-export function wait(ms: number): Promise<void> {
-	return new Promise(resolve => setTimeout(resolve, ms));
+export async function wait(ms: number): Promise<void> {
+	return new Promise((resolve) => {
+		setTimeout(resolve, ms);
+	});
 }

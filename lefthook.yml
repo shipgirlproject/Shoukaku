@@ -1,0 +1,5 @@
+pre-commit:
+  commands:
+    lint:
+      glob: "*.{js,ts,mjs,json}"
+      run: pnpm lint

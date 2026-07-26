@@ -1,0 +1,13 @@
+{
+	"$schema": "./node_modules/oxfmt/configuration_schema.json",
+	"printWidth": 120,
+	"useTabs": true,
+	"quoteProps": "as-needed",
+	"trailingComma": "all",
+	"endOfLine": "lf",
+	"sortPackageJson": {
+		"sortScripts": true
+	},
+	"sortImports": false,
+	"ignorePatterns": ["pnpm-lock.yaml", "dist", ".github"]
+}

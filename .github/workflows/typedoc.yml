@@ -1,30 +1,34 @@
 name: Publish TypeDoc
+
 on:
   push:
     branches:
       - master
 
+env:
+  LEFTHOOK: "0"
+  HUSKY: "0"
+
 jobs:
   build-docs:
     runs-on: ubuntu-latest
-    steps: 
-      - name: Checkout repository
-        uses: actions/checkout@v6
+    steps:
+      - uses: actions/checkout@v6
         with:
           persist-credentials: false
 
-      - name: Setup node
-        uses: actions/setup-node@v6
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v6
         with:
           node-version: latest
-          cache: npm
-          cache-dependency-path: package-lock.json
+          cache: pnpm
 
-      - name: Install deps
-        run: npm i
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
       - name: Build docs
-        run: npm run build:docs
+        run: pnpm run build:docs
 
       - name: Upload pages artifact
         uses: actions/upload-pages-artifact@v4
@@ -47,4 +51,3 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-    

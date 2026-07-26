@@ -1,55 +1,70 @@
 {
-  "name": "shoukaku",
-  "version": "4.3.0",
-  "description": "A stable and updated wrapper around Lavalink",
-  "main": "dist/index.js",
-  "module": "dist/index.mjs",
-  "types": "dist/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.js"
-    }
-  },
-  "scripts": {
-    "build": "npm run build:ts && npm run build:docs",
-    "build:ts": "tsup --config tsup-config.json",
-    "build:docs": "typedoc",
-    "lint": "eslint .",
-    "prepare": "npm run build:ts"
-  },
-  "keywords": [
-    "bot",
-    "music",
-    "lavalink",
-    "api",
-    "discord",
-    "lavalink.js",
-    "discord.js",
-    "lavalink-api",
-    "weeb-library"
-  ],
-  "engines": {
-    "node": ">=18.0.0",
-    "npm": ">=7.0.0"
-  },
-  "author": "Saya",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/shipgirlproject/Shoukaku.git"
-  },
-  "dependencies": {
-    "ws": "^8.19.0"
-  },
-  "devDependencies": {
-    "@shipgirl/eslint-config": "^0.5.0",
-    "@types/node": "^25.2.3",
-    "@types/ws": "^8.18.1",
-    "eslint": "^9.39.2",
-    "tsup": "^8.5.1",
-    "typedoc": "^0.28.17",
-    "typescript": "^5.9.3"
-  }
+	"name": "shoukaku",
+	"version": "5.0.0-dev.0",
+	"description": "A stable and updated wrapper around Lavalink",
+	"keywords": [
+		"api",
+		"bot",
+		"discord",
+		"discord.js",
+		"lavalink",
+		"lavalink-api",
+		"lavalink.js",
+		"music",
+		"weeb-library"
+	],
+	"license": "MIT",
+	"author": "Saya",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/shipgirlproject/Shoukaku.git"
+	},
+	"directories": {
+		"lib": "src"
+	},
+	"files": [
+		"dist"
+	],
+	"type": "module",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.mts",
+			"import": "./dist/index.mjs"
+		}
+	},
+	"publishConfig": {
+		"access": "public"
+	},
+	"scripts": {
+		"build": "pnpm build:check && tsdown",
+		"build:check": "tsc --noEmit",
+		"build:docs": "typedoc",
+		"fmt": "oxfmt src",
+		"fmt:check": "oxfmt --check",
+		"lint": "oxfmt --check && eslint src",
+		"lint:fix": "eslint src --fix",
+		"prepack": "pnpm run build",
+		"prepare": "lefthook install"
+	},
+	"dependencies": {
+		"ws": "^8.19.0"
+	},
+	"devDependencies": {
+		"@types/node": "^25.2.3",
+		"@types/ws": "^8.18.1",
+		"eslint": "^10.4.1",
+		"eslint-config-neon": "^0.5.1",
+		"eslint-import-resolver-typescript": "^4.4.4",
+		"lefthook": "^2.1.9",
+		"lodash.merge": "^4.6.2",
+		"oxfmt": "^0.53.0",
+		"tsdown": "^0.22.2",
+		"typedoc": "^0.28.17",
+		"typescript": "^6.0.3",
+		"typescript-eslint": "^8.60.1"
+	},
+	"engines": {
+		"node": ">=22.9.0"
+	},
+	"packageManager": "pnpm@11.5.2"
 }

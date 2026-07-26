@@ -1,49 +1,64 @@
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access */
-import { NodeDefaults } from '../Constants';
-import type { ServerUpdate, StateUpdatePartial } from '../guild/Connection';
-import type { NodeOption, Shoukaku } from '../Shoukaku';
-import { mergeDefault } from '../Utils';
+import { NodeDefaults } from "../Constants.js";
+import type { NodeOption, Shoukaku } from "../Shoukaku.js";
+import { mergeDefault } from "../Utils.js";
+import type { ServerUpdate, StateUpdatePartial } from "../guild/Connection.js";
 
 export interface ConnectorMethods {
-	sendPacket: any;
 	getId: any;
+	sendPacket: any;
 }
 
-export const AllowedPackets = [ 'VOICE_STATE_UPDATE', 'VOICE_SERVER_UPDATE' ];
+export const AllowedPackets = ["VOICE_STATE_UPDATE", "VOICE_SERVER_UPDATE"];
 
 export abstract class Connector {
 	protected readonly client: any;
+
 	protected manager: Shoukaku | null;
-	constructor(client: any) {
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
+	public constructor(client: any) {
 		this.client = client;
 		this.manager = null;
 	}
 
-	public set(manager: Shoukaku): Connector {
+	public set(manager: Shoukaku): this {
 		this.manager = manager;
 		return this;
 	}
 
 	protected ready(nodes: NodeOption[]): void {
 		this.manager!.id = this.getId();
-		for (const node of nodes) this.manager!.addNode(mergeDefault(NodeDefaults, node));
+		for (const node of nodes) {
+			this.manager!.addNode(mergeDefault(NodeDefaults, node));
+		}
 	}
 
 	protected raw(packet: any): void {
-		if (!AllowedPackets.includes(packet.t as string)) return;
+		if (!AllowedPackets.includes(packet.t as string)) {
+			return;
+		}
+
 		const guildId = packet.d.guild_id as string;
 		const connection = this.manager!.connections.get(guildId);
-		if (!connection) return;
-		if (packet.t === 'VOICE_SERVER_UPDATE') return connection.setServerUpdate(packet.d as ServerUpdate);
+		if (!connection) {
+			return;
+		}
+
+		if (packet.t === "VOICE_SERVER_UPDATE") {
+			connection.setServerUpdate(packet.d as ServerUpdate);
+			return;
+		}
+
 		const userId = packet.d.user_id as string;
-		if (userId !== this.manager!.id) return;
+		if (userId !== this.manager!.id) {
+			return;
+		}
+
 		connection.setStateUpdate(packet.d as StateUpdatePartial);
 	}
 
-	abstract getId(): string;
+	public abstract getId(): string;
 
-	abstract sendPacket(shardId: number, payload: unknown, important: boolean): void;
+	public abstract sendPacket(shardId: number, payload: unknown, important: boolean): void;
 
-	abstract listen(nodes: NodeOption[]): void;
+	public abstract listen(nodes: NodeOption[]): void;
 }
