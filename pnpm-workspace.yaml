@@ -1,7 +1,6 @@
 allowBuilds:
   esbuild: false
   lefthook: true
-  unrs-resolver: false
 
 autoInstallPeers: false
 
@@ -11,10 +10,16 @@ overrides:
   "@angular-eslint/eslint-plugin": npm:@favware/skip-dependency@latest
   "@angular-eslint/eslint-plugin-template": npm:@favware/skip-dependency@latest
   "@angular-eslint/template-parser": npm:@favware/skip-dependency@latest
+  "@typescript-eslint/eslint-plugin": npm:@favware/skip-dependency@latest
+  "@typescript-eslint/parser": npm:@favware/skip-dependency@latest
   astro-eslint-parser: npm:@favware/skip-dependency@latest
+  eslint: npm:@favware/skip-dependency@latest
+  eslint-config-prettier: npm:@favware/skip-dependency@latest
+  eslint-import-resolver-typescript: npm:@favware/skip-dependency@latest
   eslint-mdx: npm:@favware/skip-dependency@latest
   eslint-plugin-astro: npm:@favware/skip-dependency@latest
   eslint-plugin-cypress: npm:@favware/skip-dependency@latest
+  eslint-plugin-import-x: npm:@favware/skip-dependency@latest
   eslint-plugin-mdx: npm:@favware/skip-dependency@latest
   eslint-plugin-rxjs: npm:@favware/skip-dependency@latest
   eslint-plugin-rxjs-angular: npm:@favware/skip-dependency@latest
@@ -27,27 +32,4 @@ peerDependencyRules:
   ignoreMissing:
     - "*"
 
-publicHoistPattern:
-  - "*eslint*"
-
 minimumReleaseAge: 7200
-
-minimumReleaseAgeExclude:
-  - "@rolldown/binding-android-arm64@1.1.0"
-  - "@rolldown/binding-darwin-arm64@1.1.0"
-  - "@rolldown/binding-darwin-x64@1.1.0"
-  - "@rolldown/binding-freebsd-x64@1.1.0"
-  - "@rolldown/binding-linux-arm-gnueabihf@1.1.0"
-  - "@rolldown/binding-linux-arm64-gnu@1.1.0"
-  - "@rolldown/binding-linux-arm64-musl@1.1.0"
-  - "@rolldown/binding-linux-ppc64-gnu@1.1.0"
-  - "@rolldown/binding-linux-s390x-gnu@1.1.0"
-  - "@rolldown/binding-linux-x64-gnu@1.1.0"
-  - "@rolldown/binding-linux-x64-musl@1.1.0"
-  - "@rolldown/binding-openharmony-arm64@1.1.0"
-  - "@rolldown/binding-wasm32-wasi@1.1.0"
-  - "@rolldown/binding-win32-arm64-msvc@1.1.0"
-  - "@rolldown/binding-win32-x64-msvc@1.1.0"
-  - eslint-config-neon@0.5.1
-  - rolldown@1.1.0
-  - tsdown@0.22.2

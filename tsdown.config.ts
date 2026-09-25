@@ -9,6 +9,6 @@ export default defineConfig({
 	target: "es2022",
 	treeshake: false,
 	deps: {
-		skipNodeModulesBundle: true,
+		neverBundle: true,
 	},
 });
