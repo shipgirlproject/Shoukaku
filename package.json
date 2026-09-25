@@ -39,10 +39,10 @@
 		"build": "pnpm build:check && tsdown",
 		"build:check": "tsc --noEmit",
 		"build:docs": "typedoc",
-		"fmt": "oxfmt src",
+		"fmt": "oxfmt .",
 		"fmt:check": "oxfmt --check",
-		"lint": "oxfmt --check && eslint src",
-		"lint:fix": "eslint src --fix",
+		"lint": "oxfmt --check && oxlint --tsconfig=tsconfig.eslint.json --type-aware --type-check .",
+		"lint:fix": "oxfmt . && oxlint --tsconfig=tsconfig.eslint.json --type-aware --type-check . --fix --fix-suggestions",
 		"prepack": "pnpm run build",
 		"prepare": "lefthook install"
 	},
@@ -52,19 +52,17 @@
 	"devDependencies": {
 		"@types/node": "^25.2.3",
 		"@types/ws": "^8.18.1",
-		"eslint": "^10.4.1",
-		"eslint-config-neon": "^0.5.1",
-		"eslint-import-resolver-typescript": "^4.4.4",
+		"eslint-config-neon": "^0.5.4",
 		"lefthook": "^2.1.9",
-		"lodash.merge": "^4.6.2",
 		"oxfmt": "^0.53.0",
-		"tsdown": "^0.22.2",
+		"oxlint": "1.83.0",
+		"oxlint-tsgolint": "^7.0.2002",
+		"tsdown": "^0.23.0",
 		"typedoc": "^0.28.17",
-		"typescript": "^6.0.3",
-		"typescript-eslint": "^8.60.1"
+		"typescript": "^7.0.2"
 	},
 	"engines": {
 		"node": ">=22.9.0"
 	},
-	"packageManager": "pnpm@11.5.2"
+	"packageManager": "pnpm@12.5.1"
 }

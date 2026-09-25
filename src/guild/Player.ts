@@ -126,7 +126,7 @@ export interface FilterOptions {
 
 // Interfaces are not final, but types are, and therefore has an index signature
 // https://stackoverflow.com/a/64970740
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+// oxlint-disable-next-line typescript/consistent-type-definitions
 export type PlayerEvents = {
 	/**
 	 * Emitted when the current websocket connection is closed

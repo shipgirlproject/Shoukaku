@@ -27,8 +27,12 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # typedoc still needs the TypeScript compiler API, which TypeScript 7 does not expose,
+      # so the docs build runs against TypeScript 6 until typedoc supports TypeScript 7.
       - name: Build docs
-        run: pnpm run build:docs
+        run: |
+          pnpm add --save-dev typescript@6.0.3
+          pnpm run build:docs
 
       - name: Upload pages artifact
         uses: actions/upload-pages-artifact@v4
