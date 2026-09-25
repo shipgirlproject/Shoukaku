@@ -9,17 +9,10 @@
 	"theme": "default",
 	"readme": "docsrc/index.md",
 	"externalPattern": ["**/node_modules/**"],
-	"projectDocuments": [
-		"docsrc/guide.md",
-	],
-	
-	"highlightLanguages": [
-		"console",
-		"javascript",
-		"typescript",
-		"diff",
-	],
+	"projectDocuments": ["docsrc/guide.md"],
+
+	"highlightLanguages": ["console", "javascript", "typescript", "diff"],
 	"navigationLinks": {
-		"GitHub": "https://github.com/shipgirlproject/shoukaku",
-	},
+		"GitHub": "https://github.com/shipgirlproject/shoukaku"
+	}
 }

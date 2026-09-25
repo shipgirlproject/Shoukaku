@@ -1,3 +1,40 @@
 {
-    "editor.insertSpaces": false
+	"editor.codeActionsOnSave": {
+		"source.fixAll": "always",
+		"source.fixAll.eslint": "always",
+		"source.organizeImports": "never"
+	},
+	"editor.defaultFormatter": "oxc.oxc-vscode",
+	"editor.formatOnSave": true,
+	"editor.trimAutoWhitespace": false,
+	"eslint.enable": true,
+	"eslint.useESLintClass": true,
+	"eslint.validate": ["javascript", "typescript"],
+	"files.associations": {
+		"tsconfig.eslint.json": "jsonc",
+		"tsconfig.json": "jsonc"
+	},
+	"files.eol": "\n",
+	"files.insertFinalNewline": true,
+	"files.watcherExclude": {
+		"**/.git/objects/**": true,
+		"**/.git/subtree-cache/**": true,
+		"**/.hg/store/**": true,
+		"**/.next/*/**": true,
+		"**/.yarn/*/**": true,
+		"**/dist/*/**": true,
+		"**/node_modules/*/**": true
+	},
+	"search.exclude": {
+		"**/.yarn": true,
+		"**/.next": true,
+		"**/dist": true,
+		"**/coverage": true,
+		"**/test-results": true
+	},
+	"search.followSymlinks": false,
+	"search.useParentIgnoreFiles": true,
+	"npm.packageManager": "pnpm",
+	"js/ts.tsdk.promptToUseWorkspaceVersion": true,
+	"js/ts.tsdk.path": "node_modules/typescript/lib"
 }

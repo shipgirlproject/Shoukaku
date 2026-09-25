@@ -1,6 +1,7 @@
 ---
 title: Configuration Options
 ---
+
 # Configuration Options
 
 | Option                 | Type                    | Default  | Description                                                                                                                                          |

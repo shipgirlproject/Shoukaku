@@ -1,19 +1,21 @@
-import { OpCodes, State } from '../Constants';
-import type { Node } from '../node/Node';
-import type { Exception, Track, UpdatePlayerInfo, UpdatePlayerOptions } from '../node/Rest';
-import { PluginRequirement, TField, TReturnType, TypedEventEmitter, validatePluginRequirement } from '../Utils';
-import { Connection } from './Connection';
+import type { OpCodes } from "../Constants.js";
+import { State } from "../Constants.js";
+import type { PluginRequirement, TField, TReturnType } from "../Utils.js";
+import { TypedEventEmitter, validatePluginRequirement } from "../Utils.js";
+import type { Node } from "../node/Node.js";
+import type { Exception, Track, UpdatePlayerInfo, UpdatePlayerOptions } from "../node/Rest.js";
+import type { Connection } from "./Connection.js";
 
-export type TrackEndReason = 'finished' | 'loadFailed' | 'stopped' | 'replaced' | 'cleanup';
-export type PlayOptions = Omit<UpdatePlayerOptions, 'filters' | 'voice'>;
-export type ResumeOptions = Omit<UpdatePlayerOptions, 'track' | 'filters' | 'voice'>;
+export type TrackEndReason = "cleanup" | "finished" | "loadFailed" | "replaced" | "stopped";
+export type PlayOptions = Omit<UpdatePlayerOptions, "filters" | "voice">;
+export type ResumeOptions = Omit<UpdatePlayerOptions, "filters" | "track" | "voice">;
 
 export enum PlayerEventType {
-	TRACK_START_EVENT = 'TrackStartEvent',
-	TRACK_END_EVENT = 'TrackEndEvent',
-	TRACK_EXCEPTION_EVENT = 'TrackExceptionEvent',
-	TRACK_STUCK_EVENT = 'TrackStuckEvent',
-	WEBSOCKET_CLOSED_EVENT = 'WebSocketClosedEvent'
+	TRACK_END_EVENT = "TrackEndEvent",
+	TRACK_EXCEPTION_EVENT = "TrackExceptionEvent",
+	TRACK_START_EVENT = "TrackStartEvent",
+	TRACK_STUCK_EVENT = "TrackStuckEvent",
+	WEBSOCKET_CLOSED_EVENT = "WebSocketClosedEvent",
 }
 
 export interface Band {
@@ -22,21 +24,21 @@ export interface Band {
 }
 
 export interface KaraokeSettings {
-	level?: number;
-	monoLevel?: number;
 	filterBand?: number;
 	filterWidth?: number;
+	level?: number;
+	monoLevel?: number;
 }
 
 export interface TimescaleSettings {
-	speed?: number;
 	pitch?: number;
 	rate?: number;
+	speed?: number;
 }
 
 export interface FreqSettings {
-	frequency?: number;
 	depth?: number;
+	frequency?: number;
 }
 
 export interface RotationSettings {
@@ -44,14 +46,14 @@ export interface RotationSettings {
 }
 
 export interface DistortionSettings {
-	sinOffset?: number;
-	sinScale?: number;
 	cosOffset?: number;
 	cosScale?: number;
-	tanOffset?: number;
-	tanScale?: number;
 	offset?: number;
 	scale?: number;
+	sinOffset?: number;
+	sinScale?: number;
+	tanOffset?: number;
+	tanScale?: number;
 }
 
 export interface ChannelMixSettings {
@@ -66,63 +68,63 @@ export interface LowPassSettings {
 }
 
 export interface PlayerEvent {
-	op: OpCodes.EVENT;
 	guildId: string;
+	op: OpCodes.EVENT;
 }
 
 export interface TrackStartEvent extends PlayerEvent {
-	type: PlayerEventType.TRACK_START_EVENT;
 	track: Track;
+	type: PlayerEventType.TRACK_START_EVENT;
 }
 
 export interface TrackEndEvent extends PlayerEvent {
-	type: PlayerEventType.TRACK_END_EVENT;
-	track: Track;
 	reason: TrackEndReason;
+	track: Track;
+	type: PlayerEventType.TRACK_END_EVENT;
 }
 
 export interface TrackStuckEvent extends PlayerEvent {
-	type: PlayerEventType.TRACK_STUCK_EVENT;
-	track: Track;
 	thresholdMs: number;
+	track: Track;
+	type: PlayerEventType.TRACK_STUCK_EVENT;
 }
 
 export interface TrackExceptionEvent extends PlayerEvent {
-	type: PlayerEventType.TRACK_EXCEPTION_EVENT;
 	exception: Exception;
+	type: PlayerEventType.TRACK_EXCEPTION_EVENT;
 }
 
 export interface WebSocketClosedEvent extends PlayerEvent {
-	type: PlayerEventType.WEBSOCKET_CLOSED_EVENT;
-	code: number;
 	byRemote: boolean;
+	code: number;
 	reason: string;
+	type: PlayerEventType.WEBSOCKET_CLOSED_EVENT;
 }
 
 export interface PlayerUpdate {
+	guildId: string;
 	op: OpCodes.PLAYER_UPDATE;
 	state: {
 		connected: boolean;
+		ping: number;
 		position: number;
 		time: number;
-		ping: number;
 	};
-	guildId: string;
 }
 
 export interface FilterOptions {
-	volume?: number;
+	channelMix?: ChannelMixSettings | null;
+	distortion?: DistortionSettings | null;
 	equalizer?: Band[];
 	karaoke?: KaraokeSettings | null;
-	timescale?: TimescaleSettings | null;
-	tremolo?: FreqSettings | null;
-	vibrato?: FreqSettings | null;
-	rotation?: RotationSettings | null;
-	distortion?: DistortionSettings | null;
-	channelMix?: ChannelMixSettings | null;
 	lowPass?: LowPassSettings | null;
 	// TODO: check this, im assuming null unsets everything?
 	pluginFilters?: Record<string, unknown> | null;
+	rotation?: RotationSettings | null;
+	timescale?: TimescaleSettings | null;
+	tremolo?: FreqSettings | null;
+	vibrato?: FreqSettings | null;
+	volume?: number;
 }
 
 // Interfaces are not final, but types are, and therefore has an index signature
@@ -130,45 +132,52 @@ export interface FilterOptions {
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type PlayerEvents = {
 	/**
-	 * Emitted when the current playing track ends
-	 * @eventProperty
-	 */
-	'end': [reason: TrackEndEvent];
-	/**
-	 * Emitted when the current playing track gets stuck due to an error
-	 * @eventProperty
-	 */
-	'stuck': [data: TrackStuckEvent];
-	/**
 	 * Emitted when the current websocket connection is closed
+	 *
 	 * @eventProperty
 	 */
-	'closed': [reason: WebSocketClosedEvent];
+	closed: [reason: WebSocketClosedEvent];
 	/**
-	 * Emitted when a new track starts
+	 * Emitted when the current playing track ends
+	 *
 	 * @eventProperty
 	 */
-	'start': [data: TrackStartEvent];
+	end: [reason: TrackEndEvent];
 	/**
 	 * Emitted when there is an error caused by the current playing track
+	 *
 	 * @eventProperty
 	 */
-	'exception': [reason: TrackExceptionEvent];
+	exception: [reason: TrackExceptionEvent];
 	/**
 	 * Emitted when the library manages to resume the player
+	 *
 	 * @eventProperty
 	 */
-	'resumed': [player: Player];
+	resumed: [player: Player];
+	/**
+	 * Emitted when a new track starts
+	 *
+	 * @eventProperty
+	 */
+	start: [data: TrackStartEvent];
+	/**
+	 * Emitted when the current playing track gets stuck due to an error
+	 *
+	 * @eventProperty
+	 */
+	stuck: [data: TrackStuckEvent];
 	/**
 	 * Emitted when a playerUpdate even is received from Lavalink
+	 *
 	 * @eventProperty
 	 */
-	'update': [data: PlayerUpdate];
+	update: [data: PlayerUpdate];
 };
 
 /**
  * Plugin filters should implement this interface to use with {@link Player#setPluginFilter}
- * 
+ *
  * @example
  * Example with [LavaDSPX](https://github.com/Devoxin/LavaDSPX-Plugin) `high-pass` filter
  * ```
@@ -187,18 +196,18 @@ export type PlayerEvents = {
  */
 export interface PluginFilter extends TField {
 	/**
-	 * Plugin required by filter
-	 */
-	readonly pluginRequired?: PluginRequirement;
-	/**
 	 * Name of filter
 	 */
 	readonly name: string;
+	/**
+	 * Plugin required by filter
+	 */
+	readonly pluginRequired?: PluginRequirement;
 }
 
 /**
  * Plugin events should implement this interface to use with {@link Player#onPluginEvent}
- * 
+ *
  * @example
  * Example with [LavaLyrics](https://github.com/topi314/LavaLyrics) `LyricsLineEvent` event
  * ```
@@ -207,9 +216,9 @@ export interface PluginFilter extends TField {
  *			name: 'lavalyrics-plugin',
  *			version: '^1.1.0'
  *		};
- * 
+ *
  *		public readonly name = 'LyricsLineEvent';
- * 
+ *
  *		public readonly T = t<{
  *			lineIndex: number;
  *			line: {
@@ -225,13 +234,13 @@ export interface PluginFilter extends TField {
  */
 export interface PluginEvent extends TField {
 	/**
-	 * Plugin required by event
-	 */
-	readonly pluginRequired?: PluginRequirement;
-	/**
 	 * Name of event
 	 */
 	readonly name: string;
+	/**
+	 * Plugin required by event
+	 */
+	readonly pluginRequired?: PluginRequirement;
 }
 
 /**
@@ -242,39 +251,45 @@ export class Player extends TypedEventEmitter<PlayerEvents> {
 	 * GuildId of this player
 	 */
 	public readonly guildId: string;
+
 	/**
 	 * Lavalink node this player is connected to
 	 */
 	public node: Node;
+
 	/**
 	 * Base64 encoded data of the current track
 	 */
 	public track: string | null;
+
 	/**
 	 * Global volume of the player
 	 */
 	public volume: number;
+
 	/**
 	 * Pause status in current player
 	 */
 	public paused: boolean;
+
 	/**
 	 * Ping represents the number of milliseconds between heartbeat and ack. Could be `-1` if not connected
 	 */
 	public ping: number;
+
 	/**
 	 * Position in ms of current track
 	 */
 	public position: number;
+
 	/**
 	 * Filters on current track
 	 */
 	public filters: FilterOptions;
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	private pluginEvents: Record<string, Array<(data: any) => void> | undefined> = {};
+	private pluginEvents: Record<string, ((data: any) => void)[] | undefined> = {};
 
-	constructor(guildId: string, node: Node) {
+	public constructor(guildId: string, node: Node) {
 		super();
 		this.guildId = guildId;
 		this.node = node;
@@ -292,7 +307,7 @@ export class Player extends TypedEventEmitter<PlayerEvents> {
 			guildId: this.guildId,
 			playerOptions: {
 				track: {
-					encoded: this.track
+					encoded: this.track,
 				},
 				position: this.position,
 				paused: this.paused,
@@ -301,30 +316,35 @@ export class Player extends TypedEventEmitter<PlayerEvents> {
 					token: connection.serverUpdate!.token,
 					endpoint: connection.serverUpdate!.endpoint,
 					sessionId: connection.sessionId!,
-					channelId: connection.channelId!
+					channelId: connection.channelId!,
 				},
-				volume: this.volume
-			}
+				volume: this.volume,
+			},
 		};
 	}
 
 	/**
 	 * Move player to another node
-	 * @param name Name of node to move to, or the default ideal node
+	 *
+	 * @param name - Name of node to move to, or the default ideal node
 	 * @returns true if the player was moved, false if not
 	 */
 	public async move(name?: string): Promise<boolean> {
 		const connection = this.node.manager.connections.get(this.guildId);
 		const node = this.node.manager.nodes.get(name!) ?? this.node.manager.getIdealNode(connection);
 
-		if (!node && ![ ...this.node.manager.nodes.values() ].some(node => node.state === State.CONNECTED))
-			throw new Error('No available nodes to move to');
+		if (!node && ![...this.node.manager.nodes.values()].some((node) => node.state === State.CONNECTED)) {
+			throw new Error("No available nodes to move to");
+		}
 
-		if (!node || node.name === this.node.name || node.state !== State.CONNECTED) return false;
+		if (!node || node.name === this.node.name || node.state !== State.CONNECTED) {
+			return false;
+		}
 
 		let lastNode = this.node.manager.nodes.get(this.node.name);
-		if (lastNode?.state !== State.CONNECTED)
+		if (lastNode?.state !== State.CONNECTED) {
 			lastNode = this.node.manager.getIdealNode(connection);
+		}
 
 		await this.destroy();
 
@@ -349,52 +369,57 @@ export class Player extends TypedEventEmitter<PlayerEvents> {
 	/**
 	 * Play a new track
 	 */
-	public playTrack(playerOptions: PlayOptions, noReplace = false): Promise<void> {
+	public async playTrack(playerOptions: PlayOptions, noReplace = false): Promise<void> {
 		return this.update(playerOptions, noReplace);
 	}
 
 	/**
 	 * Stop the currently playing track
 	 */
-	public stopTrack(): Promise<void> {
+	public async stopTrack(): Promise<void> {
 		return this.update({ track: { encoded: null }, position: 0 });
 	}
 
 	/**
 	 * Pause or unpause the currently playing track
-	 * @param paused Boolean value to specify whether to pause or unpause the current bot user
+	 *
+	 * @param paused - Boolean value to specify whether to pause or unpause the current bot user
 	 */
-	public setPaused(paused = true): Promise<void> {
+	public async setPaused(paused = true): Promise<void> {
 		return this.update({ paused });
 	}
 
 	/**
 	 * Seek to a specific time in the currently playing track
-	 * @param position Position to seek to in milliseconds
+	 *
+	 * @param position - Position to seek to in milliseconds
 	 */
-	public seekTo(position: number): Promise<void> {
+	public async seekTo(position: number): Promise<void> {
 		return this.update({ position });
 	}
 
 	/**
 	 * Sets the global volume of the player
-	 * @param volume Target volume 0-1000
+	 *
+	 * @param volume - Target volume 0-1000
 	 */
-	public setGlobalVolume(volume: number): Promise<void> {
+	public async setGlobalVolume(volume: number): Promise<void> {
 		return this.update({ volume });
 	}
 
 	/**
 	 * Sets the filter volume of the player
-	 * @param volume Target volume 0.0-5.0
+	 *
+	 * @param volume - Target volume 0.0-5.0
 	 */
-	async setFilterVolume(volume: number): Promise<void> {
+	public async setFilterVolume(volume: number): Promise<void> {
 		return this.setFilters({ volume });
 	}
 
 	/**
 	 * Change the equalizer settings applied to the currently playing track
-	 * @param equalizer An array of objects that conforms to the Bands type that define volumes at different frequencies
+	 *
+	 * @param equalizer - An array of objects that conforms to the Bands type that define volumes at different frequencies
 	 */
 	public async setEqualizer(equalizer: Band[]): Promise<void> {
 		return this.setFilters({ equalizer });
@@ -402,112 +427,127 @@ export class Player extends TypedEventEmitter<PlayerEvents> {
 
 	/**
 	 * Change the karaoke settings applied to the currently playing track
-	 * @param karaoke An object that conforms to the KaraokeSettings type that defines a range of frequencies to mute
+	 *
+	 * @param karaoke - An object that conforms to the KaraokeSettings type that defines a range of frequencies to mute
 	 */
-	public setKaraoke(karaoke?: KaraokeSettings): Promise<void> {
+	public async setKaraoke(karaoke?: KaraokeSettings): Promise<void> {
 		return this.setFilters({ karaoke: karaoke ?? null });
 	}
 
 	/**
 	 * Change the timescale settings applied to the currently playing track
-	 * @param timescale An object that conforms to the TimescaleSettings type that defines the time signature to play the audio at
+	 *
+	 * @param timescale - An object that conforms to the TimescaleSettings type that defines the time signature to play the audio at
 	 */
-	public setTimescale(timescale?: TimescaleSettings): Promise<void> {
+	public async setTimescale(timescale?: TimescaleSettings): Promise<void> {
 		return this.setFilters({ timescale: timescale ?? null });
 	}
 
 	/**
 	 * Change the tremolo settings applied to the currently playing track
-	 * @param tremolo An object that conforms to the FreqSettings type that defines an oscillation in volume
+	 *
+	 * @param tremolo - An object that conforms to the FreqSettings type that defines an oscillation in volume
 	 */
-	public setTremolo(tremolo?: FreqSettings): Promise<void> {
+	public async setTremolo(tremolo?: FreqSettings): Promise<void> {
 		return this.setFilters({ tremolo: tremolo ?? null });
 	}
 
 	/**
 	 * Change the vibrato settings applied to the currently playing track
-	 * @param vibrato An object that conforms to the FreqSettings type that defines an oscillation in pitch
+	 *
+	 * @param vibrato - An object that conforms to the FreqSettings type that defines an oscillation in pitch
 	 */
-	public setVibrato(vibrato?: FreqSettings): Promise<void> {
+	public async setVibrato(vibrato?: FreqSettings): Promise<void> {
 		return this.setFilters({ vibrato: vibrato ?? null });
 	}
 
 	/**
 	 * Change the rotation settings applied to the currently playing track
-	 * @param rotation An object that conforms to the RotationSettings type that defines the frequency of audio rotating round the listener
+	 *
+	 * @param rotation - An object that conforms to the RotationSettings type that defines the frequency of audio rotating round the listener
 	 */
-	public setRotation(rotation?: RotationSettings): Promise<void> {
+	public async setRotation(rotation?: RotationSettings): Promise<void> {
 		return this.setFilters({ rotation: rotation ?? null });
 	}
 
 	/**
 	 * Change the distortion settings applied to the currently playing track
-	 * @param distortion An object that conforms to DistortionSettings that defines distortions in the audio
+	 *
+	 * @param distortion - An object that conforms to DistortionSettings that defines distortions in the audio
 	 * @returns The current player instance
 	 */
-	public setDistortion(distortion?: DistortionSettings): Promise<void> {
+	public async setDistortion(distortion?: DistortionSettings): Promise<void> {
 		return this.setFilters({ distortion: distortion ?? null });
 	}
 
 	/**
 	 * Change the channel mix settings applied to the currently playing track
-	 * @param channelMix An object that conforms to ChannelMixSettings that defines how much the left and right channels affect each other (setting all factors to 0.5 causes both channels to get the same audio)
+	 *
+	 * @param channelMix - An object that conforms to ChannelMixSettings that defines how much the left and right channels affect each other (setting all factors to 0.5 causes both channels to get the same audio)
 	 */
-	public setChannelMix(channelMix?: ChannelMixSettings): Promise<void> {
+	public async setChannelMix(channelMix?: ChannelMixSettings): Promise<void> {
 		return this.setFilters({ channelMix: channelMix ?? null });
 	}
 
 	/**
 	 * Change the low pass settings applied to the currently playing track
-	 * @param lowPass An object that conforms to LowPassSettings that defines the amount of suppression on higher frequencies
+	 *
+	 * @param lowPass - An object that conforms to LowPassSettings that defines the amount of suppression on higher frequencies
 	 */
-	public setLowPass(lowPass?: LowPassSettings): Promise<void> {
+	public async setLowPass(lowPass?: LowPassSettings): Promise<void> {
 		return this.setFilters({ lowPass: lowPass ?? null });
 	}
 
 	/**
 	 * Get the value of a plugin defined filter
-	 * @param filter Plugin filter config (see {@link PluginFilter})
-	 * @returns Filter object as specified by the `D` function
+	 *
+	 * @param filter - Plugin filter config (see {@link PluginFilter})
+	 * @returns Filter object as specified by the `TData` function
 	 */
-	public getPluginFilter<
-		F extends PluginFilter,
-		D = TReturnType<F>
-	>(filter: F): D | undefined {
+	public getPluginFilter<TFilter extends PluginFilter, TData = TReturnType<TFilter>>(
+		filter: TFilter,
+	): TData | undefined {
 		// TODO: should we check for plugins here? we shouldn't need to since it returns undefined
-		return this.filters.pluginFilters?.[filter.name] as D;
+		return this.filters.pluginFilters?.[filter.name] as TData;
 	}
 
 	/**
 	 * Set a plugin defined filter
-	 * @param filter Plugin filter config (see {@link PluginFilter})
-	 * @param data Filter object as specified by the `D` function
+	 *
+	 * @param filter - Plugin filter config (see {@link PluginFilter})
+	 * @param data - Filter object as specified by the `TData` function
 	 * @throws {@link PluginError} when plugin required by the filter is not satisfied by plugins on this node
 	 */
-	public async setPluginFilter<
-		F extends PluginFilter,
-		D = TReturnType<F>
-	>(filter: F, data?: D): Promise<void> {
+	public async setPluginFilter<TFilter extends PluginFilter, TData = TReturnType<TFilter>>(
+		filter: TFilter,
+		data?: TData,
+	): Promise<void> {
 		// TODO: should we check for plugins (name, version) or the filters list instead?
 		// TODO: should we cache the plugin check somehow?
-		if (filter.pluginRequired)
-			validatePluginRequirement(`filter ${filter.name}`, filter.pluginRequired, await this.node.rest.client._getNodePlugins());
+		if (filter.pluginRequired) {
+			validatePluginRequirement(
+				`filter ${filter.name}`,
+				filter.pluginRequired,
+				await this.node.rest.client._getNodePlugins(),
+			);
+		}
 
-		return this.setFilters({ pluginFilters: { [filter.name]: data ?? null }});
+		return this.setFilters({ pluginFilters: { [filter.name]: data ?? null } });
 	}
 
 	/**
 	 * Change the all filter settings applied to the currently playing track
-	 * @param filters An object that conforms to FilterOptions that defines all filters to apply/modify
+	 *
+	 * @param filters - An object that conforms to FilterOptions that defines all filters to apply/modify
 	 */
-	public setFilters(filters: FilterOptions): Promise<void> {
+	public async setFilters(filters: FilterOptions): Promise<void> {
 		return this.update({ filters });
 	}
 
 	/**
 	 * Clear all filters applied to the currently playing track
 	 */
-	public clearFilters(): Promise<void> {
+	public async clearFilters(): Promise<void> {
 		return this.setFilters({
 			volume: 1,
 			equalizer: [],
@@ -519,64 +559,93 @@ export class Player extends TypedEventEmitter<PlayerEvents> {
 			distortion: null,
 			channelMix: null,
 			lowPass: null,
-			pluginFilters: null
+			pluginFilters: null,
 		});
 	}
 
 	/**
 	 * Resumes the current track
-	 * @param options An object that conforms to ResumeOptions that specify behavior on resuming
-	 * @param noReplace Set it to true if you don't want to replace the currently playing track
+	 *
+	 * @param options - An object that conforms to ResumeOptions that specify behavior on resuming
+	 * @param noReplace - Set it to true if you don't want to replace the currently playing track
 	 */
 	public async resume(options: ResumeOptions = {}, noReplace = false): Promise<void> {
 		const data = this.data;
 
-		if (typeof options.position === 'number')
-			data.playerOptions.position = options.position;
-		if (typeof options.endTime === 'number')
-			data.playerOptions.endTime = options.endTime;
-		if (typeof options.paused === 'boolean')
-			data.playerOptions.paused = options.paused;
-		if (typeof options.volume === 'number')
-			data.playerOptions.volume = options.volume;
+		const patch: Partial<typeof data.playerOptions> = {};
+
+		if (typeof options.position === "number") {
+			patch.position = options.position;
+		}
+
+		if (typeof options.endTime === "number") {
+			patch.endTime = options.endTime;
+		}
+
+		if (typeof options.paused === "boolean") {
+			patch.paused = options.paused;
+		}
+
+		if (typeof options.volume === "number") {
+			patch.volume = options.volume;
+		}
+
+		data.playerOptions = {
+			...data.playerOptions,
+			...patch,
+		};
 
 		await this.update(data.playerOptions, noReplace);
 
-		this.emit('resumed', this);
+		this.emit("resumed", this);
 	}
 
 	/**
 	 * If you want to update the whole player yourself, sends raw update player info to lavalink
-	 * @param playerOptions Options to update the player data
-	 * @param noReplace Set it to true if you don't want to replace the currently playing track
+	 *
+	 * @param playerOptions - Options to update the player data
+	 * @param noReplace - Set it to true if you don't want to replace the currently playing track
 	 */
 	public async update(playerOptions: UpdatePlayerOptions, noReplace = false): Promise<void> {
-		const data = {
+		await this.node.rest.updatePlayer({
 			guildId: this.guildId,
 			noReplace,
-			playerOptions
-		};
+			playerOptions,
+		});
 
-		await this.node.rest.updatePlayer(data);
+		const { filters, track, paused, volume, position } = playerOptions;
 
-		if (!noReplace) this.paused = false;
-
-		if (playerOptions.filters) {
-			this.filters = { ...this.filters, ...playerOptions.filters };
+		if (!noReplace) {
+			this.paused = false;
 		}
 
-		if (typeof playerOptions.track !== 'undefined')
-			this.track = playerOptions.track.encoded ?? null;
-		if (typeof playerOptions.paused === 'boolean')
-			this.paused = playerOptions.paused;
-		if (typeof playerOptions.volume === 'number')
-			this.volume = playerOptions.volume;
-		if (typeof playerOptions.position === 'number')
-			this.position = playerOptions.position;
+		if (filters) {
+			this.filters = {
+				...this.filters,
+				...filters,
+			};
+		}
+
+		if (track !== undefined) {
+			this.track = track.encoded ?? null;
+		}
+
+		if (typeof paused === "boolean") {
+			this.paused = paused;
+		}
+
+		if (typeof volume === "number") {
+			this.volume = volume;
+		}
+
+		if (typeof position === "number") {
+			this.position = position;
+		}
 	}
 
 	/**
 	 * Cleans this player instance
+	 *
 	 * @internal
 	 */
 	public clean(): void {
@@ -590,6 +659,7 @@ export class Player extends TypedEventEmitter<PlayerEvents> {
 
 	/**
 	 * Sends server update to lavalink
+	 *
 	 * @internal
 	 */
 	public async sendServerUpdate(connection: Connection): Promise<void> {
@@ -600,9 +670,9 @@ export class Player extends TypedEventEmitter<PlayerEvents> {
 					token: connection.serverUpdate!.token,
 					endpoint: connection.serverUpdate!.endpoint,
 					sessionId: connection.sessionId!,
-					channelId: connection.channelId!
-				}
-			}
+					channelId: connection.channelId!,
+				},
+			},
 		};
 		await this.node.rest.updatePlayer(playerUpdate);
 	}
@@ -614,31 +684,37 @@ export class Player extends TypedEventEmitter<PlayerEvents> {
 		const { position, ping } = json.state;
 		this.position = position;
 		this.ping = ping;
-		this.emit('update', json);
+		this.emit("update", json);
 	}
 
 	/**
 	 * Handle player events received from Lavalink
-	 * @param json JSON data from Lavalink
+	 *
+	 * @param json - JSON data from Lavalink
 	 * @internal
 	 */
-	public onPlayerEvent(json: TrackStartEvent | TrackEndEvent | TrackStuckEvent | TrackExceptionEvent | WebSocketClosedEvent): void {
+	public onPlayerEvent(
+		json: TrackEndEvent | TrackExceptionEvent | TrackStartEvent | TrackStuckEvent | WebSocketClosedEvent,
+	): void {
 		switch (json.type) {
 			case PlayerEventType.TRACK_START_EVENT:
-				if (this.track) this.track = json.track.encoded;
-				this.emit('start', json);
+				if (this.track) {
+					this.track = json.track.encoded;
+				}
+
+				this.emit("start", json);
 				break;
 			case PlayerEventType.TRACK_END_EVENT:
-				this.emit('end', json);
+				this.emit("end", json);
 				break;
 			case PlayerEventType.TRACK_STUCK_EVENT:
-				this.emit('stuck', json);
+				this.emit("stuck", json);
 				break;
 			case PlayerEventType.TRACK_EXCEPTION_EVENT:
-				this.emit('exception', json);
+				this.emit("exception", json);
 				break;
 			case PlayerEventType.WEBSOCKET_CLOSED_EVENT:
-				this.emit('closed', json);
+				this.emit("closed", json);
 				break;
 			default: {
 				// TODO: fix types for json
@@ -648,6 +724,7 @@ export class Player extends TypedEventEmitter<PlayerEvents> {
 					// TODO: should we check if this.pluginEvents[type] is interable? will throw TypeError
 					for (const callback of this.pluginEvents[type]!) {
 						try {
+							// eslint-disable-next-line n/callback-return, promise/prefer-await-to-callbacks
 							callback(json);
 						} catch {
 							// TODO: should we rethrow error here?
@@ -655,9 +732,9 @@ export class Player extends TypedEventEmitter<PlayerEvents> {
 					}
 				} else {
 					this.node.manager.emit(
-						'debug',
+						"debug",
 						this.node.name,
-						`[Player] -> [Node] : Unknown Player Event Type, Data => ${JSON.stringify(json)}`
+						`[Player] -> [Node] : Unknown Player Event Type, Data => ${JSON.stringify(json)}`,
 					);
 				}
 			}
@@ -665,9 +742,9 @@ export class Player extends TypedEventEmitter<PlayerEvents> {
 	}
 
 	public onPluginEvent<
-		E extends PluginEvent,
-		D = TReturnType<E> & PlayerEvent & { type: E['name'] }
-	>(plugin: PluginEvent, callback: (data: D) => void) {
+		TEvent extends PluginEvent,
+		TData = PlayerEvent & TReturnType<TEvent> & { type: TEvent["name"] },
+	>(plugin: PluginEvent, callback: (data: TData) => void) {
 		// TODO: insert plugin check here maybe? but its async
 		// plugin event callback is never called if LL does not
 		// send event so may cause confusion
