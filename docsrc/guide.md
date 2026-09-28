@@ -3,10 +3,11 @@ title: Guide
 children:
   - ./getting-started.md
   - ./options.md
-  - ./common.md
-  - ./plugins.md
   - ./connectors.md
+  - ./common.md
+  - ./wrappers.md
   - ./clustering.md
+  - ./plugins.md
   - ./updating-from-v3.md
   - ./updating-from-v4.md
 ---

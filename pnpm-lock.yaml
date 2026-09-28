@@ -23,6 +23,9 @@ importers:
 
   .:
     dependencies:
+      compare-versions:
+        specifier: ^6.1.1
+        version: 6.1.1
       ws:
         specifier: ^8.19.0
         version: 8.21.0
@@ -1010,6 +1013,9 @@ packages:
   comment-parser@1.4.7:
     resolution: {integrity: sha512-0h+uSNtQGW3D98eQt3jJ8L06Fves8hncB4V/PKdw/Qb8Hnk19VaKuTr55UNRYiSoVa7WwrFls+rh3ux9agmkeQ==}
     engines: {node: '>= 12.0.0'}
+
+  compare-versions@6.1.1:
+    resolution: {integrity: sha512-4hm4VPpIecmlg59CHXnRDnqGplJFrbLG4aFEl5vl6cK1u76ws3LLvX7ikFnTDl5vo39sjWD6AaDPYodJp/NNHg==}
 
   concat-map@0.0.1:
     resolution: {integrity: sha512-/Srv4dswyQNBfohGpz9o6Yb3Gz3SrUDqBH5rTuhGR7ahtlbYKnVxw2bCFMRljaA7EXHaXZ8wsHdodFvbkhKmqg==}
@@ -3273,6 +3279,8 @@ snapshots:
       escape-string-regexp: 1.0.5
 
   comment-parser@1.4.7: {}
+
+  compare-versions@6.1.1: {}
 
   concat-map@0.0.1: {}
 
