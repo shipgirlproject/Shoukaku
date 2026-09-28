@@ -339,7 +339,7 @@ export class DestroyPlayerEndpoint implements RestEndpoint {
 
 	public readonly method = "DELETE";
 
-	public readonly T = t<void>;
+	public readonly T = t<undefined>;
 }
 
 export class UpdateSessionEndpoint implements RestEndpoint {
@@ -383,7 +383,7 @@ export class UnmarkFailedAddressEndpoint implements RestEndpoint {
 
 	public readonly body = () => ({ address: this.address });
 
-	public readonly T = t<void>;
+	public readonly T = t<undefined>;
 }
 
 export class LavalinkInfoEndpoint implements RestEndpoint {
