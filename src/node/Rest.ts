@@ -339,6 +339,7 @@ export class DestroyPlayerEndpoint implements RestEndpoint {
 
 	public readonly method = "DELETE";
 
+	// oxlint-disable-next-line typescript/no-invalid-void-type
 	public readonly T = t<void>;
 }
 
@@ -383,6 +384,7 @@ export class UnmarkFailedAddressEndpoint implements RestEndpoint {
 
 	public readonly body = () => ({ address: this.address });
 
+	// oxlint-disable-next-line typescript/no-invalid-void-type
 	public readonly T = t<void>;
 }
 
