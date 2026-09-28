@@ -1,5 +1,5 @@
 pre-commit:
   commands:
     lint:
-      glob: "*.{js,ts,mjs,json}"
+      glob: "*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx,json,jsonc,yml,yaml}"
       run: pnpm lint

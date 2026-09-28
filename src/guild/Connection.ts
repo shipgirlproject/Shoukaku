@@ -163,7 +163,7 @@ export class Connection extends EventEmitter {
 		try {
 			const [status] = (await once(this, "connectionUpdate", { signal: controller.signal })) as [VoiceState];
 			if (status !== VoiceState.SESSION_READY) {
-				// eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
+				// oxlint-disable-next-line typescript/switch-exhaustiveness-check
 				switch (status) {
 					case VoiceState.SESSION_ID_MISSING:
 						throw new Error("The voice connection is not established due to missing session id");
