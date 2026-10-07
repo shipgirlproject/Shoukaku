@@ -458,21 +458,22 @@ export class Node extends TypedEventEmitter<NodeEvents> {
 	 */
 	private async resumePlayers(): Promise<void> {
 		const playersWithData = [];
-		const playersWithoutData = [];
 
 		for (const player of this.manager.players.values()) {
+			// Players on other nodes are resumed by their own node's ready.
+			if (player.node.name !== this.name) {
+				continue;
+			}
+
+			// Players are only registered once their connection has a server update, so one without it is already
+			// being left (leaveVoiceChannel() awaiting its DELETE) or is managed by the application: leave it alone.
 			const serverUpdate = this.manager.connections.get(player.guildId)?.serverUpdate;
 			if (serverUpdate) {
 				playersWithData.push(player);
-			} else {
-				playersWithoutData.push(player);
 			}
 		}
 
-		await Promise.allSettled([
-			...playersWithData.map(async (player) => player.resume()),
-			...playersWithoutData.map(async (player) => this.manager.leaveVoiceChannel(player.guildId)),
-		]);
+		await Promise.allSettled(playersWithData.map(async (player) => player.resume()));
 	}
 
 	/**
