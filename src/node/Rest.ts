@@ -484,7 +484,19 @@ export class RestClient<TMiddleware extends RestMiddleware = NoopMiddleware> {
 			finalFetchOptions.body = JSON.stringify(body);
 		}
 
-		const request = await fetch(url.toString(), finalFetchOptions).finally(() => clearTimeout(timeout));
+		let request: Response;
+		try {
+			request = await fetch(url.toString(), finalFetchOptions);
+		} catch (error) {
+			// Transport failures reach callers as bare "fetch failed" or "The operation was aborted",
+			// with no hint of which node or endpoint produced them
+			if (error instanceof Error) {
+				error.message += ` (${method} ${this.baseUrl}${path})`;
+			}
+			throw error;
+		} finally {
+			clearTimeout(timeout);
+		}
 
 		if (!request.ok) {
 			const response = (await request.json().catch(() => null)) as LavalinkRestError | null;
