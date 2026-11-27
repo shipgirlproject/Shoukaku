@@ -491,7 +491,18 @@ export class RestClient<TMiddleware extends RestMiddleware = NoopMiddleware> {
 			// Transport failures reach callers as bare "fetch failed" or "The operation was aborted",
 			// with no hint of which node or endpoint produced them
 			if (error instanceof Error) {
-				error.message += ` (${method} ${this.baseUrl}${path})`;
+				// some rejections (DOMException from aborts) expose `message` as a getter only
+				const suffix = ` (${method} ${this.baseUrl}${path})`;
+				try {
+					error.message += suffix;
+				} catch {
+					Object.defineProperty(error, "message", {
+						value: error.message + suffix,
+						configurable: true,
+						enumerable: false,
+						writable: true,
+					});
+				}
 			}
 			throw error;
 		} finally {
